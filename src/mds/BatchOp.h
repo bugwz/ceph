@@ -17,24 +17,24 @@
 #define MDS_BATCHOP_H
 
 #include "common/ref.h"
-
 #include "mdstypes.h"
 
-class BatchOp {
+class BatchOp
+{
 public:
-  virtual ~BatchOp() {}
+    virtual ~BatchOp() {}
 
-  virtual void add_request(const ceph::ref_t<class MDRequestImpl>& mdr) = 0;
-  virtual ceph::ref_t<class MDRequestImpl> find_new_head() = 0;
+    virtual void add_request(const ceph::ref_t<class MDRequestImpl>& mdr) = 0;
+    virtual ceph::ref_t<class MDRequestImpl> find_new_head() = 0;
 
-  virtual void print(std::ostream&) const = 0;
+    virtual void print(std::ostream&) const = 0;
 
-  void forward(mds_rank_t target);
-  void respond(int r);
+    void forward(mds_rank_t target);
+    void respond(int r);
 
 protected:
-  virtual void _forward(mds_rank_t) = 0;
-  virtual void _respond(mds_rank_t) = 0;
+    virtual void _forward(mds_rank_t) = 0;
+    virtual void _respond(mds_rank_t) = 0;
 };
 
 #endif

@@ -3,22 +3,24 @@
 
 #pragma once
 
-#include "rgw_period_history.h"
 #include "include/common_fwd.h"
 #include "rgw/services/svc_sys_obj.h"
+#include "rgw_period_history.h"
 
 class RGWPeriod;
 
-class RGWPeriodPuller : public RGWPeriodHistory::Puller {
-  CephContext *cct;
+class RGWPeriodPuller : public RGWPeriodHistory::Puller
+{
+    CephContext* cct;
 
-  struct {
-    RGWSI_Zone *zone;
-    RGWSI_SysObj *sysobj;
-  } svc;
+    struct
+    {
+        RGWSI_Zone* zone;
+        RGWSI_SysObj* sysobj;
+    } svc;
 
- public:
-  explicit RGWPeriodPuller(RGWSI_Zone *zone_svc, RGWSI_SysObj *sysobj_svc);
+public:
+    explicit RGWPeriodPuller(RGWSI_Zone* zone_svc, RGWSI_SysObj* sysobj_svc);
 
-  int pull(const DoutPrefixProvider *dpp, const std::string& period_id, RGWPeriod& period, optional_yield y) override;
+    int pull(const DoutPrefixProvider* dpp, const std::string& period_id, RGWPeriod& period, optional_yield y) override;
 };

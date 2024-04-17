@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
  * This file is open source software, licensed to you under the terms
  * of the Apache License, Version 2.0 (the "License").  See the NOTICE file
@@ -27,24 +27,27 @@
 
 // unordered_map implemented as a simple array
 
-template <typename Value, size_t Max>
-class array_map {
-  std::array<Value, Max> _a {};
- public:
-  array_map(std::initializer_list<std::pair<size_t, Value>> i) {
-    for (auto kv : i) {
-      _a[kv.first] = kv.second;
-    }
-  }
-  Value& operator[](size_t key) { return _a[key]; }
-  const Value& operator[](size_t key) const { return _a[key]; }
+template<typename Value, size_t Max> class array_map
+{
+    std::array<Value, Max> _a{};
 
-  Value& at(size_t key) {
-    if (key >= Max) {
-      throw std::out_of_range(std::to_string(key) + " >= " + std::to_string(Max));
+public:
+    array_map(std::initializer_list<std::pair<size_t, Value>> i)
+    {
+        for (auto kv : i) {
+            _a[kv.first] = kv.second;
+        }
     }
-    return _a[key];
-  }
+    Value& operator[](size_t key) { return _a[key]; }
+    const Value& operator[](size_t key) const { return _a[key]; }
+
+    Value& at(size_t key)
+    {
+        if (key >= Max) {
+            throw std::out_of_range(std::to_string(key) + " >= " + std::to_string(Max));
+        }
+        return _a[key];
+    }
 };
 
 #endif /* ARRAY_MAP_HH_ */

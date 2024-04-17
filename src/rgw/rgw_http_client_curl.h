@@ -15,15 +15,16 @@
 
 #pragma once
 
-#include <map>
-#include <boost/optional.hpp>
 #include "rgw_frontend.h"
+
+#include <boost/optional.hpp>
+#include <map>
 
 namespace rgw {
 namespace curl {
-using fe_map_t = std::multimap <std::string, RGWFrontendConfig *>;
+using fe_map_t = std::multimap<std::string, RGWFrontendConfig*>;
 
 void setup_curl(boost::optional<const fe_map_t&> m);
 void cleanup_curl();
-}
-}
+}   // namespace curl
+}   // namespace rgw

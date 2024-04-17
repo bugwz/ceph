@@ -10,18 +10,17 @@
 namespace librbd {
 namespace migration {
 
-struct HttpProcessorInterface {
-  using EmptyBody = boost::beast::http::empty_body;
-  using EmptyRequest = boost::beast::http::request<EmptyBody>;
+struct HttpProcessorInterface
+{
+    using EmptyBody = boost::beast::http::empty_body;
+    using EmptyRequest = boost::beast::http::request<EmptyBody>;
 
-  virtual ~HttpProcessorInterface() {
-  }
+    virtual ~HttpProcessorInterface() {}
 
-  virtual void process_request(EmptyRequest& request) = 0;
-
+    virtual void process_request(EmptyRequest& request) = 0;
 };
 
-} // namespace migration
-} // namespace librbd
+}   // namespace migration
+}   // namespace librbd
 
-#endif // CEPH_LIBRBD_MIGRATION_HTTP_PROCESSOR_INTERFACE_H
+#endif   // CEPH_LIBRBD_MIGRATION_HTTP_PROCESSOR_INTERFACE_H

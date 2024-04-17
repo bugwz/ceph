@@ -29,7 +29,7 @@ function run() {
     export ORIG_CEPH_ARGS="$CEPH_ARGS"
 
     local funcs=${@:-$(set | ${SED} -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -43,25 +43,21 @@ function wait_for_health_string() {
     # Allow mon to notice version difference
     set -o pipefail
     PASSED="false"
-    for ((i=0; i < $seconds; i++)); do
-      if ceph health | grep -q "$grep_string"
-      then
-	PASSED="true"
-        break
-      fi
-      sleep 1
+    for ((i = 0; i < $seconds; i++)); do
+        if ceph health | grep -q "$grep_string"; then
+            PASSED="true"
+            break
+        fi
+        sleep 1
     done
     set +o pipefail
 
     # Make sure health changed
-    if [ $PASSED = "false" ];
-    then
-      return 1
+    if [ $PASSED = "false" ]; then
+        return 1
     fi
     return 0
 }
-
-
 
 # Test a single OSD with an old version and multiple OSDs with 2 different old versions
 function TEST_check_version_health_1() {
@@ -193,8 +189,8 @@ function TEST_check_version_health_3() {
     ceph tell 'mon.*' injectargs "--mon_warn_older_version_delay $warn_older_version_delay"
     kill_daemons $dir KILL osd.1
     EXTRA_OPTS=" --osd-objectstore=memstore" \
-          ceph_debug_version_for_testing=01.00.00-gversion-test \
-          activate_osd $dir 1
+        ceph_debug_version_for_testing=01.00.00-gversion-test \
+        activate_osd $dir 1
 
     # Wait 50% of 20 second delay config
     sleep 10

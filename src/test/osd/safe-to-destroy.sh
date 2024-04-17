@@ -15,9 +15,9 @@ function run() {
     set -e
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
-	$func $dir || return 1
+        $func $dir || return 1
         teardown $dir || return 1
     done
 }
@@ -57,7 +57,7 @@ function TEST_safe_to_destroy() {
     ceph osd safe-to-destroy 0
 
     # even osds without osd_stat are ok if all pgs are active+clean
-    id=`ceph osd create`
+    id=$(ceph osd create)
     ceph osd safe-to-destroy $id
 }
 

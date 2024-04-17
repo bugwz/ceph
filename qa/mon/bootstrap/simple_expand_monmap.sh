@@ -1,7 +1,7 @@
 #!/bin/sh -ex
 
-cwd=`pwd`
-cat > conf <<EOF
+cwd=$(pwd)
+cat >conf <<EOF
 [mon]
 admin socket = 
 EOF
@@ -34,7 +34,7 @@ ceph-mon -c conf -i d --mon-data $cwd/mon.d
 while true; do
     ceph -c conf -k keyring --monmap mm health
     if ceph -c conf -k keyring --monmap mm mon stat | grep d=; then
-	break
+        break
     fi
     sleep 1
 done

@@ -18,67 +18,62 @@
 #include "MOSDFastDispatchOp.h"
 #include "osd/ECMsgTypes.h"
 
-class MOSDECSubOpReadReply : public MOSDFastDispatchOp {
+class MOSDECSubOpReadReply : public MOSDFastDispatchOp
+{
 private:
-  static constexpr int HEAD_VERSION = 2;
-  static constexpr int COMPAT_VERSION = 1;
+    static constexpr int HEAD_VERSION = 2;
+    static constexpr int COMPAT_VERSION = 1;
 
 public:
-  spg_t pgid;
-  epoch_t map_epoch = 0, min_epoch = 0;
-  ECSubReadReply op;
+    spg_t pgid;
+    epoch_t map_epoch = 0, min_epoch = 0;
+    ECSubReadReply op;
 
-  int get_cost() const override {
-    return 0;
-  }
-  epoch_t get_map_epoch() const override {
-    return map_epoch;
-  }
-  epoch_t get_min_epoch() const override {
-    return min_epoch;
-  }
-  spg_t get_spg() const override {
-    return pgid;
-  }
+    int get_cost() const override { return 0; }
+    epoch_t get_map_epoch() const override { return map_epoch; }
+    epoch_t get_min_epoch() const override { return min_epoch; }
+    spg_t get_spg() const override { return pgid; }
 
-  MOSDECSubOpReadReply()
-    : MOSDFastDispatchOp{MSG_OSD_EC_READ_REPLY, HEAD_VERSION, COMPAT_VERSION}
+    MOSDECSubOpReadReply()
+        : MOSDFastDispatchOp{MSG_OSD_EC_READ_REPLY, HEAD_VERSION, COMPAT_VERSION}
     {}
 
-  void decode_payload() override {
-    using ceph::decode;
-    auto p = payload.cbegin();
-    decode(pgid, p);
-    decode(map_epoch, p);
-    decode(op, p);
-    if (header.version >= 2) {
-      decode(min_epoch, p);
-      decode_trace(p);
-    } else {
-      min_epoch = map_epoch;
+    void decode_payload() override
+    {
+        using ceph::decode;
+        auto p = payload.cbegin();
+        decode(pgid, p);
+        decode(map_epoch, p);
+        decode(op, p);
+        if (header.version >= 2) {
+            decode(min_epoch, p);
+            decode_trace(p);
+        }
+        else {
+            min_epoch = map_epoch;
+        }
     }
-  }
 
-  void encode_payload(uint64_t features) override {
-    using ceph::encode;
-    encode(pgid, payload);
-    encode(map_epoch, payload);
-    encode(op, payload);
-    encode(min_epoch, payload);
-    encode_trace(payload, features);
-  }
+    void encode_payload(uint64_t features) override
+    {
+        using ceph::encode;
+        encode(pgid, payload);
+        encode(map_epoch, payload);
+        encode(op, payload);
+        encode(min_epoch, payload);
+        encode_trace(payload, features);
+    }
 
-  std::string_view get_type_name() const override { return "MOSDECSubOpReadReply"; }
+    std::string_view get_type_name() const override { return "MOSDECSubOpReadReply"; }
 
-  void print(std::ostream& out) const override {
-    out << "MOSDECSubOpReadReply(" << pgid
-	<< " " << map_epoch << "/" << min_epoch
-	<< " " << op;
-    out << ")";
-  }
+    void print(std::ostream& out) const override
+    {
+        out << "MOSDECSubOpReadReply(" << pgid << " " << map_epoch << "/" << min_epoch << " " << op;
+        out << ")";
+    }
+
 private:
-  template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+    template<class T, typename... Args> friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
 };
 
 #endif

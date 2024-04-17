@@ -27,30 +27,30 @@ function main {
 
     while [ "$#" -gt 0 ]; do
         case "$1" in
-            -h|--help)
-                printf '%s: [--no-cache] <branch>[:sha1] <environment>\n' "$0"
-                exit 0
-                ;;
-            --no-cache)
-                CACHE="--no-cache"
-                shift
-                ;;
-            --flavor)
-                FLAVOR=$2
-                shift 2
-                ;;
-            --privileged)
-                PRIVILEGED=--privileged
-                shift 1
-                ;;
-            --sudo)
-                SUDO=sudo
-                shift 1
-                ;;
-            --)
-                shift
-                break
-                ;;
+        -h | --help)
+            printf '%s: [--no-cache] <branch>[:sha1] <environment>\n' "$0"
+            exit 0
+            ;;
+        --no-cache)
+            CACHE="--no-cache"
+            shift
+            ;;
+        --flavor)
+            FLAVOR=$2
+            shift 2
+            ;;
+        --privileged)
+            PRIVILEGED=--privileged
+            shift 1
+            ;;
+        --sudo)
+            SUDO=sudo
+            shift 1
+            ;;
+        --)
+            shift
+            break
+            ;;
         esac
     done
 
@@ -95,20 +95,21 @@ function main {
     T=$(mktemp -d)
     pushd "$T"
     case "$env" in
-        centos:stream)
-            distro="centos/8"
-            ;;
-        *)
-            distro="${env/://}"
+    centos:stream)
+        distro="centos/8"
+        ;;
+    *)
+        distro="${env/://}"
+        ;;
     esac
     api_url="https://shaman.ceph.com/api/search/?status=ready&project=ceph&flavor=${FLAVOR}&distros=${distro}/$(arch)&ref=${branch}&sha1=${sha}"
     repo_url="$(wget -O - "$api_url" | jq -r '.[0].chacra_url')repo"
     # validate url:
     wget -O /dev/null "$repo_url"
-    if grep ubuntu <<<"$env" > /dev/null 2>&1; then
+    if grep ubuntu <<<"$env" >/dev/null 2>&1; then
         # Docker makes it impossible to access anything outside the CWD : /
         wget -O cephdev.asc 'https://download.ceph.com/keys/autobuild.asc'
-        cat > Dockerfile <<EOF
+        cat >Dockerfile <<EOF
 FROM ${env}
 
 WORKDIR /root
@@ -124,30 +125,30 @@ EOF
         time run $SUDO docker build $CACHE --tag "$tag" .
     else # try RHEL flavor
         case "$env" in
-            centos:7)
-                python_bindings="python36-rados python36-cephfs"
-                base_debuginfo=""
-                ceph_debuginfo="ceph-debuginfo"
-                debuginfo=/etc/yum.repos.d/CentOS-Linux-Debuginfo.repo
-                ;;
-            centos:8)
-                python_bindings="python3-rados python3-cephfs"
-                base_debuginfo="glibc-debuginfo"
-                ceph_debuginfo="ceph-base-debuginfo"
-                debuginfo=/etc/yum.repos.d/CentOS-Linux-Debuginfo.repo
-                base_url="s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g"
-                ;;
-            centos:stream)
-                python_bindings="python3-rados python3-cephfs"
-                base_debuginfo="glibc-debuginfo"
-                ceph_debuginfo="ceph-base-debuginfo"
-                debuginfo=/etc/yum.repos.d/CentOS-Stream-Debuginfo.repo
-                ;;
+        centos:7)
+            python_bindings="python36-rados python36-cephfs"
+            base_debuginfo=""
+            ceph_debuginfo="ceph-debuginfo"
+            debuginfo=/etc/yum.repos.d/CentOS-Linux-Debuginfo.repo
+            ;;
+        centos:8)
+            python_bindings="python3-rados python3-cephfs"
+            base_debuginfo="glibc-debuginfo"
+            ceph_debuginfo="ceph-base-debuginfo"
+            debuginfo=/etc/yum.repos.d/CentOS-Linux-Debuginfo.repo
+            base_url="s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g"
+            ;;
+        centos:stream)
+            python_bindings="python3-rados python3-cephfs"
+            base_debuginfo="glibc-debuginfo"
+            ceph_debuginfo="ceph-base-debuginfo"
+            debuginfo=/etc/yum.repos.d/CentOS-Stream-Debuginfo.repo
+            ;;
         esac
         if [ "${FLAVOR}" = "crimson" ]; then
             ceph_debuginfo+=" ceph-crimson-osd-debuginfo ceph-crimson-osd"
         fi
-        cat > Dockerfile <<EOF
+        cat >Dockerfile <<EOF
 FROM ${env}
 
 WORKDIR /root

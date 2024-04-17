@@ -16,7 +16,7 @@
 #
 
 SCRIPTNAME="$(basename $0)"
-if [ `uname` == FreeBSD ]; then
+if [ $(uname) == FreeBSD ]; then
     GETOPT="/usr/local/bin/getopt"
 else
     GETOPT=getopt
@@ -41,12 +41,22 @@ test $? != 0 && usage
 eval set -- "$TEMP"
 
 PYTHON=python3
-while true ; do
+while true; do
     case "$1" in
-        -h|--help) usage ;;  # does not return
-        --python) PYTHON="$2" ; shift ; shift ;;
-        --) shift ; break ;;
-        *) echo "Internal error" ; exit 1 ;;
+    -h | --help) usage ;; # does not return
+    --python)
+        PYTHON="$2"
+        shift
+        shift
+        ;;
+    --)
+        shift
+        break
+        ;;
+    *)
+        echo "Internal error"
+        exit 1
+        ;;
     esac
 done
 
@@ -56,7 +66,7 @@ if ! $PYTHON -VV; then
 fi
 
 DIR=$1
-if [ -z "$DIR" ] ; then
+if [ -z "$DIR" ]; then
     echo "$SCRIPTNAME: need a directory path, but none was provided"
     usage
 fi
@@ -81,7 +91,7 @@ else
     DISABLE_PIP_VERSION_CHECK=
 fi
 
-if test -d wheelhouse ; then
+if test -d wheelhouse; then
     NO_INDEX=--no-index
     FIND_LINKS_OPT=--find-links=file://$(pwd)/wheelhouse
 fi
@@ -94,7 +104,7 @@ require=$(echo -n "$require_files" | sed -e 's/^/-r /')
 constraint=$(echo -n "$constraint_files" | sed -e 's/^/-c /')
 md5=wheelhouse/md5
 if test "$require"; then
-    if ! test -f $md5 || ! md5sum -c wheelhouse/md5 > /dev/null; then
+    if ! test -f $md5 || ! md5sum -c wheelhouse/md5 >/dev/null; then
         NO_INDEX=''
         FIND_LINKS_OPT=''
     fi

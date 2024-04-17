@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 
 SCRIPT_NAME=$(basename ${BASH_SOURCE[0]})
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # cleanup during exit
 [ -z "$CLEANUP" ] && CLEANUP=true
@@ -31,12 +31,12 @@ CEPHADM_SAMPLES_DIR=${CEPHADM_SRC_DIR}/samples
 
 # If cephadm is already installed on the system, use that one, avoid building
 # # one if we can.
-if [ -z "$CEPHADM" ] && command -v cephadm >/dev/null ; then
+if [ -z "$CEPHADM" ] && command -v cephadm >/dev/null; then
     CEPHADM="$(command -v cephadm)"
 fi
 
 if [ -z "$CEPHADM" ]; then
-    CEPHADM=`mktemp -p $TMPDIR tmp.cephadm.XXXXXX`
+    CEPHADM=$(mktemp -p $TMPDIR tmp.cephadm.XXXXXX)
     ${CEPHADM_SRC_DIR}/build.sh "$CEPHADM"
     NO_BUILD_INFO=1
 fi
@@ -62,8 +62,7 @@ if ! [ "$loopdev" = "" ]; then
     $SUDO losetup -d $loopdev
 fi
 
-function cleanup()
-{
+function cleanup() {
     if [ $CLEANUP = false ]; then
         # preserve the TMPDIR state
         echo "========================"
@@ -79,30 +78,27 @@ function cleanup()
 }
 trap cleanup EXIT
 
-function expect_false()
-{
-        set -x
-        if eval "$@"; then return 1; else return 0; fi
+function expect_false() {
+    set -x
+    if eval "$@"; then return 1; else return 0; fi
 }
 
 # expect_return_code $expected_code $command ...
-function expect_return_code()
-{
-  set -x
-  local expected_code="$1"
-  shift
-  local command="$@"
+function expect_return_code() {
+    set -x
+    local expected_code="$1"
+    shift
+    local command="$@"
 
-  set +e
-  eval "$command"
-  local return_code="$?"
-  set -e
+    set +e
+    eval "$command"
+    local return_code="$?"
+    set -e
 
-  if [ ! "$return_code" -eq "$expected_code" ]; then return 1; else return 0; fi
+    if [ ! "$return_code" -eq "$expected_code" ]; then return 1; else return 0; fi
 }
 
-function is_available()
-{
+function is_available() {
     local name="$1"
     local condition="$2"
     local tries="$3"
@@ -121,8 +117,7 @@ function is_available()
     true
 }
 
-function dump_log()
-{
+function dump_log() {
     local fsid="$1"
     local name="$2"
     local num_lines="$3"
@@ -138,8 +133,7 @@ function dump_log()
     $CEPHADM logs --fsid $fsid --name $name -- --no-pager -n $num_lines
 }
 
-function dump_all_logs()
-{
+function dump_all_logs() {
     local fsid="$1"
     local names=$($CEPHADM ls | jq -r '.[] | select(.fsid == "'$fsid'").name')
 
@@ -149,12 +143,11 @@ function dump_all_logs()
     done
 }
 
-function nfs_stop()
-{
+function nfs_stop() {
     # stop the running nfs server
     local units="nfs-server nfs-kernel-server"
     for unit in $units; do
-        if systemctl --no-pager status $unit > /dev/null; then
+        if systemctl --no-pager status $unit >/dev/null; then
             $SUDO systemctl stop $unit
         fi
     done
@@ -183,7 +176,6 @@ if [ -z "$NO_BUILD_INFO" ]; then
     $CEPHADM_BIN version | grep -v 'UNKNOWN'
 fi
 
-
 ## test shell before bootstrap, when crash dir isn't (yet) present on this host
 $CEPHADM shell --fsid $FSID -- ceph -v | grep 'ceph version'
 $CEPHADM shell --fsid $FSID -e FOO=BAR -- printenv | grep FOO=BAR
@@ -200,28 +192,28 @@ echo foo | $CEPHADM shell -- cat | grep -q foo
 $CEPHADM rm-cluster --fsid $FSID --force
 
 ## bootstrap
-ORIG_CONFIG=`mktemp -p $TMPDIR`
-CONFIG=`mktemp -p $TMPDIR`
-MONCONFIG=`mktemp -p $TMPDIR`
-KEYRING=`mktemp -p $TMPDIR`
+ORIG_CONFIG=$(mktemp -p $TMPDIR)
+CONFIG=$(mktemp -p $TMPDIR)
+MONCONFIG=$(mktemp -p $TMPDIR)
+KEYRING=$(mktemp -p $TMPDIR)
 IP=127.0.0.1
-cat <<EOF > $ORIG_CONFIG
+cat <<EOF >$ORIG_CONFIG
 [global]
 	log to file = true
         osd crush chooseleaf type = 0
 EOF
 $CEPHADM bootstrap \
-      --mon-id a \
-      --mgr-id x \
-      --mon-ip $IP \
-      --fsid $FSID \
-      --config $ORIG_CONFIG \
-      --output-config $CONFIG \
-      --output-keyring $KEYRING \
-      --output-pub-ssh-key $TMPDIR/ceph.pub \
-      --allow-overwrite \
-      --skip-mon-network \
-      --skip-monitoring-stack
+    --mon-id a \
+    --mgr-id x \
+    --mon-ip $IP \
+    --fsid $FSID \
+    --config $ORIG_CONFIG \
+    --output-config $CONFIG \
+    --output-keyring $KEYRING \
+    --output-pub-ssh-key $TMPDIR/ceph.pub \
+    --allow-overwrite \
+    --skip-mon-network \
+    --skip-monitoring-stack
 test -e $CONFIG
 test -e $KEYRING
 rm -f $ORIG_CONFIG
@@ -230,28 +222,28 @@ $SUDO test -e /var/log/ceph/$FSID/ceph-mon.a.log
 $SUDO test -e /var/log/ceph/$FSID/ceph-mgr.x.log
 
 for u in ceph.target \
-	     ceph-$FSID.target \
-	     ceph-$FSID@mon.a \
-	     ceph-$FSID@mgr.x; do
+    ceph-$FSID.target \
+    ceph-$FSID@mon.a \
+    ceph-$FSID@mgr.x; do
     systemctl is-enabled $u
     systemctl is-active $u
 done
-systemctl | grep system-ceph | grep -q .slice  # naming is escaped and annoying
+systemctl | grep system-ceph | grep -q .slice # naming is escaped and annoying
 
 # check ceph -s works (via shell w/ passed config/keyring)
 $CEPHADM shell --fsid $FSID --config $CONFIG --keyring $KEYRING -- \
-      ceph -s | grep $FSID
+    ceph -s | grep $FSID
 
 for t in mon mgr node-exporter prometheus grafana; do
     $CEPHADM shell --fsid $FSID --config $CONFIG --keyring $KEYRING -- \
-	     ceph orch apply $t --unmanaged
+        ceph orch apply $t --unmanaged
 done
 
 ## ls
-$CEPHADM ls | jq '.[]' | jq 'select(.name == "mon.a").fsid' \
-    | grep $FSID
-$CEPHADM ls | jq '.[]' | jq 'select(.name == "mgr.x").fsid' \
-    | grep $FSID
+$CEPHADM ls | jq '.[]' | jq 'select(.name == "mon.a").fsid' |
+    grep $FSID
+$CEPHADM ls | jq '.[]' | jq 'select(.name == "mgr.x").fsid' |
+    grep $FSID
 
 # make sure the version is returned correctly
 $CEPHADM ls | jq '.[]' | jq 'select(.name == "mon.a").version' | grep -q \\.
@@ -259,13 +251,13 @@ $CEPHADM ls | jq '.[]' | jq 'select(.name == "mon.a").version' | grep -q \\.
 ## deploy
 # add mon.b
 cp $CONFIG $MONCONFIG
-echo "public addrv = [v2:$IP:3301,v1:$IP:6790]" >> $MONCONFIG
+echo "public addrv = [v2:$IP:3301,v1:$IP:6790]" >>$MONCONFIG
 jq --null-input \
     --arg fsid $FSID \
     --arg name mon.b \
     --arg keyring /var/lib/ceph/$FSID/mon.a/keyring \
     --arg config "$MONCONFIG" \
-    '{"fsid": $fsid, "name": $name, "params":{"keyring": $keyring, "config": $config}}' | \
+    '{"fsid": $fsid, "name": $name, "params":{"keyring": $keyring, "config": $config}}' |
     $CEPHADM _orch deploy
 for u in ceph-$FSID@mon.b; do
     systemctl is-enabled $u
@@ -277,32 +269,32 @@ is_available "mon.b" "$cond" 30
 
 # add mgr.y
 $CEPHADM shell --fsid $FSID --config $CONFIG --keyring $KEYRING -- \
-      ceph auth get-or-create mgr.y \
-      mon 'allow profile mgr' \
-      osd 'allow *' \
-      mds 'allow *' > $TMPDIR/keyring.mgr.y
+    ceph auth get-or-create mgr.y \
+    mon 'allow profile mgr' \
+    osd 'allow *' \
+    mds 'allow *' >$TMPDIR/keyring.mgr.y
 jq --null-input \
     --arg fsid $FSID \
     --arg name mgr.y \
     --arg keyring $TMPDIR/keyring.mgr.y \
     --arg config "$CONFIG" \
-    '{"fsid": $fsid, "name": $name, "params":{"keyring": $keyring, "config": $config}}' | \
+    '{"fsid": $fsid, "name": $name, "params":{"keyring": $keyring, "config": $config}}' |
     $CEPHADM _orch deploy
 for u in ceph-$FSID@mgr.y; do
     systemctl is-enabled $u
     systemctl is-active $u
 done
 
-for f in `seq 1 30`; do
+for f in $(seq 1 30); do
     if $CEPHADM shell --fsid $FSID \
-	     --config $CONFIG --keyring $KEYRING -- \
-	  ceph -s -f json-pretty \
-	| jq '.mgrmap.num_standbys' | grep -q 1 ; then break; fi
+        --config $CONFIG --keyring $KEYRING -- \
+        ceph -s -f json-pretty |
+        jq '.mgrmap.num_standbys' | grep -q 1; then break; fi
     sleep 1
 done
 $CEPHADM shell --fsid $FSID --config $CONFIG --keyring $KEYRING -- \
-      ceph -s -f json-pretty \
-    | jq '.mgrmap.num_standbys' | grep -q 1
+    ceph -s -f json-pretty |
+    jq '.mgrmap.num_standbys' | grep -q 1
 
 # add osd.{1,2,..}
 dd if=/dev/zero of=$TMPDIR/$OSD_IMAGE_NAME bs=1 count=0 seek=$OSD_IMAGE_SIZE
@@ -313,14 +305,14 @@ $SUDO pvcreate $loop_dev && $SUDO vgcreate $OSD_VG_NAME $loop_dev
 
 # osd bootstrap keyring
 $CEPHADM shell --fsid $FSID --config $CONFIG --keyring $KEYRING -- \
-      ceph auth get client.bootstrap-osd > $TMPDIR/keyring.bootstrap.osd
+    ceph auth get client.bootstrap-osd >$TMPDIR/keyring.bootstrap.osd
 
 # create lvs first so ceph-volume doesn't overlap with lv creation
-for id in `seq 0 $((--OSD_TO_CREATE))`; do
-    $SUDO lvcreate -l $((100/$OSD_TO_CREATE))%VG -n $OSD_LV_NAME.$id $OSD_VG_NAME
+for id in $(seq 0 $((--OSD_TO_CREATE))); do
+    $SUDO lvcreate -l $((100 / $OSD_TO_CREATE))%VG -n $OSD_LV_NAME.$id $OSD_VG_NAME
 done
 
-for id in `seq 0 $((--OSD_TO_CREATE))`; do
+for id in $(seq 0 $((--OSD_TO_CREATE))); do
     device_name=/dev/$OSD_VG_NAME/$OSD_LV_NAME.$id
     CEPH_VOLUME="$CEPHADM ceph-volume \
                        --fsid $FSID \
@@ -332,7 +324,7 @@ for id in `seq 0 $((--OSD_TO_CREATE))`; do
     $CEPH_VOLUME lvm batch --no-auto $device_name --yes --no-systemd
 
     # osd id and osd fsid
-    $CEPH_VOLUME lvm list --format json $device_name > $TMPDIR/osd.map
+    $CEPH_VOLUME lvm list --format json $device_name >$TMPDIR/osd.map
     osd_id=$($SUDO cat $TMPDIR/osd.map | jq -cr '.. | ."ceph.osd_id"? | select(.)')
     osd_fsid=$($SUDO cat $TMPDIR/osd.map | jq -cr '.. | ."ceph.osd_fsid"? | select(.)')
 
@@ -343,7 +335,7 @@ for id in `seq 0 $((--OSD_TO_CREATE))`; do
         --arg keyring $TMPDIR/keyring.bootstrap.osd \
         --arg config "$CONFIG" \
         --arg osd_fsid $osd_fsid \
-        '{"fsid": $fsid, "name": $name, "params":{"keyring": $keyring, "config": $config, "osd_fsid": $osd_fsid}}' | \
+        '{"fsid": $fsid, "name": $name, "params":{"keyring": $keyring, "config": $config, "osd_fsid": $osd_fsid}}' |
         $CEPHADM _orch deploy
 done
 
@@ -351,7 +343,7 @@ done
 jq --null-input \
     --arg fsid $FSID \
     --arg name node-exporter.a \
-    '{"fsid": $fsid, "name": $name}' | \
+    '{"fsid": $fsid, "name": $name}' |
     ${CEPHADM//--image $IMAGE_DEFAULT/} _orch deploy
 cond="curl 'http://localhost:9100' | grep -q 'Node Exporter'"
 is_available "node-exporter" "$cond" 10
@@ -361,7 +353,7 @@ jq --null-input \
     --arg fsid $FSID \
     --arg name prometheus.a \
     --argjson config_blobs "$(cat ${CEPHADM_SAMPLES_DIR}/prometheus.json)" \
-    '{"fsid": $fsid, "name": $name, "config_blobs": $config_blobs}' | \
+    '{"fsid": $fsid, "name": $name, "config_blobs": $config_blobs}' |
     ${CEPHADM//--image $IMAGE_DEFAULT/} _orch deploy
 cond="curl 'localhost:9095/api/v1/query?query=up'"
 is_available "prometheus" "$cond" 10
@@ -371,7 +363,7 @@ jq --null-input \
     --arg fsid $FSID \
     --arg name grafana.a \
     --argjson config_blobs "$(cat ${CEPHADM_SAMPLES_DIR}/grafana.json)" \
-    '{"fsid": $fsid, "name": $name, "config_blobs": $config_blobs}' | \
+    '{"fsid": $fsid, "name": $name, "config_blobs": $config_blobs}' |
     ${CEPHADM//--image $IMAGE_DEFAULT/} _orch deploy
 cond="curl --insecure 'https://localhost:3000' | grep -q 'grafana'"
 is_available "grafana" "$cond" 50
@@ -380,23 +372,23 @@ is_available "grafana" "$cond" 50
 nfs_stop
 nfs_rados_pool=$(cat ${CEPHADM_SAMPLES_DIR}/nfs.json | jq -r '.["pool"]')
 $CEPHADM shell --fsid $FSID --config $CONFIG --keyring $KEYRING -- \
-        ceph osd pool create $nfs_rados_pool 64
+    ceph osd pool create $nfs_rados_pool 64
 $CEPHADM shell --fsid $FSID --config $CONFIG --keyring $KEYRING -- \
-        rados --pool nfs-ganesha --namespace nfs-ns create conf-nfs.a
+    rados --pool nfs-ganesha --namespace nfs-ns create conf-nfs.a
 $CEPHADM shell --fsid $FSID --config $CONFIG --keyring $KEYRING -- \
-	 ceph orch pause
+    ceph orch pause
 jq --null-input \
     --arg fsid $FSID \
     --arg name nfs.a \
     --arg keyring "$KEYRING" \
     --arg config "$CONFIG" \
     --argjson config_blobs "$(cat ${CEPHADM_SAMPLES_DIR}/nfs.json)" \
-    '{"fsid": $fsid, "name": $name, "params": {"keyring": $keyring, "config": $config}, "config_blobs": $config_blobs}' | \
+    '{"fsid": $fsid, "name": $name, "params": {"keyring": $keyring, "config": $config}, "config_blobs": $config_blobs}' |
     ${CEPHADM} _orch deploy
 cond="$SUDO ss -tlnp '( sport = :nfs )' | grep 'ganesha.nfsd'"
 is_available "nfs" "$cond" 10
 $CEPHADM shell --fsid $FSID --config $CONFIG --keyring $KEYRING -- \
-	 ceph orch resume
+    ceph orch resume
 
 # add alertmanager via custom container
 alertmanager_image=$(cat ${CEPHADM_SAMPLES_DIR}/custom_container.json | jq -r '.image')
@@ -409,7 +401,7 @@ jq --null-input \
     --arg image "$alertmanager_image" \
     --argjson tcp_ports "${tcp_ports}" \
     --argjson config_blobs "$(cat ${CEPHADM_SAMPLES_DIR}/custom_container.json)" \
-    '{"fsid": $fsid, "name": $name, "image": $image, "params": {"keyring": $keyring, "config": $config, "tcp_ports": $tcp_ports}, "config_blobs": $config_blobs}' | \
+    '{"fsid": $fsid, "name": $name, "image": $image, "params": {"keyring": $keyring, "config": $config, "tcp_ports": $tcp_ports}, "config_blobs": $config_blobs}' |
     ${CEPHADM//--image $IMAGE_DEFAULT/} _orch deploy
 cond="$CEPHADM enter --fsid $FSID --name container.alertmanager.a -- test -f \
       /etc/alertmanager/alertmanager.yml"
@@ -452,8 +444,8 @@ $CEPHADM enter --fsid $FSID --name mgr.x -- pidof ceph-mgr
 $CEPHADM --timeout 60 enter --fsid $FSID --name mon.a -- sleep 10
 
 ## ceph-volume
-$CEPHADM ceph-volume --fsid $FSID -- inventory --format=json \
-      | jq '.[]'
+$CEPHADM ceph-volume --fsid $FSID -- inventory --format=json |
+    jq '.[]'
 
 ## preserve test state
 [ $CLEANUP = false ] && exit 0

@@ -7,9 +7,11 @@
  * messages in MDSRankDispatcher are versioned. Therefore
  * all MDS-MDS messages must be of type MMDSOp.
  */
-class MMDSOp : public SafeMessage {
+class MMDSOp : public SafeMessage
+{
 public:
-  template<typename... Types>
-  MMDSOp(Types&&... args)
-    : SafeMessage(std::forward<Types>(args)...) {}
+    template<typename... Types>
+    MMDSOp(Types&&... args)
+        : SafeMessage(std::forward<Types>(args)...)
+    {}
 };

@@ -3,33 +3,36 @@
 
 #pragma once
 
-#include <seastar/core/future.hh>
-#include <seastar/core/shared_future.hh>
-
 #include "crimson/common/operation.h"
 #include "crimson/osd/osd_operation.h"
+
+#include <seastar/core/future.hh>
+#include <seastar/core/shared_future.hh>
 
 namespace crimson::osd {
 
 class PG;
 
-class PGActivationBlocker : public crimson::BlockerT<PGActivationBlocker> {
-  PG *pg;
+class PGActivationBlocker : public crimson::BlockerT<PGActivationBlocker>
+{
+    PG* pg;
 
-  const spg_t pgid;
-  seastar::shared_promise<> p;
+    const spg_t pgid;
+    seastar::shared_promise<> p;
 
 protected:
-  void dump_detail(Formatter *f) const;
+    void dump_detail(Formatter* f) const;
 
 public:
-  static constexpr const char *type_name = "PGActivationBlocker";
-  using Blocker = PGActivationBlocker;
+    static constexpr const char* type_name = "PGActivationBlocker";
+    using Blocker = PGActivationBlocker;
 
-  PGActivationBlocker(PG *pg) : pg(pg) {}
-  void unblock();
-  seastar::future<> wait(PGActivationBlocker::BlockingEvent::TriggerI&&);
-  seastar::future<> stop();
+    PGActivationBlocker(PG* pg)
+        : pg(pg)
+    {}
+    void unblock();
+    seastar::future<> wait(PGActivationBlocker::BlockingEvent::TriggerI&&);
+    seastar::future<> stop();
 };
 
-} // namespace crimson::osd
+}   // namespace crimson::osd

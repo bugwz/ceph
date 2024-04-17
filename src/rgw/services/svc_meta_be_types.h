@@ -16,11 +16,11 @@
 
 #pragma once
 
-enum RGWSI_META_BE_TYPES {
-  SOBJ   = 1,
-  OTP    = 2,
-  BUCKET = 3,
-  BI     = 4,
-  USER   = 5,
+enum RGWSI_META_BE_TYPES
+{
+    SOBJ = 1,
+    OTP = 2,
+    BUCKET = 3,
+    BI = 4,
+    USER = 5,
 };
-

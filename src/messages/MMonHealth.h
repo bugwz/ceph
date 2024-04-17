@@ -14,50 +14,54 @@
 #ifndef CEPH_MMON_HEALTH_H
 #define CEPH_MMON_HEALTH_H
 
-#include "msg/Message.h"
 #include "messages/MMonQuorumService.h"
 #include "mon/mon_types.h"
+#include "msg/Message.h"
 
-class MMonHealth final : public MMonQuorumService {
+class MMonHealth final : public MMonQuorumService
+{
 public:
-  static constexpr int HEAD_VERSION = 1;
+    static constexpr int HEAD_VERSION = 1;
 
-  int service_type = 0;
-  int service_op = 0;
+    int service_type = 0;
+    int service_op = 0;
 
-  // service specific data
-  DataStats data_stats;
+    // service specific data
+    DataStats data_stats;
 
-  MMonHealth() : MMonQuorumService{MSG_MON_HEALTH, HEAD_VERSION} { }
+    MMonHealth()
+        : MMonQuorumService{MSG_MON_HEALTH, HEAD_VERSION}
+    {}
 
 private:
-  ~MMonHealth() final { }
+    ~MMonHealth() final {}
 
 public:
-  std::string_view get_type_name() const override { return "mon_health"; }
-  void print(std::ostream &o) const override {
-    o << "mon_health("
-      << " e " << get_epoch()
-      << " r " << get_round()
-      << " )";
-  }
+    std::string_view get_type_name() const override { return "mon_health"; }
+    void print(std::ostream& o) const override
+    {
+        o << "mon_health("
+          << " e " << get_epoch() << " r " << get_round() << " )";
+    }
 
-  void decode_payload() override {
-    using ceph::decode;
-    auto p = payload.cbegin();
-    service_decode(p);
-    decode(service_type, p);
-    decode(service_op, p);
-    decode(data_stats, p);
-  }
+    void decode_payload() override
+    {
+        using ceph::decode;
+        auto p = payload.cbegin();
+        service_decode(p);
+        decode(service_type, p);
+        decode(service_op, p);
+        decode(data_stats, p);
+    }
 
-  void encode_payload(uint64_t features) override {
-    using ceph::encode;
-    service_encode();
-    encode(service_type, payload);
-    encode(service_op, payload);
-    encode(data_stats, payload);
-  }
+    void encode_payload(uint64_t features) override
+    {
+        using ceph::encode;
+        service_encode();
+        encode(service_type, payload);
+        encode(service_op, payload);
+        encode(data_stats, payload);
+    }
 };
 
 #endif /* CEPH_MMON_HEALTH_H */

@@ -7,14 +7,15 @@
 namespace librbd {
 namespace object_map {
 
-enum DiffState {
-  DIFF_STATE_HOLE         = 0, /* unchanged hole */
-  DIFF_STATE_DATA         = 1, /* unchanged data */
-  DIFF_STATE_HOLE_UPDATED = 2, /* new hole */
-  DIFF_STATE_DATA_UPDATED = 3  /* new data */
+enum DiffState
+{
+    DIFF_STATE_HOLE = 0,         /* unchanged hole */
+    DIFF_STATE_DATA = 1,         /* unchanged data */
+    DIFF_STATE_HOLE_UPDATED = 2, /* new hole */
+    DIFF_STATE_DATA_UPDATED = 3  /* new data */
 };
 
-} // namespace object_map
-} // namespace librbd
+}   // namespace object_map
+}   // namespace librbd
 
-#endif // CEPH_LIBRBD_OBJECT_MAP_TYPES_H
+#endif   // CEPH_LIBRBD_OBJECT_MAP_TYPES_H

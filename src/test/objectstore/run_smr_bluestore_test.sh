@@ -6,9 +6,8 @@
 # 2) run_smr_bluestore_test.sh --smr
 # Setup smr device but skip tests failing on smr
 
-
 before_creation=$(mktemp)
-lsscsi > $before_creation
+lsscsi >$before_creation
 
 echo "cd /backstores/user:zbc
 create name=zbc0 size=20G cfgstring=model-HM/zsize-256/conv-10@zbc0.raw
@@ -21,9 +20,8 @@ create /backstores/user:zbc/zbc0 0
 
 sleep 1 #if too fast device does not show up
 after_creation=$(mktemp)
-lsscsi > $after_creation
-if [[ $(diff $before_creation $after_creation | wc -l ) != 2 ]]
-then
+lsscsi >$after_creation
+if [[ $(diff $before_creation $after_creation | wc -l) != 2 ]]; then
     echo New zbc device not created
     false
 fi
@@ -38,7 +36,7 @@ delete zbc0" | sudo targetcli
 }
 trap cleanup EXIT
 
-DEV=$(diff $before_creation $after_creation |grep zbc |sed "s@.* /@/@")
+DEV=$(diff $before_creation $after_creation | grep zbc | sed "s@.* /@/@")
 sudo chmod 666 $DEV
 # Need sudo
 # https://patchwork.kernel.org/project/linux-block/patch/20210811110505.29649-3-Niklas.Cassel@wdc.com/

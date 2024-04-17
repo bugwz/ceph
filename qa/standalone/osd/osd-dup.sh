@@ -2,7 +2,7 @@
 
 source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
 
-[ `uname` = FreeBSD ] && exit 0
+[ $(uname) = FreeBSD ] && exit 0
 
 function run() {
     local dir=$1
@@ -16,7 +16,7 @@ function run() {
     CEPH_ARGS+="--filestore_wbthrottle_xfs_ios_hard_limit=900 "
     CEPH_ARGS+="--filestore_wbthrottle_btrfs_ios_hard_limit=900 "
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1

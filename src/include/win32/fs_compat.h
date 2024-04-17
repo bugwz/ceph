@@ -15,13 +15,13 @@
 
 #pragma once
 
-#define S_IFLNK   0120000
+#define S_IFLNK 0120000
 
 #define S_ISTYPE(m, TYPE) ((m & S_IFMT) == TYPE)
-#define S_ISLNK(m)  S_ISTYPE(m, S_IFLNK)
-#define S_ISUID     04000
-#define S_ISGID     02000
-#define S_ISVTX     01000
+#define S_ISLNK(m)        S_ISTYPE(m, S_IFLNK)
+#define S_ISUID           04000
+#define S_ISGID           02000
+#define S_ISVTX           01000
 
 #define LOCK_SH    1
 #define LOCK_EX    2
@@ -35,7 +35,7 @@
 #define AT_SYMLINK_NOFOLLOW 0x100
 #define AT_REMOVEDIR        0x200
 
-#define MAXSYMLINKS  65000
+#define MAXSYMLINKS 65000
 
 #define O_DIRECTORY 0200000
 #define O_NOFOLLOW  0400000

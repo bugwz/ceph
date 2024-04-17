@@ -16,48 +16,47 @@
 
 #include "common/Formatter.h"
 
-void Anchor::encode(bufferlist &bl) const
+void Anchor::encode(bufferlist& bl) const
 {
-  ENCODE_START(2, 1, bl);
-  encode(ino, bl);
-  encode(dirino, bl);
-  encode(d_name, bl);
-  encode(d_type, bl);
-  encode(frags, bl);
-  ENCODE_FINISH(bl);
+    ENCODE_START(2, 1, bl);
+    encode(ino, bl);
+    encode(dirino, bl);
+    encode(d_name, bl);
+    encode(d_type, bl);
+    encode(frags, bl);
+    ENCODE_FINISH(bl);
 }
 
-void Anchor::decode(bufferlist::const_iterator &bl)
+void Anchor::decode(bufferlist::const_iterator& bl)
 {
-  DECODE_START(2, bl);
-  decode(ino, bl);
-  decode(dirino, bl);
-  decode(d_name, bl);
-  decode(d_type, bl);
-  if (struct_v >= 2)
-    decode(frags, bl);
-  DECODE_FINISH(bl);
+    DECODE_START(2, bl);
+    decode(ino, bl);
+    decode(dirino, bl);
+    decode(d_name, bl);
+    decode(d_type, bl);
+    if (struct_v >= 2) decode(frags, bl);
+    DECODE_FINISH(bl);
 }
 
-void Anchor::dump(Formatter *f) const
+void Anchor::dump(Formatter* f) const
 {
-  f->dump_unsigned("ino", ino);
-  f->dump_unsigned("dirino", dirino);
-  f->dump_string("d_name", d_name);
-  f->dump_unsigned("d_type", d_type);
+    f->dump_unsigned("ino", ino);
+    f->dump_unsigned("dirino", dirino);
+    f->dump_string("d_name", d_name);
+    f->dump_unsigned("d_type", d_type);
 }
 
 void Anchor::generate_test_instances(std::list<Anchor*>& ls)
 {
-  ls.push_back(new Anchor);
-  ls.push_back(new Anchor);
-  ls.back()->ino = 1;
-  ls.back()->dirino = 2;
-  ls.back()->d_name = "hello";
-  ls.back()->d_type = DT_DIR;
+    ls.push_back(new Anchor);
+    ls.push_back(new Anchor);
+    ls.back()->ino = 1;
+    ls.back()->dirino = 2;
+    ls.back()->d_name = "hello";
+    ls.back()->d_type = DT_DIR;
 }
 
-std::ostream& operator<<(std::ostream& out, const Anchor &a)
+std::ostream& operator<<(std::ostream& out, const Anchor& a)
 {
-  return out << "a(" << a.ino << " " << a.dirino << "/'" << a.d_name << "' " << a.d_type << ")";
+    return out << "a(" << a.ino << " " << a.dirino << "/'" << a.d_name << "' " << a.d_type << ")";
 }

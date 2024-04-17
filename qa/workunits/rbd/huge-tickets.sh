@@ -28,8 +28,8 @@ function generate_keyring() {
     set -x
 }
 
-generate_keyring foo 1000 # ~25K, kmalloc
-generate_keyring bar 20000 # ~500K, vmalloc
+generate_keyring foo 1000   # ~25K, kmalloc
+generate_keyring bar 20000  # ~500K, vmalloc
 generate_keyring baz 300000 # ~8M, vmalloc + sg chaining
 
 rbd create --size 1 test

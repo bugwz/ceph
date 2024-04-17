@@ -3,8 +3,8 @@
 
 #include "tools/rbd/Shell.h"
 
-int main(int argc, const char **argv)
+int main(int argc, const char** argv)
 {
-  rbd::Shell shell;
-  return shell.execute(argc, argv);
+    rbd::Shell shell;
+    return shell.execute(argc, argv);
 }

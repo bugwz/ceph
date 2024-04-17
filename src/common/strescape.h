@@ -16,22 +16,23 @@
 #define CEPH_STRESCAPE_H
 
 #include <algorithm>
+#include <ctype.h>
 #include <ostream>
 #include <string_view>
 
-#include <ctype.h>
-
-inline std::string binstrprint(std::string_view sv, size_t maxlen=0)
+inline std::string binstrprint(std::string_view sv, size_t maxlen = 0)
 {
-  std::string s;
-  if (maxlen == 0 || sv.size() < maxlen) {
-    s = std::string(sv);
-  } else {
-    maxlen = std::max<size_t>(8, maxlen);
-    s = std::string(sv.substr(0, maxlen-3)) + "...";
-  }
-  std::replace_if(s.begin(), s.end(), [](char c){ return !(isalnum(c) || ispunct(c)); }, '.');
-  return s;
+    std::string s;
+    if (maxlen == 0 || sv.size() < maxlen) {
+        s = std::string(sv);
+    }
+    else {
+        maxlen = std::max<size_t>(8, maxlen);
+        s = std::string(sv.substr(0, maxlen - 3)) + "...";
+    }
+    std::replace_if(
+        s.begin(), s.end(), [](char c) { return !(isalnum(c) || ispunct(c)); }, '.');
+    return s;
 }
 
 #endif

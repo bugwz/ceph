@@ -15,14 +15,14 @@
 #ifndef CEPH_CONFUTILS_H
 #define CEPH_CONFUTILS_H
 
+#include "include/buffer_fwd.h"
+
 #include <deque>
 #include <map>
 #include <set>
 #include <string>
 #include <string_view>
 #include <vector>
-
-#include "include/buffer_fwd.h"
 
 /*
  * Ceph configuration file support.
@@ -39,50 +39,50 @@
  * writing them back out without too much difficulty. Currently, this is not
  * implemented, and the file is read-only.
  */
-struct conf_line_t  {
-  conf_line_t() = default;
-  conf_line_t(const std::string& key, const std::string& val);
-  bool operator<(const conf_line_t& rhs) const;
-  std::string key;
-  std::string val;
+struct conf_line_t
+{
+    conf_line_t() = default;
+    conf_line_t(const std::string& key, const std::string& val);
+    bool operator<(const conf_line_t& rhs) const;
+    std::string key;
+    std::string val;
 };
 
-std::ostream &operator<<(std::ostream& oss, const conf_line_t& line);
+std::ostream& operator<<(std::ostream& oss, const conf_line_t& line);
 
-class conf_section_t : public std::set<conf_line_t> {
+class conf_section_t : public std::set<conf_line_t>
+{
 public:
-  conf_section_t() = default;
-  conf_section_t(const std::string& heading,
-		 const std::vector<conf_line_t>& lines);
-  std::string heading;
-  friend std::ostream& operator<<(std::ostream& os, const conf_section_t&);
+    conf_section_t() = default;
+    conf_section_t(const std::string& heading, const std::vector<conf_line_t>& lines);
+    std::string heading;
+    friend std::ostream& operator<<(std::ostream& os, const conf_section_t&);
 };
 
-class ConfFile : public std::map<std::string, conf_section_t, std::less<>> {
-  using base_type = std::map<std::string, conf_section_t, std::less<>>;
+class ConfFile : public std::map<std::string, conf_section_t, std::less<>>
+{
+    using base_type = std::map<std::string, conf_section_t, std::less<>>;
+
 public:
-  ConfFile()
-    : ConfFile{std::vector<conf_section_t>{}}
-  {}
-  ConfFile(const conf_line_t& line)
-    : ConfFile{{conf_section_t{"global", {line}}}}
-  {}
-  ConfFile(const std::vector<conf_section_t>& sections);
-  int parse_file(const std::string &fname, std::ostream *warnings);
-  int parse_bufferlist(ceph::bufferlist *bl, std::ostream *warnings);
-  bool parse_buffer(std::string_view buf, std::ostream* warning);
-  int read(std::string_view section, std::string_view key,
-	   std::string &val) const;
-  static std::string normalize_key_name(std::string_view key);
-  // print warnings to os if any old-style section name is found
-  //
-  // consider a section name as old-style name if it starts with any of the
-  // given prefixes, but does not follow with a "."
-  void check_old_style_section_names(const std::vector<std::string>& prefixes,
-				     std::ostream& os);
-
+    ConfFile()
+        : ConfFile{std::vector<conf_section_t>{}}
+    {}
+    ConfFile(const conf_line_t& line)
+        : ConfFile{{conf_section_t{"global", {line}}}}
+    {}
+    ConfFile(const std::vector<conf_section_t>& sections);
+    int parse_file(const std::string& fname, std::ostream* warnings);
+    int parse_bufferlist(ceph::bufferlist* bl, std::ostream* warnings);
+    bool parse_buffer(std::string_view buf, std::ostream* warning);
+    int read(std::string_view section, std::string_view key, std::string& val) const;
+    static std::string normalize_key_name(std::string_view key);
+    // print warnings to os if any old-style section name is found
+    //
+    // consider a section name as old-style name if it starts with any of the
+    // given prefixes, but does not follow with a "."
+    void check_old_style_section_names(const std::vector<std::string>& prefixes, std::ostream& os);
 };
 
-std::ostream &operator<<(std::ostream& oss, const ConfFile& cf);
+std::ostream& operator<<(std::ostream& oss, const ConfFile& cf);
 
 #endif

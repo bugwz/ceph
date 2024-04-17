@@ -3,12 +3,9 @@
 
 #pragma once
 
-#include <string>
-
-#include <Python.h>
-
 #include "common/options.h"
 
-PyObject *get_python_typed_option_value(
-  Option::type_t type,
-  const std::string& value);
+#include <Python.h>
+#include <string>
+
+PyObject* get_python_typed_option_value(Option::type_t type, const std::string& value);

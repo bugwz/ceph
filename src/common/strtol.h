@@ -37,76 +37,69 @@ namespace ceph {
 // failure OR on trailing characters.
 // Sadly GCC < 11 is missing the floating point versions.
 template<typename T>
-auto parse(std::string_view s, int base = 10)
-  -> std::enable_if_t<std::is_integral_v<T>, std::optional<T>>
+auto parse(std::string_view s, int base = 10) -> std::enable_if_t<std::is_integral_v<T>, std::optional<T>>
 {
-  T t;
-  auto r = std::from_chars(s.data(), s.data() + s.size(), t, base);
-  if ((r.ec != std::errc{}) || (r.ptr != s.data() + s.size())) {
-    return std::nullopt;
-  }
-  return t;
+    T t;
+    auto r = std::from_chars(s.data(), s.data() + s.size(), t, base);
+    if ((r.ec != std::errc{}) || (r.ptr != s.data() + s.size())) {
+        return std::nullopt;
+    }
+    return t;
 }
 
 // As above, but succeed on trailing characters and trim the supplied
 // string_view to remove the parsed number. Set the supplied
 // string_view to empty if it ends with the number.
 template<typename T>
-auto consume(std::string_view& s, int base = 10)
-  -> std::enable_if_t<std::is_integral_v<T>, std::optional<T>>
+auto consume(std::string_view& s, int base = 10) -> std::enable_if_t<std::is_integral_v<T>, std::optional<T>>
 {
-  T t;
-  auto r = std::from_chars(s.data(), s.data() + s.size(), t, base);
-  if (r.ec != std::errc{})
-    return std::nullopt;
+    T t;
+    auto r = std::from_chars(s.data(), s.data() + s.size(), t, base);
+    if (r.ec != std::errc{}) return std::nullopt;
 
-  if (r.ptr == s.data() + s.size()) {
-    s = std::string_view{};
-  } else {
-    s.remove_prefix(r.ptr - s.data());
-  }
-  return t;
+    if (r.ptr == s.data() + s.size()) {
+        s = std::string_view{};
+    }
+    else {
+        s.remove_prefix(r.ptr - s.data());
+    }
+    return t;
 }
-} // namespace ceph
+}   // namespace ceph
 
-bool strict_strtob(const char* str, std::string *err);
+bool strict_strtob(const char* str, std::string* err);
 
-long long strict_strtoll(std::string_view str, int base, std::string *err);
+long long strict_strtoll(std::string_view str, int base, std::string* err);
 
-int strict_strtol(std::string_view str, int base, std::string *err);
+int strict_strtol(std::string_view str, int base, std::string* err);
 
-double strict_strtod(std::string_view str, std::string *err);
+double strict_strtod(std::string_view str, std::string* err);
 
-float strict_strtof(std::string_view str, std::string *err);
+float strict_strtof(std::string_view str, std::string* err);
 
-uint64_t strict_iecstrtoll(std::string_view str, std::string *err);
+uint64_t strict_iecstrtoll(std::string_view str, std::string* err);
 
-template<typename T>
-T strict_iec_cast(std::string_view str, std::string *err);
+template<typename T> T strict_iec_cast(std::string_view str, std::string* err);
 
-template<typename T>
-T strict_si_cast(std::string_view str, std::string *err);
+template<typename T> T strict_si_cast(std::string_view str, std::string* err);
 
 /* On enter buf points to the end of the buffer, e.g. where the least
  * significant digit of the input number will be printed. Returns pointer to
  * where the most significant digit were printed, including zero padding.
  * Does NOT add zero at the end of buffer, this is responsibility of the caller.
  */
-template<typename T, const unsigned base = 10, const unsigned width = 1>
-static inline
-char* ritoa(T u, char *buf)
+template<typename T, const unsigned base = 10, const unsigned width = 1> static inline char* ritoa(T u, char* buf)
 {
-  static_assert(std::is_unsigned_v<T>, "signed types are not supported");
-  static_assert(base <= 16, "extend character map below to support higher bases");
-  unsigned digits = 0;
-  while (u) {
-    *--buf = "0123456789abcdef"[u % base];
-    u /= base;
-    digits++;
-  }
-  while (digits++ < width)
-    *--buf = '0';
-  return buf;
+    static_assert(std::is_unsigned_v<T>, "signed types are not supported");
+    static_assert(base <= 16, "extend character map below to support higher bases");
+    unsigned digits = 0;
+    while (u) {
+        *--buf = "0123456789abcdef"[u % base];
+        u /= base;
+        digits++;
+    }
+    while (digits++ < width) *--buf = '0';
+    return buf;
 }
 
 #endif

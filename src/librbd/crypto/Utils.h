@@ -13,21 +13,18 @@ struct ImageCtx;
 namespace crypto {
 
 class CryptoInterface;
-template <typename> class EncryptionFormat;
+template<typename> class EncryptionFormat;
 
 namespace util {
 
-template <typename ImageCtxT = librbd::ImageCtx>
-void set_crypto(ImageCtxT *image_ctx,
-                decltype(ImageCtxT::encryption_format) encryption_format);
+template<typename ImageCtxT = librbd::ImageCtx>
+void set_crypto(ImageCtxT* image_ctx, decltype(ImageCtxT::encryption_format) encryption_format);
 
-int build_crypto(
-        CephContext* cct, const unsigned char* key, uint32_t key_length,
-        uint64_t block_size, uint64_t data_offset,
-        std::unique_ptr<CryptoInterface>* result_crypto);
+int build_crypto(CephContext* cct, const unsigned char* key, uint32_t key_length, uint64_t block_size,
+                 uint64_t data_offset, std::unique_ptr<CryptoInterface>* result_crypto);
 
-} // namespace util
-} // namespace crypto
-} // namespace librbd
+}   // namespace util
+}   // namespace crypto
+}   // namespace librbd
 
-#endif // CEPH_LIBRBD_CRYPTO_UTILS_H
+#endif   // CEPH_LIBRBD_CRYPTO_UTILS_H

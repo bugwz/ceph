@@ -14,21 +14,19 @@ class Driver;
 class Watcher : public librbd::UpdateWatchCtx
 {
 public:
-  Watcher(Driver *m_drv, librados::IoCtx &ioctx, librbd::Image &image,
-          size_t size);
+    Watcher(Driver* m_drv, librados::IoCtx& ioctx, librbd::Image& image, size_t size);
 
-  void handle_notify() override;
+    void handle_notify() override;
 
 private:
-  Driver *m_drv;
-  librados::IoCtx &m_ioctx;
-  librbd::Image &m_image;
-  size_t m_size;
+    Driver* m_drv;
+    librados::IoCtx& m_ioctx;
+    librbd::Image& m_image;
+    size_t m_size;
 };
 
 
-} // namespace ggate
-} // namespace rbd
+}   // namespace ggate
+}   // namespace rbd
 
-#endif // CEPH_RBD_GGATE_WATCHER_H
-
+#endif   // CEPH_RBD_GGATE_WATCHER_H

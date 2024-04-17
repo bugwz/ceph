@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
  * Ceph distributed storage system
@@ -14,7 +14,7 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  */
 
 #ifndef CEPH_EXT_BLK_DEV_INTERFACE_H
@@ -25,43 +25,46 @@
 
     Block devices with verdor specific capabilities rely on plugins implementing
     **ExtBlkDevInterface** to provide access to their capabilities.
-    
+
     Methods returning an **int** return **0** on success and a
     negative value on error.
- */ 
+ */
 
-#include <string>
 #include <map>
-#include <ostream>
 #include <memory>
+#include <ostream>
+#include <string>
 #ifdef __linux__
 #include <sys/capability.h>
 #else
-typedef void *cap_t;
+typedef void* cap_t;
 #endif
 
 #include "common/PluginRegistry.h"
 
 namespace ceph {
-  class ExtBlkDevState {
-    uint64_t logical_total=0;
-    uint64_t logical_avail=0;
-    uint64_t physical_total=0;
-    uint64_t physical_avail=0;
-  public:
-    uint64_t get_logical_total(){return logical_total;}
-    uint64_t get_logical_avail(){return logical_avail;}
-    uint64_t get_physical_total(){return physical_total;}
-    uint64_t get_physical_avail(){return physical_avail;}
-    void set_logical_total(uint64_t alogical_total){logical_total=alogical_total;}
-    void set_logical_avail(uint64_t alogical_avail){logical_avail=alogical_avail;}
-    void set_physical_total(uint64_t aphysical_total){physical_total=aphysical_total;}
-    void set_physical_avail(uint64_t aphysical_avail){physical_avail=aphysical_avail;}
-  };
+class ExtBlkDevState
+{
+    uint64_t logical_total = 0;
+    uint64_t logical_avail = 0;
+    uint64_t physical_total = 0;
+    uint64_t physical_avail = 0;
+
+public:
+    uint64_t get_logical_total() { return logical_total; }
+    uint64_t get_logical_avail() { return logical_avail; }
+    uint64_t get_physical_total() { return physical_total; }
+    uint64_t get_physical_avail() { return physical_avail; }
+    void set_logical_total(uint64_t alogical_total) { logical_total = alogical_total; }
+    void set_logical_avail(uint64_t alogical_avail) { logical_avail = alogical_avail; }
+    void set_physical_total(uint64_t aphysical_total) { physical_total = aphysical_total; }
+    void set_physical_avail(uint64_t aphysical_avail) { physical_avail = aphysical_avail; }
+};
 
 
-  class ExtBlkDevInterface {
-  public:
+class ExtBlkDevInterface
+{
+public:
     virtual ~ExtBlkDevInterface() {}
 
     /**
@@ -98,20 +101,22 @@ namespace ceph {
      * @param [in,out] pm property map of the device, to be extended by attributes detected by this plugin
      * @return 0 on success or a negative errno on error.
      */
-    virtual int collect_metadata(const std::string& prefix, std::map<std::string,std::string> *pm) = 0;
-  };
+    virtual int collect_metadata(const std::string& prefix, std::map<std::string, std::string>* pm) = 0;
+};
 
-  typedef std::shared_ptr<ExtBlkDevInterface> ExtBlkDevInterfaceRef;
+typedef std::shared_ptr<ExtBlkDevInterface> ExtBlkDevInterfaceRef;
 
-  class ExtBlkDevPlugin : public Plugin {
-  public:
-
-    explicit ExtBlkDevPlugin(CephContext *cct) : Plugin(cct) {}
+class ExtBlkDevPlugin : public Plugin
+{
+public:
+    explicit ExtBlkDevPlugin(CephContext* cct)
+        : Plugin(cct)
+    {}
     virtual ~ExtBlkDevPlugin() {}
 
     /**
      * Indicate plugin-required capabilities in permitted set
-     * If a plugin requires a capability to be active in the 
+     * If a plugin requires a capability to be active in the
      * permitted set when invoked, it must indicate so by setting
      * the required flags in the cap_t structure passed into this method.
      * The cap_t structure is empty when passed into the method, and only the
@@ -132,10 +137,9 @@ namespace ceph {
      * @param [out] ext_blk_dev object created on successful device support detection
      * @return 0 on success or a negative errno on error.
      */
-    virtual int factory(const std::string& logdevname,
-                        ExtBlkDevInterfaceRef& ext_blk_dev) = 0;
-  };
+    virtual int factory(const std::string& logdevname, ExtBlkDevInterfaceRef& ext_blk_dev) = 0;
+};
 
-}
+}   // namespace ceph
 
 #endif

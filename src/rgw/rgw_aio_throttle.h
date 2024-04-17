@@ -15,119 +15,136 @@
 
 #pragma once
 
-#include "include/rados/librados_fwd.hpp"
-#include <memory>
-#include "common/ceph_mutex.h"
 #include "common/async/completion.h"
 #include "common/async/yield_context.h"
-#include "services/svc_rados.h"
+#include "common/ceph_mutex.h"
+#include "include/rados/librados_fwd.hpp"
 #include "rgw_aio.h"
+#include "services/svc_rados.h"
+
+#include <memory>
 
 namespace rgw {
 
-class Throttle {
- protected:
-  const uint64_t window;
-  uint64_t pending_size = 0;
+class Throttle
+{
+protected:
+    const uint64_t window;
+    uint64_t pending_size = 0;
 
-  AioResultList pending;
-  AioResultList completed;
+    AioResultList pending;
+    AioResultList completed;
 
-  bool is_available() const { return pending_size <= window; }
-  bool has_completion() const { return !completed.empty(); }
-  bool is_drained() const { return pending.empty(); }
+    bool is_available() const { return pending_size <= window; }
+    bool has_completion() const { return !completed.empty(); }
+    bool is_drained() const { return pending.empty(); }
 
-  enum class Wait { None, Available, Completion, Drained };
-  Wait waiter = Wait::None;
+    enum class Wait
+    {
+        None,
+        Available,
+        Completion,
+        Drained
+    };
+    Wait waiter = Wait::None;
 
-  bool waiter_ready() const;
+    bool waiter_ready() const;
 
- public:
-  Throttle(uint64_t window) : window(window) {}
+public:
+    Throttle(uint64_t window)
+        : window(window)
+    {}
 
-  virtual ~Throttle() {
-    // must drain before destructing
-    ceph_assert(pending.empty());
-    ceph_assert(completed.empty());
-  }
+    virtual ~Throttle()
+    {
+        // must drain before destructing
+        ceph_assert(pending.empty());
+        ceph_assert(completed.empty());
+    }
 };
 
 // a throttle for aio operations. all public functions must be called from
 // the same thread
-class BlockingAioThrottle final : public Aio, private Throttle {
-  ceph::mutex mutex = ceph::make_mutex("AioThrottle");
-  ceph::condition_variable cond;
+class BlockingAioThrottle final : public Aio, private Throttle
+{
+    ceph::mutex mutex = ceph::make_mutex("AioThrottle");
+    ceph::condition_variable cond;
 
-  struct Pending : AioResultEntry {
-    BlockingAioThrottle *parent = nullptr;
-    uint64_t cost = 0;
-    librados::AioCompletion *completion = nullptr;
-  };
- public:
-  BlockingAioThrottle(uint64_t window) : Throttle(window) {}
+    struct Pending : AioResultEntry
+    {
+        BlockingAioThrottle* parent = nullptr;
+        uint64_t cost = 0;
+        librados::AioCompletion* completion = nullptr;
+    };
 
-  virtual ~BlockingAioThrottle() override {};
+public:
+    BlockingAioThrottle(uint64_t window)
+        : Throttle(window)
+    {}
 
-  AioResultList get(const RGWSI_RADOS::Obj& obj, OpFunc&& f,
-                    uint64_t cost, uint64_t id) override final;
+    virtual ~BlockingAioThrottle() override{};
 
-  void put(AioResult& r) override final;
+    AioResultList get(const RGWSI_RADOS::Obj& obj, OpFunc&& f, uint64_t cost, uint64_t id) override final;
 
-  AioResultList poll() override final;
+    void put(AioResult& r) override final;
 
-  AioResultList wait() override final;
+    AioResultList poll() override final;
 
-  AioResultList drain() override final;
+    AioResultList wait() override final;
+
+    AioResultList drain() override final;
 };
 
 // a throttle that yields the coroutine instead of blocking. all public
 // functions must be called within the coroutine strand
-class YieldingAioThrottle final : public Aio, private Throttle {
-  boost::asio::io_context& context;
-  yield_context yield;
-  struct Handler;
+class YieldingAioThrottle final : public Aio, private Throttle
+{
+    boost::asio::io_context& context;
+    yield_context yield;
+    struct Handler;
 
-  // completion callback associated with the waiter
-  using Completion = ceph::async::Completion<void(boost::system::error_code)>;
-  std::unique_ptr<Completion> completion;
+    // completion callback associated with the waiter
+    using Completion = ceph::async::Completion<void(boost::system::error_code)>;
+    std::unique_ptr<Completion> completion;
 
-  template <typename CompletionToken>
-  auto async_wait(CompletionToken&& token);
+    template<typename CompletionToken> auto async_wait(CompletionToken&& token);
 
-  struct Pending : AioResultEntry { uint64_t cost = 0; };
+    struct Pending : AioResultEntry
+    {
+        uint64_t cost = 0;
+    };
 
- public:
-  YieldingAioThrottle(uint64_t window, boost::asio::io_context& context,
-                      yield_context yield)
-    : Throttle(window), context(context), yield(yield)
-  {}
+public:
+    YieldingAioThrottle(uint64_t window, boost::asio::io_context& context, yield_context yield)
+        : Throttle(window)
+        , context(context)
+        , yield(yield)
+    {}
 
-  virtual ~YieldingAioThrottle() override {};
+    virtual ~YieldingAioThrottle() override{};
 
-  AioResultList get(const RGWSI_RADOS::Obj& obj, OpFunc&& f,
-                    uint64_t cost, uint64_t id) override final;
+    AioResultList get(const RGWSI_RADOS::Obj& obj, OpFunc&& f, uint64_t cost, uint64_t id) override final;
 
-  void put(AioResult& r) override final;
+    void put(AioResult& r) override final;
 
-  AioResultList poll() override final;
+    AioResultList poll() override final;
 
-  AioResultList wait() override final;
+    AioResultList wait() override final;
 
-  AioResultList drain() override final;
+    AioResultList drain() override final;
 };
 
 // return a smart pointer to Aio
 inline auto make_throttle(uint64_t window_size, optional_yield y)
 {
-  std::unique_ptr<Aio> aio;
-  if (y) {
-    aio = std::make_unique<YieldingAioThrottle>(window_size,
-                                                y.get_io_context(),
-                                                y.get_yield_context());
-  } else {
-    aio = std::make_unique<BlockingAioThrottle>(window_size);
-  }
-  return aio;
+    std::unique_ptr<Aio> aio;
+    if (y) {
+        aio = std::make_unique<YieldingAioThrottle>(window_size, y.get_io_context(), y.get_yield_context());
+    }
+    else {
+        aio = std::make_unique<BlockingAioThrottle>(window_size);
+    }
+    return aio;
 }
 
-} // namespace rgw
+}   // namespace rgw

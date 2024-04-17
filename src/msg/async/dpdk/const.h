@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
  * This file is open source software, licensed to you under the terms
  * of the Apache License, Version 2.0 (the "License").  See the NOTICE file
@@ -25,12 +25,18 @@
 
 #include <stdint.h>
 
-enum class ip_protocol_num : uint8_t {
-  icmp = 1, tcp = 6, unused = 255
+enum class ip_protocol_num : uint8_t
+{
+    icmp = 1,
+    tcp = 6,
+    unused = 255
 };
 
-enum class eth_protocol_num : uint16_t {
-  ipv4 = 0x0800, arp = 0x0806, ipv6 = 0x86dd
+enum class eth_protocol_num : uint16_t
+{
+    ipv4 = 0x0800,
+    arp = 0x0806,
+    ipv6 = 0x86dd
 };
 
 const uint8_t eth_hdr_len = 14;

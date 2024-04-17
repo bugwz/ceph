@@ -3,17 +3,18 @@
 
 #pragma once
 
-#include "include/rados/librados.hpp"
-#include "include/ceph_assert.h"
-#include "common/Timer.h"
 #include "common/Cond.h"
+#include "common/Timer.h"
+#include "include/ceph_assert.h"
+#include "include/rados/librados.hpp"
 
 class RGWRados;
 class RGWRealm;
 
-enum class RGWRealmNotify {
-  Reload,
-  ZonesNeedPeriod,
+enum class RGWRealmNotify
+{
+    Reload,
+    ZonesNeedPeriod,
 };
 WRITE_RAW_ENCODER(RGWRealmNotify);
 
@@ -21,46 +22,46 @@ WRITE_RAW_ENCODER(RGWRealmNotify);
  * RGWRealmWatcher establishes a watch on the current RGWRealm's control object,
  * and forwards notifications to registered observers.
  */
-class RGWRealmWatcher : public librados::WatchCtx2 {
- public:
-  /**
-   * Watcher is an interface that allows the RGWRealmWatcher to pass
-   * notifications on to other interested objects.
-   */
-  class Watcher {
-   public:
-    virtual ~Watcher() = default;
+class RGWRealmWatcher : public librados::WatchCtx2
+{
+public:
+    /**
+     * Watcher is an interface that allows the RGWRealmWatcher to pass
+     * notifications on to other interested objects.
+     */
+    class Watcher
+    {
+    public:
+        virtual ~Watcher() = default;
 
-    virtual void handle_notify(RGWRealmNotify type,
-                               bufferlist::const_iterator& p) = 0;
-  };
+        virtual void handle_notify(RGWRealmNotify type, bufferlist::const_iterator& p) = 0;
+    };
 
-  RGWRealmWatcher(const DoutPrefixProvider *dpp, CephContext* cct, const RGWRealm& realm);
-  ~RGWRealmWatcher() override;
+    RGWRealmWatcher(const DoutPrefixProvider* dpp, CephContext* cct, const RGWRealm& realm);
+    ~RGWRealmWatcher() override;
 
-  /// register a watcher for the given notification type
-  void add_watcher(RGWRealmNotify type, Watcher& watcher);
+    /// register a watcher for the given notification type
+    void add_watcher(RGWRealmNotify type, Watcher& watcher);
 
-  /// respond to realm notifications by calling the appropriate watcher
-  void handle_notify(uint64_t notify_id, uint64_t cookie,
-                     uint64_t notifier_id, bufferlist& bl) override;
+    /// respond to realm notifications by calling the appropriate watcher
+    void handle_notify(uint64_t notify_id, uint64_t cookie, uint64_t notifier_id, bufferlist& bl) override;
 
-  /// reestablish the watch if it gets disconnected
-  void handle_error(uint64_t cookie, int err) override;
+    /// reestablish the watch if it gets disconnected
+    void handle_error(uint64_t cookie, int err) override;
 
- private:
-  CephContext *const cct;
+private:
+    CephContext* const cct;
 
-  /// keep a separate Rados client whose lifetime is independent of RGWRados
-  /// so that we don't miss notifications during realm reconfiguration
-  librados::Rados rados;
-  librados::IoCtx pool_ctx;
-  uint64_t watch_handle = 0;
-  std::string watch_oid;
+    /// keep a separate Rados client whose lifetime is independent of RGWRados
+    /// so that we don't miss notifications during realm reconfiguration
+    librados::Rados rados;
+    librados::IoCtx pool_ctx;
+    uint64_t watch_handle = 0;
+    std::string watch_oid;
 
-  int watch_start(const DoutPrefixProvider *dpp, const RGWRealm& realm);
-  int watch_restart();
-  void watch_stop();
+    int watch_start(const DoutPrefixProvider* dpp, const RGWRealm& realm);
+    int watch_restart();
+    void watch_stop();
 
-  std::map<RGWRealmNotify, Watcher&> watchers;
+    std::map<RGWRealmNotify, Watcher&> watchers;
 };

@@ -7,40 +7,40 @@
 
 namespace ceph {
 
-class ContextCompletion {
+class ContextCompletion
+{
 public:
-  ContextCompletion(Context *ctx, bool ignore_enoent);
+    ContextCompletion(Context* ctx, bool ignore_enoent);
 
-  void finish_adding_requests();
+    void finish_adding_requests();
 
-  void start_op();
-  void finish_op(int r);
+    void start_op();
+    void finish_op(int r);
 
 private:
-  ceph::mutex m_lock = ceph::make_mutex("ContextCompletion::m_lock");
-  Context *m_ctx;
-  bool m_ignore_enoent;
-  int m_ret;
-  bool m_building;
-  uint64_t m_current_ops;
+    ceph::mutex m_lock = ceph::make_mutex("ContextCompletion::m_lock");
+    Context* m_ctx;
+    bool m_ignore_enoent;
+    int m_ret;
+    bool m_building;
+    uint64_t m_current_ops;
 };
 
-class C_ContextCompletion : public Context {
+class C_ContextCompletion : public Context
+{
 public:
-  C_ContextCompletion(ContextCompletion &context_completion)
-    : m_context_completion(context_completion)
-  {
-    m_context_completion.start_op();
-  }
+    C_ContextCompletion(ContextCompletion& context_completion)
+        : m_context_completion(context_completion)
+    {
+        m_context_completion.start_op();
+    }
 
-  void finish(int r) override {
-    m_context_completion.finish_op(r);
-  }
+    void finish(int r) override { m_context_completion.finish_op(r); }
 
 private:
-  ContextCompletion &m_context_completion;
+    ContextCompletion& m_context_completion;
 };
 
-} // namespace ceph
+}   // namespace ceph
 
-#endif // CEPH_ASYNC_COMPLETION_H
+#endif   // CEPH_ASYNC_COMPLETION_H

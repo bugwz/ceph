@@ -21,9 +21,11 @@
 
 class PoolDump : public RadosDump
 {
-  public:
-    explicit PoolDump(int file_fd_) : RadosDump(file_fd_, false) {}
-    int dump(librados::IoCtx *io_ctx);
+public:
+    explicit PoolDump(int file_fd_)
+        : RadosDump(file_fd_, false)
+    {}
+    int dump(librados::IoCtx* io_ctx);
 };
 
-#endif // POOL_DUMP_H_
+#endif   // POOL_DUMP_H_

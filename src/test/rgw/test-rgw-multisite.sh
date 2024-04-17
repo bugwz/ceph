@@ -7,8 +7,8 @@ shift
 
 [ $num_clusters -lt 1 ] && echo "clusters num must be at least 1" && exit 1
 
-. "`dirname $0`/test-rgw-common.sh"
-. "`dirname $0`/test-rgw-meta-sync.sh"
+. "$(dirname $0)/test-rgw-common.sh"
+. "$(dirname $0)/test-rgw-meta-sync.sh"
 
 set -e
 
@@ -22,30 +22,30 @@ system_secret="pencil"
 x $(start_ceph_cluster c1) -n $(get_mstart_parameters 1)
 
 if [ -n "$RGW_PER_ZONE" ]; then
-  rgws="$RGW_PER_ZONE"
+    rgws="$RGW_PER_ZONE"
 else
-  rgws=1
+    rgws=1
 fi
 
 url=http://localhost
 
 i=1
 while [ $i -le $rgws ]; do
-  port=$((8100+i))
-  endpoints="$endpoints""$url:$port,"
-  i=$((i+1))
+    port=$((8100 + i))
+    endpoints="$endpoints""$url:$port,"
+    i=$((i + 1))
 done
 
 # create realm, zonegroup, zone, start rgws
 init_first_zone c1 $realm_name $zg ${zg}-1 $endpoints $system_access_key $system_secret
 i=1
 while [ $i -le $rgws ]; do
-  port=$((8100+i))
-  x $(rgw c1 "$port" "$@")
-  i="$((i+1))"
+    port=$((8100 + i))
+    x $(rgw c1 "$port" "$@")
+    i="$((i + 1))"
 done
 
-output=`$(rgw_admin c1) realm get`
+output=$($(rgw_admin c1) realm get)
 
 echo realm_status=$output
 
@@ -54,30 +54,29 @@ echo realm_status=$output
 endpoints=""
 i=2
 while [ $i -le $num_clusters ]; do
-  x $(start_ceph_cluster c$i) -n $(get_mstart_parameters $i)
-  j=1
-  endpoints=""
-  while [ $j -le $rgws ]; do
-    port=$((8000+i*100+j))
-    endpoints="$endpoints""$url:$port,"
-    j=$((j+1))
-  done
+    x $(start_ceph_cluster c$i) -n $(get_mstart_parameters $i)
+    j=1
+    endpoints=""
+    while [ $j -le $rgws ]; do
+        port=$((8000 + i * 100 + j))
+        endpoints="$endpoints""$url:$port,"
+        j=$((j + 1))
+    done
 
-  # create new zone, start rgw
-  init_zone_in_existing_zg c$i $realm_name $zg ${zg}-${i} 8101 $endpoints $zone_port $system_access_key $system_secret
-  j=1
-  while [ $j -le $rgws ]; do
-    port=$((8000+i*100+j))
-    x $(rgw c$i "$port" "$@")
-    j="$((j+1))"
-  done
-  i=$((i+1))
+    # create new zone, start rgw
+    init_zone_in_existing_zg c$i $realm_name $zg ${zg}-${i} 8101 $endpoints $zone_port $system_access_key $system_secret
+    j=1
+    while [ $j -le $rgws ]; do
+        port=$((8000 + i * 100 + j))
+        x $(rgw c$i "$port" "$@")
+        j="$((j + 1))"
+    done
+    i=$((i + 1))
 done
 
 i=2
 while [ $i -le $num_clusters ]; do
-  wait_for_meta_sync c1 c$i $realm_name
+    wait_for_meta_sync c1 c$i $realm_name
 
-  i=$((i+1))
+    i=$((i + 1))
 done
-

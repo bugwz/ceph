@@ -2,43 +2,44 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "include/crc32c.h"
-#include "arch/probe.h"
-#include "arch/intel.h"
+
 #include "arch/arm.h"
+#include "arch/intel.h"
 #include "arch/ppc.h"
-#include "common/sctp_crc32.h"
-#include "common/crc32c_intel_fast.h"
+#include "arch/probe.h"
 #include "common/crc32c_aarch64.h"
+#include "common/crc32c_intel_fast.h"
 #include "common/crc32c_ppc.h"
+#include "common/sctp_crc32.h"
 
 /*
  * choose best implementation based on the CPU architecture.
  */
 ceph_crc32c_func_t ceph_choose_crc32(void)
 {
-  // make sure we've probed cpu features; this might depend on the
-  // link order of this file relative to arch/probe.cc.
-  ceph_arch_probe();
+    // make sure we've probed cpu features; this might depend on the
+    // link order of this file relative to arch/probe.cc.
+    ceph_arch_probe();
 
-  // if the CPU supports it, *and* the fast version is compiled in,
-  // use that.
+    // if the CPU supports it, *and* the fast version is compiled in,
+    // use that.
 #if defined(__i386__) || defined(__x86_64__)
-  if (ceph_arch_intel_sse42 && ceph_crc32c_intel_fast_exists()) {
-    return ceph_crc32c_intel_fast;
-  }
+    if (ceph_arch_intel_sse42 && ceph_crc32c_intel_fast_exists()) {
+        return ceph_crc32c_intel_fast;
+    }
 #elif defined(__arm__) || defined(__aarch64__)
-# if defined(HAVE_ARMV8_CRC)
-  if (ceph_arch_aarch64_crc32){
-    return ceph_crc32c_aarch64;
-  }
-# endif
-#elif defined(__powerpc__) || defined(__ppc__)
-  if (ceph_arch_ppc_crc32) {
-    return ceph_crc32c_ppc;
-  }
+#if defined(HAVE_ARMV8_CRC)
+    if (ceph_arch_aarch64_crc32) {
+        return ceph_crc32c_aarch64;
+    }
 #endif
-  // default
-  return ceph_crc32c_sctp;
+#elif defined(__powerpc__) || defined(__ppc__)
+    if (ceph_arch_ppc_crc32) {
+        return ceph_crc32c_ppc;
+    }
+#endif
+    // default
+    return ceph_crc32c_sctp;
 }
 
 /*
@@ -63,26 +64,25 @@ ceph_crc32c_func_t ceph_crc32c_func = ceph_choose_crc32();
  */
 void create_turbo_table(uint32_t table[32][32])
 {
-  //crc_turbo_struct table;
-  for (int bit = 0 ; bit < 32 ; bit++) {
-    table[0][bit] = ceph_crc32c_sctp(1UL << bit, nullptr, 1);
-  }
-  for (int range = 1; range <32 ; range++) {
-    for (int bit = 0 ; bit < 32 ; bit++) {
-      uint32_t crc_x = table[range-1][bit];
-      uint32_t crc_y = 0;
-      for (int b = 0 ; b < 32 ; b++) {
-        if ( (crc_x & (1UL << b)) != 0 ) {
-          crc_y = crc_y ^ table[range-1][b];
-        }
-      }
-      table[range][bit] = crc_y;
+    // crc_turbo_struct table;
+    for (int bit = 0; bit < 32; bit++) {
+        table[0][bit] = ceph_crc32c_sctp(1UL << bit, nullptr, 1);
     }
-  }
+    for (int range = 1; range < 32; range++) {
+        for (int bit = 0; bit < 32; bit++) {
+            uint32_t crc_x = table[range - 1][bit];
+            uint32_t crc_y = 0;
+            for (int b = 0; b < 32; b++) {
+                if ((crc_x & (1UL << b)) != 0) {
+                    crc_y = crc_y ^ table[range - 1][b];
+                }
+            }
+            table[range][bit] = crc_y;
+        }
+    }
 }
 
-static uint32_t crc_turbo_table[32][32] =
-{
+static uint32_t crc_turbo_table[32][32] = {
     {0xf26b8303, 0xe13b70f7, 0xc79a971f, 0x8ad958cf, 0x105ec76f, 0x20bd8ede, 0x417b1dbc, 0x82f63b78,
      0x00000001, 0x00000002, 0x00000004, 0x00000008, 0x00000010, 0x00000020, 0x00000040, 0x00000080,
      0x00000100, 0x00000200, 0x00000400, 0x00000800, 0x00001000, 0x00002000, 0x00004000, 0x00008000,
@@ -210,31 +210,29 @@ static uint32_t crc_turbo_table[32][32] =
     {0xf26b8303, 0xe13b70f7, 0xc79a971f, 0x8ad958cf, 0x105ec76f, 0x20bd8ede, 0x417b1dbc, 0x82f63b78,
      0x00000001, 0x00000002, 0x00000004, 0x00000008, 0x00000010, 0x00000020, 0x00000040, 0x00000080,
      0x00000100, 0x00000200, 0x00000400, 0x00000800, 0x00001000, 0x00002000, 0x00004000, 0x00008000,
-     0x00010000, 0x00020000, 0x00040000, 0x00080000, 0x00100000, 0x00200000, 0x00400000, 0x00800000}
-};
+     0x00010000, 0x00020000, 0x00040000, 0x00080000, 0x00100000, 0x00200000, 0x00400000, 0x00800000}};
 
 uint32_t ceph_crc32c_zeros(uint32_t crc, unsigned len)
 {
-  int range = 0;
-  unsigned remainder = len & 15;
-  len = len >> 4;
-  range = 4;
-  while (len != 0) {
-    if ((len & 1) == 1) {
-      uint32_t crc1 = 0;
-      uint32_t* ptr = crc_turbo_table/*.val*/[range];
-      while (crc != 0) {
-        uint32_t mask = ~((crc & 1) - 1);
-        crc1 = crc1 ^ (mask & *ptr);
-        crc = crc >> 1;
-        ptr++;
-      }
-      crc = crc1;
+    int range = 0;
+    unsigned remainder = len & 15;
+    len = len >> 4;
+    range = 4;
+    while (len != 0) {
+        if ((len & 1) == 1) {
+            uint32_t crc1 = 0;
+            uint32_t* ptr = crc_turbo_table /*.val*/[range];
+            while (crc != 0) {
+                uint32_t mask = ~((crc & 1) - 1);
+                crc1 = crc1 ^ (mask & *ptr);
+                crc = crc >> 1;
+                ptr++;
+            }
+            crc = crc1;
+        }
+        len = len >> 1;
+        range++;
     }
-    len = len >> 1;
-    range++;
-  }
-  if (remainder > 0)
-    crc = ceph_crc32c(crc, nullptr, remainder);
-  return crc;
+    if (remainder > 0) crc = ceph_crc32c(crc, nullptr, remainder);
+    return crc;
 }

@@ -3,57 +3,69 @@
 #ifndef CEPH_PAXOSSERVICEMESSAGE_H
 #define CEPH_PAXOSSERVICEMESSAGE_H
 
-#include "msg/Message.h"
 #include "mon/Session.h"
+#include "msg/Message.h"
 
-class PaxosServiceMessage : public Message {
+class PaxosServiceMessage : public Message
+{
 public:
-  version_t version;
-  __s16 deprecated_session_mon;
-  uint64_t deprecated_session_mon_tid;
+    version_t version;
+    __s16 deprecated_session_mon;
+    uint64_t deprecated_session_mon_tid;
 
-  // track which epoch the leader received a forwarded request in, so we can
-  // discard forwarded requests appropriately on election boundaries.
-  epoch_t rx_election_epoch;
+    // track which epoch the leader received a forwarded request in, so we can
+    // discard forwarded requests appropriately on election boundaries.
+    epoch_t rx_election_epoch;
 
-  PaxosServiceMessage()
-    : Message{MSG_PAXOS},
-      version(0), deprecated_session_mon(-1), deprecated_session_mon_tid(0),
-      rx_election_epoch(0) { }
-  PaxosServiceMessage(int type, version_t v, int enc_version=1, int compat_enc_version=0)
-    : Message{type, enc_version, compat_enc_version},
-      version(v), deprecated_session_mon(-1), deprecated_session_mon_tid(0),
-      rx_election_epoch(0)  { }
- protected:
-  ~PaxosServiceMessage() override {}
+    PaxosServiceMessage()
+        : Message{MSG_PAXOS}
+        , version(0)
+        , deprecated_session_mon(-1)
+        , deprecated_session_mon_tid(0)
+        , rx_election_epoch(0)
+    {}
+    PaxosServiceMessage(int type, version_t v, int enc_version = 1, int compat_enc_version = 0)
+        : Message{type, enc_version, compat_enc_version}
+        , version(v)
+        , deprecated_session_mon(-1)
+        , deprecated_session_mon_tid(0)
+        , rx_election_epoch(0)
+    {}
 
- public:
-  void paxos_encode() {
-    using ceph::encode;
-    encode(version, payload);
-    encode(deprecated_session_mon, payload);
-    encode(deprecated_session_mon_tid, payload);
-  }
+protected:
+    ~PaxosServiceMessage() override {}
 
-  void paxos_decode(ceph::buffer::list::const_iterator& p ) {
-    using ceph::decode;
-    decode(version, p);
-    decode(deprecated_session_mon, p);
-    decode(deprecated_session_mon_tid, p);
-  }
+public:
+    void paxos_encode()
+    {
+        using ceph::encode;
+        encode(version, payload);
+        encode(deprecated_session_mon, payload);
+        encode(deprecated_session_mon_tid, payload);
+    }
 
-  void encode_payload(uint64_t features) override {
-    ceph_abort();
-    paxos_encode();
-  }
+    void paxos_decode(ceph::buffer::list::const_iterator& p)
+    {
+        using ceph::decode;
+        decode(version, p);
+        decode(deprecated_session_mon, p);
+        decode(deprecated_session_mon_tid, p);
+    }
 
-  void decode_payload() override {
-    ceph_abort();
-    auto p = payload.cbegin();
-    paxos_decode(p);
-  }
+    void encode_payload(uint64_t features) override
+    {
+        ceph_abort();
+        paxos_encode();
+    }
 
-  std::string_view get_type_name() const override { return "PaxosServiceMessage"; }
+    void decode_payload() override
+    {
+        ceph_abort();
+        auto p = payload.cbegin();
+        paxos_decode(p);
+    }
+
+    std::string_view get_type_name() const override { return "PaxosServiceMessage"; }
 };
 
 #endif

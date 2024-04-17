@@ -16,43 +16,38 @@
  *
  */
 
-#include <errno.h>
-#include <stdlib.h>
+#include "common/config_proxy.h"
 #include "erasure-code/ErasureCodePlugin.h"
 #include "global/global_context.h"
+
 #include "gtest/gtest.h"
-#include "common/config_proxy.h"
+#include <errno.h>
+#include <stdlib.h>
 
 using namespace std;
 
 TEST(ErasureCodePlugin, factory)
 {
-  ErasureCodePluginRegistry &instance = ErasureCodePluginRegistry::instance();
-  map<std::string,std::string> profile;
-  {
-    ErasureCodeInterfaceRef erasure_code;
-    EXPECT_FALSE(erasure_code);
-    EXPECT_EQ(0, instance.factory("shec",
-				  g_conf().get_val<std::string>("erasure_code_dir"),
-				  profile,
-				  &erasure_code, &cerr));
-    EXPECT_TRUE(erasure_code.get());
-  }
-  const char *techniques[] = {
-    "single",
-    "multiple",
-    0
-  };
-  for(const char **technique = techniques; *technique; technique++) {
-    ErasureCodeInterfaceRef erasure_code;
-    profile["technique"] = *technique;
-    EXPECT_FALSE(erasure_code);
-    EXPECT_EQ(0, instance.factory("shec",
-				  g_conf().get_val<std::string>("erasure_code_dir"),
-				  profile,
-                                  &erasure_code, &cerr));
-    EXPECT_TRUE(erasure_code.get());
-  }
+    ErasureCodePluginRegistry& instance = ErasureCodePluginRegistry::instance();
+    map<std::string, std::string> profile;
+    {
+        ErasureCodeInterfaceRef erasure_code;
+        EXPECT_FALSE(erasure_code);
+        EXPECT_EQ(
+            0,
+            instance.factory("shec", g_conf().get_val<std::string>("erasure_code_dir"), profile, &erasure_code, &cerr));
+        EXPECT_TRUE(erasure_code.get());
+    }
+    const char* techniques[] = {"single", "multiple", 0};
+    for (const char** technique = techniques; *technique; technique++) {
+        ErasureCodeInterfaceRef erasure_code;
+        profile["technique"] = *technique;
+        EXPECT_FALSE(erasure_code);
+        EXPECT_EQ(
+            0,
+            instance.factory("shec", g_conf().get_val<std::string>("erasure_code_dir"), profile, &erasure_code, &cerr));
+        EXPECT_TRUE(erasure_code.get());
+    }
 }
 
 /*

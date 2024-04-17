@@ -21,18 +21,18 @@
 test -d dev/osd0/. && test -e dev/sudo && SUDO="sudo"
 
 if [ -e CMakeCache.txt ]; then
-  [ -z "$CEPH_BIN" ] && CEPH_BIN=bin
+    [ -z "$CEPH_BIN" ] && CEPH_BIN=bin
 fi
 
 if [ -n "$VSTART_DEST" ]; then
-  CEPH_CONF_PATH=$VSTART_DEST
+    CEPH_CONF_PATH=$VSTART_DEST
 else
-  CEPH_CONF_PATH="$PWD"
+    CEPH_CONF_PATH="$PWD"
 fi
 conf_fn="$CEPH_CONF_PATH/ceph.conf"
 
 if [ -z "$CEPHADM" ]; then
-  CEPHADM="${CEPH_BIN}/cephadm"
+    CEPHADM="${CEPH_BIN}/cephadm"
 fi
 
 MYUID=$(id -u)
@@ -41,9 +41,9 @@ MYNAME=$(id -nu)
 do_killall() {
     local pname="ceph-run.*$1"
     if [ $1 == "ganesha.nfsd" ]; then
-	    pname=$1
+        pname=$1
     fi
-    pg=`pgrep -u $MYUID -f $pname`
+    pg=$(pgrep -u $MYUID -f $pname)
     [ -n "$pg" ] && kill $pg
     $SUDO killall -u $MYNAME $1
 }
@@ -54,25 +54,25 @@ maybe_kill() {
     local step=$1
     shift
     case $step in
-        0)
-            # killing processes
-            pkill -SIGTERM -u $MYUID $p
+    0)
+        # killing processes
+        pkill -SIGTERM -u $MYUID $p
+        return 1
+        ;;
+    [1-5])
+        # wait for processes to stop
+        if pkill -0 -u $MYUID $p; then
+            # $p is still alive
             return 1
-            ;;
-        [1-5])
-            # wait for processes to stop
-            if pkill -0 -u $MYUID $p; then
-                # $p is still alive
-                return 1
-            fi
-            ;;
-        8)
-            # kill and print if some left
-            if pkill -0 -u $MYUID $p; then
-                echo "WARNING: $p did not orderly shutdown, killing it hard!" >&2
-                pkill -SIGKILL -u $MYUID $p
-            fi
-            ;;
+        fi
+        ;;
+    8)
+        # kill and print if some left
+        if pkill -0 -u $MYUID $p; then
+            echo "WARNING: $p did not orderly shutdown, killing it hard!" >&2
+            pkill -SIGKILL -u $MYUID $p
+        fi
+        ;;
     esac
 }
 
@@ -97,15 +97,13 @@ do_umountall() {
     SRC_MNT_ARRAY=($(findmnt -t ceph -n --raw --output=source,target))
     LEN_SRC_MNT_ARRAY=${#SRC_MNT_ARRAY[@]}
 
-    for (( i=0; i<${LEN_SRC_MNT_ARRAY}; i=$((i+2)) ))
-    do
-      # The first IP:PORT among the list is checked against vstart monitor IP:PORTS
-      IP_PORT1=$(echo ${SRC_MNT_ARRAY[$i]} | awk -F ':/' '{print $1}' | awk -F ',' '{print $1}')
-      if [[ "$VSTART_IP_PORTS" == *"$IP_PORT1"* ]]
-      then
-        CEPH_MNT=${SRC_MNT_ARRAY[$((i+1))]}
-        [ -n "$CEPH_MNT" ] && sudo umount -f $CEPH_MNT
-      fi
+    for ((i = 0; i < ${LEN_SRC_MNT_ARRAY}; i = $((i + 2)))); do
+        # The first IP:PORT among the list is checked against vstart monitor IP:PORTS
+        IP_PORT1=$(echo ${SRC_MNT_ARRAY[$i]} | awk -F ':/' '{print $1}' | awk -F ',' '{print $1}')
+        if [[ "$VSTART_IP_PORTS" == *"$IP_PORT1"* ]]; then
+            CEPH_MNT=${SRC_MNT_ARRAY[$((i + 1))]}
+            [ -n "$CEPH_MNT" ] && sudo umount -f $CEPH_MNT
+        fi
     done
 
     #Get fuse mounts of the cluster
@@ -130,43 +128,44 @@ stop_cephadm=0
 
 while [ $# -ge 1 ]; do
     case $1 in
-        all )
-            stop_all=1
-            ;;
-        mon | ceph-mon )
-            stop_mon=1
-            stop_all=0
-            ;;
-        mgr | ceph-mgr )
-            stop_mgr=1
-            stop_all=0
-            ;;
-        mds | ceph-mds )
-            stop_mds=1
-            stop_all=0
-            ;;
-        osd | ceph-osd )
-            stop_osd=1
-            stop_all=0
-            ;;
-        rgw | ceph-rgw )
-            stop_rgw=1
-            stop_all=0
-            ;;
-        nfs | ganesha.nfsd )
-            stop_ganesha=1
-            stop_all=0
-            ;;
-        --crimson)
-            ceph_osd=crimson-osd
-            ;;
-        --cephadm)
-            stop_cephadm=1
-            stop_all=0
-            ;;
-        * )
-            printf "$usage"
-            exit
+    all)
+        stop_all=1
+        ;;
+    mon | ceph-mon)
+        stop_mon=1
+        stop_all=0
+        ;;
+    mgr | ceph-mgr)
+        stop_mgr=1
+        stop_all=0
+        ;;
+    mds | ceph-mds)
+        stop_mds=1
+        stop_all=0
+        ;;
+    osd | ceph-osd)
+        stop_osd=1
+        stop_all=0
+        ;;
+    rgw | ceph-rgw)
+        stop_rgw=1
+        stop_all=0
+        ;;
+    nfs | ganesha.nfsd)
+        stop_ganesha=1
+        stop_all=0
+        ;;
+    --crimson)
+        ceph_osd=crimson-osd
+        ;;
+    --cephadm)
+        stop_cephadm=1
+        stop_all=0
+        ;;
+    *)
+        printf "$usage"
+        exit
+        ;;
     esac
     shift
 done
@@ -179,22 +178,22 @@ if [ $stop_all -eq 1 ]; then
 
     if "${CEPH_BIN}"/rbd device list -c $conf_fn >/dev/null 2>&1; then
         "${CEPH_BIN}"/rbd device list -c $conf_fn | tail -n +2 |
-        while read DEV; do
-            # While it is currently possible to create an rbd image with
-            # whitespace chars in its name, krbd will refuse mapping such
-            # an image, so we can safely split on whitespace here.  (The
-            # same goes for whitespace chars in names of the pools that
-            # contain rbd images).
-            DEV="$(echo "${DEV}" | tr -s '[:space:]' | awk '{ print $5 }')"
-            sudo "${CEPH_BIN}"/rbd device unmap "${DEV}" -c $conf_fn
-        done
+            while read DEV; do
+                # While it is currently possible to create an rbd image with
+                # whitespace chars in its name, krbd will refuse mapping such
+                # an image, so we can safely split on whitespace here.  (The
+                # same goes for whitespace chars in names of the pools that
+                # contain rbd images).
+                DEV="$(echo "${DEV}" | tr -s '[:space:]' | awk '{ print $5 }')"
+                sudo "${CEPH_BIN}"/rbd device unmap "${DEV}" -c $conf_fn
+            done
 
         if [ -n "$("${CEPH_BIN}"/rbd device list -c $conf_fn)" ]; then
             echo "WARNING: Some rbd images are still mapped!" >&2
         fi
     fi
 
-    daemons="$(sudo $CEPHADM ls 2> /dev/null)"
+    daemons="$(sudo $CEPHADM ls 2>/dev/null)"
     if [ $? -eq 0 -a "$daemons" != "[]" ]; then
         do_killcephadm
     fi
@@ -223,7 +222,7 @@ if [ $stop_all -eq 1 ]; then
     pkill -u $MYUID -f valgrind.bin.\*ceph-mon
     $SUDO pkill -u $MYUID -f valgrind.bin.\*$ceph_osd
     pkill -u $MYUID -f valgrind.bin.\*ceph-mds
-    asok_dir=`dirname $("${CEPH_BIN}"/ceph-conf -c ${conf_fn} --show-config-value admin_socket)`
+    asok_dir=$(dirname $("${CEPH_BIN}"/ceph-conf -c ${conf_fn} --show-config-value admin_socket))
     rm -rf "${asok_dir}"
 else
     [ $stop_mon -eq 1 ] && do_killall ceph-mon

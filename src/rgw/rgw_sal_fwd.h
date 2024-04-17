@@ -16,26 +16,28 @@
 #pragma once
 
 
-namespace rgw { namespace sal {
+namespace rgw {
+namespace sal {
 
-  class Driver;
-  class User;
-  class Bucket;
-  class BucketList;
-  class Object;
-  class MultipartUpload;
-  class Lifecycle;
-  class Notification;
-  class Writer;
-  class PlacementTier;
-  class ZoneGroup;
-  class Zone;
-  class LuaManager;
-  struct RGWRoleInfo;
+class Driver;
+class User;
+class Bucket;
+class BucketList;
+class Object;
+class MultipartUpload;
+class Lifecycle;
+class Notification;
+class Writer;
+class PlacementTier;
+class ZoneGroup;
+class Zone;
+class LuaManager;
+struct RGWRoleInfo;
 
-  class ConfigStore;
-  class RealmWriter;
-  class ZoneGroupWriter;
-  class ZoneWriter;
+class ConfigStore;
+class RealmWriter;
+class ZoneGroupWriter;
+class ZoneWriter;
 
-} } // namespace rgw::sal
+}   // namespace sal
+}   // namespace rgw

@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
  * Ceph - scalable distributed file system
@@ -7,29 +7,28 @@
  *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
- * License version 2.1, as published by the Free Software 
+ * License version 2.1, as published by the Free Software
  * Foundation.  See file COPYING.
- * 
+ *
  */
 
 #ifndef CEPH_MESSAGEREF_H
 #define CEPH_MESSAGEREF_H
- 
-#include <boost/intrusive_ptr.hpp>
+
 #include "common/RefCountedObj.h"
 
-template<typename T>
-using MRef = boost::intrusive_ptr<T>;
-template<typename T>
-using MConstRef = boost::intrusive_ptr<T const>;
-template<typename T>
-using MURef = std::unique_ptr<T, TOPNSPC::common::UniquePtrDeleter>;
+#include <boost/intrusive_ptr.hpp>
+
+template<typename T> using MRef = boost::intrusive_ptr<T>;
+template<typename T> using MConstRef = boost::intrusive_ptr<T const>;
+template<typename T> using MURef = std::unique_ptr<T, TOPNSPC::common::UniquePtrDeleter>;
 
 using MessageRef = MRef<class Message>;
 using MessageConstRef = MConstRef<class Message>;
 using MessageURef = MURef<class Message>;
 
-/* cd src/messages/ && for f in *; do printf 'class '; basename "$f" .h | tr -d '\n'; printf ';\n'; done >> ../msg/MessageRef.h */
+/* cd src/messages/ && for f in *; do printf 'class '; basename "$f" .h | tr -d '\n'; printf ';\n'; done >>
+ * ../msg/MessageRef.h */
 
 class MAuth;
 class MAuthReply;

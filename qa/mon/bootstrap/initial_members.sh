@@ -1,7 +1,7 @@
 #!/bin/sh -ex
 
-cwd=`pwd`
-cat > conf <<EOF
+cwd=$(pwd)
+cat >conf <<EOF
 [mon]
 admin socket = 
 log file = $cwd/\$name.log
@@ -31,7 +31,7 @@ ceph-mon -c conf -i b --mon-data $cwd/mon.c
 ceph -c conf -k keyring --monmap mm health
 
 ceph -c conf -k keyring --monmap mm health
-if ceph -c conf -k keyring --monmap mm mon stat | grep a= | grep b= | grep c= ; then
+if ceph -c conf -k keyring --monmap mm mon stat | grep a= | grep b= | grep c=; then
     break
 fi
 

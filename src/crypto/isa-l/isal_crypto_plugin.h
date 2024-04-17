@@ -15,33 +15,31 @@
 #ifndef ISAL_CRYPTO_PLUGIN_H
 #define ISAL_CRYPTO_PLUGIN_H
 // -----------------------------------------------------------------------------
-#include "crypto/crypto_plugin.h"
-#include "crypto/isa-l/isal_crypto_accel.h"
 #include "arch/intel.h"
 #include "arch/probe.h"
+#include "crypto/crypto_plugin.h"
+#include "crypto/isa-l/isal_crypto_accel.h"
 // -----------------------------------------------------------------------------
 
 
-class ISALCryptoPlugin : public CryptoPlugin {
+class ISALCryptoPlugin : public CryptoPlugin
+{
 
 public:
-
-  explicit ISALCryptoPlugin(CephContext* cct) : CryptoPlugin(cct)
-  {}
-  ~ISALCryptoPlugin()
-  {}
-  virtual int factory(CryptoAccelRef *cs,
-                      std::ostream *ss)
-  {
-    if (cryptoaccel == nullptr)
+    explicit ISALCryptoPlugin(CephContext* cct)
+        : CryptoPlugin(cct)
+    {}
+    ~ISALCryptoPlugin() {}
+    virtual int factory(CryptoAccelRef* cs, std::ostream* ss)
     {
-      ceph_arch_probe();
-      if (ceph_arch_intel_aesni && ceph_arch_intel_sse41) {
-        cryptoaccel = CryptoAccelRef(new ISALCryptoAccel);
-      }
+        if (cryptoaccel == nullptr) {
+            ceph_arch_probe();
+            if (ceph_arch_intel_aesni && ceph_arch_intel_sse41) {
+                cryptoaccel = CryptoAccelRef(new ISALCryptoAccel);
+            }
+        }
+        *cs = cryptoaccel;
+        return 0;
     }
-    *cs = cryptoaccel;
-    return 0;
-  }
 };
 #endif

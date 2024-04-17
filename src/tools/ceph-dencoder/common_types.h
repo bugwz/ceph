@@ -450,5 +450,5 @@ MESSAGE(MTimeCheck2)
 #include "messages/MWatchNotify.h"
 MESSAGE(MWatchNotify)
 
-#include "messages/MMgrUpdate.h" 
+#include "messages/MMgrUpdate.h"
 MESSAGE(MMgrUpdate)

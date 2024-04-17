@@ -9,5 +9,5 @@ namespace osd {
 
 extern tracing::Tracer tracer;
 
-} // namespace osd
-} // namespace tracing
+}   // namespace osd
+}   // namespace tracing

@@ -96,7 +96,7 @@ while true; do
         sleep $SLEEP_SECS
         continue
     }
-    ssh-keyscan -H $VM_IP &> $SSH_KNOWN_HOSTS_FILE || {
+    ssh-keyscan -H $VM_IP &>$SSH_KNOWN_HOSTS_FILE || {
         echo "SSH is not reachable yet"
         sleep $SLEEP_SECS
         continue
@@ -152,7 +152,7 @@ for i in $(ls /etc/ceph); do
     scp_upload /etc/ceph/$i /etc/ceph/$i
 done
 
-cat << EOF > ${DIR}/connection_info.sh
+cat <<EOF >${DIR}/connection_info.sh
 export SSH_USER="${SSH_USER}"
 export SSH_KNOWN_HOSTS_FILE="${SSH_KNOWN_HOSTS_FILE}"
 export SSH_KEY="${SSH_KEY}"

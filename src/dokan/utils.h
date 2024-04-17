@@ -8,11 +8,11 @@
  * License version 2.1, as published by the Free Software
  * Foundation.  See file COPYING.
  *
-*/
+ */
 
 #pragma once
 
 #include "include/compat.h"
 
 void to_filetime(time_t t, LPFILETIME pft);
-void to_unix_time(FILETIME ft, time_t *t);
+void to_unix_time(FILETIME ft, time_t* t);

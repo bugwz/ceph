@@ -22,11 +22,12 @@
  */
 
 #include "objclass/objclass.h"
-#include <errno.h>
-#include <string>
-#include <sstream>
+
 #include <cstdio>
+#include <errno.h>
 #include <include/compat.h>
+#include <sstream>
+#include <string>
 
 #define DECIMAL_PRECISION 10
 
@@ -35,134 +36,136 @@ using std::string;
 using ceph::decode;
 using ceph::encode;
 
-CLS_VER(1,0)
+CLS_VER(1, 0)
 CLS_NAME(numops)
 
-static int add(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
+static int add(cls_method_context_t hctx, bufferlist* in, bufferlist* out)
 {
-  string key, diff_str;
+    string key, diff_str;
 
-  auto iter = in->cbegin();
-  try {
-    decode(key, iter);
-    decode(diff_str, iter);
-  } catch (const ceph::buffer::error &err) {
-    CLS_LOG(20, "add: invalid decode of input");
-    return -EINVAL;
-  }
-
-  char *end_ptr = 0;
-  double difference = strtod(diff_str.c_str(), &end_ptr);
-
-  if (end_ptr && *end_ptr != '\0') {
-    CLS_ERR("add: invalid input value: %s", diff_str.c_str());
-    return -EINVAL;
-  }
-
-  bufferlist bl;
-  int ret = cls_cxx_map_get_val(hctx, key, &bl);
-
-  double value;
-
-  if (ret == -ENODATA || bl.length() == 0) {
-    value = 0;
-  } else if (ret < 0) {
-    if (ret != -ENOENT) {
-      CLS_ERR("add: error reading omap key %s: %d", key.c_str(), ret);
+    auto iter = in->cbegin();
+    try {
+        decode(key, iter);
+        decode(diff_str, iter);
     }
-    return ret;
-  } else {
-    std::string stored_value(bl.c_str(), bl.length());
-    end_ptr = 0;
-    value = strtod(stored_value.c_str(), &end_ptr);
+    catch (const ceph::buffer::error& err) {
+        CLS_LOG(20, "add: invalid decode of input");
+        return -EINVAL;
+    }
+
+    char* end_ptr = 0;
+    double difference = strtod(diff_str.c_str(), &end_ptr);
 
     if (end_ptr && *end_ptr != '\0') {
-      CLS_ERR("add: invalid stored value: %s", stored_value.c_str());
-      return -EBADMSG;
+        CLS_ERR("add: invalid input value: %s", diff_str.c_str());
+        return -EINVAL;
     }
-  }
 
-  value += difference;
+    bufferlist bl;
+    int ret = cls_cxx_map_get_val(hctx, key, &bl);
 
-  std::stringstream stream;
-  stream << std::setprecision(DECIMAL_PRECISION) << value;
+    double value;
 
-  bufferlist new_value;
-  new_value.append(stream.str());
+    if (ret == -ENODATA || bl.length() == 0) {
+        value = 0;
+    }
+    else if (ret < 0) {
+        if (ret != -ENOENT) {
+            CLS_ERR("add: error reading omap key %s: %d", key.c_str(), ret);
+        }
+        return ret;
+    }
+    else {
+        std::string stored_value(bl.c_str(), bl.length());
+        end_ptr = 0;
+        value = strtod(stored_value.c_str(), &end_ptr);
 
-  return cls_cxx_map_set_val(hctx, key, &new_value);
+        if (end_ptr && *end_ptr != '\0') {
+            CLS_ERR("add: invalid stored value: %s", stored_value.c_str());
+            return -EBADMSG;
+        }
+    }
+
+    value += difference;
+
+    std::stringstream stream;
+    stream << std::setprecision(DECIMAL_PRECISION) << value;
+
+    bufferlist new_value;
+    new_value.append(stream.str());
+
+    return cls_cxx_map_set_val(hctx, key, &new_value);
 }
 
-static int mul(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
+static int mul(cls_method_context_t hctx, bufferlist* in, bufferlist* out)
 {
-  string key, diff_str;
+    string key, diff_str;
 
-  auto iter = in->cbegin();
-  try {
-    decode(key, iter);
-    decode(diff_str, iter);
-  } catch (const ceph::buffer::error &err) {
-    CLS_LOG(20, "mul: invalid decode of input");
-    return -EINVAL;
-  }
-
-  char *end_ptr = 0;
-  double difference = strtod(diff_str.c_str(), &end_ptr);
-
-  if (end_ptr && *end_ptr != '\0') {
-    CLS_ERR("mul: invalid input value: %s", diff_str.c_str());
-    return -EINVAL;
-  }
-
-  bufferlist bl;
-  int ret = cls_cxx_map_get_val(hctx, key, &bl);
-
-  double value;
-
-  if (ret == -ENODATA || bl.length() == 0) {
-    value = 0;
-  } else if (ret < 0) {
-    if (ret != -ENOENT) {
-      CLS_ERR("mul: error reading omap key %s: %d", key.c_str(), ret);
+    auto iter = in->cbegin();
+    try {
+        decode(key, iter);
+        decode(diff_str, iter);
     }
-    return ret;
-  } else {
-    std::string stored_value(bl.c_str(), bl.length());
-    end_ptr = 0;
-    value = strtod(stored_value.c_str(), &end_ptr);
+    catch (const ceph::buffer::error& err) {
+        CLS_LOG(20, "mul: invalid decode of input");
+        return -EINVAL;
+    }
+
+    char* end_ptr = 0;
+    double difference = strtod(diff_str.c_str(), &end_ptr);
 
     if (end_ptr && *end_ptr != '\0') {
-      CLS_ERR("mul: invalid stored value: %s", stored_value.c_str());
-      return -EBADMSG;
+        CLS_ERR("mul: invalid input value: %s", diff_str.c_str());
+        return -EINVAL;
     }
-  }
 
-  value *= difference;
+    bufferlist bl;
+    int ret = cls_cxx_map_get_val(hctx, key, &bl);
 
-  std::stringstream stream;
-  stream << std::setprecision(DECIMAL_PRECISION) << value;
+    double value;
 
-  bufferlist new_value;
-  new_value.append(stream.str());
+    if (ret == -ENODATA || bl.length() == 0) {
+        value = 0;
+    }
+    else if (ret < 0) {
+        if (ret != -ENOENT) {
+            CLS_ERR("mul: error reading omap key %s: %d", key.c_str(), ret);
+        }
+        return ret;
+    }
+    else {
+        std::string stored_value(bl.c_str(), bl.length());
+        end_ptr = 0;
+        value = strtod(stored_value.c_str(), &end_ptr);
 
-  return cls_cxx_map_set_val(hctx, key, &new_value);
+        if (end_ptr && *end_ptr != '\0') {
+            CLS_ERR("mul: invalid stored value: %s", stored_value.c_str());
+            return -EBADMSG;
+        }
+    }
+
+    value *= difference;
+
+    std::stringstream stream;
+    stream << std::setprecision(DECIMAL_PRECISION) << value;
+
+    bufferlist new_value;
+    new_value.append(stream.str());
+
+    return cls_cxx_map_set_val(hctx, key, &new_value);
 }
 
 CLS_INIT(numops)
 {
-  CLS_LOG(20, "loading cls_numops");
+    CLS_LOG(20, "loading cls_numops");
 
-  cls_handle_t h_class;
-  cls_method_handle_t h_add;
-  cls_method_handle_t h_mul;
+    cls_handle_t h_class;
+    cls_method_handle_t h_add;
+    cls_method_handle_t h_mul;
 
-  cls_register("numops", &h_class);
+    cls_register("numops", &h_class);
 
-  cls_register_cxx_method(h_class, "add",
-                          CLS_METHOD_RD | CLS_METHOD_WR,
-                          add, &h_add);
+    cls_register_cxx_method(h_class, "add", CLS_METHOD_RD | CLS_METHOD_WR, add, &h_add);
 
-  cls_register_cxx_method(h_class, "mul",
-                          CLS_METHOD_RD | CLS_METHOD_WR,
-                          mul, &h_mul);
+    cls_register_cxx_method(h_class, "mul", CLS_METHOD_RD | CLS_METHOD_WR, mul, &h_mul);
 }

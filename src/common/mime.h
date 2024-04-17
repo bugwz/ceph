@@ -31,7 +31,7 @@ extern "C" {
  * You may call mime_encode_as_qp(input, NULL, 0) to find the size of the
  * buffer you will need.
  */
-signed int mime_encode_as_qp(const char *input, char *output, int outlen);
+signed int mime_encode_as_qp(const char* input, char* output, int outlen);
 
 /* Decode a quoted-printable buffer.
  *
@@ -47,7 +47,7 @@ signed int mime_encode_as_qp(const char *input, char *output, int outlen);
  * buffer you will need. The output will never be longer than the input for
  * this function.
  */
-signed int mime_decode_from_qp(const char *input, char *output, int outlen);
+signed int mime_decode_from_qp(const char* input, char* output, int outlen);
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,6 @@
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
-#include "common/ceph_mutex.h"
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 #include "common/Cond.h"
+#include "common/ceph_mutex.h"
 #include "include/rados/librados.hpp"
 
 #ifndef TESTOPSTAT_H
@@ -8,46 +8,48 @@
 
 class TestOp;
 
-class TestOpStat {
+class TestOpStat
+{
 public:
-  mutable ceph::mutex stat_lock = ceph::make_mutex("TestOpStat lock");
+    mutable ceph::mutex stat_lock = ceph::make_mutex("TestOpStat lock");
 
-  TestOpStat() = default;
-    
-  static uint64_t gettime()
-  {
-    timeval t;
-    gettimeofday(&t,0);
-    return (1000000*t.tv_sec) + t.tv_usec;
-  }
+    TestOpStat() = default;
 
-  class TypeStatus {
-  public:
-    std::map<TestOp*,uint64_t> inflight;
-    std::multiset<uint64_t> latencies;
-    void begin(TestOp *in)
+    static uint64_t gettime()
     {
-      ceph_assert(!inflight.count(in));
-      inflight[in] = gettime();
+        timeval t;
+        gettimeofday(&t, 0);
+        return (1000000 * t.tv_sec) + t.tv_usec;
     }
 
-    void end(TestOp *in)
+    class TypeStatus
     {
-      ceph_assert(inflight.count(in));
-      uint64_t curtime = gettime();
-      latencies.insert(curtime - inflight[in]);
-      inflight.erase(in);
-    }
+    public:
+        std::map<TestOp*, uint64_t> inflight;
+        std::multiset<uint64_t> latencies;
+        void begin(TestOp* in)
+        {
+            ceph_assert(!inflight.count(in));
+            inflight[in] = gettime();
+        }
 
-    void export_latencies(std::map<double,uint64_t> &in) const;
-  };
-  std::map<std::string,TypeStatus> stats;
+        void end(TestOp* in)
+        {
+            ceph_assert(inflight.count(in));
+            uint64_t curtime = gettime();
+            latencies.insert(curtime - inflight[in]);
+            inflight.erase(in);
+        }
 
-  void begin(TestOp *in);
-  void end(TestOp *in);
-  friend std::ostream & operator<<(std::ostream &, const TestOpStat &);
+        void export_latencies(std::map<double, uint64_t>& in) const;
+    };
+    std::map<std::string, TypeStatus> stats;
+
+    void begin(TestOp* in);
+    void end(TestOp* in);
+    friend std::ostream& operator<<(std::ostream&, const TestOpStat&);
 };
 
-std::ostream & operator<<(std::ostream &out, const TestOpStat &rhs);
+std::ostream& operator<<(std::ostream& out, const TestOpStat& rhs);
 
 #endif

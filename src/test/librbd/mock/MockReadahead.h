@@ -4,18 +4,19 @@
 #ifndef CEPH_TEST_LIBRBD_MOCK_READAHEAD_H
 #define CEPH_TEST_LIBRBD_MOCK_READAHEAD_H
 
-#include "include/int_types.h"
 #include "gmock/gmock.h"
+#include "include/int_types.h"
 
 class Context;
 
 namespace librbd {
 
-struct MockReadahead {
-  MOCK_METHOD1(set_max_readahead_size, void(uint64_t));
-  MOCK_METHOD1(wait_for_pending, void(Context *));
+struct MockReadahead
+{
+    MOCK_METHOD1(set_max_readahead_size, void(uint64_t));
+    MOCK_METHOD1(wait_for_pending, void(Context*));
 };
 
-} // namespace librbd
+}   // namespace librbd
 
-#endif // CEPH_TEST_LIBRBD_MOCK_READAHEAD_H
+#endif   // CEPH_TEST_LIBRBD_MOCK_READAHEAD_H

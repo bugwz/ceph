@@ -8,24 +8,21 @@
 #undef TRACEPOINT_DEFINE
 #endif
 
-void __cyg_profile_func_enter(void *this_fn, void *call_site)
-    __attribute__((no_instrument_function));
+void __cyg_profile_func_enter(void* this_fn, void* call_site) __attribute__((no_instrument_function));
 
-void __cyg_profile_func_exit(void *this_fn, void *call_site)
-    __attribute__((no_instrument_function));
+void __cyg_profile_func_exit(void* this_fn, void* call_site) __attribute__((no_instrument_function));
 
 
-void __cyg_profile_func_enter(void *this_fn, void *call_site)
+void __cyg_profile_func_enter(void* this_fn, void* call_site)
 {
 #ifdef WITH_LTTNG
     tracepoint(lttng_ust_cyg_profile, func_entry, this_fn, call_site);
 #endif
 }
 
-void __cyg_profile_func_exit(void *this_fn, void *call_site)
+void __cyg_profile_func_exit(void* this_fn, void* call_site)
 {
 #ifdef WITH_LTTNG
     tracepoint(lttng_ust_cyg_profile, func_exit, this_fn, call_site);
 #endif
 }
-

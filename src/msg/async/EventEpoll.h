@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
  * Ceph - scalable distributed file system
@@ -17,33 +17,37 @@
 #ifndef CEPH_MSG_EVENTEPOLL_H
 #define CEPH_MSG_EVENTEPOLL_H
 
-#include <unistd.h>
-#include <sys/epoll.h>
-
 #include "Event.h"
 
-class EpollDriver : public EventDriver {
-  int epfd;
-  struct epoll_event *events;
-  CephContext *cct;
-  int nevent;
+#include <sys/epoll.h>
+#include <unistd.h>
 
- public:
-  explicit EpollDriver(CephContext *c): epfd(-1), events(NULL), cct(c), nevent(0) {}
-  ~EpollDriver() override {
-    if (epfd != -1)
-      close(epfd);
+class EpollDriver : public EventDriver
+{
+    int epfd;
+    struct epoll_event* events;
+    CephContext* cct;
+    int nevent;
 
-    if (events)
-      free(events);
-  }
+public:
+    explicit EpollDriver(CephContext* c)
+        : epfd(-1)
+        , events(NULL)
+        , cct(c)
+        , nevent(0)
+    {}
+    ~EpollDriver() override
+    {
+        if (epfd != -1) close(epfd);
 
-  int init(EventCenter *c, int nevent) override;
-  int add_event(int fd, int cur_mask, int add_mask) override;
-  int del_event(int fd, int cur_mask, int del_mask) override;
-  int resize_events(int newsize) override;
-  int event_wait(std::vector<FiredFileEvent> &fired_events,
-		 struct timeval *tp) override;
+        if (events) free(events);
+    }
+
+    int init(EventCenter* c, int nevent) override;
+    int add_event(int fd, int cur_mask, int add_mask) override;
+    int del_event(int fd, int cur_mask, int del_mask) override;
+    int resize_events(int newsize) override;
+    int event_wait(std::vector<FiredFileEvent>& fired_events, struct timeval* tp) override;
 };
 
 #endif

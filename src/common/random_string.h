@@ -16,20 +16,21 @@
 
 #pragma once
 
-#include <string>
 #include "include/common_fwd.h"
 
+#include <string>
+
 /* size should be the required string size + 1 */
-int gen_rand_base64(CephContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric(CephContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric_lower(CephContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric_upper(CephContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric_no_underscore(CephContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric_plain(CephContext *cct, char *dest, size_t size);
+int gen_rand_base64(CephContext* cct, char* dest, size_t size);
+void gen_rand_alphanumeric(CephContext* cct, char* dest, size_t size);
+void gen_rand_alphanumeric_lower(CephContext* cct, char* dest, size_t size);
+void gen_rand_alphanumeric_upper(CephContext* cct, char* dest, size_t size);
+void gen_rand_alphanumeric_no_underscore(CephContext* cct, char* dest, size_t size);
+void gen_rand_alphanumeric_plain(CephContext* cct, char* dest, size_t size);
 
 // returns a std::string with 'size' random characters
-std::string gen_rand_alphanumeric(CephContext *cct, size_t size);
-std::string gen_rand_alphanumeric_lower(CephContext *cct, size_t size);
-std::string gen_rand_alphanumeric_upper(CephContext *cct, size_t size);
-std::string gen_rand_alphanumeric_no_underscore(CephContext *cct, size_t size);
-std::string gen_rand_alphanumeric_plain(CephContext *cct, size_t size);
+std::string gen_rand_alphanumeric(CephContext* cct, size_t size);
+std::string gen_rand_alphanumeric_lower(CephContext* cct, size_t size);
+std::string gen_rand_alphanumeric_upper(CephContext* cct, size_t size);
+std::string gen_rand_alphanumeric_no_underscore(CephContext* cct, size_t size);
+std::string gen_rand_alphanumeric_plain(CephContext* cct, size_t size);

@@ -2,20 +2,18 @@
 
 # attempt to trigger #6047
 
-
 cmd_no=0
-expect()
-{
-  cmd_no=$(($cmd_no+1))
-  cmd="$1"
-  expected=$2
-  echo "[$cmd_no] $cmd"
-  eval  $cmd
-  ret=$?
-  if [[ $ret -ne $expected ]]; then
-    echo "[$cmd_no] unexpected return '$ret', expected '$expected'"
-    exit 1
-  fi
+expect() {
+    cmd_no=$(($cmd_no + 1))
+    cmd="$1"
+    expected=$2
+    echo "[$cmd_no] $cmd"
+    eval $cmd
+    ret=$?
+    if [[ $ret -ne $expected ]]; then
+        echo "[$cmd_no] unexpected return '$ret', expected '$expected'"
+        exit 1
+    fi
 }
 
 ceph osd pool delete test test --yes-i-really-really-mean-it || true
@@ -56,6 +54,5 @@ expect 'rados cppool test-foo test-bar --yes-i-really-mean-it' 0
 expect 'rbd --pool test-bar snap rm image@snapshot' 95
 expect 'ceph osd pool delete test-foo test-foo --yes-i-really-really-mean-it' 0
 expect 'ceph osd pool delete test-bar test-bar --yes-i-really-really-mean-it' 0
-
 
 echo OK

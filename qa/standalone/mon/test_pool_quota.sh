@@ -6,7 +6,6 @@
 
 # Includes
 
-
 source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
 
 function run() {
@@ -19,7 +18,7 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         $func $dir || return 1
     done
 }
@@ -35,28 +34,26 @@ function TEST_pool_quota() {
 
     local poolname=testquota
     create_pool $poolname 20
-    local objects=`ceph df detail | grep -w $poolname|awk '{print $3}'`
-    local bytes=`ceph df detail | grep -w $poolname|awk '{print $4}'`
+    local objects=$(ceph df detail | grep -w $poolname | awk '{print $3}')
+    local bytes=$(ceph df detail | grep -w $poolname | awk '{print $4}')
 
     echo $objects
     echo $bytes
-    if [ $objects != 'N/A' ] || [ $bytes != 'N/A' ] ;
-      then
-      return 1
+    if [ $objects != 'N/A' ] || [ $bytes != 'N/A' ]; then
+        return 1
     fi
 
-    ceph osd pool set-quota  $poolname   max_objects 1000
-    ceph osd pool set-quota  $poolname  max_bytes 1024
+    ceph osd pool set-quota $poolname max_objects 1000
+    ceph osd pool set-quota $poolname max_bytes 1024
 
-    objects=`ceph df detail | grep -w $poolname|awk '{print $3}'`
-    bytes=`ceph df detail | grep -w $poolname|awk '{print $4}'`
-   
-    if [ $objects != '1000' ] || [ $bytes != '1K' ] ;
-      then
-      return 1
+    objects=$(ceph df detail | grep -w $poolname | awk '{print $3}')
+    bytes=$(ceph df detail | grep -w $poolname | awk '{print $4}')
+
+    if [ $objects != '1000' ] || [ $bytes != '1K' ]; then
+        return 1
     fi
 
-    ceph osd pool delete  $poolname $poolname  --yes-i-really-really-mean-it
+    ceph osd pool delete $poolname $poolname --yes-i-really-really-mean-it
     teardown $dir || return 1
 }
 

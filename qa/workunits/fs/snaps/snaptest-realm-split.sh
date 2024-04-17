@@ -3,7 +3,7 @@
 set -e
 
 mkdir -p 1/a
-exec 3<> 1/a/file1
+exec 3<>1/a/file1
 
 echo -n a >&3
 

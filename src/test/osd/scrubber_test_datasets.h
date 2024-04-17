@@ -18,4 +18,4 @@ extern hobject_t hobj_ms1_snp30;
 // a manipulation set used in TestTScrubberBe_data_2:
 extern ScrubGenerator::CorruptFuncList crpt_funcs_set1;
 
-}  // namespace ScrubDatasets
+}   // namespace ScrubDatasets

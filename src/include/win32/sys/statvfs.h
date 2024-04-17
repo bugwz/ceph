@@ -1,5 +1,5 @@
 #ifndef _SYS_STATVFS_H
-#define _SYS_STATVFS_H  1
+#define _SYS_STATVFS_H 1
 
 typedef unsigned __int64 fsfilcnt64_t;
 typedef unsigned __int64 fsblkcnt64_t;
@@ -20,7 +20,8 @@ struct statvfs
     unsigned long int f_namemax;
     int __f_spare[6];
 };
-struct flock {
+struct flock
+{
     short l_type;
     short l_whence;
     off_t l_start;

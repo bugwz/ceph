@@ -27,7 +27,7 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
     local funcs=${@:-$(set | ${SED} -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -39,18 +39,18 @@ function TEST_crush_rule_create_simple() {
 
     run_mon $dir a || return 1
 
-    ceph --format xml osd crush rule dump replicated_rule | \
-        egrep '<op>take</op><item>[^<]+</item><item_name>default</item_name>' | \
+    ceph --format xml osd crush rule dump replicated_rule |
+        egrep '<op>take</op><item>[^<]+</item><item_name>default</item_name>' |
         grep '<op>choose_firstn</op><num>0</num><type>osd</type>' || return 1
     local rule=rule0
     local root=host1
     ceph osd crush add-bucket $root host
     local failure_domain=osd
     ceph osd crush rule create-simple $rule $root $failure_domain || return 1
-    ceph osd crush rule create-simple $rule $root $failure_domain 2>&1 | \
+    ceph osd crush rule create-simple $rule $root $failure_domain 2>&1 |
         grep "$rule already exists" || return 1
-    ceph --format xml osd crush rule dump $rule | \
-        egrep '<op>take</op><item>[^<]+</item><item_name>'$root'</item_name>' | \
+    ceph --format xml osd crush rule dump $rule |
+        egrep '<op>take</op><item>[^<]+</item><item_name>'$root'</item_name>' |
         grep '<op>choose_firstn</op><num>0</num><type>'$failure_domain'</type>' || return 1
     ceph osd crush rule rm $rule || return 1
 }
@@ -62,10 +62,10 @@ function TEST_crush_rule_dump() {
 
     local rule=rule1
     ceph osd crush rule create-erasure $rule || return 1
-    test $(ceph --format json osd crush rule dump $rule | \
-           jq ".rule_name == \"$rule\"") == true || return 1
-    test $(ceph --format json osd crush rule dump | \
-           jq "map(select(.rule_name == \"$rule\")) | length == 1") == true || return 1
+    test $(ceph --format json osd crush rule dump $rule |
+        jq ".rule_name == \"$rule\"") == true || return 1
+    test $(ceph --format json osd crush rule dump |
+        jq "map(select(.rule_name == \"$rule\")) | length == 1") == true || return 1
     ! ceph osd crush rule dump non_existent_rule || return 1
     ceph osd crush rule rm $rule || return 1
 }
@@ -93,10 +93,10 @@ function TEST_crush_rule_create_erasure() {
     # create a new rule with the default profile, implicitly
     #
     ceph osd crush rule create-erasure $rule || return 1
-    ceph osd crush rule create-erasure $rule 2>&1 | \
+    ceph osd crush rule create-erasure $rule 2>&1 |
         grep "$rule already exists" || return 1
-    ceph --format xml osd crush rule dump $rule | \
-        egrep '<op>take</op><item>[^<]+</item><item_name>default</item_name>' | \
+    ceph --format xml osd crush rule dump $rule |
+        egrep '<op>take</op><item>[^<]+</item><item_name>default</item_name>' |
         grep '<op>chooseleaf_indep</op><num>0</num><type>host</type>' || return 1
     ceph osd crush rule rm $rule || return 1
     ! ceph osd crush rule ls | grep $rule || return 1
@@ -130,11 +130,10 @@ function TEST_add_rule_failed() {
     ceph osd crush add-bucket $root host
     ceph osd crush rule create-simple test_rule1 $root osd firstn || return 1
     ceph osd crush rule create-simple test_rule2 $root osd firstn || return 1
-    ceph osd getcrushmap > $dir/crushmap || return 1
-    crushtool --decompile $dir/crushmap > $dir/crushmap.txt || return 1
-    for i in $(seq 3 255)
-        do
-            cat <<EOF
+    ceph osd getcrushmap >$dir/crushmap || return 1
+    crushtool --decompile $dir/crushmap >$dir/crushmap.txt || return 1
+    for i in $(seq 3 255); do
+        cat <<EOF
 rule test_rule$i {
 	id $i
 	type replicated
@@ -143,9 +142,9 @@ rule test_rule$i {
 	step emit
 }
 EOF
-    done >> $dir/crushmap.txt
+    done >>$dir/crushmap.txt
     crushtool --compile $dir/crushmap.txt -o $dir/crushmap || return 1
-    ceph osd setcrushmap -i $dir/crushmap  || return 1
+    ceph osd setcrushmap -i $dir/crushmap || return 1
     ceph osd crush rule create-simple test_rule_nospace $root osd firstn 2>&1 | grep "Error ENOSPC" || return 1
 
 }
@@ -183,7 +182,7 @@ function TEST_crush_reject_empty() {
     create_rbd_pool || return 1
 
     local empty_map=$dir/empty_map
-    :> $empty_map.txt
+    : >$empty_map.txt
     crushtool -c $empty_map.txt -o $empty_map.map || return 1
     expect_failure $dir "Error EINVAL" \
         ceph osd setcrushmap -i $empty_map.map || return 1

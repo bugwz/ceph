@@ -9,8 +9,8 @@ if [ -z "$CEPHADM" ]; then
 fi
 
 # fsid
-if [ -e fsid ] ; then
-    fsid=`cat fsid`
+if [ -e fsid ]; then
+    fsid=$(cat fsid)
 else
     echo 'no fsid file, so no cluster?'
     exit 0
@@ -18,4 +18,3 @@ fi
 echo "fsid $fsid"
 
 sudo $CEPHADM rm-cluster --force --fsid $fsid
-

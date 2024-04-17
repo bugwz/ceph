@@ -15,10 +15,12 @@
 #define BARRIER_H
 
 #include "include/types.h"
+
 #include <boost/intrusive/list.hpp>
 #define BOOST_ICL_USE_STATIC_BOUNDED_INTERVALS
-#include <boost/icl/interval_set.hpp>
 #include "common/ceph_mutex.h"
+
+#include <boost/icl/interval_set.hpp>
 
 class Client;
 
@@ -34,66 +36,61 @@ typedef boost::icl::interval<uint64_t>::type barrier_interval;
 
 enum CBlockSync_State
 {
-  CBlockSync_State_None, /* initial state */
-  CBlockSync_State_Unclaimed, /* outstanding write */
-  CBlockSync_State_Committing, /* commit in progress */
-  CBlockSync_State_Completed,
+    CBlockSync_State_None,       /* initial state */
+    CBlockSync_State_Unclaimed,  /* outstanding write */
+    CBlockSync_State_Committing, /* commit in progress */
+    CBlockSync_State_Completed,
 };
 
 class BarrierContext;
 
 class C_Block_Sync;
 
-typedef boost::intrusive::list< C_Block_Sync,
-				boost::intrusive::member_hook<
-				  C_Block_Sync,
-				  boost::intrusive::list_member_hook<>,
-				  &C_Block_Sync::intervals_hook >
-				> BlockSyncList;
+typedef boost::intrusive::list<
+    C_Block_Sync,
+    boost::intrusive::member_hook<C_Block_Sync, boost::intrusive::list_member_hook<>, &C_Block_Sync::intervals_hook> >
+    BlockSyncList;
 
 class Barrier
 {
 private:
-  ceph::condition_variable cond;
-  boost::icl::interval_set<uint64_t> span;
-  BlockSyncList write_list;
+    ceph::condition_variable cond;
+    boost::icl::interval_set<uint64_t> span;
+    BlockSyncList write_list;
 
 public:
-  boost::intrusive::list_member_hook<> active_commits_hook;
+    boost::intrusive::list_member_hook<> active_commits_hook;
 
-  Barrier();
-  ~Barrier();
+    Barrier();
+    ~Barrier();
 
-  friend class BarrierContext;
+    friend class BarrierContext;
 };
 
-typedef boost::intrusive::list< Barrier,
-				boost::intrusive::member_hook<
-				  Barrier,
-				  boost::intrusive::list_member_hook<>,
-				  &Barrier::active_commits_hook >
-				> BarrierList;
+typedef boost::intrusive::list<Barrier, boost::intrusive::member_hook<Barrier, boost::intrusive::list_member_hook<>,
+                                                                      &Barrier::active_commits_hook> >
+    BarrierList;
 
 class BarrierContext
 {
 private:
-  Client *cl;
-  uint64_t ino;
-  ceph::mutex lock = ceph::make_mutex("BarrierContext");
+    Client* cl;
+    uint64_t ino;
+    ceph::mutex lock = ceph::make_mutex("BarrierContext");
 
-  // writes not claimed by a commit
-  BlockSyncList outstanding_writes;
+    // writes not claimed by a commit
+    BlockSyncList outstanding_writes;
 
-  // commits in progress, with their claimed writes
-  BarrierList active_commits;
+    // commits in progress, with their claimed writes
+    BarrierList active_commits;
 
 public:
-  BarrierContext(Client *c, uint64_t ino);
-  void write_nobarrier(C_Block_Sync &cbs);
-  void write_barrier(C_Block_Sync &cbs);
-  void commit_barrier(barrier_interval &civ);
-  void complete(C_Block_Sync &cbs);
-  ~BarrierContext();
+    BarrierContext(Client* c, uint64_t ino);
+    void write_nobarrier(C_Block_Sync& cbs);
+    void write_barrier(C_Block_Sync& cbs);
+    void commit_barrier(barrier_interval& civ);
+    void complete(C_Block_Sync& cbs);
+    ~BarrierContext();
 };
 
 #endif

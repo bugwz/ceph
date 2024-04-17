@@ -5,12 +5,12 @@
 #
 source /etc/os-release
 case $ID in
-debian|ubuntu)
+debian | ubuntu)
     RPMDEB='DEB'
     dpkg-query --show ceph-common
     PKG_NAME_AND_VERSION=$(dpkg-query --show ceph-common)
     ;;
-centos|fedora|rhel|opensuse*|suse|sles)
+centos | fedora | rhel | opensuse* | suse | sles)
     RPMDEB='RPM'
     rpm -q ceph
     PKG_NAME_AND_VERSION=$(rpm -q ceph)
@@ -18,6 +18,7 @@ centos|fedora|rhel|opensuse*|suse|sles)
 *)
     echo "Unsupported distro ->$ID<-! Bailing out."
     exit 1
+    ;;
 esac
 PKG_CEPH_VERSION=$(perl -e '"'"$PKG_NAME_AND_VERSION"'" =~ m/(\d+(\.\d+)+)/; print "$1\n";')
 echo "According to $RPMDEB package, the ceph version under test is ->$PKG_CEPH_VERSION<-"

@@ -20,29 +20,29 @@
 #define SHARED_LIB_SUFFIX CMAKE_SHARED_LIBRARY_SUFFIX
 
 #ifdef _WIN32
-  #include <string>
+#include <string>
 
-  using dl_errmsg_t = std::string;
+using dl_errmsg_t = std::string;
 
-  // The load mode flags will be ignored on Windows. We keep the same
-  // values for debugging purposes though.
-  #define RTLD_LAZY       0x00001
-  #define RTLD_NOW        0x00002
-  #define RTLD_BINDING_MASK   0x3
-  #define RTLD_NOLOAD     0x00004
-  #define RTLD_DEEPBIND   0x00008
-  #define RTLD_GLOBAL     0x00100
-  #define RTLD_LOCAL      0
-  #define RTLD_NODELETE   0x01000
+// The load mode flags will be ignored on Windows. We keep the same
+// values for debugging purposes though.
+#define RTLD_LAZY         0x00001
+#define RTLD_NOW          0x00002
+#define RTLD_BINDING_MASK 0x3
+#define RTLD_NOLOAD       0x00004
+#define RTLD_DEEPBIND     0x00008
+#define RTLD_GLOBAL       0x00100
+#define RTLD_LOCAL        0
+#define RTLD_NODELETE     0x01000
 
-  void* dlopen(const char *filename, int flags);
-  int dlclose(void* handle);
-  dl_errmsg_t dlerror();
-  void* dlsym(void* handle, const char* symbol);
+void* dlopen(const char* filename, int flags);
+int dlclose(void* handle);
+dl_errmsg_t dlerror();
+void* dlsym(void* handle, const char* symbol);
 #else
-  #include <dlfcn.h>
+#include <dlfcn.h>
 
-  using dl_errmsg_t = char*;
+using dl_errmsg_t = char*;
 #endif /* _WIN32 */
 
 #endif /* DLFCN_H */

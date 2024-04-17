@@ -18,7 +18,7 @@ export RGW_HOST="${RGW_HOST:-$rgw_host}"
 
 # random argument determines if multipart is aborted or completed 50/50
 outcome=$((RANDOM % 2))
-if [ $outcome -eq 0 ] ;then
+if [ $outcome -eq 0 ]; then
     echo "== TESTING *ABORTING* MULTIPART UPLOAD WITH RE-UPLOADS =="
 else
     echo "== TESTING *COMPLETING* MULTIPART UPLOAD WITH RE-UPLOADS =="
@@ -26,7 +26,7 @@ fi
 
 # random argument determines if multipart is aborted or completed 50/50
 versioning=$((RANDOM % 2))
-if [ $versioning -eq 0 ] ;then
+if [ $versioning -eq 0 ]; then
     echo "== TESTING NON-VERSIONED BUCKET =="
 else
     echo "== TESTING VERSIONED BUCKET =="
@@ -34,7 +34,6 @@ fi
 
 # create a randomized bucket name
 bucket="reupload-bkt-$((RANDOM % 899999 + 100000))"
-
 
 # SET UP PYTHON VIRTUAL ENVIRONMENT
 
@@ -44,25 +43,22 @@ source $mydir/bin/activate
 pip install pip --upgrade
 pip install boto3
 
-
 # CREATE RGW USER IF NECESSARY
 
-if radosgw-admin user info --access-key $RGW_ACCESS_KEY 2>/dev/null ;then
+if radosgw-admin user info --access-key $RGW_ACCESS_KEY 2>/dev/null; then
     echo INFO: user already exists
 else
     echo INFO: creating user
     radosgw-admin user create --uid testid \
-		  --access-key $RGW_ACCESS_KEY \
-		  --secret $RGW_SECRET_KEY \
-		  --display-name 'M. Tester' \
-		  --email tester@ceph.com 2>/dev/null
+        --access-key $RGW_ACCESS_KEY \
+        --secret $RGW_SECRET_KEY \
+        --display-name 'M. Tester' \
+        --email tester@ceph.com 2>/dev/null
 fi
-
 
 # RUN REUPLOAD TEST
 
 $mydir/bin/python3 ${mydir}/test_rgw_s3_mp_reupload.py $bucket $outcome $versioning
-
 
 # ANALYZE FOR ERRORS
 # (NOTE: for now we're choosing not to use the rgw-orphan-list tool)
@@ -84,13 +80,12 @@ cat $rados_ls_out
 
 # compare expected and found
 diff $radoslist_out $rados_ls_out >$diff_out
-if [ $(cat $diff_out | wc -l) -ne 0 ] ;then
+if [ $(cat $diff_out | wc -l) -ne 0 ]; then
     error=1
     echo "ERROR: Found differences between expected and actual rados objects for test bucket."
     echo "    note: indicators: '>' found but not expected; '<' expected but not found."
     cat $diff_out
 fi
-
 
 # CLEAN UP
 
@@ -98,10 +93,9 @@ deactivate
 
 rm -f $orphan_list_out $radoslist_out $rados_ls_out $diff_out
 
-
 # PRODUCE FINAL RESULTS
 
-if [ -n "$error" ] ;then
+if [ -n "$error" ]; then
     echo "== FAILED =="
     exit 1
 fi

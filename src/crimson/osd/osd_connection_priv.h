@@ -11,17 +11,19 @@
 
 namespace crimson::osd {
 
-struct OSDConnectionPriv : public crimson::net::Connection::user_private_t {
-  ConnectionPipeline client_request_conn_pipeline;
-  ConnectionPipeline peering_request_conn_pipeline;
-  ConnectionPipeline replicated_request_conn_pipeline;
+struct OSDConnectionPriv : public crimson::net::Connection::user_private_t
+{
+    ConnectionPipeline client_request_conn_pipeline;
+    ConnectionPipeline peering_request_conn_pipeline;
+    ConnectionPipeline replicated_request_conn_pipeline;
 };
 
-static OSDConnectionPriv &get_osd_priv(crimson::net::Connection *conn) {
-  if (!conn->has_user_private()) {
-    conn->set_user_private(std::make_unique<OSDConnectionPriv>());
-  }
-  return static_cast<OSDConnectionPriv&>(conn->get_user_private());
+static OSDConnectionPriv& get_osd_priv(crimson::net::Connection* conn)
+{
+    if (!conn->has_user_private()) {
+        conn->set_user_private(std::make_unique<OSDConnectionPriv>());
+    }
+    return static_cast<OSDConnectionPriv&>(conn->get_user_private());
 }
 
-}
+}   // namespace crimson::osd

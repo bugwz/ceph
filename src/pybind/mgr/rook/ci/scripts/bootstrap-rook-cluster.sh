@@ -15,9 +15,9 @@ on_error() {
     minikube delete
 }
 
-configure_libvirt(){
+configure_libvirt() {
     sudo usermod -aG libvirt $(id -un)
-    sudo su -l $USER  # Avoid having to log out and log in for group addition to take effect.
+    sudo su -l $USER # Avoid having to log out and log in for group addition to take effect.
     sudo systemctl enable --now libvirtd
     sudo systemctl restart libvirtd
     sleep 10 # wait some time for libvirtd service to restart
@@ -26,12 +26,12 @@ configure_libvirt(){
 setup_minikube_env() {
 
     # Check if Minikube is running
-    if minikube status > /dev/null 2>&1; then
-	echo "Minikube is running"
-	minikube stop
-	minikube delete
+    if minikube status >/dev/null 2>&1; then
+        echo "Minikube is running"
+        minikube stop
+        minikube delete
     else
-	echo "Minikube is not running"
+        echo "Minikube is not running"
     fi
 
     rm -rf ~/.minikube
@@ -79,9 +79,9 @@ wait_for_rook_operator() {
     PHASE=$($KUBECTL get cephclusters.ceph.rook.io -n rook-ceph -o jsonpath='{.items[?(@.kind == "CephCluster")].status.phase}')
     echo "PHASE: $PHASE"
     while ! $KUBECTL get cephclusters.ceph.rook.io -n rook-ceph -o jsonpath='{.items[?(@.kind == "CephCluster")].status.phase}' | grep -q "Ready"; do
-	echo "Waiting for cluster to be ready..."
-	sleep $sleep_interval
-	attempts=$((attempts+1))
+        echo "Waiting for cluster to be ready..."
+        sleep $sleep_interval
+        attempts=$((attempts + 1))
         if [ $attempts -ge $max_attempts ]; then
             echo "Maximum number of attempts ($max_attempts) reached. Exiting..."
             return 1
@@ -95,9 +95,9 @@ wait_for_ceph_cluster() {
     local attempts=0
     $KUBECTL rollout status deployment rook-ceph-tools -n rook-ceph --timeout=30s
     while ! $KUBECTL get cephclusters.ceph.rook.io -n rook-ceph -o jsonpath='{.items[?(@.kind == "CephCluster")].status.ceph.health}' | grep -q "HEALTH_OK"; do
-	echo "Waiting for Ceph cluster installed"
-	sleep $sleep_interval
-	attempts=$((attempts+1))
+        echo "Waiting for Ceph cluster installed"
+        sleep $sleep_interval
+        attempts=$((attempts + 1))
         if [ $attempts -ge $max_attempts ]; then
             echo "Maximum number of attempts ($max_attempts) reached. Exiting..."
             return 1

@@ -37,27 +37,30 @@
 #include <type_traits>
 #include <utility>
 
-template <typename T, typename Alloc>
+template<typename T, typename Alloc>
 inline void transfer_pass1(Alloc& a, T* from, T* to,
-                           typename std::enable_if<std::is_nothrow_move_constructible<T>::value>::type* = nullptr) {
+                           typename std::enable_if<std::is_nothrow_move_constructible<T>::value>::type* = nullptr)
+{
     a.construct(to, std::move(*from));
     a.destroy(from);
 }
 
-template <typename T, typename Alloc>
+template<typename T, typename Alloc>
 inline void transfer_pass2(Alloc& a, T* from, T* to,
-                           typename std::enable_if<std::is_nothrow_move_constructible<T>::value>::type* = nullptr) {
-}
+                           typename std::enable_if<std::is_nothrow_move_constructible<T>::value>::type* = nullptr)
+{}
 
-template <typename T, typename Alloc>
+template<typename T, typename Alloc>
 inline void transfer_pass1(Alloc& a, T* from, T* to,
-               typename std::enable_if<!std::is_nothrow_move_constructible<T>::value>::type* = nullptr) {
+                           typename std::enable_if<!std::is_nothrow_move_constructible<T>::value>::type* = nullptr)
+{
     a.construct(to, *from);
 }
 
-template <typename T, typename Alloc>
+template<typename T, typename Alloc>
 inline void transfer_pass2(Alloc& a, T* from, T* to,
-               typename std::enable_if<!std::is_nothrow_move_constructible<T>::value>::type* = nullptr) {
+                           typename std::enable_if<!std::is_nothrow_move_constructible<T>::value>::type* = nullptr)
+{
     a.destroy(from);
 }
 

@@ -22,75 +22,78 @@
 #ifndef CEPH_MSG_DPDK_QUEUE_H_
 #define CEPH_MSG_DPDK_QUEUE_H_
 
-#include <queue>
-
 #include "circular_buffer.h"
 
-template <typename T>
-class queue {
-  std::queue<T, circular_buffer<T>> _q;
-  size_t _max;
+#include <queue>
 
- public:
-  explicit queue(size_t size): _max(size) {}
+template<typename T> class queue
+{
+    std::queue<T, circular_buffer<T>> _q;
+    size_t _max;
 
-  // Push an item.
-  //
-  // Returns false if the queue was full and the item was not pushed.
-  bool push(T&& a);
+public:
+    explicit queue(size_t size)
+        : _max(size)
+    {}
 
-  // pops an item.
-  T pop();
+    // Push an item.
+    //
+    // Returns false if the queue was full and the item was not pushed.
+    bool push(T&& a);
 
-  // Consumes items from the queue, passing them to @func, until @func
-  // returns false or the queue it empty
-  //
-  // Returns false if func returned false.
-  template <typename Func>
-  bool consume(Func&& func);
+    // pops an item.
+    T pop();
 
-  // Returns true when the queue is empty.
-  bool empty() const;
+    // Consumes items from the queue, passing them to @func, until @func
+    // returns false or the queue it empty
+    //
+    // Returns false if func returned false.
+    template<typename Func> bool consume(Func&& func);
 
-  // Returns true when the queue is full.
-  bool full() const;
+    // Returns true when the queue is empty.
+    bool empty() const;
 
-  size_t size() const { return _q.size(); }
+    // Returns true when the queue is full.
+    bool full() const;
 
-  // Destroy any items in the queue
-  void clear() {
-    while (!_q.empty()) {
-      _q.pop();
+    size_t size() const { return _q.size(); }
+
+    // Destroy any items in the queue
+    void clear()
+    {
+        while (!_q.empty()) {
+            _q.pop();
+        }
     }
-  }
 };
 
-template <typename T>
-inline bool queue<T>::push(T&& data) {
-  if (_q.size() < _max) {
-    _q.push(std::move(data));
-    notify_not_empty();
-    return true;
-  } else {
-    return false;
-  }
+template<typename T> inline bool queue<T>::push(T&& data)
+{
+    if (_q.size() < _max) {
+        _q.push(std::move(data));
+        notify_not_empty();
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
-template <typename T>
-inline T queue<T>::pop() {
-  T data = std::move(_q.front());
-  _q.pop();
-  return data;
+template<typename T> inline T queue<T>::pop()
+{
+    T data = std::move(_q.front());
+    _q.pop();
+    return data;
 }
 
-template <typename T>
-inline bool queue<T>::empty() const {
-  return _q.empty();
+template<typename T> inline bool queue<T>::empty() const
+{
+    return _q.empty();
 }
 
-template <typename T>
-inline bool queue<T>::full() const {
-  return _q.size() == _max;
+template<typename T> inline bool queue<T>::full() const
+{
+    return _q.size() == _max;
 }
 
 #endif /* CEPH_MSG_DPDK_QUEUE_H_ */

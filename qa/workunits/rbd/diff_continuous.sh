@@ -6,7 +6,7 @@ set -o pipefail
 function untar_workload() {
     local i
     for ((i = 0; i < 10; i++)); do
-        pv -L 10M linux-5.4.tar.gz > "${MOUNT}/linux-5.4.tar.gz"
+        pv -L 10M linux-5.4.tar.gz >"${MOUNT}/linux-5.4.tar.gz"
         tar -C "${MOUNT}" -xzf "${MOUNT}/linux-5.4.tar.gz"
         sync "${MOUNT}"
         rm -rf "${MOUNT}"/linux-5.4*

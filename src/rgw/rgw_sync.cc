@@ -7,18 +7,18 @@
 
 using namespace std;
 
-std::ostream&  RGWMetaSyncStatusManager::gen_prefix(std::ostream& out) const
+std::ostream& RGWMetaSyncStatusManager::gen_prefix(std::ostream& out) const
 {
-  return out << "meta sync: ";
+    return out << "meta sync: ";
 }
 
 unsigned RGWMetaSyncStatusManager::get_subsys() const
 {
-  return dout_subsys;
+    return dout_subsys;
 }
 
 void RGWRemoteMetaLog::finish()
 {
-  going_down = true;
-  stop();
+    going_down = true;
+    stop();
 }

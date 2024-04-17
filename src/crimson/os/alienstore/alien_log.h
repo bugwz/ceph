@@ -10,22 +10,22 @@ namespace ceph {
 namespace logging {
 class SubsystemMap;
 }
-}
+}   // namespace ceph
 
 namespace seastar::alien {
-  class instance;
+class instance;
 }
-namespace ceph::logging
-{
+namespace ceph::logging {
 class CnLog : public ceph::logging::Log
 {
-  seastar::alien::instance& inst;
-  unsigned shard;
-  void _flush(EntryVector& q, bool crash) override;
+    seastar::alien::instance& inst;
+    unsigned shard;
+    void _flush(EntryVector& q, bool crash) override;
+
 public:
-  CnLog(const SubsystemMap *s, seastar::alien::instance& inst, unsigned shard);
-  ~CnLog() override;
+    CnLog(const SubsystemMap* s, seastar::alien::instance& inst, unsigned shard);
+    ~CnLog() override;
 };
-}
+}   // namespace ceph::logging
 
 #endif

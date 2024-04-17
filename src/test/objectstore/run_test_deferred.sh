@@ -1,8 +1,6 @@
 #!/bin/bash
 
-
-if [[ ! (-x ./bin/unittest_deferred) || ! (-x ./bin/ceph-kvstore-tool) || ! (-x ./bin/ceph-bluestore-tool)]]
-then
+if [[ ! (-x ./bin/unittest_deferred) || ! (-x ./bin/ceph-kvstore-tool) || ! (-x ./bin/ceph-bluestore-tool) ]]; then
     echo Test must be run from ceph build directory
     echo with unittest_deferred, ceph-kvstore-tool and ceph-bluestore-tool compiled
     exit 1
@@ -41,8 +39,7 @@ fi
 
 # If we were lucky, this command now fails
 ./bin/ceph-bluestore-tool --path bluestore.test_temp_dir/ --command fsck --deep 1 --debug-bluestore=30/30 --debug-bdev=30/30 --log-file=log-bs-crash.txt --log-to-file --log-to-stderr=false
-if [[ $? != 0 ]]
-then
+if [[ $? != 0 ]]; then
     echo "Deferred writes corruption successfully created !"
 else
     echo "No deferred write problems detected."

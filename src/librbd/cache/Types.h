@@ -12,17 +12,18 @@ class Context;
 namespace librbd {
 namespace cache {
 
-enum ImageCacheType {
-  IMAGE_CACHE_TYPE_RWL = 1,
-  IMAGE_CACHE_TYPE_SSD,
-  IMAGE_CACHE_TYPE_UNKNOWN
+enum ImageCacheType
+{
+    IMAGE_CACHE_TYPE_RWL = 1,
+    IMAGE_CACHE_TYPE_SSD,
+    IMAGE_CACHE_TYPE_UNKNOWN
 };
 
-typedef std::list<Context *> Contexts;
+typedef std::list<Context*> Contexts;
 
 const std::string PERSISTENT_CACHE_STATE = ".rbd_persistent_cache_state";
 
-} // namespace cache
-} // namespace librbd
+}   // namespace cache
+}   // namespace librbd
 
-#endif // CEPH_LIBRBD_CACHE_TYPES_H
+#endif   // CEPH_LIBRBD_CACHE_TYPES_H

@@ -4,21 +4,14 @@
 #pragma once
 
 #include <include/compat.h>
-#include <sched.h>
 #include <ostream>
+#include <sched.h>
 #include <set>
 
-int parse_cpu_set_list(const char *s,
-		       size_t *cpu_set_size,
-		       cpu_set_t *cpu_set);
-std::string cpu_set_to_str_list(size_t cpu_set_size,
-				const cpu_set_t *cpu_set);
-std::set<int> cpu_set_to_set(size_t cpu_set_size,
-			     const cpu_set_t *cpu_set);
+int parse_cpu_set_list(const char* s, size_t* cpu_set_size, cpu_set_t* cpu_set);
+std::string cpu_set_to_str_list(size_t cpu_set_size, const cpu_set_t* cpu_set);
+std::set<int> cpu_set_to_set(size_t cpu_set_size, const cpu_set_t* cpu_set);
 
-int get_numa_node_cpu_set(int node,
-			  size_t *cpu_set_size,
-			  cpu_set_t *cpu_set);
+int get_numa_node_cpu_set(int node, size_t* cpu_set_size, cpu_set_t* cpu_set);
 
-int set_cpu_affinity_all_threads(size_t cpu_set_size,
-				 cpu_set_t *cpu_set);
+int set_cpu_affinity_all_threads(size_t cpu_set_size, cpu_set_t* cpu_set);

@@ -1,11 +1,9 @@
 #!/usr/bin/bash -ex
 
-function expect_false()
-{
-	set -x
-	if "$@"; then return 1; else return 0; fi
+function expect_false() {
+    set -x
+    if "$@"; then return 1; else return 0; fi
 }
-
 
 ceph auth export
 ceph auth rm client.rot
@@ -44,7 +42,7 @@ echo "2, PK is $PK"
 
 ceph auth export client.rot
 
-while ceph -n client.rot --key $K -s ; do
+while ceph -n client.rot --key $K -s; do
     ceph auth export client.rot
     ceph -n client.rot --key $PK -s
     sleep 1

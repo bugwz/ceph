@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-dir=`dirname $0`
+dir=$(dirname $0)
 
 CEPH_TOOL='./ceph'
 $CEPH_TOOL || CEPH_TOOL='ceph'
@@ -34,4 +34,3 @@ rm -r ./?/* || true
 
 CEPH_ARGS=$CEPH_ARGS CEPH_TOOL=$CEPH_TOOL $dir/dir_pri_nul.sh
 rm -r ./?/* || true
-

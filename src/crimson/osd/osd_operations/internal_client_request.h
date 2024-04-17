@@ -12,57 +12,50 @@
 
 namespace crimson::osd {
 
-class InternalClientRequest : public PhasedOperationT<InternalClientRequest>,
-                              private CommonClientRequest {
+class InternalClientRequest : public PhasedOperationT<InternalClientRequest>, private CommonClientRequest
+{
 public:
-  explicit InternalClientRequest(Ref<PG> pg);
-  ~InternalClientRequest();
+    explicit InternalClientRequest(Ref<PG> pg);
+    ~InternalClientRequest();
 
-  // imposed by `ShardService::start_operation<T>(...)`.
-  seastar::future<> start();
+    // imposed by `ShardService::start_operation<T>(...)`.
+    seastar::future<> start();
 
 protected:
-  virtual const hobject_t& get_target_oid() const = 0;
-  virtual PG::do_osd_ops_params_t get_do_osd_ops_params() const = 0;
-  virtual std::vector<OSDOp> create_osd_ops() = 0;
+    virtual const hobject_t& get_target_oid() const = 0;
+    virtual PG::do_osd_ops_params_t get_do_osd_ops_params() const = 0;
+    virtual std::vector<OSDOp> create_osd_ops() = 0;
 
-  const PG& get_pg() const {
-    return *pg;
-  }
+    const PG& get_pg() const { return *pg; }
 
 private:
-  friend OperationT<InternalClientRequest>;
+    friend OperationT<InternalClientRequest>;
 
-  static constexpr OperationTypeCode type =
-    OperationTypeCode::internal_client_request;
+    static constexpr OperationTypeCode type = OperationTypeCode::internal_client_request;
 
-  void print(std::ostream &) const final;
-  void dump_detail(Formatter *f) const final;
+    void print(std::ostream&) const final;
+    void dump_detail(Formatter* f) const final;
 
-  CommonPGPipeline& client_pp();
+    CommonPGPipeline& client_pp();
 
-  seastar::future<> do_process();
+    seastar::future<> do_process();
 
-  Ref<PG> pg;
-  OpInfo op_info;
-  PipelineHandle handle;
+    Ref<PG> pg;
+    OpInfo op_info;
+    PipelineHandle handle;
 
 public:
-  PipelineHandle& get_handle() { return handle; }
+    PipelineHandle& get_handle() { return handle; }
 
-  std::tuple<
-    StartEvent,
-    CommonPGPipeline::WaitForActive::BlockingEvent,
-    PGActivationBlocker::BlockingEvent,
-    CommonPGPipeline::RecoverMissing::BlockingEvent,
-    CommonPGPipeline::GetOBC::BlockingEvent,
-    CommonPGPipeline::Process::BlockingEvent,
-    CompletionEvent
-  > tracking_events;
+    std::tuple<StartEvent, CommonPGPipeline::WaitForActive::BlockingEvent, PGActivationBlocker::BlockingEvent,
+               CommonPGPipeline::RecoverMissing::BlockingEvent, CommonPGPipeline::GetOBC::BlockingEvent,
+               CommonPGPipeline::Process::BlockingEvent, CompletionEvent>
+        tracking_events;
 };
 
-} // namespace crimson::osd
+}   // namespace crimson::osd
 
 #if FMT_VERSION >= 90000
-template <> struct fmt::formatter<crimson::osd::InternalClientRequest> : fmt::ostream_formatter {};
+template<> struct fmt::formatter<crimson::osd::InternalClientRequest> : fmt::ostream_formatter
+{};
 #endif

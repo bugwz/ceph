@@ -15,20 +15,20 @@
 
 #pragma once
 
-#include <memory>
-#include <sqlite3.h>
+#include "sqlite/statement.h"
 
 #include <fmt/format.h>
-
-#include "sqlite/statement.h"
+#include <memory>
+#include <sqlite3.h>
 
 class DoutPrefixProvider;
 
 namespace rgw::dbstore::sqlite {
 
 // owning sqlite3 pointer
-struct db_deleter {
-  void operator()(sqlite3* p) const { ::sqlite3_close(p); }
+struct db_deleter
+{
+    void operator()(sqlite3* p) const { ::sqlite3_close(p); }
 };
 using db_ptr = std::unique_ptr<sqlite3, db_deleter>;
 
@@ -37,28 +37,34 @@ using db_ptr = std::unique_ptr<sqlite3, db_deleter>;
 db_ptr open_database(const char* filename, int flags);
 
 
-struct Connection {
-  db_ptr db;
-  // map of statements, prepared on first use
-  std::map<std::string_view, stmt_ptr> statements;
+struct Connection
+{
+    db_ptr db;
+    // map of statements, prepared on first use
+    std::map<std::string_view, stmt_ptr> statements;
 
-  explicit Connection(db_ptr db) : db(std::move(db)) {}
+    explicit Connection(db_ptr db)
+        : db(std::move(db))
+    {}
 };
 
 // sqlite connection factory for ConnectionPool
-class ConnectionFactory {
-  std::string uri;
-  int flags;
- public:
-  ConnectionFactory(std::string uri, int flags)
-      : uri(std::move(uri)), flags(flags) {}
+class ConnectionFactory
+{
+    std::string uri;
+    int flags;
 
-  auto operator()(const DoutPrefixProvider* dpp)
-    -> std::unique_ptr<Connection>
-  {
-    auto db = open_database(uri.c_str(), flags);
-    return std::make_unique<Connection>(std::move(db));
-  }
+public:
+    ConnectionFactory(std::string uri, int flags)
+        : uri(std::move(uri))
+        , flags(flags)
+    {}
+
+    auto operator()(const DoutPrefixProvider* dpp) -> std::unique_ptr<Connection>
+    {
+        auto db = open_database(uri.c_str(), flags);
+        return std::make_unique<Connection>(std::move(db));
+    }
 };
 
-} // namespace rgw::dbstore::sqlite
+}   // namespace rgw::dbstore::sqlite

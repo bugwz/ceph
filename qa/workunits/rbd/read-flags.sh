@@ -19,21 +19,21 @@ function test_read_flags {
 
     local EXTRA_ARGS="--log-file test.log --debug-ms 1 --no-log-to-stderr"
     if [ "$SET_BALANCED" = 'y' ]; then
-	EXTRA_ARGS="$EXTRA_ARGS --rbd-balance-snap-reads"
+        EXTRA_ARGS="$EXTRA_ARGS --rbd-balance-snap-reads"
     elif [ "$SET_LOCALIZED" = 'y' ]; then
-	EXTRA_ARGS="$EXTRA_ARGS --rbd-localize-snap-reads"
+        EXTRA_ARGS="$EXTRA_ARGS --rbd-localize-snap-reads"
     fi
 
-    rbd export $IMAGE - $EXTRA_ARGS > /dev/null
+    rbd export $IMAGE - $EXTRA_ARGS >/dev/null
     if [ "$EXPECT_BALANCED" = 'y' ]; then
-	grep -q balance_reads test.log
+        grep -q balance_reads test.log
     else
-	grep -L balance_reads test.log | grep -q test.log
+        grep -L balance_reads test.log | grep -q test.log
     fi
     if [ "$EXPECT_LOCALIZED" = 'y' ]; then
-	grep -q localize_reads test.log
+        grep -q localize_reads test.log
     else
-	grep -L localize_reads test.log | grep -q test.log
+        grep -L localize_reads test.log | grep -q test.log
     fi
     rm -f test.log
 

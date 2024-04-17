@@ -2,10 +2,9 @@
 
 set -ex
 
-expect_false()
-{
-	set -x
-	if "$@"; then return 1; else return 0; fi
+expect_false() {
+    set -x
+    if "$@"; then return 1; else return 0; fi
 }
 
 # create pools, set up tier relationship
@@ -17,9 +16,9 @@ ceph osd tier add base_pool partial_wrong
 ceph osd tier add base_pool wrong_cache
 
 # populate base_pool with some data
-echo "foo" > foo.txt
-echo "bar" > bar.txt
-echo "baz" > baz.txt
+echo "foo" >foo.txt
+echo "bar" >bar.txt
+echo "baz" >baz.txt
 rados -p base_pool put fooobj foo.txt
 rados -p base_pool put barobj bar.txt
 # fill in wrong_cache backwards so we can tell we read from it
@@ -65,7 +64,7 @@ diff -q tmp.txt bar.txt
 ceph osd pool create empty_cache 2
 
 touch empty.txt
-rados -p empty_cache ls > tmp.txt
+rados -p empty_cache ls >tmp.txt
 diff -q tmp.txt empty.txt
 
 ceph osd tier add base_pool empty_cache
@@ -75,7 +74,7 @@ rados -p base_pool get fooobj tmp.txt
 rados -p base_pool get barobj tmp.txt
 expect_false rados -p base_pool get bazobj tmp.txt
 
-rados -p empty_cache ls > tmp.txt
+rados -p empty_cache ls >tmp.txt
 expect_false diff -q tmp.txt empty.txt
 
 # cleanup

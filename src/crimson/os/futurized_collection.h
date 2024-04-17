@@ -3,35 +3,29 @@
 
 #pragma once
 
+#include "osd/osd_types.h"
+
 #include <boost/intrusive_ptr.hpp>
 #include <boost/smart_ptr/intrusive_ref_counter.hpp>
 #include <seastar/core/future.hh>
 
-#include "osd/osd_types.h"
-
 namespace crimson::os {
 class FuturizedStore;
 
-class FuturizedCollection
-  : public boost::intrusive_ref_counter<FuturizedCollection,
-                                        boost::thread_safe_counter>
+class FuturizedCollection : public boost::intrusive_ref_counter<FuturizedCollection, boost::thread_safe_counter>
 {
 public:
-  FuturizedCollection(const coll_t& cid)
-    : cid{cid} {}
-  virtual ~FuturizedCollection() {}
-  virtual seastar::future<> flush() {
-    return seastar::make_ready_future<>();
-  }
-  virtual seastar::future<bool> flush_commit() {
-    return seastar::make_ready_future<bool>(true);
-  }
-  const coll_t& get_cid() const {
-    return cid;
-  }
+    FuturizedCollection(const coll_t& cid)
+        : cid{cid}
+    {}
+    virtual ~FuturizedCollection() {}
+    virtual seastar::future<> flush() { return seastar::make_ready_future<>(); }
+    virtual seastar::future<bool> flush_commit() { return seastar::make_ready_future<bool>(true); }
+    const coll_t& get_cid() const { return cid; }
+
 private:
-  const coll_t cid;
+    const coll_t cid;
 };
 
-using CollectionRef =  boost::intrusive_ptr<FuturizedCollection>;
-}
+using CollectionRef = boost::intrusive_ptr<FuturizedCollection>;
+}   // namespace crimson::os

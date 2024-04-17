@@ -16,37 +16,35 @@
 #ifndef CEPH_BLK_HMSMRDEVICE_H
 #define CEPH_BLK_HMSMRDEVICE_H
 
-#include <atomic>
-
-#include "include/types.h"
-#include "include/interval_set.h"
+#include "../kernel/KernelDevice.h"
+#include "BlockDevice.h"
+#include "aio/aio.h"
 #include "common/Thread.h"
+#include "include/interval_set.h"
+#include "include/types.h"
 #include "include/utime.h"
 
-#include "aio/aio.h"
-#include "BlockDevice.h"
-#include "../kernel/KernelDevice.h"
+#include <atomic>
 
 
-class HMSMRDevice final : public KernelDevice {
-  int zbd_fd = -1;	///< fd for the zoned block device
+class HMSMRDevice final : public KernelDevice
+{
+    int zbd_fd = -1;   ///< fd for the zoned block device
 
 public:
-  HMSMRDevice(CephContext* cct, aio_callback_t cb, void *cbpriv,
-              aio_callback_t d_cb, void *d_cbpriv);
+    HMSMRDevice(CephContext* cct, aio_callback_t cb, void* cbpriv, aio_callback_t d_cb, void* d_cbpriv);
 
-  static bool support(const std::string& path);
+    static bool support(const std::string& path);
 
-  // open/close hooks for libzbd
-  int _post_open() override;
-  void _pre_close() override;
+    // open/close hooks for libzbd
+    int _post_open() override;
+    void _pre_close() override;
 
-  // smr-specific methods
-  bool is_smr() const final { return true; }
-  void reset_all_zones() override;
-  void reset_zone(uint64_t zone) override;
-  std::vector<uint64_t> get_zones() override;
-
+    // smr-specific methods
+    bool is_smr() const final { return true; }
+    void reset_all_zones() override;
+    void reset_zone(uint64_t zone) override;
+    std::vector<uint64_t> get_zones() override;
 };
 
-#endif //CEPH_BLK_HMSMRDEVICE_H
+#endif   // CEPH_BLK_HMSMRDEVICE_H

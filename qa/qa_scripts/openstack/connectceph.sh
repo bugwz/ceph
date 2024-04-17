@@ -34,8 +34,8 @@ ssh $ceph_node sudo ceph auth get-or-create client.cinder-backup | ssh $openstac
 ssh $openstack_node sudo chown cinder:cinder /etc/ceph/ceph.client.cinder-backup.keyring
 ssh $ceph_node sudo ceph auth get-key client.cinder | ssh $openstack_node tee client.cinder.key
 copy_file execs/libvirt-secret.sh $openstack_node .
-secret_msg=`ssh $openstack_node sudo ./libvirt-secret.sh $openstack_node`
-secret_virt=`echo $secret_msg | sed 's/.* set //'`
+secret_msg=$(ssh $openstack_node sudo ./libvirt-secret.sh $openstack_node)
+secret_virt=$(echo $secret_msg | sed 's/.* set //')
 echo $secret_virt
 fix_conf_file $openstack_node glance-api /etc/glance
 fix_conf_file $openstack_node cinder /etc/cinder $secret_virt

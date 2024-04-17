@@ -11,7 +11,7 @@ source $(dirname $0)/../ceph-helpers-root.sh
 ############################################
 echo "Install required tools"
 
-CURRENT_PATH=`pwd`
+CURRENT_PATH=$(pwd)
 
 ############################################
 #			Compile&Start RocksDB
@@ -19,29 +19,29 @@ CURRENT_PATH=`pwd`
 # install prerequisites
 # for rocksdb
 case $(distro_id) in
-	ubuntu|debian|devuan|softiron)
-		install git g++ libsnappy-dev zlib1g-dev libbz2-dev libradospp-dev cmake
-		;;
-	centos|fedora|rhel)
-        case $(distro_id) in
-            rhel)
-                # RHEL needs CRB repo for snappy-devel
-                sudo subscription-manager repos --enable "codeready-builder-for-rhel-8-x86_64-rpms"
-                ;;
-        esac
-        install git gcc-c++.x86_64 snappy-devel zlib zlib-devel bzip2 bzip2-devel libradospp-devel.x86_64 cmake libarchive-3.3.3
+ubuntu | debian | devuan | softiron)
+    install git g++ libsnappy-dev zlib1g-dev libbz2-dev libradospp-dev cmake
+    ;;
+centos | fedora | rhel)
+    case $(distro_id) in
+    rhel)
+        # RHEL needs CRB repo for snappy-devel
+        sudo subscription-manager repos --enable "codeready-builder-for-rhel-8-x86_64-rpms"
         ;;
-	opensuse*|suse|sles)
-		install git gcc-c++ snappy-devel zlib-devel libbz2-devel libradospp-devel
-		;;
-	*)
-        echo "$(distro_id) is unknown, $@ will have to be installed manually."
-        ;;
+    esac
+    install git gcc-c++.x86_64 snappy-devel zlib zlib-devel bzip2 bzip2-devel libradospp-devel.x86_64 cmake libarchive-3.3.3
+    ;;
+opensuse* | suse | sles)
+    install git gcc-c++ snappy-devel zlib-devel libbz2-devel libradospp-devel
+    ;;
+*)
+    echo "$(distro_id) is unknown, $@ will have to be installed manually."
+    ;;
 esac
 
 # # gflags
 # sudo yum install gflags-devel
-# 
+#
 # wget https://github.com/schuhschuh/gflags/archive/master.zip
 # unzip master.zip
 # cd gflags-master
@@ -51,10 +51,9 @@ esac
 
 # # snappy-devel
 
-
 echo "Compile rocksdb"
 if [ -e rocksdb ]; then
-	rm -fr rocksdb
+    rm -fr rocksdb
 fi
 
 pushd $(dirname /home/ubuntu/cephtest/clone.client.0/qa/workunits/rados/bash.sh)/../../../
@@ -64,7 +63,7 @@ git clone $(dirname /home/ubuntu/cephtest/clone.client.0/qa/workunits/rados/bash
 
 # compile code
 cd rocksdb
-if type cmake3 > /dev/null 2>&1 ; then
+if type cmake3 >/dev/null 2>&1; then
     CMAKE=cmake3
 else
     CMAKE=cmake
@@ -80,18 +79,17 @@ mkdir -p ../ceph/src/
 if [ -f "/etc/ceph/ceph.conf" ]; then
     cp /etc/ceph/ceph.conf ../ceph/src/
 elif [ -f "/etc/ceph/ceph/ceph.conf" ]; then
-	cp /etc/ceph/ceph/ceph.conf ../ceph/src/
-else 
-	echo "/etc/ceph/ceph/ceph.conf doesn't exist"
+    cp /etc/ceph/ceph/ceph.conf ../ceph/src/
+else
+    echo "/etc/ceph/ceph/ceph.conf doesn't exist"
 fi
 
 echo "Run EnvLibrados test"
 # run test
-if [ -f "../ceph/src/ceph.conf" ]
-	then
-	cp env_librados_test ~/cephtest/archive
-	./env_librados_test
-else 
-	echo "../ceph/src/ceph.conf doesn't exist"
+if [ -f "../ceph/src/ceph.conf" ]; then
+    cp env_librados_test ~/cephtest/archive
+    ./env_librados_test
+else
+    echo "../ceph/src/ceph.conf doesn't exist"
 fi
 cd ${CURRENT_PATH}

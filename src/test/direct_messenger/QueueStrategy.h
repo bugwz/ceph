@@ -16,48 +16,52 @@
 #ifndef QUEUE_STRATEGY_H
 #define QUEUE_STRATEGY_H
 
-#include <vector>
-#include <memory>
-#include <boost/intrusive/list.hpp>
 #include "DispatchStrategy.h"
 #include "msg/Messenger.h"
 
+#include <boost/intrusive/list.hpp>
+#include <memory>
+#include <vector>
+
 namespace bi = boost::intrusive;
 
-class QueueStrategy : public DispatchStrategy {
-  ceph::mutex lock = ceph::make_mutex("QueueStrategy::lock");
-  const int n_threads;
-  bool stop;
+class QueueStrategy : public DispatchStrategy
+{
+    ceph::mutex lock = ceph::make_mutex("QueueStrategy::lock");
+    const int n_threads;
+    bool stop;
 
-  Message::Queue mqueue;
+    Message::Queue mqueue;
 
-  class QSThread : public Thread {
-  public:
-    bi::list_member_hook<> thread_q;
-    QueueStrategy *dq;
-    ceph::condition_variable cond;
-    explicit QSThread(QueueStrategy *dq) : thread_q(), dq(dq) {}
-    void* entry() {
-      dq->entry(this);
-      return NULL;
-    }
+    class QSThread : public Thread
+    {
+    public:
+        bi::list_member_hook<> thread_q;
+        QueueStrategy* dq;
+        ceph::condition_variable cond;
+        explicit QSThread(QueueStrategy* dq)
+            : thread_q()
+            , dq(dq)
+        {}
+        void* entry()
+        {
+            dq->entry(this);
+            return NULL;
+        }
 
-    typedef bi::list< QSThread,
-		      bi::member_hook< QSThread,
-				       bi::list_member_hook<>,
-				       &QSThread::thread_q > > Queue;
-  };
+        typedef bi::list<QSThread, bi::member_hook<QSThread, bi::list_member_hook<>, &QSThread::thread_q>> Queue;
+    };
 
-  std::vector<std::unique_ptr<QSThread>> threads; //< all threads
-  QSThread::Queue disp_threads; //< waiting threads
+    std::vector<std::unique_ptr<QSThread>> threads;   //< all threads
+    QSThread::Queue disp_threads;                     //< waiting threads
 
 public:
-  explicit QueueStrategy(int n_threads);
-  void ds_dispatch(Message *m) override;
-  void shutdown() override;
-  void start() override;
-  void wait() override;
-  void entry(QSThread *thrd);
-  virtual ~QueueStrategy() {}
+    explicit QueueStrategy(int n_threads);
+    void ds_dispatch(Message* m) override;
+    void shutdown() override;
+    void start() override;
+    void wait() override;
+    void entry(QSThread* thrd);
+    virtual ~QueueStrategy() {}
 };
 #endif /* QUEUE_STRATEGY_H */

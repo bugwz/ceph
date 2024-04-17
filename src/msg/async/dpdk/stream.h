@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
  * This file is open source software, licensed to you under the terms
  * of the Apache License, Version 2.0 (the "License").  See the NOTICE file
@@ -23,8 +23,8 @@
 #ifndef CEPH_MSG_STREAM_H_
 #define CEPH_MSG_STREAM_H_
 
-#include <exception>
 #include <cassert>
+#include <exception>
 
 // A stream<> is the producer side.  It may call produce() as long
 // as the returned from the previous invocation is ready.
@@ -41,115 +41,114 @@
 // positive integer; when it becomes ready, the producer
 // will resume processing.
 
-template <typename... T>
-class subscription;
+template<typename... T> class subscription;
 
-template <typename... T>
-class stream {
-  subscription<T...>* _sub = nullptr;
-  int done;
-  bool ready;
- public:
-  using next_fn = std::function<int (T...)>;
-  stream() = default;
-  stream(const stream&) = delete;
-  stream(stream&&) = delete;
-  ~stream() {
-    if (_sub) {
-      _sub->_stream = nullptr;
+template<typename... T> class stream
+{
+    subscription<T...>* _sub = nullptr;
+    int done;
+    bool ready;
+
+public:
+    using next_fn = std::function<int(T...)>;
+    stream() = default;
+    stream(const stream&) = delete;
+    stream(stream&&) = delete;
+    ~stream()
+    {
+        if (_sub) {
+            _sub->_stream = nullptr;
+        }
     }
-  }
 
-  void operator=(const stream&) = delete;
-  void operator=(stream&&) = delete;
+    void operator=(const stream&) = delete;
+    void operator=(stream&&) = delete;
 
-  // Returns a subscription that reads value from this
-  // stream.
-  subscription<T...> listen() {
-    return subscription<T...>(this);
-  }
+    // Returns a subscription that reads value from this
+    // stream.
+    subscription<T...> listen() { return subscription<T...>(this); }
 
-  // Returns a subscription that reads value from this
-  // stream, and also sets up the listen function.
-  subscription<T...> listen(next_fn next) {
-    auto sub = subscription<T...>(this);
-    sub.start(std::move(next));
-    return sub;
-  }
+    // Returns a subscription that reads value from this
+    // stream, and also sets up the listen function.
+    subscription<T...> listen(next_fn next)
+    {
+        auto sub = subscription<T...>(this);
+        sub.start(std::move(next));
+        return sub;
+    }
 
-  // Becomes ready when the listener is ready to accept
-  // values.  Call only once, when beginning to produce
-  // values.
-  bool started() {
-    return ready;
-  }
+    // Becomes ready when the listener is ready to accept
+    // values.  Call only once, when beginning to produce
+    // values.
+    bool started() { return ready; }
 
-  // Produce a value.  Call only after started(), and after
-  // a previous produce() is ready.
-  int produce(T... data) {
-      return _sub->_next(std::move(data)...);
-  }
+    // Produce a value.  Call only after started(), and after
+    // a previous produce() is ready.
+    int produce(T... data) { return _sub->_next(std::move(data)...); }
 
-  // End the stream.   Call only after started(), and after
-  // a previous produce() is ready.  No functions may be called
-  // after this.
-  void close() {
-    done = 1;
-  }
+    // End the stream.   Call only after started(), and after
+    // a previous produce() is ready.  No functions may be called
+    // after this.
+    void close() { done = 1; }
 
-  // Signal an error.   Call only after started(), and after
-  // a previous produce() is ready.  No functions may be called
-  // after this.
-  void set_exception(int error) {
-    done = error;
-  }
- private:
-  void start();
-  friend class subscription<T...>;
+    // Signal an error.   Call only after started(), and after
+    // a previous produce() is ready.  No functions may be called
+    // after this.
+    void set_exception(int error) { done = error; }
+
+private:
+    void start();
+    friend class subscription<T...>;
 };
 
-template <typename... T>
-class subscription {
- public:
-  using next_fn = typename stream<T...>::next_fn;
- private:
-  stream<T...>* _stream;
-  next_fn _next;
- private:
-  explicit subscription(stream<T...>* s): _stream(s) {
-    ceph_assert(!_stream->_sub);
-    _stream->_sub = this;
-  }
+template<typename... T> class subscription
+{
+public:
+    using next_fn = typename stream<T...>::next_fn;
 
- public:
-  subscription(subscription&& x)
-    : _stream(x._stream), _next(std::move(x._next)) {
-    x._stream = nullptr;
-    if (_stream) {
-      _stream->_sub = this;
+private:
+    stream<T...>* _stream;
+    next_fn _next;
+
+private:
+    explicit subscription(stream<T...>* s)
+        : _stream(s)
+    {
+        ceph_assert(!_stream->_sub);
+        _stream->_sub = this;
     }
-  }
-  ~subscription() {
-    if (_stream) {
-      _stream->_sub = nullptr;
+
+public:
+    subscription(subscription&& x)
+        : _stream(x._stream)
+        , _next(std::move(x._next))
+    {
+        x._stream = nullptr;
+        if (_stream) {
+            _stream->_sub = this;
+        }
     }
-  }
+    ~subscription()
+    {
+        if (_stream) {
+            _stream->_sub = nullptr;
+        }
+    }
 
-  /// \brief Start receiving events from the stream.
-  ///
-  /// \param next Callback to call for each event
-  void start(std::function<int (T...)> next) {
-    _next = std::move(next);
-    _stream->ready = true;
-  }
+    /// \brief Start receiving events from the stream.
+    ///
+    /// \param next Callback to call for each event
+    void start(std::function<int(T...)> next)
+    {
+        _next = std::move(next);
+        _stream->ready = true;
+    }
 
-  // Becomes ready when the stream is empty, or when an error
-  // happens (in that case, an exception is held).
-  int done() {
-    return _stream->done;
-  }
+    // Becomes ready when the stream is empty, or when an error
+    // happens (in that case, an exception is held).
+    int done() { return _stream->done; }
 
-  friend class stream<T...>;
+    friend class stream<T...>;
 };
 
 #endif /* CEPH_MSG_STREAM_H_ */

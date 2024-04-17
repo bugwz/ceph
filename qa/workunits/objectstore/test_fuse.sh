@@ -6,10 +6,9 @@ if ! id -u | grep -q '^0$'; then
     exit 0
 fi
 
-expect_false()
-{
-        set -x
-        if "$@"; then return 1; else return 0; fi
+expect_false() {
+    set -x
+    if "$@"; then return 1; else return 0; fi
 }
 
 COT=ceph-objectstore-tool
@@ -29,7 +28,7 @@ export CEPH_ARGS=--enable_experimental_unrecoverable_data_corrupting_features=bl
 $COT --no-mon-config --op mkfs --data-path $DATA --type $TYPE
 $COT --no-mon-config --op fuse --data-path $DATA --mountpoint $MNT &
 
-while ! test -e $MNT/type ; do
+while ! test -e $MNT/type; do
     echo waiting for $MNT/type to appear
     sleep 1
 done
@@ -53,12 +52,12 @@ test -e $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/bitwise_hash
 test -e $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/omap_header
 
 # omap header
-echo omap header > $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/omap_header
+echo omap header >$MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/omap_header
 grep -q omap $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/omap_header
 
 # omap
-echo value a > $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/omap/keya
-echo value b > $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/omap/keyb
+echo value a >$MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/omap/keya
+echo value b >$MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/omap/keyb
 ls $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/omap | grep -c key | grep -q 2
 grep 'value a' $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/omap/keya
 grep 'value b' $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/omap/keyb
@@ -68,8 +67,8 @@ rm $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/omap/keyb
 test ! -e $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/omap/keyb
 
 # attr
-echo value a > $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/attr/keya
-echo value b > $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/attr/keyb
+echo value a >$MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/attr/keya
+echo value b >$MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/attr/keyb
 ls $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/attr | grep -c key | grep -q 2
 grep 'value a' $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/attr/keya
 grep 'value b' $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/attr/keyb
@@ -80,7 +79,7 @@ test ! -e $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/attr/keyb
 
 # data
 test ! -s $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/data
-echo asdfasdfasdf > $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/data
+echo asdfasdfasdf >$MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/data
 test -s $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/data
 grep -q asdfasdfasdf $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/data
 truncate --size 4 $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/data
@@ -88,7 +87,6 @@ stat --format=%s $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/data | grep -q ^
 expect_false grep -q asdfasdfasdf $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/data
 rm $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/data
 test ! -s $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/data
-
 
 # create pg collection
 mkdir --mode 0003 $MNT/0.0_head

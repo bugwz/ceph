@@ -33,7 +33,7 @@ function run() {
     # check that erasure code plugins are preloaded
     CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.a) log flush || return 1
     grep 'load: jerasure.*lrc' $dir/mon.a.log || return 1
-    for id in $(seq 0 10) ; do
+    for id in $(seq 0 10); do
         run_osd $dir $id || return 1
     done
     create_rbd_pool || return 1
@@ -44,7 +44,7 @@ function run() {
     create_erasure_coded_pool ecpool || return 1
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         $func $dir || return 1
     done
 
@@ -57,8 +57,8 @@ function create_erasure_coded_pool() {
 
     ceph osd erasure-code-profile set myprofile \
         crush-failure-domain=osd || return 1
-    create_pool $poolname 12 12 erasure myprofile \
-        || return 1
+    create_pool $poolname 12 12 erasure myprofile ||
+        return 1
     wait_for_clean || return 1
 }
 
@@ -67,10 +67,9 @@ function rados_put_get() {
     local poolname=$2
     local objname=${3:-SOMETHING}
 
-
-    for marker in AAA BBB CCCC DDDD ; do
+    for marker in AAA BBB CCCC DDDD; do
         printf "%*s" 1024 $marker
-    done > $dir/ORIGINAL
+    done >$dir/ORIGINAL
 
     #
     # get and put an object, compare they are equal
@@ -105,10 +104,9 @@ function rados_osds_out_in() {
     local poolname=$2
     local objname=${3:-SOMETHING}
 
-
-    for marker in FFFF GGGG HHHH IIII ; do
+    for marker in FFFF GGGG HHHH IIII; do
         printf "%*s" 1024 $marker
-    done > $dir/ORIGINAL
+    done >$dir/ORIGINAL
 
     #
     # get and put an object, compare they are equal
@@ -127,14 +125,14 @@ function rados_osds_out_in() {
     wait_for_clean || return 1
     local osds_list=$(get_osds $poolname $objname)
     local -a osds=($osds_list)
-    for osd in 0 1 ; do
-      ceph osd out ${osds[$osd]} || return 1
+    for osd in 0 1; do
+        ceph osd out ${osds[$osd]} || return 1
     done
     wait_for_clean || return 1
     #
     # verify the object is no longer mapped to the osds that are out
     #
-    for osd in 0 1 ; do
+    for osd in 0 1; do
         ! get_osds $poolname $objname | grep '\<'${osds[$osd]}'\>' || return 1
     done
     rados --pool $poolname get $objname $dir/COPY || return 1
@@ -144,8 +142,8 @@ function rados_osds_out_in() {
     # to be clean (i.e. all PG are clean and active) again which
     # implies the PG go back to using the same osds as before
     #
-    for osd in 0 1 ; do
-      ceph osd in ${osds[$osd]} || return 1
+    for osd in 0 1; do
+        ceph osd in ${osds[$osd]} || return 1
     done
     wait_for_clean || return 1
     test "$osds_list" = "$(get_osds $poolname $objname)" || return 1
@@ -161,9 +159,9 @@ function TEST_rados_put_get_lrc_advanced() {
         plugin=lrc \
         mapping=DD_ \
         crush-steps='[ [ "chooseleaf", "osd", 0 ] ]' \
-        layers='[ [ "DDc", "" ] ]'  || return 1
-    create_pool $poolname 12 12 erasure $profile \
-        || return 1
+        layers='[ [ "DDc", "" ] ]' || return 1
+    create_pool $poolname 12 12 erasure $profile ||
+        return 1
 
     rados_put_get $dir $poolname || return 1
 
@@ -180,8 +178,8 @@ function TEST_rados_put_get_lrc_kml() {
         plugin=lrc \
         k=4 m=2 l=3 \
         crush-failure-domain=osd || return 1
-    create_pool $poolname 12 12 erasure $profile \
-        || return 1
+    create_pool $poolname 12 12 erasure $profile ||
+        return 1
 
     rados_put_get $dir $poolname || return 1
 
@@ -190,7 +188,7 @@ function TEST_rados_put_get_lrc_kml() {
 }
 
 function TEST_rados_put_get_isa() {
-    if ! erasure_code_plugin_exists isa ; then
+    if ! erasure_code_plugin_exists isa; then
         echo "SKIP because plugin isa has not been built"
         return 0
     fi
@@ -200,8 +198,8 @@ function TEST_rados_put_get_isa() {
     ceph osd erasure-code-profile set profile-isa \
         plugin=isa \
         crush-failure-domain=osd || return 1
-    create_pool $poolname 1 1 erasure profile-isa \
-        || return 1
+    create_pool $poolname 1 1 erasure profile-isa ||
+        return 1
 
     rados_put_get $dir $poolname || return 1
 
@@ -220,8 +218,8 @@ function TEST_rados_put_get_jerasure() {
         plugin=jerasure \
         k=4 m=2 \
         crush-failure-domain=osd || return 1
-    create_pool $poolname 12 12 erasure $profile \
-        || return 1
+    create_pool $poolname 12 12 erasure $profile ||
+        return 1
 
     rados_put_get $dir $poolname || return 1
     rados_osds_out_in $dir $poolname || return 1
@@ -240,8 +238,8 @@ function TEST_rados_put_get_shec() {
         plugin=shec \
         k=2 m=1 c=1 \
         crush-failure-domain=osd || return 1
-    create_pool $poolname 12 12 erasure $profile \
-        || return 1
+    create_pool $poolname 12 12 erasure $profile ||
+        return 1
 
     rados_put_get $dir $poolname || return 1
 
@@ -251,7 +249,7 @@ function TEST_rados_put_get_shec() {
 
 function TEST_alignment_constraints() {
     local payload=ABC
-    echo "$payload" > $dir/ORIGINAL
+    echo "$payload" >$dir/ORIGINAL
     #
     # Verify that the rados command enforces alignment constraints
     # imposed by the stripe width
@@ -283,13 +281,16 @@ function verify_chunk_mapping() {
     local first=$3
     local second=$4
 
-    local payload=$(printf '%*s' $(chunk_size) FIRST$poolname ; printf '%*s' $(chunk_size) SECOND$poolname)
-    echo -n "$payload" > $dir/ORIGINAL
+    local payload=$(
+        printf '%*s' $(chunk_size) FIRST$poolname
+        printf '%*s' $(chunk_size) SECOND$poolname
+    )
+    echo -n "$payload" >$dir/ORIGINAL
 
     rados --pool $poolname put SOMETHING$poolname $dir/ORIGINAL || return 1
     rados --pool $poolname get SOMETHING$poolname $dir/COPY || return 1
     local -a osds=($(get_osds $poolname SOMETHING$poolname))
-    for (( i = 0; i < ${#osds[@]}; i++ )) ; do
+    for ((i = 0; i < ${#osds[@]}; i++)); do
         ceph daemon osd.${osds[$i]} flush_journal
     done
     diff $dir/ORIGINAL $dir/COPY || return 1
@@ -316,8 +317,8 @@ function TEST_chunk_mapping() {
         mapping='_DD' \
         crush-steps='[ [ "choose", "osd", 0 ] ]' || return 1
     ceph osd erasure-code-profile get remap-profile
-    create_pool remap-pool 12 12 erasure remap-profile \
-        || return 1
+    create_pool remap-pool 12 12 erasure remap-profile ||
+        return 1
 
     #
     # mapping=_DD

@@ -10,29 +10,30 @@
  *
  */
 
-#include "include/compat.h"
 #include "common/ceph_context.h"
+#include "include/compat.h"
 
 
-class RegistryKey {
+class RegistryKey
+{
 public:
-  RegistryKey(CephContext *cct_, HKEY hRootKey, LPCTSTR strKey, bool create_value);
-  ~RegistryKey();
+    RegistryKey(CephContext* cct_, HKEY hRootKey, LPCTSTR strKey, bool create_value);
+    ~RegistryKey();
 
-  static remove(CephContext *cct_, HKEY hRootKey, LPCTSTR strKey);
+    static remove(CephContext* cct_, HKEY hRootKey, LPCTSTR strKey);
 
-  int flush();
+    int flush();
 
-  int set(LPCTSTR lpValue, DWORD data);
-  int set(LPCTSTR lpValue, std::string data);
+    int set(LPCTSTR lpValue, DWORD data);
+    int set(LPCTSTR lpValue, std::string data);
 
-  int get(LPCTSTR lpValue, bool& value);
-  int get(LPCTSTR lpValue, DWORD& value);
-  int get(LPCTSTR lpValue, std::string& value);
+    int get(LPCTSTR lpValue, bool& value);
+    int get(LPCTSTR lpValue, DWORD& value);
+    int get(LPCTSTR lpValue, std::string& value);
 
-  HKEY hKey = NULL;
-  bool missingKey = false;
+    HKEY hKey = NULL;
+    bool missingKey = false;
 
 private:
-  CephContext *cct;
+    CephContext* cct;
 };

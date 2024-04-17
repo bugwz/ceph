@@ -5,11 +5,12 @@
 
 #include <cstdlib>
 
-static inline bool is_crimson_cluster() {
-  return getenv("CRIMSON_COMPAT") != nullptr;
+static inline bool is_crimson_cluster()
+{
+    return getenv("CRIMSON_COMPAT") != nullptr;
 }
 
-#define SKIP_IF_CRIMSON()             \
-  if (is_crimson_cluster()) {         \
-    GTEST_SKIP() << "Not supported by crimson yet. Skipped"; \
-  }
+#define SKIP_IF_CRIMSON()                                        \
+    if (is_crimson_cluster()) {                                  \
+        GTEST_SKIP() << "Not supported by crimson yet. Skipped"; \
+    }

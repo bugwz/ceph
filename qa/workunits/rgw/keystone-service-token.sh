@@ -19,16 +19,16 @@ source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
 trap cleanup EXIT
 
 function cleanup() {
-  kill $KEYSTONE_FAKE_SERVER_PID
-  wait
+    kill $KEYSTONE_FAKE_SERVER_PID
+    wait
 }
 
 function run() {
-  $CEPH_ROOT/qa/workunits/rgw//keystone-fake-server.py &
-  KEYSTONE_FAKE_SERVER_PID=$!
-  # Give fake Keystone server some seconds to startup
-  sleep 5
-  $CEPH_ROOT/qa/workunits/rgw/test-keystone-service-token.py
+    $CEPH_ROOT/qa/workunits/rgw//keystone-fake-server.py &
+    KEYSTONE_FAKE_SERVER_PID=$!
+    # Give fake Keystone server some seconds to startup
+    sleep 5
+    $CEPH_ROOT/qa/workunits/rgw/test-keystone-service-token.py
 }
 
 main keystone-service-token "$@"

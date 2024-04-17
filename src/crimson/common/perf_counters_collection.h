@@ -5,45 +5,51 @@
 
 #include "common/perf_counters.h"
 #include "include/common_fwd.h"
+
 #include <seastar/core/sharded.hh>
 
 using crimson::common::PerfCountersCollectionImpl;
 namespace crimson::common {
-class PerfCountersCollection: public seastar::sharded<PerfCountersCollection>
+class PerfCountersCollection : public seastar::sharded<PerfCountersCollection>
 {
-  using ShardedPerfCountersCollection = seastar::sharded<PerfCountersCollection>;
+    using ShardedPerfCountersCollection = seastar::sharded<PerfCountersCollection>;
 
 private:
-  std::unique_ptr<PerfCountersCollectionImpl> perf_collection;
-  static ShardedPerfCountersCollection sharded_perf_coll;
-  friend PerfCountersCollection& local_perf_coll();
-  friend ShardedPerfCountersCollection& sharded_perf_coll();
+    std::unique_ptr<PerfCountersCollectionImpl> perf_collection;
+    static ShardedPerfCountersCollection sharded_perf_coll;
+    friend PerfCountersCollection& local_perf_coll();
+    friend ShardedPerfCountersCollection& sharded_perf_coll();
 
 public:
-  PerfCountersCollection();
-  ~PerfCountersCollection();
-  PerfCountersCollectionImpl* get_perf_collection();
-  void dump_formatted(ceph::Formatter *f, bool schema, bool dump_labeled,
-                      const std::string &logger = "",
-                      const std::string &counter = "");
+    PerfCountersCollection();
+    ~PerfCountersCollection();
+    PerfCountersCollectionImpl* get_perf_collection();
+    void dump_formatted(ceph::Formatter* f, bool schema, bool dump_labeled, const std::string& logger = "",
+                        const std::string& counter = "");
 };
 
-inline PerfCountersCollection::ShardedPerfCountersCollection& sharded_perf_coll(){
-  return PerfCountersCollection::sharded_perf_coll;
+inline PerfCountersCollection::ShardedPerfCountersCollection& sharded_perf_coll()
+{
+    return PerfCountersCollection::sharded_perf_coll;
 }
 
-inline PerfCountersCollection& local_perf_coll() {
-  return PerfCountersCollection::sharded_perf_coll.local();
+inline PerfCountersCollection& local_perf_coll()
+{
+    return PerfCountersCollection::sharded_perf_coll.local();
 }
 
-class PerfCountersDeleter {
-  CephContext* cct;
+class PerfCountersDeleter
+{
+    CephContext* cct;
 
 public:
-  PerfCountersDeleter() noexcept : cct(nullptr) {}
-  PerfCountersDeleter(CephContext* cct) noexcept : cct(cct) {}
-  void operator()(PerfCounters* p) noexcept;
+    PerfCountersDeleter() noexcept
+        : cct(nullptr)
+    {}
+    PerfCountersDeleter(CephContext* cct) noexcept
+        : cct(cct)
+    {}
+    void operator()(PerfCounters* p) noexcept;
 };
-}
+}   // namespace crimson::common
 using PerfCountersRef = std::unique_ptr<crimson::common::PerfCounters, crimson::common::PerfCountersDeleter>;
-

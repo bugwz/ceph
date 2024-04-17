@@ -16,7 +16,7 @@ function get_python_path() {
     echo $(realpath ../src/pybind):$(pwd)/lib/cython_modules/lib.3:$python_common
 }
 
-if [ `uname` = FreeBSD ]; then
+if [ $(uname) = FreeBSD ]; then
     # otherwise module prettytable will not be found
     export PYTHONPATH=$(get_python_path):/usr/local/lib/python3.6/site-packages
     exec_mode=+111
@@ -59,7 +59,7 @@ fi
 
 all=false
 if [ "$1" = "" ]; then
-   all=true
+    all=true
 fi
 
 select=("$@")
@@ -77,28 +77,29 @@ else
     sudo sysctl -w "${KERNCORE}=${COREPATTERN}"
 fi
 # Clean out any cores in core target directory (currently .)
-if ls $(dirname $(sysctl -n $KERNCORE)) | grep -q '^core\|core$' ; then
-    mkdir found.cores.$$ 2> /dev/null || true
+if ls $(dirname $(sysctl -n $KERNCORE)) | grep -q '^core\|core$'; then
+    mkdir found.cores.$$ 2>/dev/null || true
     for i in $(ls $(dirname $(sysctl -n $KERNCORE)) | grep '^core\|core$'); do
-	mv $i found.cores.$$
+        mv $i found.cores.$$
     done
     echo "Stray cores put in $(pwd)/found.cores.$$"
 fi
 
 ulimit -c unlimited
-for f in $(cd $location ; find . -mindepth 2 -perm $exec_mode -type f)
-do
+for f in $(
+    cd $location
+    find . -mindepth 2 -perm $exec_mode -type f
+); do
     f=$(echo $f | sed 's/\.\///')
     if [[ "$all" = "false" ]]; then
         found=false
-        for c in "${!select[@]}"
-        do
+        for c in "${!select[@]}"; do
             # Get command and any arguments of subset of tests to run
             allargs="${select[$c]}"
             arg1=$(echo "$allargs" | cut --delimiter " " --field 1)
             # Get user args for this selection for use below
             userargs="$(echo $allargs | cut -s --delimiter " " --field 2-)"
-            if [[ "$arg1" = $(basename $f) ]] || [[  "$arg1" = $(dirname $f) ]]; then
+            if [[ "$arg1" = $(basename $f) ]] || [[ "$arg1" = $(dirname $f) ]]; then
                 found=true
                 break
             fi
@@ -121,12 +122,12 @@ do
     echo "--- $cmd ---"
     if [[ "$dryrun" != "true" ]]; then
         if ! PATH=$PATH:bin \
-	    CEPH_ROOT=.. \
-	    CEPH_LIB=lib \
-	    LOCALRUN=yes \
-	    time -f "Elapsed %E (%e seconds)" $cmd ; then
-          echo "$f .............. FAILED"
-          errors=$(expr $errors + 1)
+            CEPH_ROOT=.. \
+            CEPH_LIB=lib \
+            LOCALRUN=yes \
+            time -f "Elapsed %E (%e seconds)" $cmd; then
+            echo "$f .............. FAILED"
+            errors=$(expr $errors + 1)
         fi
     fi
 done

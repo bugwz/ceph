@@ -47,12 +47,12 @@ OLD_IFS=$IFS
 IFS='
  	'
 
-function cleanup () {
+function cleanup() {
     rm -rf $TMPDIR
     IFS="$OLD_IFS"
 }
 
-function usage () {
+function usage() {
     echo "Usage is as follows:"
     echo
     echo "$PROGRAM <--version>"
@@ -95,18 +95,18 @@ function usage () {
     echo "    If '--verbose' or '-v' is specified, progress will be printed."
 }
 
-function version () {
+function version() {
     echo "$PROGRAM version $VERSION"
 }
 
 # Internal variables and initializations.
-readonly PROGRAM=`basename "$0"`
+readonly PROGRAM=$(basename "$0")
 readonly VERSION=0.2
 
-OLD_PWD="`pwd`"
-TMPDIR=`mktemp -d "${TMPDIR:-/tmp}/$PROGRAM.XXXXXX"`
-TMPFILE=`mktemp "$TMPDIR/$PROGRAM.XXXXXX"` # Create a place to store our work's progress
-TOARCHIVE=`mktemp "$TMPDIR/$PROGRAM.toarchive.XXXXXX"`
+OLD_PWD="$(pwd)"
+TMPDIR=$(mktemp -d "${TMPDIR:-/tmp}/$PROGRAM.XXXXXX")
+TMPFILE=$(mktemp "$TMPDIR/$PROGRAM.XXXXXX") # Create a place to store our work's progress
+TOARCHIVE=$(mktemp "$TMPDIR/$PROGRAM.toarchive.XXXXXX")
 OUT_FILE=$OLD_PWD # assume "this directory" without a name change by default
 SEPARATE=0
 VERBOSE=0
@@ -125,59 +125,59 @@ readonly E_UNKNOWN=255
 # Process command-line arguments.
 while test $# -gt 0; do
     case $1 in
-        --format )
-            shift
-            FORMAT="$1"
-            shift
-            ;;
+    --format)
+        shift
+        FORMAT="$1"
+        shift
+        ;;
 
-        --prefix )
-            shift
-            PREFIX="$1"
-            shift
-            ;;
+    --prefix)
+        shift
+        PREFIX="$1"
+        shift
+        ;;
 
-        --separate | -s )
-            shift
-            SEPARATE=1
-            ;;
+    --separate | -s)
+        shift
+        SEPARATE=1
+        ;;
 
-        --tree-ish | -t )
-            shift
-            TREEISH="$1"
-            shift
-            ;;
+    --tree-ish | -t)
+        shift
+        TREEISH="$1"
+        shift
+        ;;
 
-	--ignore )
-	    shift
-	    IGNORE="$1"
-	    shift
-	    ;;
+    --ignore)
+        shift
+        IGNORE="$1"
+        shift
+        ;;
 
-        --version )
-            version
-            exit
-            ;;
+    --version)
+        version
+        exit
+        ;;
 
-        --verbose | -v )
-            shift
-            VERBOSE=1
-            ;;
+    --verbose | -v)
+        shift
+        VERBOSE=1
+        ;;
 
-        -? | --usage | --help )
-            usage
-            exit
-            ;;
+    -? | --usage | --help)
+        usage
+        exit
+        ;;
 
-        -* )
-            echo "Unrecognized option: $1" >&2
-            usage
-            exit $E_BAD_OPTION
-            ;;
+    -*)
+        echo "Unrecognized option: $1" >&2
+        usage
+        exit $E_BAD_OPTION
+        ;;
 
-        * )
-            break
-            ;;
+    *)
+        break
+        ;;
     esac
 done
 
@@ -191,7 +191,10 @@ if [ $SEPARATE -eq 1 -a ! -d $OUT_FILE ]; then
     echo "When creating multiple archives, your destination must be a directory."
     echo "If it's not, you risk being surprised when your files are overwritten."
     exit
-elif [ `git config -l | grep -q '^core\.bare=false'; echo $?` -ne 0 ]; then
+elif [ $(
+    git config -l | grep -q '^core\.bare=false'
+    echo $?
+) -ne 0 ]; then
     echo "$PROGRAM must be run from a git working copy (i.e., not a bare repository)."
     exit
 fi
@@ -200,34 +203,33 @@ fi
 if [ $VERBOSE -eq 1 ]; then
     echo -n "creating superproject archive..."
 fi
-git archive --format=$FORMAT --prefix="$PREFIX" $TREEISH > $TMPDIR/$(basename "$(pwd)").$FORMAT
+git archive --format=$FORMAT --prefix="$PREFIX" $TREEISH >$TMPDIR/$(basename "$(pwd)").$FORMAT
 if [ $VERBOSE -eq 1 ]; then
     echo "done"
 fi
-echo $TMPDIR/$(basename "$(pwd)").$FORMAT >| $TMPFILE # clobber on purpose
-superfile=`head -n 1 $TMPFILE`
+echo $TMPDIR/$(basename "$(pwd)").$FORMAT >|$TMPFILE # clobber on purpose
+superfile=$(head -n 1 $TMPFILE)
 
 if [ $VERBOSE -eq 1 ]; then
     echo -n "looking for subprojects..."
 fi
 # find all '.git' dirs, these show us the remaining to-be-archived dirs
 # we only want directories that are below the current directory
-find . -mindepth 2 -name '.git' -type d -print | sed -e 's/^\.\///' -e 's/\.git$//' >> $TOARCHIVE
+find . -mindepth 2 -name '.git' -type d -print | sed -e 's/^\.\///' -e 's/\.git$//' >>$TOARCHIVE
 # as of version 1.7.8, git places the submodule .git directories under the superprojects .git dir
 # the submodules get a .git file that points to their .git dir. we need to find all of these too
-find . -mindepth 2 -name '.git' -type f -print | xargs grep -l "gitdir" | sed -e 's/^\.\///' -e 's/\.git$//' >> $TOARCHIVE
+find . -mindepth 2 -name '.git' -type f -print | xargs grep -l "gitdir" | sed -e 's/^\.\///' -e 's/\.git$//' >>$TOARCHIVE
 
 if [ -n "$IGNORE" ]; then
-    cat $TOARCHIVE | grep -v $IGNORE > $TOARCHIVE.new
+    cat $TOARCHIVE | grep -v $IGNORE >$TOARCHIVE.new
     mv $TOARCHIVE.new $TOARCHIVE
 fi
 
 if [ $VERBOSE -eq 1 ]; then
     echo "done"
     echo "  found:"
-    cat $TOARCHIVE | while read arch
-    do
-      echo "    $arch"
+    cat $TOARCHIVE | while read arch; do
+        echo "    $arch"
     done
 fi
 
@@ -237,14 +239,14 @@ fi
 while read path; do
     TREEISH=$(git submodule | grep "^ .*${path%/} " | cut -d ' ' -f 2) # git submodule does not list trailing slashes in $path
     cd "$path"
-    git archive --format=$FORMAT --prefix="${PREFIX}$path" ${TREEISH:-HEAD} > "$TMPDIR"/"$(echo "$path" | sed -e 's/\//./g')"$FORMAT
+    git archive --format=$FORMAT --prefix="${PREFIX}$path" ${TREEISH:-HEAD} >"$TMPDIR"/"$(echo "$path" | sed -e 's/\//./g')"$FORMAT
     if [ $FORMAT == 'zip' ]; then
         # delete the empty directory entry; zipped submodules won't unzip if we don't do this
         zip -d "$(tail -n 1 $TMPFILE)" "${PREFIX}${path%/}" >/dev/null # remove trailing '/'
     fi
-    echo "$TMPDIR"/"$(echo "$path" | sed -e 's/\//./g')"$FORMAT >> $TMPFILE
+    echo "$TMPDIR"/"$(echo "$path" | sed -e 's/\//./g')"$FORMAT >>$TMPFILE
     cd "$OLD_PWD"
-done < $TOARCHIVE
+done <$TOARCHIVE
 if [ $VERBOSE -eq 1 ]; then
     echo "done"
 fi
@@ -261,13 +263,13 @@ if [ $SEPARATE -eq 0 ]; then
     elif [ $FORMAT == 'zip' ]; then
         sed -e '1d' $TMPFILE | while read file; do
             # zip incorrectly stores the full path, so cd and then grow
-            cd `dirname "$file"`
-            zip -g "$superfile" `basename "$file"` && rm -f "$file"
+            cd $(dirname "$file")
+            zip -g "$superfile" $(basename "$file") && rm -f "$file"
         done
         cd "$OLD_PWD"
     fi
 
-    echo "$superfile" >| $TMPFILE # clobber on purpose
+    echo "$superfile" >|$TMPFILE # clobber on purpose
 fi
 if [ $VERBOSE -eq 1 ]; then
     echo "done"
@@ -278,7 +280,7 @@ if [ $VERBOSE -eq 1 ]; then
 fi
 while read file; do
     mv "$file" "$OUT_FILE"
-done < $TMPFILE
+done <$TMPFILE
 if [ $VERBOSE -eq 1 ]; then
     echo "done"
 fi

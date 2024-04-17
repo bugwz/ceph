@@ -13,35 +13,32 @@ namespace librbd {
 
 struct ImageCtx;
 
-template <typename ImageCtxT>
-class ConfigWatcher {
+template<typename ImageCtxT> class ConfigWatcher
+{
 public:
-  static ConfigWatcher* create(ImageCtxT& image_ctx) {
-    return new ConfigWatcher(image_ctx);
-  }
+    static ConfigWatcher* create(ImageCtxT& image_ctx) { return new ConfigWatcher(image_ctx); }
 
-  ConfigWatcher(ImageCtxT& image_ctx);
-  ~ConfigWatcher();
+    ConfigWatcher(ImageCtxT& image_ctx);
+    ~ConfigWatcher();
 
-  ConfigWatcher(const ConfigWatcher&) = delete;
-  ConfigWatcher& operator=(const ConfigWatcher&) = delete;
+    ConfigWatcher(const ConfigWatcher&) = delete;
+    ConfigWatcher& operator=(const ConfigWatcher&) = delete;
 
-  void init();
-  void shut_down();
+    void init();
+    void shut_down();
 
 private:
-  struct Observer;
+    struct Observer;
 
-  ImageCtxT& m_image_ctx;
+    ImageCtxT& m_image_ctx;
 
-  Observer* m_observer = nullptr;
+    Observer* m_observer = nullptr;
 
-  void handle_global_config_change(std::set<std::string> changed);
-
+    void handle_global_config_change(std::set<std::string> changed);
 };
 
-} // namespace librbd
+}   // namespace librbd
 
 extern template class librbd::ConfigWatcher<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_CONFIG_WATCHER_H
+#endif   // CEPH_LIBRBD_CONFIG_WATCHER_H

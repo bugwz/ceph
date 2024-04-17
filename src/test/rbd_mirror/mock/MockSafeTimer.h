@@ -8,9 +8,10 @@
 
 struct Context;
 
-struct MockSafeTimer {
-  MOCK_METHOD2(add_event_after, Context*(double, Context*));
-  MOCK_METHOD1(cancel_event, bool(Context *));
+struct MockSafeTimer
+{
+    MOCK_METHOD2(add_event_after, Context*(double, Context*));
+    MOCK_METHOD1(cancel_event, bool(Context*));
 };
 
-#endif // CEPH_MOCK_SAFE_TIMER_H
+#endif   // CEPH_MOCK_SAFE_TIMER_H

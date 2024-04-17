@@ -42,13 +42,13 @@ function run() {
     rados --pool rbd --striper put toyfile $dir/toyfile || return 1
 
     # stat it, with and without striping
-    rados --pool rbd --striper stat toyfile | cut -d ',' -f 2 > $dir/stripedStat || return 1
-    rados --pool rbd stat toyfile.0000000000000000 | cut -d ',' -f 2 > $dir/stat || return 1
-    echo ' size 1234' > $dir/refstat
+    rados --pool rbd --striper stat toyfile | cut -d ',' -f 2 >$dir/stripedStat || return 1
+    rados --pool rbd stat toyfile.0000000000000000 | cut -d ',' -f 2 >$dir/stat || return 1
+    echo ' size 1234' >$dir/refstat
     diff -w $dir/stripedStat $dir/refstat || return 1
     diff -w $dir/stat $dir/refstat || return 1
-    rados --pool rbd stat toyfile >& $dir/staterror
-    grep -q 'No such file or directory' $dir/staterror ||  return 1
+    rados --pool rbd stat toyfile >&$dir/staterror
+    grep -q 'No such file or directory' $dir/staterror || return 1
 
     # get the file back with and without striping
     rados --pool rbd --striper get toyfile $dir/stripedGroup || return 1
@@ -58,39 +58,39 @@ function run() {
 
     # test truncate
     rados --pool rbd --striper truncate toyfile 12
-    rados --pool rbd --striper stat toyfile | cut -d ',' -f 2 > $dir/stripedStat || return 1
-    rados --pool rbd stat toyfile.0000000000000000 | cut -d ',' -f 2 > $dir/stat || return 1
-    echo ' size 12' > $dir/reftrunc
+    rados --pool rbd --striper stat toyfile | cut -d ',' -f 2 >$dir/stripedStat || return 1
+    rados --pool rbd stat toyfile.0000000000000000 | cut -d ',' -f 2 >$dir/stat || return 1
+    echo ' size 12' >$dir/reftrunc
     diff -w $dir/stripedStat $dir/reftrunc || return 1
     diff -w $dir/stat $dir/reftrunc || return 1
 
     # test xattrs
 
     rados --pool rbd --striper setxattr toyfile somexattr somevalue || return 1
-    rados --pool rbd --striper getxattr toyfile somexattr > $dir/xattrvalue || return 1
-    rados --pool rbd getxattr toyfile.0000000000000000 somexattr > $dir/xattrvalue2 || return 1
-    echo 'somevalue' > $dir/refvalue
+    rados --pool rbd --striper getxattr toyfile somexattr >$dir/xattrvalue || return 1
+    rados --pool rbd getxattr toyfile.0000000000000000 somexattr >$dir/xattrvalue2 || return 1
+    echo 'somevalue' >$dir/refvalue
     diff -w $dir/xattrvalue $dir/refvalue || return 1
     diff -w $dir/xattrvalue2 $dir/refvalue || return 1
-    rados --pool rbd --striper listxattr toyfile > $dir/xattrlist || return 1
-    echo 'somexattr' > $dir/reflist
+    rados --pool rbd --striper listxattr toyfile >$dir/xattrlist || return 1
+    echo 'somexattr' >$dir/reflist
     diff -w $dir/xattrlist $dir/reflist || return 1
-    rados --pool rbd listxattr toyfile.0000000000000000 | grep -v striper > $dir/xattrlist2 || return 1
+    rados --pool rbd listxattr toyfile.0000000000000000 | grep -v striper >$dir/xattrlist2 || return 1
     diff -w $dir/xattrlist2 $dir/reflist || return 1
     rados --pool rbd --striper rmxattr toyfile somexattr || return 1
 
     local attr_not_found_str="No data available"
-    [ `uname` = FreeBSD ] && \
+    [ $(uname) = FreeBSD ] &&
         attr_not_found_str="Attribute not found"
-    expect_failure $dir "$attr_not_found_str"  \
+    expect_failure $dir "$attr_not_found_str" \
         rados --pool rbd --striper getxattr toyfile somexattr || return 1
-    expect_failure $dir "$attr_not_found_str"  \
+    expect_failure $dir "$attr_not_found_str" \
         rados --pool rbd getxattr toyfile.0000000000000000 somexattr || return 1
 
     # test rm
     rados --pool rbd --striper rm toyfile || return 1
     expect_failure $dir 'No such file or directory' \
-        rados --pool rbd --striper stat toyfile  || return 1
+        rados --pool rbd --striper stat toyfile || return 1
     expect_failure $dir 'No such file or directory' \
         rados --pool rbd stat toyfile.0000000000000000 || return 1
 

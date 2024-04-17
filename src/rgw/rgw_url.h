@@ -8,5 +8,4 @@ namespace rgw {
 // parse a URL of the form: http|https|amqp|amqps|kafka://[user:password@]<host>[:port]
 bool parse_url_authority(const std::string& url, std::string& host, std::string& user, std::string& password);
 bool parse_url_userinfo(const std::string& url, std::string& user, std::string& password);
-}
-
+}   // namespace rgw

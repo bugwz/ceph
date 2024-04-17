@@ -17,6 +17,6 @@
 
 #include "include/common_fwd.h"
 
-void dump_open_fds(CephContext *cct);
+void dump_open_fds(CephContext* cct);
 
 #endif

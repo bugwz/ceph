@@ -33,7 +33,7 @@ function run() {
     export poolname=test
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -45,7 +45,7 @@ function below_margin() {
     shift
     local -i target=$1
 
-    return $(( $check <= $target && $check >= $target - $margin ? 0 : 1 ))
+    return $(($check <= $target && $check >= $target - $margin ? 0 : 1))
 }
 
 function above_margin() {
@@ -53,7 +53,7 @@ function above_margin() {
     shift
     local -i target=$1
 
-    return $(( $check >= $target && $check <= $target + $margin ? 0 : 1 ))
+    return $(($check >= $target && $check <= $target + $margin ? 0 : 1))
 }
 
 FIND_UPACT='grep "pg[[]${PG}.*recovering.*update_calc_stats " $log | tail -1 | sed "s/.*[)] \([[][^ p]*\).*$/\1/"'
@@ -75,9 +75,8 @@ function check() {
     local log=$dir/osd.${primary}.log
 
     local addp=" "
-    if [ "$type" = "erasure" ];
-    then
-      addp="p"
+    if [ "$type" = "erasure" ]; then
+        addp="p"
     fi
 
     UPACT=$(eval $FIND_UPACT)
@@ -97,13 +96,12 @@ function check() {
     above_margin $LAST $misplaced_end || return 1
 
     # This is the value of set into MISSING_ON_PRIMARY
-    if [ -n "$primary_start" ];
-    then
-      which="shard $primary"
-      FIRST=$(eval $FIND_FIRST)
-      below_margin $FIRST $primary_start || return 1
-      LAST=$(eval $FIND_LAST)
-      above_margin $LAST $primary_end || return 1
+    if [ -n "$primary_start" ]; then
+        which="shard $primary"
+        FIRST=$(eval $FIND_FIRST)
+        below_margin $FIRST $primary_start || return 1
+        LAST=$(eval $FIND_LAST)
+        above_margin $LAST $primary_end || return 1
     fi
 }
 
@@ -127,8 +125,7 @@ function do_recovery_out1() {
     run_osd $dir 4 || return 1
     run_osd $dir 5 || return 1
 
-    if [ $type = "erasure" ];
-    then
+    if [ $type = "erasure" ]; then
         ceph osd erasure-code-profile set myprofile plugin=jerasure technique=reed_sol_van k=2 m=1 crush-failure-domain=osd
         create_pool $poolname 1 1 $type myprofile
     else
@@ -137,9 +134,8 @@ function do_recovery_out1() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local primary=$(get_primary $poolname obj1)
@@ -199,9 +195,8 @@ function TEST_recovery_sizeup() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local primary=$(get_primary $poolname obj1)
@@ -254,9 +249,8 @@ function TEST_recovery_sizedown() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local primary=$(get_primary $poolname obj1)
@@ -265,8 +259,7 @@ function TEST_recovery_sizedown() {
     local allosds=$(get_osds $poolname obj1)
 
     ceph osd set norecover
-    for osd in $allosds
-    do
+    for osd in $allosds; do
         ceph osd out osd.$osd
     done
 
@@ -308,9 +301,8 @@ function TEST_recovery_undersized() {
     local osds=3
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    for i in $(seq 0 $(expr $osds - 1))
-    do
-      run_osd $dir $i || return 1
+    for i in $(seq 0 $(expr $osds - 1)); do
+        run_osd $dir $i || return 1
     done
 
     create_pool $poolname 1 1
@@ -318,9 +310,8 @@ function TEST_recovery_undersized() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local primary=$(get_primary $poolname obj1)
@@ -328,14 +319,12 @@ function TEST_recovery_undersized() {
 
     ceph osd set norecover
     # Mark any osd not the primary (only 1 replica so also has no replica)
-    for i in $(seq 0 $(expr $osds - 1))
-    do
-      if [ $i = $primary ];
-      then
-        continue
-      fi
-      ceph osd out osd.$i
-      break
+    for i in $(seq 0 $(expr $osds - 1)); do
+        if [ $i = $primary ]; then
+            continue
+        fi
+        ceph osd out osd.$i
+        break
     done
     ceph osd pool set test size 4
     ceph osd unset norecover
@@ -347,18 +336,15 @@ function TEST_recovery_undersized() {
     # Wait for recovery to finish
     # Can't use wait_for_clean() because state goes from active+recovering+undersized+degraded
     # to  active+undersized+degraded
-    for i in $(seq 1 300)
-    do
-      if ceph pg dump pgs | grep ^$PG | grep -qv recovering
-      then
-          break
-      fi
-      if [ $i = "300" ];
-      then
-          echo "Timeout waiting for recovery to finish"
-          return 1
-      fi
-      sleep 1
+    for i in $(seq 1 300); do
+        if ceph pg dump pgs | grep ^$PG | grep -qv recovering; then
+            break
+        fi
+        if [ $i = "300" ]; then
+            echo "Timeout waiting for recovery to finish"
+            return 1
+        fi
+        sleep 1
     done
 
     # Get new primary
@@ -396,9 +382,8 @@ function TEST_recovery_erasure_remapped() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local primary=$(get_primary $poolname obj1)
@@ -411,18 +396,15 @@ function TEST_recovery_erasure_remapped() {
     ceph osd out osd.${otherosd}
 
     # Mark osd not the primary and not down/out osd as just out
-    for i in 0 1 2 3
-    do
-      if [ $i = $primary ];
-      then
-	continue
-      fi
-      if [ $i = $otherosd ];
-      then
-	continue
-      fi
-      ceph osd out osd.$i
-      break
+    for i in 0 1 2 3; do
+        if [ $i = $primary ]; then
+            continue
+        fi
+        if [ $i = $otherosd ]; then
+            continue
+        fi
+        ceph osd out osd.$i
+        break
     done
     ceph osd unset norecover
     ceph tell osd.$(get_primary $poolname obj1) debug kick_recovery_wq 0
@@ -443,9 +425,8 @@ function TEST_recovery_multi() {
     local osds=6
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    for i in $(seq 0 $(expr $osds - 1))
-    do
-      run_osd $dir $i || return 1
+    for i in $(seq 0 $(expr $osds - 1)); do
+        run_osd $dir $i || return 1
     done
 
     create_pool $poolname 1 1
@@ -465,9 +446,8 @@ function TEST_recovery_multi() {
     ceph osd down osd.${otherosd}
 
     local half=$(expr $objects / 2)
-    for i in $(seq 2 $half)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 2 $half); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     kill $(cat $dir/osd.${primary}.pid)
@@ -475,9 +455,8 @@ function TEST_recovery_multi() {
     activate_osd $dir ${otherosd}
     sleep 3
 
-    for i in $(seq $(expr $half + 1) $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq $(expr $half + 1) $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local PG=$(get_pg $poolname obj1)

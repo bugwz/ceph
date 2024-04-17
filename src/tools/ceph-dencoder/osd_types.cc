@@ -1,4 +1,5 @@
 #include "acconfig.h"
+
 #include <cstdint>
 using namespace std;
 #include "include/ceph_features.h"
@@ -28,12 +29,11 @@ using namespace std;
 // cannot initialize dencoders when initializing static variables, as some of
 // the types are allocated using mempool, and the mempools are initialized as
 // static variables.
-DENC_API void register_dencoders(DencoderPlugin* plugin)
-{
+DENC_API void register_dencoders(DencoderPlugin* plugin){
 #include "osd_types.h"
 }
 
 DENC_API void unregister_dencoders(DencoderPlugin* plugin)
 {
-  plugin->unregister_dencoders();
+    plugin->unregister_dencoders();
 }

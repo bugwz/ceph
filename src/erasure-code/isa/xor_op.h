@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2014 CERN (Switzerland)
  *                                                                                                                                                                                                           \
- * Author: Andreas-Joachim Peters <Andreas.Joachim.Peters@cern.ch>                                                                                                                                           \
+ * Author: Andreas-Joachim Peters <Andreas.Joachim.Peters@cern.ch> \
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -25,12 +25,10 @@
 // -------------------------------------------------------------------------
 // -------------------------------------------------------------------------
 
-#define EC_ISA_ADDRESS_ALIGNMENT 32u
+#define EC_ISA_ADDRESS_ALIGNMENT    32u
 #define EC_ISA_VECTOR_SSE2_WORDSIZE 64u
 
-#if __GNUC__ > 4 || \
-  ( (__GNUC__ == 4) && (__GNUC_MINOR__ >= 4) ) ||\
-  (__clang__ == 1 )
+#if __GNUC__ > 4 || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 4)) || (__clang__ == 1)
 #ifdef EC_ISA_VECTOR_OP_DEBUG
 #pragma message "* using 128-bit vector operations in " __FILE__
 #endif
@@ -52,36 +50,31 @@ typedef unsigned long long vector_op_t;
 // -------------------------------------------------------------------------
 // check if a pointer is aligend to byte_count
 // -------------------------------------------------------------------------
-#define is_aligned(POINTER, BYTE_COUNT) \
-  (((uintptr_t)(const void *)(POINTER)) % (BYTE_COUNT) == 0)
+#define is_aligned(POINTER, BYTE_COUNT) (((uintptr_t)(const void*)(POINTER)) % (BYTE_COUNT) == 0)
 
 // -------------------------------------------------------------------------
 // compute byte-wise XOR of cw and dw block, ew contains the end address of cw
 // -------------------------------------------------------------------------
-void
-byte_xor(unsigned char* cw, unsigned char* dw, unsigned char* ew);
+void byte_xor(unsigned char* cw, unsigned char* dw, unsigned char* ew);
 
 // -------------------------------------------------------------------------
 // compute word-wise XOR of cw and dw block, ew contains the end address of cw
 // -------------------------------------------------------------------------
-void
-vector_xor(vector_op_t* cw, vector_op_t* dw, vector_op_t* ew);
+void vector_xor(vector_op_t* cw, vector_op_t* dw, vector_op_t* ew);
 
 // -------------------------------------------------------------------------
 // compute region XOR like parity = src[0] ^ src[1] ... ^ src[src_size-]
 // -------------------------------------------------------------------------
-void
-region_xor(unsigned char** src, unsigned char* parity, int src_size, unsigned size);
+void region_xor(unsigned char** src, unsigned char* parity, int src_size, unsigned size);
 
 // -------------------------------------------------------------------------
 // compute region XOR like parity = src[0] ^ src[1] ... ^ src[src_size-]
 // using SSE2 64-byte operations
 // -------------------------------------------------------------------------
-void
-region_sse2_xor(char** src /* array of 64-byte aligned source pointer to xor */,
-                char* parity /* 64-byte aligned output pointer containing the parity */,
-                int src_size /* size of the source pointer array */,
-                unsigned size /* size of the region to xor */);
+void region_sse2_xor(char** src /* array of 64-byte aligned source pointer to xor */,
+                     char* parity /* 64-byte aligned output pointer containing the parity */,
+                     int src_size /* size of the source pointer array */,
+                     unsigned size /* size of the region to xor */);
 
 
-#endif // EC_ISA_XOR_OP_H
+#endif   // EC_ISA_XOR_OP_H

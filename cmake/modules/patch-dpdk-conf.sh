@@ -7,7 +7,7 @@ setconf() {
     if grep -q ^$key= ${conf}; then
         sed -i -e "s:^$key=.*$:$key=$val:g" ${conf}
     else
-        echo $key=$val >> ${conf}
+        echo $key=$val >>${conf}
     fi
 }
 

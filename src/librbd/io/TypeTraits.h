@@ -9,12 +9,12 @@
 namespace librbd {
 namespace io {
 
-template <typename IoCtxT>
-struct TypeTraits {
-  typedef ::SafeTimer SafeTimer;
+template<typename IoCtxT> struct TypeTraits
+{
+    typedef ::SafeTimer SafeTimer;
 };
 
-} // namespace io
-} // namespace librbd
+}   // namespace io
+}   // namespace librbd
 
-#endif // CEPH_LIBRBD_IO_TYPE_TRAITS_H
+#endif   // CEPH_LIBRBD_IO_TYPE_TRAITS_H

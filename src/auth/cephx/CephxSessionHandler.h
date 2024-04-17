@@ -13,32 +13,30 @@
  */
 
 
-#include "auth/AuthSessionHandler.h"
 #include "auth/Auth.h"
+#include "auth/AuthSessionHandler.h"
 #include "include/common_fwd.h"
 
 class Message;
 
-class CephxSessionHandler  : public AuthSessionHandler {
-  CephContext *cct;
-  int protocol;
-  CryptoKey key;                // per mon authentication
-  uint64_t features;
+class CephxSessionHandler : public AuthSessionHandler
+{
+    CephContext* cct;
+    int protocol;
+    CryptoKey key;   // per mon authentication
+    uint64_t features;
 
-  int _calc_signature(Message *m, uint64_t *psig);
+    int _calc_signature(Message* m, uint64_t* psig);
 
 public:
-  CephxSessionHandler(CephContext *cct,
-		      const CryptoKey& session_key,
-		      const uint64_t features)
-    : cct(cct),
-      protocol(CEPH_AUTH_CEPHX),
-      key(session_key),
-      features(features) {
-  }
-  ~CephxSessionHandler() override = default;
+    CephxSessionHandler(CephContext* cct, const CryptoKey& session_key, const uint64_t features)
+        : cct(cct)
+        , protocol(CEPH_AUTH_CEPHX)
+        , key(session_key)
+        , features(features)
+    {}
+    ~CephxSessionHandler() override = default;
 
-  int sign_message(Message *m) override;
-  int check_message_signature(Message *m) override ;
+    int sign_message(Message* m) override;
+    int check_message_signature(Message* m) override;
 };
-

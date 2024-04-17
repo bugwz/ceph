@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-extern uint32_t ceph_crc32c_ppc(uint32_t crc, unsigned char const *buffer, unsigned len);
+extern uint32_t ceph_crc32c_ppc(uint32_t crc, unsigned char const* buffer, unsigned len);
 
 #ifdef __cplusplus
 }

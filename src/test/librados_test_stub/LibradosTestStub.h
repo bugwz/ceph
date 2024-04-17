@@ -5,12 +5,13 @@
 #define LIBRADOS_TEST_STUB_H
 
 #include "include/rados/librados_fwd.hpp"
+
 #include <boost/shared_ptr.hpp>
 
 namespace neorados {
 struct IOContext;
 struct RADOS;
-} // namespace neorados
+}   // namespace neorados
 
 namespace librados {
 
@@ -19,13 +20,12 @@ class MockTestMemRadosClient;
 class TestCluster;
 class TestClassHandler;
 
-MockTestMemIoCtxImpl &get_mock_io_ctx(IoCtx &ioctx);
-MockTestMemIoCtxImpl &get_mock_io_ctx(neorados::RADOS& rados,
-                                      neorados::IOContext& io_context);
+MockTestMemIoCtxImpl& get_mock_io_ctx(IoCtx& ioctx);
+MockTestMemIoCtxImpl& get_mock_io_ctx(neorados::RADOS& rados, neorados::IOContext& io_context);
 
-MockTestMemRadosClient &get_mock_rados_client(neorados::RADOS& rados);
+MockTestMemRadosClient& get_mock_rados_client(neorados::RADOS& rados);
 
-} // namespace librados
+}   // namespace librados
 
 namespace librados_test_stub {
 
@@ -36,7 +36,7 @@ TestClusterRef get_cluster();
 
 librados::TestClassHandler* get_class_handler();
 
-} // namespace librados_test_stub
+}   // namespace librados_test_stub
 
 
-#endif // LIBRADOS_TEST_STUB_H
+#endif   // LIBRADOS_TEST_STUB_H

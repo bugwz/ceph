@@ -28,7 +28,7 @@ function run() {
     CEPH_ARGS+="--debug-bluestore 20 "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -47,9 +47,8 @@ function TEST_snaptrim_stats() {
     setup $dir || return 1
     run_mon $dir a --osd_pool_default_size=$OSDS || return 1
     run_mgr $dir x || return 1
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $osd --osd_pool_default_pg_autoscale_mode=off || return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $osd --osd_pool_default_pg_autoscale_mode=off || return 1
     done
 
     # disable scrubs
@@ -64,8 +63,7 @@ function TEST_snaptrim_stats() {
     # write a few objects
     TESTDATA="testdata.1"
     dd if=/dev/urandom of=$TESTDATA bs=4096 count=1
-    for i in `seq 1 $objects`
-    do
+    for i in $(seq 1 $objects); do
         rados -p $poolname put obj${i} $TESTDATA
     done
     rm -f $TESTDATA
@@ -74,9 +72,8 @@ function TEST_snaptrim_stats() {
     SNAP=1
     rados -p $poolname mksnap snap${SNAP}
     TESTDATA="testdata.2"
-    dd if=/dev/urandom of=$TESTDATA  bs=4096 count=1
-    for i in `seq 1 $objects`
-    do
+    dd if=/dev/urandom of=$TESTDATA bs=4096 count=1
+    for i in $(seq 1 $objects); do
         rados -p $poolname put obj${i} $TESTDATA
     done
     rm -f $TESTDATA
@@ -89,13 +86,12 @@ function TEST_snaptrim_stats() {
     sleep $WAIT_FOR_UPDATE
     local objects_trimmed=0
     local snaptrim_duration_total=0.0
-    for i in $(seq 0 $(expr $PGNUM - 1))
-    do
+    for i in $(seq 0 $(expr $PGNUM - 1)); do
         local pgid="${poolid}.${i}"
-        objects_trimmed=$(expr $objects_trimmed + $(ceph pg $pgid query | \
+        objects_trimmed=$(expr $objects_trimmed + $(ceph pg $pgid query |
             jq '.info.stats.objects_trimmed'))
-        snaptrim_duration_total=`echo $snaptrim_duration_total + $(ceph pg \
-            $pgid query | jq '.info.stats.snaptrim_duration') | bc`
+        snaptrim_duration_total=$(echo $snaptrim_duration_total + $(ceph pg \
+            $pgid query | jq '.info.stats.snaptrim_duration') | bc)
     done
     test $objects_trimmed -eq $objects || return 1
     echo "$snaptrim_duration_total > 0.0" | bc || return 1
@@ -115,9 +111,8 @@ function TEST_snaptrim_stats_multiple_snaps() {
     setup $dir || return 1
     run_mon $dir a --osd_pool_default_size=$OSDS || return 1
     run_mgr $dir x || return 1
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $osd --osd_pool_default_pg_autoscale_mode=off || return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $osd --osd_pool_default_pg_autoscale_mode=off || return 1
     done
 
     # disable scrubs
@@ -132,21 +127,18 @@ function TEST_snaptrim_stats_multiple_snaps() {
     # write a few objects
     local TESTDATA="testdata.0"
     dd if=/dev/urandom of=$TESTDATA bs=4096 count=1
-    for i in `seq 1 $objects`
-    do
+    for i in $(seq 1 $objects); do
         rados -p $poolname put obj${i} $TESTDATA
     done
     rm -f $TESTDATA
 
     # create snapshots, clones
     NUMSNAPS=2
-    for i in `seq 1 $NUMSNAPS`
-    do
+    for i in $(seq 1 $NUMSNAPS); do
         rados -p $poolname mksnap snap${i}
         TESTDATA="testdata".${i}
-        dd if=/dev/urandom of=$TESTDATA  bs=4096 count=1
-        for i in `seq 1 $objects`
-        do
+        dd if=/dev/urandom of=$TESTDATA bs=4096 count=1
+        for i in $(seq 1 $objects); do
             rados -p $poolname put obj${i} $TESTDATA
         done
         rm -f $TESTDATA
@@ -154,8 +146,7 @@ function TEST_snaptrim_stats_multiple_snaps() {
 
     # remove the snapshots, should trigger snaptrim
     local total_objects_trimmed=0
-    for i in `seq 1 $NUMSNAPS`
-    do
+    for i in $(seq 1 $NUMSNAPS); do
         rados -p $poolname rmsnap snap${i}
 
         # check for snaptrim stats
@@ -163,13 +154,12 @@ function TEST_snaptrim_stats_multiple_snaps() {
         sleep $WAIT_FOR_UPDATE
         local objects_trimmed=0
         local snaptrim_duration_total=0.0
-        for i in $(seq 0 $(expr $PGNUM - 1))
-        do
+        for i in $(seq 0 $(expr $PGNUM - 1)); do
             local pgid="${poolid}.${i}"
-            objects_trimmed=$(expr $objects_trimmed + $(ceph pg $pgid query | \
+            objects_trimmed=$(expr $objects_trimmed + $(ceph pg $pgid query |
                 jq '.info.stats.objects_trimmed'))
-            snaptrim_duration_total=`echo $snaptrim_duration_total + $(ceph pg \
-                $pgid query | jq '.info.stats.snaptrim_duration') | bc`
+            snaptrim_duration_total=$(echo $snaptrim_duration_total + $(ceph pg \
+                $pgid query | jq '.info.stats.snaptrim_duration') | bc)
         done
         test $objects_trimmed -eq $objects || return 1
         echo "$snaptrim_duration_total > 0.0" | bc || return 1

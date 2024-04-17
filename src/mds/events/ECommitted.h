@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
  * Ceph - scalable distributed file system
@@ -7,9 +7,9 @@
  *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
- * License version 2.1, as published by the Free Software 
+ * License version 2.1, as published by the Free Software
  * Foundation.  See file COPYING.
- * 
+ *
  */
 
 #ifndef CEPH_MDS_ECOMMITTED_H
@@ -18,25 +18,28 @@
 #include "../LogEvent.h"
 #include "EMetaBlob.h"
 
-class ECommitted : public LogEvent {
+class ECommitted : public LogEvent
+{
 public:
-  metareqid_t reqid;
+    metareqid_t reqid;
 
-  ECommitted() : LogEvent(EVENT_COMMITTED) { }
-  explicit ECommitted(metareqid_t r) :
-    LogEvent(EVENT_COMMITTED), reqid(r) { }
+    ECommitted()
+        : LogEvent(EVENT_COMMITTED)
+    {}
+    explicit ECommitted(metareqid_t r)
+        : LogEvent(EVENT_COMMITTED)
+        , reqid(r)
+    {}
 
-  void print(std::ostream& out) const override {
-    out << "ECommitted " << reqid;
-  }
+    void print(std::ostream& out) const override { out << "ECommitted " << reqid; }
 
-  void encode(bufferlist &bl, uint64_t features) const override;
-  void decode(bufferlist::const_iterator &bl) override;
-  void dump(Formatter *f) const override;
-  static void generate_test_instances(std::list<ECommitted*>& ls);
+    void encode(bufferlist& bl, uint64_t features) const override;
+    void decode(bufferlist::const_iterator& bl) override;
+    void dump(Formatter* f) const override;
+    static void generate_test_instances(std::list<ECommitted*>& ls);
 
-  void update_segment() override {}
-  void replay(MDSRank *mds) override;
+    void update_segment() override {}
+    void replay(MDSRank* mds) override;
 };
 WRITE_CLASS_ENCODER_FEATURES(ECommitted)
 

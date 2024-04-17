@@ -9,7 +9,7 @@ function assert_exit_codes() {
     declare -a pids=($@)
 
     for pid in ${pids[@]}; do
-       wait $pid
+        wait $pid
     done
 }
 

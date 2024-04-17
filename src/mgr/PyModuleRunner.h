@@ -14,11 +14,10 @@
 
 #pragma once
 
-#include "common/Thread.h"
-#include "common/LogClient.h"
-#include "mgr/Gil.h"
-
 #include "PyModule.h"
+#include "common/LogClient.h"
+#include "common/Thread.h"
+#include "mgr/Gil.h"
 
 /**
  * Implement the pattern of calling serve() on a module in a thread,
@@ -27,63 +26,56 @@
 class PyModuleRunner
 {
 public:
-  // Info about the module we're going to run
-  PyModuleRef py_module;
+    // Info about the module we're going to run
+    PyModuleRef py_module;
 
 protected:
-  // Populated by descendent class
-  PyObject *pClassInstance = nullptr;
+    // Populated by descendent class
+    PyObject* pClassInstance = nullptr;
 
-  LogChannelRef clog;
+    LogChannelRef clog;
 
-  class PyModuleRunnerThread : public Thread
-  {
-    PyModuleRunner *mod;
+    class PyModuleRunnerThread : public Thread
+    {
+        PyModuleRunner* mod;
 
-  public:
-    explicit PyModuleRunnerThread(PyModuleRunner *mod_)
-      : mod(mod_) {}
+    public:
+        explicit PyModuleRunnerThread(PyModuleRunner* mod_)
+            : mod(mod_)
+        {}
 
-    void *entry() override;
-  };
+        void* entry() override;
+    };
 
-  bool is_dead() const { return dead; }
+    bool is_dead() const { return dead; }
 
-  std::string thread_name;
+    std::string thread_name;
 
 public:
-  int serve();
-  void shutdown();
-  void log(const std::string &record);
+    int serve();
+    void shutdown();
+    void log(const std::string& record);
 
-  const char *get_thread_name() const
-  {
-    return thread_name.c_str();
-  }
+    const char* get_thread_name() const { return thread_name.c_str(); }
 
-  PyModuleRunner(
-      const PyModuleRef &py_module_,
-      LogChannelRef clog_)
-    : 
-      py_module(py_module_),
-      clog(clog_),
-      thread(this)
-  {
-    // Shortened name for use as thread name, because thread names
-    // required to be <16 chars
-    thread_name = py_module->get_name().substr(0, 15);
+    PyModuleRunner(const PyModuleRef& py_module_, LogChannelRef clog_)
+        : py_module(py_module_)
+        , clog(clog_)
+        , thread(this)
+    {
+        // Shortened name for use as thread name, because thread names
+        // required to be <16 chars
+        thread_name = py_module->get_name().substr(0, 15);
 
-    ceph_assert(py_module != nullptr);
-  }
+        ceph_assert(py_module != nullptr);
+    }
 
-  ~PyModuleRunner();
+    ~PyModuleRunner();
 
-  PyModuleRunnerThread thread;
+    PyModuleRunnerThread thread;
 
-  std::string const &get_name() const { return py_module->get_name(); }
+    std::string const& get_name() const { return py_module->get_name(); }
 
 private:
-  bool dead = false;
+    bool dead = false;
 };
-
-

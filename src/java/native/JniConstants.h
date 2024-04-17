@@ -37,7 +37,8 @@
  *
  * TODO: similar arguments hold for field and method IDs; we should cache them centrally too.
  */
-struct JniConstants {
+struct JniConstants
+{
     static void init(JNIEnv* env);
 
     static jclass inet6AddressClass;
@@ -46,7 +47,9 @@ struct JniConstants {
     static jclass stringClass;
 };
 
-#define NATIVE_METHOD(className, functionName, signature) \
-    { #functionName, signature, reinterpret_cast<void*>(className ## _ ## functionName) }
+#define NATIVE_METHOD(className, functionName, signature)                             \
+    {                                                                                 \
+        #functionName, signature, reinterpret_cast<void*>(className##_##functionName) \
+    }
 
-#endif  // JNI_CONSTANTS_H_included
+#endif   // JNI_CONSTANTS_H_included

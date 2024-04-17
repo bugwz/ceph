@@ -3,56 +3,44 @@
 
 #pragma once
 
-#include <map>
-#include <vector>
-#include <string>
-#include <include/types.h>
+#include "rgw_acl.h"
 
 #include <boost/optional.hpp>
-
-#include "rgw_acl.h"
+#include <include/types.h>
+#include <map>
+#include <string>
+#include <vector>
 
 class RGWUserCtl;
 
 class RGWAccessControlPolicy_SWIFT : public RGWAccessControlPolicy
 {
-  int add_grants(const DoutPrefixProvider *dpp, rgw::sal::Driver* driver,
-                 const std::vector<std::string>& uids,
-                 uint32_t perm);
+    int add_grants(const DoutPrefixProvider* dpp, rgw::sal::Driver* driver, const std::vector<std::string>& uids,
+                   uint32_t perm);
 
 public:
-  explicit RGWAccessControlPolicy_SWIFT(CephContext* const cct)
-    : RGWAccessControlPolicy(cct) {
-  }
-  ~RGWAccessControlPolicy_SWIFT() override = default;
+    explicit RGWAccessControlPolicy_SWIFT(CephContext* const cct)
+        : RGWAccessControlPolicy(cct)
+    {}
+    ~RGWAccessControlPolicy_SWIFT() override = default;
 
-  int create(const DoutPrefixProvider *dpp,
-	     rgw::sal::Driver* driver,
-             const rgw_user& id,
-             const std::string& name,
-             const char* read_list,
-             const char* write_list,
-             uint32_t& rw_mask);
-  void filter_merge(uint32_t mask, RGWAccessControlPolicy_SWIFT *policy);
-  void to_str(std::string& read, std::string& write);
+    int create(const DoutPrefixProvider* dpp, rgw::sal::Driver* driver, const rgw_user& id, const std::string& name,
+               const char* read_list, const char* write_list, uint32_t& rw_mask);
+    void filter_merge(uint32_t mask, RGWAccessControlPolicy_SWIFT* policy);
+    void to_str(std::string& read, std::string& write);
 };
 
 class RGWAccessControlPolicy_SWIFTAcct : public RGWAccessControlPolicy
 {
 public:
-  explicit RGWAccessControlPolicy_SWIFTAcct(CephContext * const cct)
-    : RGWAccessControlPolicy(cct) {
-  }
-  ~RGWAccessControlPolicy_SWIFTAcct() override {}
+    explicit RGWAccessControlPolicy_SWIFTAcct(CephContext* const cct)
+        : RGWAccessControlPolicy(cct)
+    {}
+    ~RGWAccessControlPolicy_SWIFTAcct() override {}
 
-  void add_grants(const DoutPrefixProvider *dpp,
-		  rgw::sal::Driver* driver,
-                  const std::vector<std::string>& uids,
-                  uint32_t perm);
-  bool create(const DoutPrefixProvider *dpp,
-	      rgw::sal::Driver* driver,
-              const rgw_user& id,
-              const std::string& name,
-              const std::string& acl_str);
-  boost::optional<std::string> to_str() const;
+    void add_grants(const DoutPrefixProvider* dpp, rgw::sal::Driver* driver, const std::vector<std::string>& uids,
+                    uint32_t perm);
+    bool create(const DoutPrefixProvider* dpp, rgw::sal::Driver* driver, const rgw_user& id, const std::string& name,
+                const std::string& acl_str);
+    boost::optional<std::string> to_str() const;
 };

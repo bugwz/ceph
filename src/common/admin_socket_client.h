@@ -23,11 +23,12 @@
 class AdminSocketClient
 {
 public:
-  AdminSocketClient(const std::string &path);
-  std::string do_request(std::string request, std::string *result);
-  std::string ping(bool *ok);
+    AdminSocketClient(const std::string& path);
+    std::string do_request(std::string request, std::string* result);
+    std::string ping(bool* ok);
+
 private:
-  std::string m_path;
+    std::string m_path;
 };
 
 const char* get_rand_socket_path();

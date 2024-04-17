@@ -18,10 +18,11 @@
 namespace librados {
 
 // Wraps Objecter's ObjectOperation with storage for an optional mtime argument.
-struct ObjectOperationImpl {
-  ::ObjectOperation o;
-  ceph::real_time rt;
-  ceph::real_time *prt = nullptr;
+struct ObjectOperationImpl
+{
+    ::ObjectOperation o;
+    ceph::real_time rt;
+    ceph::real_time* prt = nullptr;
 };
 
-} // namespace librados
+}   // namespace librados

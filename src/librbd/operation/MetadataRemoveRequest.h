@@ -5,6 +5,7 @@
 #define CEPH_LIBRBD_OPERATION_METADATA_REMOVE_REQUEST_H
 
 #include "librbd/operation/Request.h"
+
 #include <iosfwd>
 #include <string>
 
@@ -16,29 +17,26 @@ class ImageCtx;
 
 namespace operation {
 
-template <typename ImageCtxT = ImageCtx>
-class MetadataRemoveRequest : public Request<ImageCtxT> {
+template<typename ImageCtxT = ImageCtx> class MetadataRemoveRequest : public Request<ImageCtxT>
+{
 public:
-  MetadataRemoveRequest(ImageCtxT &image_ctx, Context *on_finish,
-                        const std::string &key);
+    MetadataRemoveRequest(ImageCtxT& image_ctx, Context* on_finish, const std::string& key);
 
 protected:
-  void send_op() override;
-  bool should_complete(int r) override;
+    void send_op() override;
+    bool should_complete(int r) override;
 
-  journal::Event create_event(uint64_t op_tid) const override {
-    return journal::MetadataRemoveEvent(op_tid, m_key);
-  }
+    journal::Event create_event(uint64_t op_tid) const override { return journal::MetadataRemoveEvent(op_tid, m_key); }
 
 private:
-  std::string m_key;
+    std::string m_key;
 
-  void send_metadata_remove();
+    void send_metadata_remove();
 };
 
-} // namespace operation
-} // namespace librbd
+}   // namespace operation
+}   // namespace librbd
 
 extern template class librbd::operation::MetadataRemoveRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_OPERATION_METADATA_REMOVE_REQUEST_H
+#endif   // CEPH_LIBRBD_OPERATION_METADATA_REMOVE_REQUEST_H

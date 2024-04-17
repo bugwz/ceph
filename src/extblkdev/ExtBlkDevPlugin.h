@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
  * Ceph distributed storage system
@@ -16,7 +16,7 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  */
 
 #ifndef CEPH_EXT_BLK_DEV_PLUGIN_H
@@ -26,13 +26,11 @@
 
 namespace ceph {
 
-  namespace extblkdev {
-    int preload(CephContext *cct);
-    int detect_device(CephContext *cct,
-			  const std::string &logdevname,
-			  ExtBlkDevInterfaceRef& ebd_impl);
-    int release_device(ExtBlkDevInterfaceRef& ebd_impl);
-  }
-}
+namespace extblkdev {
+int preload(CephContext* cct);
+int detect_device(CephContext* cct, const std::string& logdevname, ExtBlkDevInterfaceRef& ebd_impl);
+int release_device(ExtBlkDevInterfaceRef& ebd_impl);
+}   // namespace extblkdev
+}   // namespace ceph
 
 #endif

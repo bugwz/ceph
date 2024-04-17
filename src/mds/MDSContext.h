@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
  * Ceph - scalable distributed file system
@@ -7,22 +7,22 @@
  *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
- * License version 2.1, as published by the Free Software 
+ * License version 2.1, as published by the Free Software
  * Foundation.  See file COPYING.
- * 
+ *
  */
 
 
 #ifndef MDS_CONTEXT_H
 #define MDS_CONTEXT_H
 
-#include <vector>
-#include <deque>
-
+#include "common/ceph_time.h"
 #include "include/Context.h"
 #include "include/elist.h"
 #include "include/spinlock.h"
-#include "common/ceph_time.h"
+
+#include <deque>
+#include <vector>
 
 class MDSRank;
 
@@ -31,41 +31,38 @@ class MDSRank;
  *
  * This class exists so that Context subclasses can provide the MDS pointer
  * from a pointer they already had, e.g. MDCache or Locker, rather than
- * necessarily having to carry around an extra MDS* pointer. 
+ * necessarily having to carry around an extra MDS* pointer.
  */
 class MDSContext : public Context
 {
 public:
-template<template<typename> class A>
-  using vec_alloc = std::vector<MDSContext*, A<MDSContext*>>;
-  using vec = vec_alloc<std::allocator>;
+    template<template<typename> class A> using vec_alloc = std::vector<MDSContext*, A<MDSContext*>>;
+    using vec = vec_alloc<std::allocator>;
 
-template<template<typename> class A>
-  using que_alloc = std::deque<MDSContext*, A<MDSContext*>>;
-  using que = que_alloc<std::allocator>;
+    template<template<typename> class A> using que_alloc = std::deque<MDSContext*, A<MDSContext*>>;
+    using que = que_alloc<std::allocator>;
 
-  void complete(int r) override;
-  virtual MDSRank *get_mds() = 0;
+    void complete(int r) override;
+    virtual MDSRank* get_mds() = 0;
 };
 
 /* Children of this could have used multiple inheritance with MDSHolder and
  * MDSContext but then get_mds() would be ambiguous.
  */
-template<class T>
-class MDSHolder : public T
+template<class T> class MDSHolder : public T
 {
 public:
-  MDSRank* get_mds() override {
-    return mds;
-  }
+    MDSRank* get_mds() override { return mds; }
 
 protected:
-  MDSHolder() = delete;
-  MDSHolder(MDSRank* mds) : mds(mds) {
-    ceph_assert(mds != nullptr);
-  }
+    MDSHolder() = delete;
+    MDSHolder(MDSRank* mds)
+        : mds(mds)
+    {
+        ceph_assert(mds != nullptr);
+    }
 
-  MDSRank* mds;
+    MDSRank* mds;
 };
 
 /**
@@ -74,10 +71,12 @@ protected:
 class MDSInternalContext : public MDSHolder<MDSContext>
 {
 public:
-  MDSInternalContext() = delete;
+    MDSInternalContext() = delete;
 
 protected:
-  explicit MDSInternalContext(MDSRank *mds_) : MDSHolder(mds_) {}
+    explicit MDSInternalContext(MDSRank* mds_)
+        : MDSHolder(mds_)
+    {}
 };
 
 /**
@@ -87,32 +86,36 @@ protected:
 class MDSInternalContextWrapper : public MDSInternalContext
 {
 protected:
-  Context *fin = nullptr;
-  void finish(int r) override;
+    Context* fin = nullptr;
+    void finish(int r) override;
+
 public:
-  MDSInternalContextWrapper(MDSRank *m, Context *c) : MDSInternalContext(m), fin(c) {}
+    MDSInternalContextWrapper(MDSRank* m, Context* c)
+        : MDSInternalContext(m)
+        , fin(c)
+    {}
 };
 
 class MDSIOContextBase : public MDSContext
 {
 public:
-  MDSIOContextBase(bool track=true);
-  virtual ~MDSIOContextBase();
-  MDSIOContextBase(const MDSIOContextBase&) = delete;
-  MDSIOContextBase& operator=(const MDSIOContextBase&) = delete;
+    MDSIOContextBase(bool track = true);
+    virtual ~MDSIOContextBase();
+    MDSIOContextBase(const MDSIOContextBase&) = delete;
+    MDSIOContextBase& operator=(const MDSIOContextBase&) = delete;
 
-  void complete(int r) override;
+    void complete(int r) override;
 
-  virtual void print(std::ostream& out) const = 0;
+    virtual void print(std::ostream& out) const = 0;
 
-  static bool check_ios_in_flight(ceph::coarse_mono_time cutoff,
-				  std::string& slow_count,
-				  ceph::coarse_mono_time& oldest);
+    static bool check_ios_in_flight(ceph::coarse_mono_time cutoff, std::string& slow_count,
+                                    ceph::coarse_mono_time& oldest);
+
 private:
-  ceph::coarse_mono_time created_at;
-  elist<MDSIOContextBase*>::item list_item;
-  
-  friend struct MDSIOContextList;
+    ceph::coarse_mono_time created_at;
+    elist<MDSIOContextBase*>::item list_item;
+
+    friend struct MDSIOContextList;
 };
 
 /**
@@ -123,15 +126,14 @@ private:
 class MDSLogContextBase : public MDSIOContextBase
 {
 protected:
-  uint64_t write_pos = 0;
+    uint64_t write_pos = 0;
+
 public:
-  MDSLogContextBase() = default;
-  void complete(int r) final;
-  void set_write_pos(uint64_t wp) { write_pos = wp; }
-  virtual void pre_finish(int r) {}
-  void print(std::ostream& out) const override {
-    out << "log_event(" << write_pos << ")";
-  }
+    MDSLogContextBase() = default;
+    void complete(int r) final;
+    void set_write_pos(uint64_t wp) { write_pos = wp; }
+    virtual void pre_finish(int r) {}
+    void print(std::ostream& out) const override { out << "log_event(" << write_pos << ")"; }
 };
 
 /**
@@ -141,7 +143,9 @@ public:
 class MDSIOContext : public MDSHolder<MDSIOContextBase>
 {
 public:
-  explicit MDSIOContext(MDSRank *mds_) : MDSHolder(mds_) {}
+    explicit MDSIOContext(MDSRank* mds_)
+        : MDSHolder(mds_)
+    {}
 };
 
 /**
@@ -151,13 +155,15 @@ public:
 class MDSIOContextWrapper : public MDSHolder<MDSIOContextBase>
 {
 protected:
-  Context *fin;
+    Context* fin;
+
 public:
-  MDSIOContextWrapper(MDSRank *m, Context *c) : MDSHolder(m), fin(c) {}
-  void finish(int r) override;
-  void print(std::ostream& out) const override {
-    out << "io_context_wrapper(" << fin << ")";
-  }
+    MDSIOContextWrapper(MDSRank* m, Context* c)
+        : MDSHolder(m)
+        , fin(c)
+    {}
+    void finish(int r) override;
+    void print(std::ostream& out) const override { out << "io_context_wrapper(" << fin << ")"; }
 };
 
 /**
@@ -166,10 +172,11 @@ public:
 class C_MDSInternalNoop : public MDSContext
 {
 public:
-  void finish(int r) override {}
-  void complete(int r) override { delete this; }
+    void finish(int r) override {}
+    void complete(int r) override { delete this; }
+
 protected:
-  MDSRank* get_mds() override final {ceph_abort();}
+    MDSRank* get_mds() override final { ceph_abort(); }
 };
 
 
@@ -180,28 +187,32 @@ protected:
 class C_IO_Wrapper : public MDSIOContext
 {
 protected:
-  bool async;
-  MDSContext *wrapped;
-  void finish(int r) override {
-    wrapped->complete(r);
-    wrapped = nullptr;
-  }
-public:
-  C_IO_Wrapper(MDSRank *mds_, MDSContext *wrapped_) :
-    MDSIOContext(mds_), async(true), wrapped(wrapped_) {
-    ceph_assert(wrapped != NULL);
-  }
-
-  ~C_IO_Wrapper() override {
-    if (wrapped != nullptr) {
-      delete wrapped;
-      wrapped = nullptr;
+    bool async;
+    MDSContext* wrapped;
+    void finish(int r) override
+    {
+        wrapped->complete(r);
+        wrapped = nullptr;
     }
-  }
-  void complete(int r) final;
-  void print(std::ostream& out) const override {
-    out << "io_wrapper(" << wrapped << ")";
-  }
+
+public:
+    C_IO_Wrapper(MDSRank* mds_, MDSContext* wrapped_)
+        : MDSIOContext(mds_)
+        , async(true)
+        , wrapped(wrapped_)
+    {
+        ceph_assert(wrapped != NULL);
+    }
+
+    ~C_IO_Wrapper() override
+    {
+        if (wrapped != nullptr) {
+            delete wrapped;
+            wrapped = nullptr;
+        }
+    }
+    void complete(int r) final;
+    void print(std::ostream& out) const override { out << "io_wrapper(" << wrapped << ")"; }
 };
 
 using MDSGather = C_GatherBase<MDSContext, C_MDSInternalNoop>;
@@ -209,4 +220,4 @@ using MDSGatherBuilder = C_GatherBuilderBase<MDSContext, MDSGather>;
 
 using MDSContextFactory = ContextFactory<MDSContext>;
 
-#endif  // MDS_CONTEXT_H
+#endif   // MDS_CONTEXT_H

@@ -13,9 +13,10 @@
 #ifndef HEAP_PROFILER_H_
 #define HEAP_PROFILER_H_
 
+#include "common/config.h"
+
 #include <string>
 #include <vector>
-#include "common/config.h"
 
 class LogClient;
 
@@ -31,7 +32,7 @@ bool ceph_using_tcmalloc();
  */
 void ceph_heap_profiler_init();
 
-void ceph_heap_profiler_stats(char *buf, int length);
+void ceph_heap_profiler_stats(char* buf, int length);
 
 void ceph_heap_release_free_memory();
 
@@ -45,13 +46,12 @@ void ceph_heap_profiler_start();
 
 void ceph_heap_profiler_stop();
 
-void ceph_heap_profiler_dump(const char *reason);
+void ceph_heap_profiler_dump(const char* reason);
 
-bool ceph_heap_get_numeric_property(const char *property, size_t *value);
+bool ceph_heap_get_numeric_property(const char* property, size_t* value);
 
-bool ceph_heap_set_numeric_property(const char *property, size_t value);
+bool ceph_heap_set_numeric_property(const char* property, size_t value);
 
-void ceph_heap_profiler_handle_command(const std::vector<std::string> &cmd,
-                                       std::ostream& out);
+void ceph_heap_profiler_handle_command(const std::vector<std::string>& cmd, std::ostream& out);
 
 #endif /* HEAP_PROFILER_H_ */

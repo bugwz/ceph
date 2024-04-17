@@ -3,16 +3,14 @@
 
 #pragma once
 
-#include <string>
 #include <ostream>
+#include <string>
 
 namespace librbd {
 namespace io {
 
-  std::string rbd_io_operations_to_string(uint64_t ops,
-                                          std::ostream *err);
-  uint64_t rbd_io_operations_from_string(const std::string& value,
-                                         std::ostream *err);
+std::string rbd_io_operations_to_string(uint64_t ops, std::ostream* err);
+uint64_t rbd_io_operations_from_string(const std::string& value, std::ostream* err);
 
-} // namespace io
-} // namespace librbd
+}   // namespace io
+}   // namespace librbd

@@ -25,9 +25,9 @@
 #include <sqlite3.h>
 
 #ifdef _WIN32
-#  define LIBCEPHSQLITE_API __declspec(dllexport)
+#define LIBCEPHSQLITE_API __declspec(dllexport)
 #else
-#  define LIBCEPHSQLITE_API [[gnu::visibility("default")]]
+#define LIBCEPHSQLITE_API [[gnu::visibility("default")]]
 #endif
 
 #ifdef __cplusplus

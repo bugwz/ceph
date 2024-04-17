@@ -32,7 +32,7 @@ function install() {
         sudo apt-get purge -y gcc
         sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     fi
-    for package in "$@" ; do
+    for package in "$@"; do
         install_one $package
     done
     if [ $(distro_id) = "ubuntu" ]; then
@@ -47,18 +47,18 @@ function install() {
 
 function install_one() {
     case $(distro_id) in
-        ubuntu|debian|devuan|softiron)
-            sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
-            ;;
-        centos|fedora|rhel)
-            sudo yum install -y "$@"
-            ;;
-        opensuse*|suse|sles)
-            sudo zypper --non-interactive install "$@"
-            ;;
-        *)
-            echo "$(distro_id) is unknown, $@ will have to be installed manually."
-            ;;
+    ubuntu | debian | devuan | softiron)
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
+        ;;
+    centos | fedora | rhel)
+        sudo yum install -y "$@"
+        ;;
+    opensuse* | suse | sles)
+        sudo zypper --non-interactive install "$@"
+        ;;
+    *)
+        echo "$(distro_id) is unknown, $@ will have to be installed manually."
+        ;;
     esac
 }
 
@@ -74,19 +74,19 @@ function install_pkg_on_ubuntu {
     local pkgs=$@
     local missing_pkgs
     if [ $force = "force" ]; then
-	missing_pkgs="$@"
+        missing_pkgs="$@"
     else
-	for pkg in $pkgs; do
-	    if ! dpkg -s $pkg &> /dev/null; then
-		missing_pkgs+=" $pkg"
-	    fi
-	done
+        for pkg in $pkgs; do
+            if ! dpkg -s $pkg &>/dev/null; then
+                missing_pkgs+=" $pkg"
+            fi
+        done
     fi
     if test -n "$missing_pkgs"; then
-	local shaman_url="https://shaman.ceph.com/api/repos/${project}/master/${sha1}/ubuntu/${codename}/repo"
-	sudo curl --silent --location $shaman_url --output /etc/apt/sources.list.d/$project.list
-	sudo env DEBIAN_FRONTEND=noninteractive apt-get update -y -o Acquire::Languages=none -o Acquire::Translation=none || true
-	sudo env DEBIAN_FRONTEND=noninteractive apt-get install --allow-unauthenticated -y $missing_pkgs
+        local shaman_url="https://shaman.ceph.com/api/repos/${project}/master/${sha1}/ubuntu/${codename}/repo"
+        sudo curl --silent --location $shaman_url --output /etc/apt/sources.list.d/$project.list
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get update -y -o Acquire::Languages=none -o Acquire::Translation=none || true
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get install --allow-unauthenticated -y $missing_pkgs
     fi
 }
 
@@ -115,7 +115,7 @@ function pool_read_write() {
     ceph osd pool set $test_pool min_size $size || return 1
     ceph osd pool application enable $test_pool rados
 
-    echo FOO > $dir/BAR
+    echo FOO >$dir/BAR
     timeout $timeout rados --pool $test_pool put BAR $dir/BAR || return 1
     timeout $timeout rados --pool $test_pool get BAR $dir/BAR.copy || return 1
     diff $dir/BAR $dir/BAR.copy || return 1

@@ -15,32 +15,33 @@
 #ifndef CEPH_COMMON_INIT_H
 #define CEPH_COMMON_INIT_H
 
+#include "common/code_environment.h"
+#include "include/common_fwd.h"
+
 #include <deque>
 
-#include "include/common_fwd.h"
-#include "common/code_environment.h"
+enum common_init_flags_t
+{
+    // Set up defaults that make sense for an unprivileged daemon
+    CINIT_FLAG_UNPRIVILEGED_DAEMON_DEFAULTS = 0x1,
 
-enum common_init_flags_t {
-  // Set up defaults that make sense for an unprivileged daemon
-  CINIT_FLAG_UNPRIVILEGED_DAEMON_DEFAULTS = 0x1,
+    // By default, don't read a configuration file OR contact mons
+    CINIT_FLAG_NO_DEFAULT_CONFIG_FILE = 0x2,
 
-  // By default, don't read a configuration file OR contact mons
-  CINIT_FLAG_NO_DEFAULT_CONFIG_FILE = 0x2,
+    // Don't close stderr (in daemonize)
+    CINIT_FLAG_NO_CLOSE_STDERR = 0x4,
 
-  // Don't close stderr (in daemonize)
-  CINIT_FLAG_NO_CLOSE_STDERR = 0x4,
+    // don't do anything daemonish, like create /var/run/ceph, or print a banner
+    CINIT_FLAG_NO_DAEMON_ACTIONS = 0x8,
 
-  // don't do anything daemonish, like create /var/run/ceph, or print a banner
-  CINIT_FLAG_NO_DAEMON_ACTIONS = 0x8,
+    // don't drop privileges
+    CINIT_FLAG_DEFER_DROP_PRIVILEGES = 0x10,
 
-  // don't drop privileges
-  CINIT_FLAG_DEFER_DROP_PRIVILEGES = 0x10,
+    // don't contact mons for config
+    CINIT_FLAG_NO_MON_CONFIG = 0x20,
 
-  // don't contact mons for config
-  CINIT_FLAG_NO_MON_CONFIG = 0x20,
-
-  // don't expose default cct perf counters
-  CINIT_FLAG_NO_CCT_PERF_COUNTERS = 0x40,
+    // don't expose default cct perf counters
+    CINIT_FLAG_NO_CCT_PERF_COUNTERS = 0x40,
 };
 
 #ifndef WITH_SEASTAR
@@ -63,13 +64,11 @@ class CephInitParameters;
  *
  * Your library may also supply functions to read a configuration file.
  */
-CephContext *common_preinit(const CephInitParameters &iparams,
-			    enum code_environment_t code_env, int flags);
-#endif // #ifndef WITH_SEASTAR
+CephContext* common_preinit(const CephInitParameters& iparams, enum code_environment_t code_env, int flags);
+#endif   // #ifndef WITH_SEASTAR
 
 /* Print out some parse error. */
-void complain_about_parse_error(CephContext *cct,
-				const std::string& parse_error);
+void complain_about_parse_error(CephContext* cct, const std::string& parse_error);
 
 /* This function is called after you have done your last
  * fork. When you make this call, the system will initialize everything that
@@ -83,6 +82,6 @@ void complain_about_parse_error(CephContext *cct,
  * libraries. The most obvious reason for this is that the threads started by
  * the Ceph libraries would be destroyed by a fork().
  */
-void common_init_finish(CephContext *cct);
+void common_init_finish(CephContext* cct);
 
 #endif

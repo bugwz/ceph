@@ -8,7 +8,7 @@ ulimit -c 0
 #assume working ceph environment (radosgw-admin in path) and rgw on localhost:80
 # localhost::443 for ssl
 
-mydir=`dirname $0`
+mydir=$(dirname $0)
 
 python3 -m venv $mydir
 source $mydir/bin/activate
@@ -20,4 +20,3 @@ $mydir/bin/python3 $mydir/test_rgw_reshard.py
 
 deactivate
 echo OK.
-

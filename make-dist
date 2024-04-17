@@ -13,7 +13,7 @@ fi
 # will expose us to the dreaded "[BUG] npm run [command] failed if the directory
 # path contains colon" bug https://github.com/npm/cli/issues/633
 # (see https://tracker.ceph.com/issues/39556 for details)
-if [[ "$BASEDIR" == *:* ]] ; then
+if [[ "$BASEDIR" == *:* ]]; then
     echo "$SCRIPTNAME: Full path to the script: $BASEDIR/$SCRIPTNAME"
     echo "$SCRIPTNAME: The path to the script contains a colon. Their presence has been known to break the script."
     exit 1
@@ -21,7 +21,7 @@ fi
 
 version=$1
 [ -z "$version" ] && version=$(git describe --long --match 'v*' | sed 's/^v//')
-if expr index $version '-' > /dev/null; then
+if expr index $version '-' >/dev/null; then
     rpm_version=$(echo $version | cut -d - -f 1-1)
     rpm_release=$(echo $version | cut -d - -f 2- | sed 's/-/./')
 else
@@ -34,7 +34,7 @@ echo "version $version"
 
 # update submodules
 echo "updating submodules..."
-force=$(if git submodule usage 2>&1 | grep --quiet 'update.*--force'; then echo --force ; fi)
+force=$(if git submodule usage 2>&1 | grep --quiet 'update.*--force'; then echo --force; fi)
 if ! git submodule sync || ! git submodule update $force --init --recursive; then
     echo "Error: could not initialize submodule projects"
     echo "  Network connectivity might be required."
@@ -97,7 +97,7 @@ download_liburing() {
     shift
     liburing_fname=liburing-${liburing_version}.tar.gz
     download_from $liburing_fname $liburing_sha256 $*
-    tar xzf $liburing_fname -C src  \
+    tar xzf $liburing_fname -C src \
         --exclude=debian \
         --exclude=examples \
         --exclude=man \
@@ -127,29 +127,29 @@ download_pmdk() {
 }
 
 build_dashboard_frontend() {
-  CURR_DIR=`pwd`
-  TEMP_DIR=`mktemp -d`
+    CURR_DIR=$(pwd)
+    TEMP_DIR=$(mktemp -d)
 
-  $CURR_DIR/src/tools/setup-virtualenv.sh $TEMP_DIR
-  $TEMP_DIR/bin/pip install nodeenv
-  $TEMP_DIR/bin/nodeenv --verbose -p --node=18.17.0
-  cd src/pybind/mgr/dashboard/frontend
+    $CURR_DIR/src/tools/setup-virtualenv.sh $TEMP_DIR
+    $TEMP_DIR/bin/pip install nodeenv
+    $TEMP_DIR/bin/nodeenv --verbose -p --node=18.17.0
+    cd src/pybind/mgr/dashboard/frontend
 
-  . $TEMP_DIR/bin/activate
-  NG_CLI_ANALYTICS=false timeout 1h npm ci
-  echo "Building ceph-dashboard frontend with build:localize script";
-  # we need to use "--" because so that "--configuration production"
-  # survives accross all scripts redirections inside package.json
-  npm run build:localize -- --configuration production
-  deactivate
-  cd $CURR_DIR
-  rm -rf $TEMP_DIR
-  tar cf dashboard_frontend.tar $outfile/src/pybind/mgr/dashboard/frontend/dist
+    . $TEMP_DIR/bin/activate
+    NG_CLI_ANALYTICS=false timeout 1h npm ci
+    echo "Building ceph-dashboard frontend with build:localize script"
+    # we need to use "--" because so that "--configuration production"
+    # survives accross all scripts redirections inside package.json
+    npm run build:localize -- --configuration production
+    deactivate
+    cd $CURR_DIR
+    rm -rf $TEMP_DIR
+    tar cf dashboard_frontend.tar $outfile/src/pybind/mgr/dashboard/frontend/dist
 }
 
 generate_rook_ceph_client() {
-  $outfile/src/pybind/mgr/rook/generate_rook_ceph_client.sh
-  tar cf rook_ceph_client.tar $outfile/src/pybind/mgr/rook/rook_client/*.py
+    $outfile/src/pybind/mgr/rook/generate_rook_ceph_client.sh
+    tar cf rook_ceph_client.tar $outfile/src/pybind/mgr/rook/rook_client/*.py
 }
 
 # clean out old cruft...
@@ -159,25 +159,28 @@ rm -f $outfile*
 # build new tarball
 echo "building tarball..."
 bin/git-archive-all.sh --prefix ceph-$version/ \
-		       --verbose \
-		       --ignore corpus \
-		       $outfile.tar
+    --verbose \
+    --ignore corpus \
+    $outfile.tar
 
 # populate files with version strings
 echo "including src/.git_version, ceph.spec"
 
-(git rev-parse HEAD ; echo $version) 2> /dev/null > src/.git_version
+(
+    git rev-parse HEAD
+    echo $version
+) 2>/dev/null >src/.git_version
 
 if [ -r /etc/os-release ]; then
     source /etc/os-release
     case $ID in
-        opensuse*|suse|sles)
-            if [ "x$rpm_release" != "x0" ] ; then
-                rpm_release=$(echo $rpm_release | sed 's/.g/+g/')
-                rpm_version="${rpm_version}.${rpm_release}"
-                rpm_release="0"
-            fi
-            ;;
+    opensuse* | suse | sles)
+        if [ "x$rpm_release" != "x0" ]; then
+            rpm_release=$(echo $rpm_release | sed 's/.g/+g/')
+            rpm_version="${rpm_version}.${rpm_release}"
+            rpm_release="0"
+        fi
+        ;;
     esac
 fi
 
@@ -185,7 +188,7 @@ for spec in ceph.spec.in; do
     cat $spec |
         sed "s/@PROJECT_VERSION@/$rpm_version/g" |
         sed "s/@RPM_RELEASE@/$rpm_release/g" |
-        sed "s/@TARBALL_BASENAME@/ceph-$version/g" > `echo $spec | sed 's/.in$//'`
+        sed "s/@TARBALL_BASENAME@/ceph-$version/g" >$(echo $spec | sed 's/.in$//')
 done
 ln -s . $outfile
 tar cvf $outfile.version.tar $outfile/src/.git_version $outfile/ceph.spec
@@ -193,23 +196,23 @@ tar cvf $outfile.version.tar $outfile/src/.git_version $outfile/ceph.spec
 # at the three URLs referenced below (may involve uploading to download.ceph.com)
 boost_version=1.79.0
 download_boost $boost_version 475d589d51a7f8b3ba2ba4eda022b170e562ca3b760ee922c146b6c65856ef39 \
-               https://boostorg.jfrog.io/artifactory/main/release/$boost_version/source \
-               https://download.ceph.com/qa
+    https://boostorg.jfrog.io/artifactory/main/release/$boost_version/source \
+    https://download.ceph.com/qa
 download_liburing 0.7 8e2842cfe947f3a443af301bdd6d034455536c38a455c7a700d0c1ad165a7543 \
-                  https://github.com/axboe/liburing/archive \
-                  https://git.kernel.dk/cgit/liburing/snapshot
+    https://github.com/axboe/liburing/archive \
+    https://git.kernel.dk/cgit/liburing/snapshot
 pmdk_version=1.10
 download_pmdk $pmdk_version 08dafcf94db5ac13fac9139c92225d9aa5f3724ea74beee4e6ca19a01a2eb20c \
-               https://github.com/pmem/pmdk/releases/download/$pmdk_version
+    https://github.com/pmem/pmdk/releases/download/$pmdk_version
 build_dashboard_frontend
 generate_rook_ceph_client
-for tarball in $outfile.version   \
-               $outfile.boost     \
-               $outfile.liburing  \
-               $outfile.pmdk  \
-               dashboard_frontend \
-               rook_ceph_client   \
-               $outfile; do
+for tarball in $outfile.version \
+    $outfile.boost \
+    $outfile.liburing \
+    $outfile.pmdk \
+    dashboard_frontend \
+    rook_ceph_client \
+    $outfile; do
     tar --concatenate -f $outfile.all.tar $tarball.tar
     rm $tarball.tar
 done

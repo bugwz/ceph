@@ -45,7 +45,7 @@
  * is invoked that are otherwise covered by the retry logic may be
  * returned.
  */
-#define KRBD_CTX_F_NOUDEV       (1U << 0)
+#define KRBD_CTX_F_NOUDEV (1U << 0)
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,32 +53,17 @@ extern "C" {
 
 struct krbd_ctx;
 
-int krbd_create_from_context(rados_config_t cct, uint32_t flags,
-                             struct krbd_ctx **pctx);
-void krbd_destroy(struct krbd_ctx *ctx);
+int krbd_create_from_context(rados_config_t cct, uint32_t flags, struct krbd_ctx** pctx);
+void krbd_destroy(struct krbd_ctx* ctx);
 
-int krbd_map(struct krbd_ctx *ctx,
-             const char *pool_name,
-             const char *nspace_name,
-             const char *image_name,
-             const char *snap_name,
-             const char *options,
-             char **pdevnode);
-int krbd_is_mapped(struct krbd_ctx *ctx,
-                   const char *pool_name,
-                   const char *nspace_name,
-                   const char *image_name,
-                   const char *snap_name,
-                   char **pdevnode);
+int krbd_map(struct krbd_ctx* ctx, const char* pool_name, const char* nspace_name, const char* image_name,
+             const char* snap_name, const char* options, char** pdevnode);
+int krbd_is_mapped(struct krbd_ctx* ctx, const char* pool_name, const char* nspace_name, const char* image_name,
+                   const char* snap_name, char** pdevnode);
 
-int krbd_unmap(struct krbd_ctx *ctx, const char *devnode,
-               const char *options);
-int krbd_unmap_by_spec(struct krbd_ctx *ctx,
-                       const char *pool_name,
-                       const char *nspace_name,
-                       const char *image_name,
-                       const char *snap_name,
-                       const char *options);
+int krbd_unmap(struct krbd_ctx* ctx, const char* devnode, const char* options);
+int krbd_unmap_by_spec(struct krbd_ctx* ctx, const char* pool_name, const char* nspace_name, const char* image_name,
+                       const char* snap_name, const char* options);
 
 #ifdef __cplusplus
 }
@@ -87,10 +72,10 @@ int krbd_unmap_by_spec(struct krbd_ctx *ctx,
 #ifdef __cplusplus
 
 namespace ceph {
-  class Formatter;
+class Formatter;
 }
 
-int krbd_showmapped(struct krbd_ctx *ctx, ceph::Formatter *f);
+int krbd_showmapped(struct krbd_ctx* ctx, ceph::Formatter* f);
 
 #endif /* __cplusplus */
 

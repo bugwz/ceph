@@ -7,19 +7,20 @@
 
 namespace sync_counters {
 
-enum {
-  l_first = 805000,
+enum
+{
+    l_first = 805000,
 
-  l_fetch,
-  l_fetch_not_modified,
-  l_fetch_err,
+    l_fetch,
+    l_fetch_not_modified,
+    l_fetch_err,
 
-  l_poll,
-  l_poll_err,
+    l_poll,
+    l_poll_err,
 
-  l_last,
+    l_last,
 };
 
-PerfCountersRef build(CephContext *cct, const std::string& name);
+PerfCountersRef build(CephContext* cct, const std::string& name);
 
-} // namespace sync_counters
+}   // namespace sync_counters

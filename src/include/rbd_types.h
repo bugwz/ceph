@@ -25,10 +25,10 @@
  *   ...                     - data
  */
 
-#define RBD_HEADER_PREFIX      "rbd_header."
-#define RBD_OBJECT_MAP_PREFIX  "rbd_object_map."
-#define RBD_DATA_PREFIX        "rbd_data."
-#define RBD_ID_PREFIX          "rbd_id."
+#define RBD_HEADER_PREFIX     "rbd_header."
+#define RBD_OBJECT_MAP_PREFIX "rbd_object_map."
+#define RBD_DATA_PREFIX       "rbd_data."
+#define RBD_ID_PREFIX         "rbd_id."
 
 /*
  * old-style rbd image 'foo' consists of objects
@@ -38,11 +38,11 @@
  *   ...          - data
  */
 
-#define RBD_SUFFIX	 	".rbd"
-#define RBD_DIRECTORY           "rbd_directory"
-#define RBD_INFO                "rbd_info"
-#define RBD_NAMESPACE           "rbd_namespace"
-#define RBD_TASK                "rbd_task"
+#define RBD_SUFFIX    ".rbd"
+#define RBD_DIRECTORY "rbd_directory"
+#define RBD_INFO      "rbd_info"
+#define RBD_NAMESPACE "rbd_namespace"
+#define RBD_TASK      "rbd_task"
 
 /*
  * rbd_children object in each pool contains omap entries
@@ -58,23 +58,23 @@
  * rbd_children objects with entries referring to that parent; if any
  * exist (and those children exist), the parent removal is prevented.
  */
-#define RBD_CHILDREN		"rbd_children"
-#define RBD_LOCK_NAME		"rbd_lock"
+#define RBD_CHILDREN  "rbd_children"
+#define RBD_LOCK_NAME "rbd_lock"
 
 /**
  * rbd_mirroring object in each pool contains pool-specific settings
  * for configuring mirroring.
  */
-#define RBD_MIRRORING       "rbd_mirroring"
+#define RBD_MIRRORING "rbd_mirroring"
 
 /**
  * rbd_mirror_leader and rbd_mirror_instance.<instance id> objects are used
  * for pool-level coordination between rbd-mirror daemons.
  */
-#define RBD_MIRROR_LEADER               "rbd_mirror_leader"
-#define RBD_MIRROR_INSTANCE_PREFIX      "rbd_mirror_instance."
+#define RBD_MIRROR_LEADER          "rbd_mirror_leader"
+#define RBD_MIRROR_INSTANCE_PREFIX "rbd_mirror_instance."
 
-#define RBD_MAX_OBJ_NAME_SIZE	96
+#define RBD_MAX_OBJ_NAME_SIZE   96
 #define RBD_MAX_BLOCK_NAME_SIZE 24
 
 /**
@@ -96,13 +96,13 @@
  */
 #define RBD_MAX_BLOCK_NAME_PREFIX_LENGTH 43
 
-#define RBD_COMP_NONE		0
-#define RBD_CRYPT_NONE		0
+#define RBD_COMP_NONE  0
+#define RBD_CRYPT_NONE 0
 
-#define RBD_HEADER_TEXT		"<<< Rados Block Device Image >>>\n"
-#define RBD_MIGRATE_HEADER_TEXT	"<<< Migrating RBD Image      >>>\n"
-#define RBD_HEADER_SIGNATURE	"RBD"
-#define RBD_HEADER_VERSION	"001.005"
+#define RBD_HEADER_TEXT         "<<< Rados Block Device Image >>>\n"
+#define RBD_MIGRATE_HEADER_TEXT "<<< Migrating RBD Image      >>>\n"
+#define RBD_HEADER_SIGNATURE    "RBD"
+#define RBD_HEADER_VERSION      "001.005"
 
 #define RBD_GROUP_INVALID_POOL (-1)
 
@@ -116,44 +116,49 @@
  * MON config-key prefix for storing optional remote cluster connectivity
  * parameters
  */
-#define RBD_MIRROR_CONFIG_KEY_PREFIX          "rbd/mirror/"
-#define RBD_MIRROR_SITE_NAME_CONFIG_KEY       RBD_MIRROR_CONFIG_KEY_PREFIX "site_name"
-#define RBD_MIRROR_PEER_CLIENT_ID_CONFIG_KEY  RBD_MIRROR_CONFIG_KEY_PREFIX "peer_client_id"
-#define RBD_MIRROR_PEER_CONFIG_KEY_PREFIX     RBD_MIRROR_CONFIG_KEY_PREFIX "peer/"
+#define RBD_MIRROR_CONFIG_KEY_PREFIX         "rbd/mirror/"
+#define RBD_MIRROR_SITE_NAME_CONFIG_KEY      RBD_MIRROR_CONFIG_KEY_PREFIX "site_name"
+#define RBD_MIRROR_PEER_CLIENT_ID_CONFIG_KEY RBD_MIRROR_CONFIG_KEY_PREFIX "peer_client_id"
+#define RBD_MIRROR_PEER_CONFIG_KEY_PREFIX    RBD_MIRROR_CONFIG_KEY_PREFIX "peer/"
 
-struct rbd_info {
-	ceph_le64 max_id;
-} __attribute__ ((packed));
-
-struct rbd_obj_snap_ondisk {
-	ceph_le64 id;
-	ceph_le64 image_size;
+struct rbd_info
+{
+    ceph_le64 max_id;
 } __attribute__((packed));
 
-struct rbd_obj_header_ondisk {
-	char text[40];
-	char block_name[RBD_MAX_BLOCK_NAME_SIZE];
-	char signature[4];
-	char version[8];
-	struct {
-		__u8 order;
-		__u8 crypt_type;
-		__u8 comp_type;
-		__u8 unused;
-	} __attribute__((packed)) options;
-	ceph_le64 image_size;
-	ceph_le64 snap_seq;
-	ceph_le32 snap_count;
-	ceph_le32 reserved;
-	ceph_le64 snap_names_len;
-	struct rbd_obj_snap_ondisk snaps[0];
+struct rbd_obj_snap_ondisk
+{
+    ceph_le64 id;
+    ceph_le64 image_size;
 } __attribute__((packed));
 
-enum {
-  RBD_PROTECTION_STATUS_UNPROTECTED  = 0,
-  RBD_PROTECTION_STATUS_UNPROTECTING = 1,
-  RBD_PROTECTION_STATUS_PROTECTED    = 2,
-  RBD_PROTECTION_STATUS_LAST         = 3
+struct rbd_obj_header_ondisk
+{
+    char text[40];
+    char block_name[RBD_MAX_BLOCK_NAME_SIZE];
+    char signature[4];
+    char version[8];
+    struct
+    {
+        __u8 order;
+        __u8 crypt_type;
+        __u8 comp_type;
+        __u8 unused;
+    } __attribute__((packed)) options;
+    ceph_le64 image_size;
+    ceph_le64 snap_seq;
+    ceph_le32 snap_count;
+    ceph_le32 reserved;
+    ceph_le64 snap_names_len;
+    struct rbd_obj_snap_ondisk snaps[0];
+} __attribute__((packed));
+
+enum
+{
+    RBD_PROTECTION_STATUS_UNPROTECTED = 0,
+    RBD_PROTECTION_STATUS_UNPROTECTING = 1,
+    RBD_PROTECTION_STATUS_PROTECTED = 2,
+    RBD_PROTECTION_STATUS_LAST = 3
 };
 
 #endif

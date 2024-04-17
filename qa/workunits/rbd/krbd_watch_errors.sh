@@ -10,7 +10,7 @@ function refresh_loop() {
 
     local i
     for ((i = 1; ; i++)); do
-        echo 1 | sudo tee "${SYSFS_DIR}/${dev_id}/refresh" > /dev/null
+        echo 1 | sudo tee "${SYSFS_DIR}/${dev_id}/refresh" >/dev/null
         if ((i % 100 == 0)); then
             echo "Refreshed ${i} times"
         fi

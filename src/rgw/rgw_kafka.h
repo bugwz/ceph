@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include <string>
-#include <functional>
-#include <boost/optional.hpp>
-
 #include "include/common_fwd.h"
+
+#include <boost/optional.hpp>
+#include <functional>
+#include <string>
 
 namespace rgw::kafka {
 
@@ -22,20 +22,17 @@ bool init(CephContext* cct);
 void shutdown();
 
 // connect to a kafka endpoint
-bool connect(std::string& broker, const std::string& url, bool use_ssl, bool verify_ssl, boost::optional<const std::string&> ca_location, boost::optional<const std::string&> mechanism);
+bool connect(std::string& broker, const std::string& url, bool use_ssl, bool verify_ssl,
+             boost::optional<const std::string&> ca_location, boost::optional<const std::string&> mechanism);
 
 // publish a message over a connection that was already created
-int publish(const std::string& conn_name,
-    const std::string& topic,
-    const std::string& message);
+int publish(const std::string& conn_name, const std::string& topic, const std::string& message);
 
 // publish a message over a connection that was already created
 // and pass a callback that will be invoked (async) when broker confirms
 // receiving the message
-int publish_with_confirm(const std::string& conn_name,
-    const std::string& topic,
-    const std::string& message,
-    reply_callback_t cb);
+int publish_with_confirm(const std::string& conn_name, const std::string& topic, const std::string& message,
+                         reply_callback_t cb);
 
 // convert the integer status returned from the "publish" function to a string
 std::string status_to_string(int s);
@@ -62,5 +59,4 @@ size_t get_max_inflight();
 // maximum number of messages in the queue
 size_t get_max_queue();
 
-}
-
+}   // namespace rgw::kafka

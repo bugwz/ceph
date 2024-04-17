@@ -35,7 +35,7 @@ function run() {
     CEPH_ARGS+="--osd-class-update-on-start=false "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -53,10 +53,10 @@ function TEST_choose_args_update() {
     run_osd $dir 0 || return 1
 
     ceph osd set-require-min-compat-client luminous
-    ceph osd getcrushmap > $dir/map || return 1
+    ceph osd getcrushmap >$dir/map || return 1
     crushtool -d $dir/map -o $dir/map.txt || return 1
     sed -i -e '/end crush map/d' $dir/map.txt
-    cat >> $dir/map.txt <<EOF
+    cat >>$dir/map.txt <<EOF
 # choose_args
 choose_args 0 {
   {
@@ -85,14 +85,14 @@ EOF
 
     run_osd $dir 1 || return 1
     ceph osd crush tree
-    ceph osd getcrushmap > $dir/map-one-more || return 1
+    ceph osd getcrushmap >$dir/map-one-more || return 1
     crushtool -d $dir/map-one-more -o $dir/map-one-more.txt || return 1
     cat $dir/map-one-more.txt
     diff -u $dir/map-one-more.txt $CEPH_ROOT/src/test/crush/crush-choose-args-expected-one-more-3.txt || return 1
 
     destroy_osd $dir 1 || return 1
     ceph osd crush tree
-    ceph osd getcrushmap > $dir/map-one-less || return 1
+    ceph osd getcrushmap >$dir/map-one-less || return 1
     crushtool -d $dir/map-one-less -o $dir/map-one-less.txt || return 1
     diff -u $dir/map-one-less.txt $dir/map.txt || return 1
 }
@@ -112,10 +112,10 @@ function TEST_no_update_weight_set() {
 
     ceph osd set-require-min-compat-client luminous
     ceph osd crush tree
-    ceph osd getcrushmap > $dir/map || return 1
+    ceph osd getcrushmap >$dir/map || return 1
     crushtool -d $dir/map -o $dir/map.txt || return 1
     sed -i -e '/end crush map/d' $dir/map.txt
-    cat >> $dir/map.txt <<EOF
+    cat >>$dir/map.txt <<EOF
 # choose_args
 choose_args 0 {
   {
@@ -142,17 +142,16 @@ EOF
     ceph osd setcrushmap -i $dir/map-new || return 1
     ceph osd crush tree
 
-
     run_osd $dir 1 || return 1
     ceph osd crush tree
-    ceph osd getcrushmap > $dir/map-one-more || return 1
+    ceph osd getcrushmap >$dir/map-one-more || return 1
     crushtool -d $dir/map-one-more -o $dir/map-one-more.txt || return 1
     cat $dir/map-one-more.txt
     diff -u $dir/map-one-more.txt $CEPH_ROOT/src/test/crush/crush-choose-args-expected-one-more-0.txt || return 1
 
     destroy_osd $dir 1 || return 1
     ceph osd crush tree
-    ceph osd getcrushmap > $dir/map-one-less || return 1
+    ceph osd getcrushmap >$dir/map-one-less || return 1
     crushtool -d $dir/map-one-less -o $dir/map-one-less.txt || return 1
     diff -u $dir/map-one-less.txt $dir/map.txt || return 1
 

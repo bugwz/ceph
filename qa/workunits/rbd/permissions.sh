@@ -41,41 +41,41 @@ delete_users() {
 
 create_users() {
     ceph auth get-or-create client.volumes \
-	mon 'profile rbd' \
-	osd 'profile rbd pool=volumes, profile rbd-read-only pool=images' \
-	mgr 'profile rbd pool=volumes, profile rbd-read-only pool=images' >> $KEYRING
-    ceph auth get-or-create client.images mon 'profile rbd' osd 'profile rbd pool=images' >> $KEYRING
+        mon 'profile rbd' \
+        osd 'profile rbd pool=volumes, profile rbd-read-only pool=images' \
+        mgr 'profile rbd pool=volumes, profile rbd-read-only pool=images' >>$KEYRING
+    ceph auth get-or-create client.images mon 'profile rbd' osd 'profile rbd pool=images' >>$KEYRING
 
-    ceph auth get-or-create client.snap_none mon 'allow r' >> $KEYRING
-    ceph auth get-or-create client.snap_all mon 'allow r' osd 'allow w' >> $KEYRING
-    ceph auth get-or-create client.snap_pool mon 'allow r' osd 'allow w pool=images' >> $KEYRING
-    ceph auth get-or-create client.snap_profile_all mon 'allow r' osd 'profile rbd' >> $KEYRING
-    ceph auth get-or-create client.snap_profile_pool mon 'allow r' osd 'profile rbd pool=images' >> $KEYRING
+    ceph auth get-or-create client.snap_none mon 'allow r' >>$KEYRING
+    ceph auth get-or-create client.snap_all mon 'allow r' osd 'allow w' >>$KEYRING
+    ceph auth get-or-create client.snap_pool mon 'allow r' osd 'allow w pool=images' >>$KEYRING
+    ceph auth get-or-create client.snap_profile_all mon 'allow r' osd 'profile rbd' >>$KEYRING
+    ceph auth get-or-create client.snap_profile_pool mon 'allow r' osd 'profile rbd pool=images' >>$KEYRING
 
-    ceph auth get-or-create client.mon_write mon 'allow *' >> $KEYRING
+    ceph auth get-or-create client.mon_write mon 'allow *' >>$KEYRING
 }
 
 expect() {
 
-  set +e
+    set +e
 
-  local expected_ret=$1
-  local ret
+    local expected_ret=$1
+    local ret
 
-  shift
-  cmd=$@
+    shift
+    cmd=$@
 
-  eval $cmd
-  ret=$?
+    eval $cmd
+    ret=$?
 
-  set -e
+    set -e
 
-  if [[ $ret -ne $expected_ret ]]; then
-    echo "ERROR: running \'$cmd\': expected $expected_ret got $ret"
-    return 1
-  fi
+    if [[ $ret -ne $expected_ret ]]; then
+        echo "ERROR: running \'$cmd\': expected $expected_ret got $ret"
+        return 1
+    fi
 
-  return 0
+    return 0
 }
 
 test_images_access() {
@@ -162,10 +162,10 @@ test_volumes_access() {
 }
 
 create_self_managed_snapshot() {
-  ID=$1
-  POOL=$2
+    ID=$1
+    POOL=$2
 
-  cat << EOF | CEPH_ARGS="-k $KEYRING" python3
+    cat <<EOF | CEPH_ARGS="-k $KEYRING" python3
 import rados
 
 with rados.Rados(conffile="", rados_id="${ID}") as cluster:
@@ -177,10 +177,10 @@ EOF
 }
 
 remove_self_managed_snapshot() {
-  ID=$1
-  POOL=$2
+    ID=$1
+    POOL=$2
 
-  cat << EOF | CEPH_ARGS="-k $KEYRING" python3
+    cat <<EOF | CEPH_ARGS="-k $KEYRING" python3
 import rados
 
 with rados.Rados(conffile="", rados_id="mon_write") as cluster1, \

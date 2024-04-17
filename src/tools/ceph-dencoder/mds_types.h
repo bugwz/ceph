@@ -10,8 +10,8 @@ TYPE(SnapInfo)
 TYPE(snaplink_t)
 TYPE(sr_t)
 
-#include "mds/mdstypes.h"
 #include "include/cephfs/types.h"
+#include "mds/mdstypes.h"
 TYPE(frag_info_t)
 TYPE(nest_info_t)
 TYPE(quota_info_t)
@@ -41,7 +41,7 @@ TYPE_FEATUREFUL(MDSMap)
 TYPE_FEATUREFUL(MDSMap::mds_info_t)
 
 #include "mds/FSMap.h"
-//TYPE_FEATUREFUL(Filesystem)
+// TYPE_FEATUREFUL(Filesystem)
 TYPE_FEATUREFUL(FSMap)
 
 #include "mds/Capability.h"
@@ -109,4 +109,4 @@ TYPE_FEATUREFUL_NOCOPY(ETableServer)
 
 #include "mds/events/EUpdate.h"
 TYPE_FEATUREFUL_NOCOPY(EUpdate)
-#endif // WITH_CEPHFS
+#endif   // WITH_CEPHFS

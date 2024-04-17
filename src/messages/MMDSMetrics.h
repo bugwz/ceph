@@ -4,52 +4,54 @@
 #ifndef CEPH_MDS_METRICS_H
 #define CEPH_MDS_METRICS_H
 
-#include "messages/MMDSOp.h"
 #include "mds/MDSPerfMetricTypes.h"
+#include "messages/MMDSOp.h"
 
-class MMDSMetrics final : public MMDSOp {
+class MMDSMetrics final : public MMDSOp
+{
 private:
-  static constexpr int HEAD_VERSION = 1;
-  static constexpr int COMPAT_VERSION = 1;
+    static constexpr int HEAD_VERSION = 1;
+    static constexpr int COMPAT_VERSION = 1;
+
 public:
-  // metrics messsage (client -> metrics map, rank, etc..)
-  metrics_message_t metrics_message;
+    // metrics messsage (client -> metrics map, rank, etc..)
+    metrics_message_t metrics_message;
 
 protected:
-  MMDSMetrics() : MMDSOp(MSG_MDS_METRICS, HEAD_VERSION, COMPAT_VERSION) {
-  }
-  MMDSMetrics(metrics_message_t metrics_message)
-    : MMDSOp(MSG_MDS_METRICS, HEAD_VERSION, COMPAT_VERSION),
-      metrics_message(metrics_message) {
-  }
-  ~MMDSMetrics() final {}
+    MMDSMetrics()
+        : MMDSOp(MSG_MDS_METRICS, HEAD_VERSION, COMPAT_VERSION)
+    {}
+    MMDSMetrics(metrics_message_t metrics_message)
+        : MMDSOp(MSG_MDS_METRICS, HEAD_VERSION, COMPAT_VERSION)
+        , metrics_message(metrics_message)
+    {}
+    ~MMDSMetrics() final {}
 
 public:
-  std::string_view get_type_name() const override {
-    return "mds_metrics";
-  }
+    std::string_view get_type_name() const override { return "mds_metrics"; }
 
-  void print(std::ostream &out) const override {
-    out << "mds_metrics from rank=" << metrics_message.rank << " carrying "
-        << metrics_message.client_metrics_map.size() << " metric updates";
-  }
+    void print(std::ostream& out) const override
+    {
+        out << "mds_metrics from rank=" << metrics_message.rank << " carrying "
+            << metrics_message.client_metrics_map.size() << " metric updates";
+    }
 
-  void encode_payload(uint64_t features) override {
-    using ceph::encode;
-    encode(metrics_message, payload, features);
-  }
+    void encode_payload(uint64_t features) override
+    {
+        using ceph::encode;
+        encode(metrics_message, payload, features);
+    }
 
-  void decode_payload() override {
-    using ceph::decode;
-    auto iter = payload.cbegin();
-    decode(metrics_message, iter);
-  }
+    void decode_payload() override
+    {
+        using ceph::decode;
+        auto iter = payload.cbegin();
+        decode(metrics_message, iter);
+    }
 
 private:
-  template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
-  template<class T, typename... Args>
-  friend MURef<T> crimson::make_message(Args&&... args);
+    template<class T, typename... Args> friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+    template<class T, typename... Args> friend MURef<T> crimson::make_message(Args&&... args);
 };
 
-#endif // CEPH_MDS_METRICS_H
+#endif   // CEPH_MDS_METRICS_H

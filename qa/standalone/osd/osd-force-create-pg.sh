@@ -11,7 +11,7 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -33,9 +33,9 @@ function TEST_reuse_id() {
     kill_daemons $dir TERM osd.0
     kill_daemons $dir TERM osd.1
     kill_daemons $dir TERM osd.2
-    ceph-objectstore-tool --data-path $dir/0 --op remove --pgid 1.0  --force
-    ceph-objectstore-tool --data-path $dir/1 --op remove --pgid 1.0  --force
-    ceph-objectstore-tool --data-path $dir/2 --op remove --pgid 1.0  --force
+    ceph-objectstore-tool --data-path $dir/0 --op remove --pgid 1.0 --force
+    ceph-objectstore-tool --data-path $dir/1 --op remove --pgid 1.0 --force
+    ceph-objectstore-tool --data-path $dir/2 --op remove --pgid 1.0 --force
     activate_osd $dir 0 || return 1
     activate_osd $dir 1 || return 1
     activate_osd $dir 2 || return 1

@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <string>
 #include <boost/container/flat_set.hpp>
+#include <string>
 
 namespace rgw::zone_features {
 
@@ -18,30 +18,32 @@ inline constexpr std::string_view compress_encrypted = "compress-encrypted";
 
 // static list of features supported by this release
 inline constexpr std::initializer_list<std::string_view> supported = {
-  resharding,
-  compress_encrypted,
+    resharding,
+    compress_encrypted,
 };
 
-inline constexpr bool supports(std::string_view feature) {
-  for (auto i : supported) {
-    if (feature.compare(i) == 0) {
-      return true;
+inline constexpr bool supports(std::string_view feature)
+{
+    for (auto i : supported) {
+        if (feature.compare(i) == 0) {
+            return true;
+        }
     }
-  }
-  return false;
+    return false;
 }
 
 // static list of features enabled by default on new zonegroups
 inline constexpr std::initializer_list<std::string_view> enabled = {
-  resharding,
+    resharding,
 };
 
 
 // enable string_view overloads for find() contains() etc
-struct feature_less : std::less<std::string_view> {
-  using is_transparent = std::true_type;
+struct feature_less : std::less<std::string_view>
+{
+    using is_transparent = std::true_type;
 };
 
 using set = boost::container::flat_set<std::string, feature_less>;
 
-} // namespace rgw::zone_features
+}   // namespace rgw::zone_features

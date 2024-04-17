@@ -8,7 +8,7 @@ export JOURNAL_FILE=/tmp/journal.bin
 export JSON_OUTPUT=/tmp/json.tmp
 export BINARY_OUTPUT=/tmp/binary.tmp
 
-if [ -d $BINARY_OUTPUT ] ; then
+if [ -d $BINARY_OUTPUT ]; then
     rm -rf $BINARY_OUTPUT
 fi
 
@@ -16,21 +16,21 @@ fi
 # first because it's used as the reset method between
 # following checks.
 echo "Testing that export/import cycle preserves state"
-HEADER_STATE=`$BIN header get`
-EVENT_LIST=`$BIN event get list`
+HEADER_STATE=$($BIN header get)
+EVENT_LIST=$($BIN event get list)
 $BIN journal export $JOURNAL_FILE
 $BIN journal import $JOURNAL_FILE
-NEW_HEADER_STATE=`$BIN header get`
-NEW_EVENT_LIST=`$BIN event get list`
+NEW_HEADER_STATE=$($BIN header get)
+NEW_EVENT_LIST=$($BIN event get list)
 
-if [ ! "$HEADER_STATE" = "$NEW_HEADER_STATE" ] ; then
+if [ ! "$HEADER_STATE" = "$NEW_HEADER_STATE" ]; then
     echo "Import failed to preserve header state"
     echo $HEADER_STATE
     echo $NEW_HEADER_STATE
     exit -1
 fi
 
-if [ ! "$EVENT_LIST" = "$NEW_EVENT_LIST" ] ; then
+if [ ! "$EVENT_LIST" = "$NEW_EVENT_LIST" ]; then
     echo "Import failed to preserve event state"
     echo $EVENT_LIST
     echo $NEW_EVENT_LIST
@@ -45,7 +45,7 @@ $BIN header get
 
 # Make a copy of the journal in its original state
 $BIN journal export $JOURNAL_FILE
-if [ ! -s $JOURNAL_FILE ] ; then
+if [ ! -s $JOURNAL_FILE ]; then
     echo "Export to $JOURNAL_FILE failed"
     exit -1
 fi
@@ -71,12 +71,12 @@ echo "Testing 'event' commands..."
 $BIN event get summary
 $BIN event get --type=UPDATE --path=/ --inode=0 --frag=0x100 summary
 $BIN event get json --path $JSON_OUTPUT
-if [ ! -s $JSON_OUTPUT ] ; then
+if [ ! -s $JSON_OUTPUT ]; then
     echo "Export to $JSON_OUTPUT failed"
     exit -1
 fi
 $BIN event get binary --path $BINARY_OUTPUT
-if [ ! -s $BINARY_OUTPUT ] ; then
+if [ ! -s $BINARY_OUTPUT ]; then
     echo "Export to $BINARY_OUTPUT failed"
     exit -1
 fi
@@ -89,4 +89,3 @@ $BIN event splice summary
 # To ensure mds successfully replays its journal, we need to do journal reset.
 $BIN journal reset
 cephfs-table-tool all reset session
-

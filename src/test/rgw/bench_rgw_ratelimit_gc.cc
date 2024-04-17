@@ -1,20 +1,19 @@
-#include "rgw_ratelimit.h"
-#include "rgw_common.h"
 #include "random"
+#include "rgw_common.h"
+#include "rgw_ratelimit.h"
+
+#include <boost/program_options.hpp>
+#include <chrono>
 #include <cstdlib>
 #include <string>
-#include <chrono>
-#include <boost/program_options.hpp>
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     int num_qos_classes = 1;
-    try
-    {
+    try {
         using namespace boost::program_options;
         options_description desc{"Options"};
-        desc.add_options()
-        ("help,h", "Help screen")
-        ("num_qos_classes", value<int>()->default_value(1), "how many qos tenants");
+        desc.add_options()("help,h",
+                           "Help screen")("num_qos_classes", value<int>()->default_value(1), "how many qos tenants");
         variables_map vm;
         store(parse_command_line(argc, argv, desc), vm);
         if (vm.count("help")) {
@@ -23,8 +22,7 @@ int main(int argc, char **argv)
         }
         num_qos_classes = vm["num_qos_classes"].as<int>();
     }
-    catch (const boost::program_options::error &ex)
-    {
+    catch (const boost::program_options::error& ex) {
         std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;
     }
@@ -35,18 +33,15 @@ int main(int argc, char **argv)
     info.max_read_ops = 0;
     info.max_write_ops = 0;
     std::unique_ptr<CephContext> cct = std::make_unique<CephContext>(CEPH_ENTITY_TYPE_ANY);
-    if (!g_ceph_context)
-    {
+    if (!g_ceph_context) {
         g_ceph_context = cct.get();
     }
     std::shared_ptr<ActiveRateLimiter> ratelimit(new ActiveRateLimiter(g_ceph_context));
     ratelimit->start();
     auto dout = DoutPrefix(g_ceph_context, ceph_subsys_rgw, "rate limiter: ");
-    for(int i = 0; i < num_qos_classes; i++)
-    {
+    for (int i = 0; i < num_qos_classes; i++) {
         std::string tenant = "uuser" + std::to_string(i);
         auto time = ceph::coarse_real_clock::now();
         ratelimit->get_active()->should_rate_limit("PUT", tenant, time, &info);
     }
-
 }

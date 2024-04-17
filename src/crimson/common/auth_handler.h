@@ -7,11 +7,11 @@ class EntityName;
 class AuthCapsInfo;
 
 namespace crimson::common {
-class AuthHandler {
+class AuthHandler
+{
 public:
-  // the peer just got authorized
-  virtual void handle_authentication(const EntityName& name,
-				     const AuthCapsInfo& caps) = 0;
-  virtual ~AuthHandler() = default;
+    // the peer just got authorized
+    virtual void handle_authentication(const EntityName& name, const AuthCapsInfo& caps) = 0;
+    virtual ~AuthHandler() = default;
 };
-}
+}   // namespace crimson::common

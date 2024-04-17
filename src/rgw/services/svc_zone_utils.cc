@@ -2,42 +2,50 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 #include "svc_zone_utils.h"
+
+#include "rgw_zone.h"
 #include "svc_rados.h"
 #include "svc_zone.h"
 
-#include "rgw_zone.h"
-
 using namespace std;
 
-int RGWSI_ZoneUtils::do_start(optional_yield, const DoutPrefixProvider *dpp)
+int RGWSI_ZoneUtils::do_start(optional_yield, const DoutPrefixProvider* dpp)
 {
-  init_unique_trans_id_deps();
+    init_unique_trans_id_deps();
 
-  return 0;
+    return 0;
 }
 
-string RGWSI_ZoneUtils::gen_host_id() {
-  /* uint64_t needs 16, two '-' separators and a trailing null */
-  const string& zone_name = zone_svc->get_zone().name;
-  const string& zonegroup_name = zone_svc->get_zonegroup().get_name();
-  char charbuf[16 + zone_name.size() + zonegroup_name.size() + 2 + 1];
-  snprintf(charbuf, sizeof(charbuf), "%llx-%s-%s", (unsigned long long)rados_svc->instance_id(), zone_name.c_str(), zonegroup_name.c_str());
-  return string(charbuf);
+string RGWSI_ZoneUtils::gen_host_id()
+{
+    /* uint64_t needs 16, two '-' separators and a trailing null */
+    const string& zone_name = zone_svc->get_zone().name;
+    const string& zonegroup_name = zone_svc->get_zonegroup().get_name();
+    char charbuf[16 + zone_name.size() + zonegroup_name.size() + 2 + 1];
+    snprintf(charbuf,
+             sizeof(charbuf),
+             "%llx-%s-%s",
+             (unsigned long long)rados_svc->instance_id(),
+             zone_name.c_str(),
+             zonegroup_name.c_str());
+    return string(charbuf);
 }
 
 string RGWSI_ZoneUtils::unique_id(uint64_t unique_num)
 {
-  char buf[32];
-  snprintf(buf, sizeof(buf), ".%llu.%llu", (unsigned long long)rados_svc->instance_id(), (unsigned long long)unique_num);
-  string s = zone_svc->get_zone_params().get_id() + buf;
-  return s;
+    char buf[32];
+    snprintf(
+        buf, sizeof(buf), ".%llu.%llu", (unsigned long long)rados_svc->instance_id(), (unsigned long long)unique_num);
+    string s = zone_svc->get_zone_params().get_id() + buf;
+    return s;
 }
 
-void RGWSI_ZoneUtils::init_unique_trans_id_deps() {
-  char buf[16 + 2 + 1]; /* uint64_t needs 16, 2 hyphens add further 2 */
+void RGWSI_ZoneUtils::init_unique_trans_id_deps()
+{
+    char buf[16 + 2 + 1]; /* uint64_t needs 16, 2 hyphens add further 2 */
 
-  snprintf(buf, sizeof(buf), "-%llx-", (unsigned long long)rados_svc->instance_id());
-  url_encode(string(buf) + zone_svc->get_zone().name, trans_id_suffix);
+    snprintf(buf, sizeof(buf), "-%llx-", (unsigned long long)rados_svc->instance_id());
+    url_encode(string(buf) + zone_svc->get_zone().name, trans_id_suffix);
 }
 
 /* In order to preserve compatibility with Swift API, transaction ID
@@ -51,14 +59,12 @@ void RGWSI_ZoneUtils::init_unique_trans_id_deps() {
  *    range;
  *  - last, optional part of transaction ID is any url-encoded string
  *    without restriction on length. */
-string RGWSI_ZoneUtils::unique_trans_id(const uint64_t unique_num) {
-  char buf[41]; /* 2 + 21 + 1 + 16 (timestamp can consume up to 16) + 1 */
-  time_t timestamp = time(NULL);
+string RGWSI_ZoneUtils::unique_trans_id(const uint64_t unique_num)
+{
+    char buf[41]; /* 2 + 21 + 1 + 16 (timestamp can consume up to 16) + 1 */
+    time_t timestamp = time(NULL);
 
-  snprintf(buf, sizeof(buf), "tx%021llx-%010llx",
-           (unsigned long long)unique_num,
-           (unsigned long long)timestamp);
+    snprintf(buf, sizeof(buf), "tx%021llx-%010llx", (unsigned long long)unique_num, (unsigned long long)timestamp);
 
-  return string(buf) + trans_id_suffix;
+    return string(buf) + trans_id_suffix;
 }
-

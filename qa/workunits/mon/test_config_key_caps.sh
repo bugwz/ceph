@@ -6,28 +6,25 @@ set -e
 tmp=$(mktemp -d -p /tmp test_mon_config_key_caps.XXXXX)
 entities=()
 
-function cleanup()
-{
-	set +e
-	set +x
-	if [[ -e $tmp/keyring ]] && [[ -e $tmp/keyring.orig ]]; then
-		grep '\[.*\..*\]' $tmp/keyring.orig > $tmp/entities.orig
-		for e in $(grep '\[.*\..*\]' $tmp/keyring | \
-			diff $tmp/entities.orig - | \
-			sed -n 's/^.*\[\(.*\..*\)\]/\1/p');
-		do
-			ceph auth rm $e 2>&1 >& /dev/null
-		done
-	fi
-	#rm -fr $tmp
+function cleanup() {
+    set +e
+    set +x
+    if [[ -e $tmp/keyring ]] && [[ -e $tmp/keyring.orig ]]; then
+        grep '\[.*\..*\]' $tmp/keyring.orig >$tmp/entities.orig
+        for e in $(grep '\[.*\..*\]' $tmp/keyring |
+            diff $tmp/entities.orig - |
+            sed -n 's/^.*\[\(.*\..*\)\]/\1/p'); do
+            ceph auth rm $e 2>&1 >&/dev/null
+        done
+    fi
+    #rm -fr $tmp
 }
 
 trap cleanup 0 # cleanup on exit
 
-function expect_false()
-{
-	set -x
-	if "$@"; then return 1; else return 0; fi
+function expect_false() {
+    set -x
+    if "$@"; then return 1; else return 0; fi
 }
 
 # for cleanup purposes
@@ -76,7 +73,7 @@ ceph auth get-or-create $osd_a mon 'allow profile osd'
 ceph auth get-or-create $osd_b mon 'allow profile osd'
 
 ceph auth get-or-create $prefix_aa mon \
-	"allow command \"config-key get\" with key prefix client/$prefix_aa"
+    "allow command \"config-key get\" with key prefix client/$prefix_aa"
 
 cap="allow command \"config-key set\" with key prefix client/"
 cap="$cap,allow command \"config-key get\" with key prefix client/$prefix_bb"
@@ -109,32 +106,32 @@ ceph auth export -o $k
 
 # keys will all the caps can do whatever
 for c in $allow_aa $allow_bb $allow_cc $mgr_a $mgr_b; do
-	ceph -k $k --name $c config-key get daemon-private/osd.123/test-foo
-	ceph -k $k --name $c config-key get mgr/test-foo
-	ceph -k $k --name $c config-key get device/test-foo
-	ceph -k $k --name $c config-key get test/foo
+    ceph -k $k --name $c config-key get daemon-private/osd.123/test-foo
+    ceph -k $k --name $c config-key get mgr/test-foo
+    ceph -k $k --name $c config-key get device/test-foo
+    ceph -k $k --name $c config-key get test/foo
 done
 
 for c in $osd_a $osd_b; do
-	ceph -k $k --name $c config-key put daemon-private/$c/test-foo
-	ceph -k $k --name $c config-key get daemon-private/$c/test-foo
-	expect_false ceph -k $k --name $c config-key ls
-	expect_false ceph -k $k --name $c config-key get mgr/test-foo
-	expect_false ceph -k $k --name $c config-key get device/test-foo
-	expect_false ceph -k $k --name $c config-key get test/foo
+    ceph -k $k --name $c config-key put daemon-private/$c/test-foo
+    ceph -k $k --name $c config-key get daemon-private/$c/test-foo
+    expect_false ceph -k $k --name $c config-key ls
+    expect_false ceph -k $k --name $c config-key get mgr/test-foo
+    expect_false ceph -k $k --name $c config-key get device/test-foo
+    expect_false ceph -k $k --name $c config-key get test/foo
 done
 
 expect_false ceph -k $k --name $osd_a get daemon-private/$osd_b/test-foo
 expect_false ceph -k $k --name $osd_b get daemon-private/$osd_a/test-foo
 
 expect_false ceph -k $k --name $prefix_aa \
-	config-key ls
+    config-key ls
 expect_false ceph -k $k --name $prefix_aa \
-	config-key get daemon-private/osd.123/test-foo
+    config-key get daemon-private/osd.123/test-foo
 expect_false ceph -k $k --name $prefix_aa \
-	config-key set test/bar
+    config-key set test/bar
 expect_false ceph -k $k --name $prefix_aa \
-	config-key set client/$prefix_aa/foo
+    config-key set client/$prefix_aa/foo
 
 # write something so we can read, use a custom entity
 ceph -k $k --name $allow_bb config-key set client/$prefix_aa/foo
@@ -149,7 +146,7 @@ ceph -k $k --name $prefix_bb config-key get client/$prefix_bb/foo
 expect_false ceph -k $k --name $prefix_bb config-key get client/$prefix_aa/bar
 expect_false ceph -k $k --name $prefix_bb config-key ls
 expect_false ceph -k $k --name $prefix_bb \
-	config-key get daemon-private/osd.123/test-foo
+    config-key get daemon-private/osd.123/test-foo
 expect_false ceph -k $k --name $prefix_bb config-key get mgr/test-foo
 expect_false ceph -k $k --name $prefix_bb config-key get device/test-foo
 expect_false ceph -k $k --name $prefix_bb config-key get test/bar
@@ -161,7 +158,7 @@ ceph -k $k --name $prefix_cc config-key get client/$match_aa/foo
 ceph -k $k --name $prefix_cc config-key get client/$match_bb/foo
 expect_false ceph -k $k --name $prefix_cc config-key set other/prefix
 expect_false ceph -k $k --name $prefix_cc config-key get mgr/test-foo
-ceph -k $k --name $prefix_cc config-key ls >& /dev/null
+ceph -k $k --name $prefix_cc config-key ls >&/dev/null
 
 ceph -k $k --name $match_aa config-key get client/$match_aa/foo
 expect_false ceph -k $k --name $match_aa config-key get client/$match_bb/foo
@@ -172,30 +169,30 @@ expect_false ceph -k $k --name $match_bb config-key get client/$match_aa/foo
 expect_false ceph -k $k --name $match_bb config-key set client/$match_aa/foo
 
 keys=(daemon-private/osd.123/test-foo
-	  mgr/test-foo
-	  device/test-foo
-	  test/foo
-	  client/$prefix_aa/foo
-	  client/$prefix_bb/foo
-	  client/$match_aa/foo
-	  client/$match_bb/foo
+    mgr/test-foo
+    device/test-foo
+    test/foo
+    client/$prefix_aa/foo
+    client/$prefix_bb/foo
+    client/$match_aa/foo
+    client/$match_bb/foo
 )
 # expect these all to fail accessing config-key
 for c in $fail_aa $fail_bb $fail_cc \
-		 $fail_dd $fail_ee $fail_ff \
-		 $fail_gg; do
-	for m in get set; do
-		for key in ${keys[*]} client/$prefix_aa/foo client/$prefix_bb/foo; do
-			expect_false ceph -k $k --name $c config-key $m $key
-		done
-	done
+    $fail_dd $fail_ee $fail_ff \
+    $fail_gg; do
+    for m in get set; do
+        for key in ${keys[*]} client/$prefix_aa/foo client/$prefix_bb/foo; do
+            expect_false ceph -k $k --name $c config-key $m $key
+        done
+    done
 done
 
 # fail writes but succeed on reads
 expect_false ceph -k $k --name $fail_writes config-key set client/$match_aa/foo
 expect_false ceph -k $k --name $fail_writes config-key set test/foo
 ceph -k $k --name $fail_writes config-key ls
-ceph -k $k --name $fail_writes config-key get client/$match_aa/foo 
+ceph -k $k --name $fail_writes config-key get client/$match_aa/foo
 ceph -k $k --name $fail_writes config-key get daemon-private/osd.123/test-foo
 
 echo "OK"

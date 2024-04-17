@@ -21,7 +21,7 @@ SKIP_DLL_COPY=${SKIP_DLL_COPY:-}
 SKIP_TESTS=${SKIP_TESTS:-}
 SKIP_BINDIR_CLEAN=${SKIP_BINDIR_CLEAN:-}
 # Use Ninja's default, it might be useful when having few cores.
-NUM_WORKERS_DEFAULT=$(( $num_vcpus + 2 ))
+NUM_WORKERS_DEFAULT=$(($num_vcpus + 2))
 NUM_WORKERS=${NUM_WORKERS:-$NUM_WORKERS_DEFAULT}
 DEV_BUILD=${DEV_BUILD:-}
 # Unless SKIP_ZIP is set, we're preparing an archive that contains the Ceph
@@ -41,10 +41,10 @@ OS=${OS}
 if [[ -z $OS ]]; then
     source /etc/os-release
     case "$ID" in
-    opensuse*|suse|sles)
+    opensuse* | suse | sles)
         OS="suse"
         ;;
-    rhel|centos)
+    rhel | centos)
         OS="rhel"
         ;;
     ubuntu)
@@ -68,10 +68,10 @@ ALLOCATOR=${ALLOCATOR:-libc}
 # -Wa,-mbig-obj does not help.
 CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE:-}
 if [[ -z $CMAKE_BUILD_TYPE ]]; then
-  # By default, we're building release binaries with minimal debug information.
-  export CFLAGS="$CFLAGS -g1"
-  export CXXFLAGS="$CXXFLAGS -g1"
-  CMAKE_BUILD_TYPE=Release
+    # By default, we're building release binaries with minimal debug information.
+    export CFLAGS="$CFLAGS -g1"
+    export CXXFLAGS="$CXXFLAGS -g1"
+    CMAKE_BUILD_TYPE=Release
 fi
 
 # Some tests can't use shared libraries yet due to unspecified dependencies.
@@ -126,7 +126,7 @@ cd $BUILD_DIR
 
 if [[ ! -f ${depsToolsetDir}/completed ]]; then
     echo "Preparing dependencies: $DEPS_DIR. Log: ${BUILD_DIR}/build_deps.log"
-    NUM_WORKERS=$NUM_WORKERS DEPS_DIR=$DEPS_DIR OS="$OS"\
+    NUM_WORKERS=$NUM_WORKERS DEPS_DIR=$DEPS_DIR OS="$OS" \
         "$SCRIPT_DIR/win32_deps_build.sh" | tee "${BUILD_DIR}/build_deps.log"
 fi
 
@@ -137,58 +137,58 @@ MINGW_POSIX_FLAGS=1
 source "$SCRIPT_DIR/mingw_conf.sh"
 
 if [[ -z $SKIP_CMAKE ]]; then
-# We'll need to cross compile Boost.Python before enabling
-# "WITH_MGR".
-echo "Generating solution. Log: ${BUILD_DIR}/cmake.log"
+    # We'll need to cross compile Boost.Python before enabling
+    # "WITH_MGR".
+    echo "Generating solution. Log: ${BUILD_DIR}/cmake.log"
 
-# This isn't propagated to some of the subprojects, we'll use an env variable
-# for now.
-export CMAKE_PREFIX_PATH=$depsDirs
+    # This isn't propagated to some of the subprojects, we'll use an env variable
+    # for now.
+    export CMAKE_PREFIX_PATH=$depsDirs
 
-if [[ -n $DEV_BUILD ]]; then
-  echo "Dev build enabled."
-  echo "Git versioning will be disabled."
-  ENABLE_GIT_VERSION="OFF"
-  WITH_CEPH_DEBUG_MUTEX="ON"
-else
-  ENABLE_GIT_VERSION="ON"
-  WITH_CEPH_DEBUG_MUTEX="OFF"
-fi
+    if [[ -n $DEV_BUILD ]]; then
+        echo "Dev build enabled."
+        echo "Git versioning will be disabled."
+        ENABLE_GIT_VERSION="OFF"
+        WITH_CEPH_DEBUG_MUTEX="ON"
+    else
+        ENABLE_GIT_VERSION="ON"
+        WITH_CEPH_DEBUG_MUTEX="OFF"
+    fi
 
-# As opposed to Linux, Windows shared libraries can't have unresolved
-# symbols. Until we fix the dependencies (which are either unspecified
-# or circular), we'll have to stick to static linking.
-cmake -D CMAKE_PREFIX_PATH=$depsDirs \
-      -D MINGW_LINK_DIRECTORIES="$linkDirs" \
-      -D CMAKE_TOOLCHAIN_FILE="$MINGW_CMAKE_FILE" \
-      -D WITH_LIBCEPHSQLITE=OFF \
-      -D WITH_RDMA=OFF -D WITH_OPENLDAP=OFF \
-      -D WITH_GSSAPI=OFF -D WITH_XFS=OFF \
-      -D WITH_FUSE=OFF -D WITH_DOKAN=ON \
-      -D WITH_BLUESTORE=OFF -D WITH_LEVELDB=OFF \
-      -D WITH_LTTNG=OFF -D WITH_BABELTRACE=OFF -D WITH_JAEGER=OFF \
-      -D WITH_SYSTEM_BOOST=ON -D WITH_MGR=OFF -D WITH_KVS=OFF \
-      -D WITH_LIBCEPHFS=ON -D WITH_KRBD=OFF -D WITH_RADOSGW=OFF \
-      -D ENABLE_SHARED=$ENABLE_SHARED -D WITH_RBD=ON -D BUILD_GMOCK=ON \
-      -D WITH_CEPHFS=OFF -D WITH_MANPAGE=OFF \
-      -D WITH_MGR_DASHBOARD_FRONTEND=OFF -D WITH_SYSTEMD=OFF -D WITH_TESTS=ON \
-      -D LZ4_INCLUDE_DIR=$lz4Include -D LZ4_LIBRARY=$lz4Lib \
-      -D Backtrace_INCLUDE_DIR="$backtraceDir/include" \
-      -D Backtrace_LIBRARY="$backtraceDir/lib/libbacktrace.a" \
-      -D ENABLE_GIT_VERSION=$ENABLE_GIT_VERSION \
-      -D ALLOCATOR="$ALLOCATOR" -D CMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE \
-      -D WNBD_INCLUDE_DIRS="$wnbdSrcDir/include" \
-      -D WNBD_LIBRARIES="$wnbdLibDir/libwnbd.a" \
-      -D WITH_CEPH_DEBUG_MUTEX=$WITH_CEPH_DEBUG_MUTEX \
-      -D DOKAN_INCLUDE_DIRS="$dokanSrcDir/dokan" \
-      -D DOKAN_LIBRARIES="$dokanLibDir/libdokan.a" \
-      -G "$cmakeGenerator" \
-      $CEPH_DIR  2>&1 | tee "${BUILD_DIR}/cmake.log"
+    # As opposed to Linux, Windows shared libraries can't have unresolved
+    # symbols. Until we fix the dependencies (which are either unspecified
+    # or circular), we'll have to stick to static linking.
+    cmake -D CMAKE_PREFIX_PATH=$depsDirs \
+        -D MINGW_LINK_DIRECTORIES="$linkDirs" \
+        -D CMAKE_TOOLCHAIN_FILE="$MINGW_CMAKE_FILE" \
+        -D WITH_LIBCEPHSQLITE=OFF \
+        -D WITH_RDMA=OFF -D WITH_OPENLDAP=OFF \
+        -D WITH_GSSAPI=OFF -D WITH_XFS=OFF \
+        -D WITH_FUSE=OFF -D WITH_DOKAN=ON \
+        -D WITH_BLUESTORE=OFF -D WITH_LEVELDB=OFF \
+        -D WITH_LTTNG=OFF -D WITH_BABELTRACE=OFF -D WITH_JAEGER=OFF \
+        -D WITH_SYSTEM_BOOST=ON -D WITH_MGR=OFF -D WITH_KVS=OFF \
+        -D WITH_LIBCEPHFS=ON -D WITH_KRBD=OFF -D WITH_RADOSGW=OFF \
+        -D ENABLE_SHARED=$ENABLE_SHARED -D WITH_RBD=ON -D BUILD_GMOCK=ON \
+        -D WITH_CEPHFS=OFF -D WITH_MANPAGE=OFF \
+        -D WITH_MGR_DASHBOARD_FRONTEND=OFF -D WITH_SYSTEMD=OFF -D WITH_TESTS=ON \
+        -D LZ4_INCLUDE_DIR=$lz4Include -D LZ4_LIBRARY=$lz4Lib \
+        -D Backtrace_INCLUDE_DIR="$backtraceDir/include" \
+        -D Backtrace_LIBRARY="$backtraceDir/lib/libbacktrace.a" \
+        -D ENABLE_GIT_VERSION=$ENABLE_GIT_VERSION \
+        -D ALLOCATOR="$ALLOCATOR" -D CMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE \
+        -D WNBD_INCLUDE_DIRS="$wnbdSrcDir/include" \
+        -D WNBD_LIBRARIES="$wnbdLibDir/libwnbd.a" \
+        -D WITH_CEPH_DEBUG_MUTEX=$WITH_CEPH_DEBUG_MUTEX \
+        -D DOKAN_INCLUDE_DIRS="$dokanSrcDir/dokan" \
+        -D DOKAN_LIBRARIES="$dokanLibDir/libdokan.a" \
+        -G "$cmakeGenerator" \
+        $CEPH_DIR 2>&1 | tee "${BUILD_DIR}/cmake.log"
 fi # [[ -z $SKIP_CMAKE ]]
 
 if [[ -z $SKIP_BUILD ]]; then
     echo "Building using $NUM_WORKERS workers. Log: ${BUILD_DIR}/build.log"
-    echo "" > "${BUILD_DIR}/build.log"
+    echo "" >"${BUILD_DIR}/build.log"
 
     cd $BUILD_DIR
     ninja_targets="rados rbd rbd-wnbd "
@@ -197,8 +197,8 @@ if [[ -z $SKIP_BUILD ]]; then
     # TODO: do we actually need the ceph compression libs?
     ninja_targets+=" compressor ceph_lz4 ceph_snappy ceph_zlib ceph_zstd"
     if [[ -z $SKIP_TESTS ]]; then
-      ninja_targets+=" tests ceph_radosacl ceph_scratchtool "
-      ninja_targets+=`ninja -t targets | grep ceph_test | cut -d ":" -f 1 | grep -v exe`
+        ninja_targets+=" tests ceph_radosacl ceph_scratchtool "
+        ninja_targets+=$(ninja -t targets | grep ceph_test | cut -d ":" -f 1 | grep -v exe)
     fi
 
     ninja -v $ninja_targets 2>&1 | tee "${BUILD_DIR}/build.log"
@@ -225,8 +225,10 @@ if [[ -z $SKIP_ZIP ]]; then
     ZIP_TMPDIR=$(mktemp -d win_binaries.XXXXX)
     if [[ -z $EMBEDDED_DBG_SYM ]]; then
         echo "Extracting debug symbols from binaries."
-        rm -rf $strippedBinDir; mkdir $strippedBinDir
-        rm -rf $dbgSymbolDir; mkdir $dbgSymbolDir
+        rm -rf $strippedBinDir
+        mkdir $strippedBinDir
+        rm -rf $dbgSymbolDir
+        mkdir $dbgSymbolDir
         # Strip files individually, to save time and space
         for file in $binDir/*.exe $binDir/*.dll; do
             dbgFilename=$(basename $file).debug
@@ -241,7 +243,7 @@ if [[ -z $SKIP_ZIP ]]; then
         done
         # Copy any remaining files to the stripped directory
         for file in $binDir/*; do
-            [[ ! -f $strippedBinDir/$(basename $file) ]] && \
+            [[ ! -f $strippedBinDir/$(basename $file) ]] &&
                 cp $file $strippedBinDir
         done
         ln -s $strippedBinDir $ZIP_TMPDIR/ceph

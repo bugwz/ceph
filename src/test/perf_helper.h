@@ -25,6 +25,6 @@ uint64_t plus_one(uint64_t x);
 void throw_end_of_buffer();
 void throw_int();
 
-} // PerfHelper
+}   // namespace PerfHelper
 
-#endif  // CEPH_TEST_PERFHELPER_H
+#endif   // CEPH_TEST_PERFHELPER_H

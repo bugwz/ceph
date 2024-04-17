@@ -15,93 +15,92 @@
 
 #pragma once
 
-#include "rgw/rgw_rest.h"
 #include "rgw/rgw_auth_s3.h"
+#include "rgw/rgw_rest.h"
 
-class RGWOp_Metadata_List : public RGWRESTOp {
+class RGWOp_Metadata_List : public RGWRESTOp
+{
 public:
-  RGWOp_Metadata_List() {}
-  ~RGWOp_Metadata_List() override {}
+    RGWOp_Metadata_List() {}
+    ~RGWOp_Metadata_List() override {}
 
-  int check_caps(const RGWUserCaps& caps) override {
-    return caps.check_cap("metadata", RGW_CAP_READ);
-  }
-  void execute(optional_yield y) override;
-  const char* name() const override { return "list_metadata"; }
+    int check_caps(const RGWUserCaps& caps) override { return caps.check_cap("metadata", RGW_CAP_READ); }
+    void execute(optional_yield y) override;
+    const char* name() const override { return "list_metadata"; }
 };
 
-class RGWOp_Metadata_Get : public RGWRESTOp {
+class RGWOp_Metadata_Get : public RGWRESTOp
+{
 public:
-  RGWOp_Metadata_Get() {}
-  ~RGWOp_Metadata_Get() override {}
+    RGWOp_Metadata_Get() {}
+    ~RGWOp_Metadata_Get() override {}
 
-  int check_caps(const RGWUserCaps& caps) override {
-    return caps.check_cap("metadata", RGW_CAP_READ);
-  }
-  void execute(optional_yield y) override;
-  const char* name() const override { return "get_metadata"; }
+    int check_caps(const RGWUserCaps& caps) override { return caps.check_cap("metadata", RGW_CAP_READ); }
+    void execute(optional_yield y) override;
+    const char* name() const override { return "get_metadata"; }
 };
 
-class RGWOp_Metadata_Get_Myself : public RGWOp_Metadata_Get {
+class RGWOp_Metadata_Get_Myself : public RGWOp_Metadata_Get
+{
 public:
-  RGWOp_Metadata_Get_Myself() {}
-  ~RGWOp_Metadata_Get_Myself() override {}
+    RGWOp_Metadata_Get_Myself() {}
+    ~RGWOp_Metadata_Get_Myself() override {}
 
-  void execute(optional_yield y) override;
+    void execute(optional_yield y) override;
 };
 
-class RGWOp_Metadata_Put : public RGWRESTOp {
-  int get_data(bufferlist& bl);
-  std::string update_status;
-  obj_version ondisk_version;
-public:
-  RGWOp_Metadata_Put() {}
-  ~RGWOp_Metadata_Put() override {}
+class RGWOp_Metadata_Put : public RGWRESTOp
+{
+    int get_data(bufferlist& bl);
+    std::string update_status;
+    obj_version ondisk_version;
 
-  int check_caps(const RGWUserCaps& caps) override {
-    return caps.check_cap("metadata", RGW_CAP_WRITE);
-  }
-  void execute(optional_yield y) override;
-  void send_response() override;
-  const char* name() const override { return "set_metadata"; }
-  RGWOpType get_type() override { return RGW_OP_ADMIN_SET_METADATA; }
+public:
+    RGWOp_Metadata_Put() {}
+    ~RGWOp_Metadata_Put() override {}
+
+    int check_caps(const RGWUserCaps& caps) override { return caps.check_cap("metadata", RGW_CAP_WRITE); }
+    void execute(optional_yield y) override;
+    void send_response() override;
+    const char* name() const override { return "set_metadata"; }
+    RGWOpType get_type() override { return RGW_OP_ADMIN_SET_METADATA; }
 };
 
-class RGWOp_Metadata_Delete : public RGWRESTOp {
+class RGWOp_Metadata_Delete : public RGWRESTOp
+{
 public:
-  RGWOp_Metadata_Delete() {}
-  ~RGWOp_Metadata_Delete() override {}
+    RGWOp_Metadata_Delete() {}
+    ~RGWOp_Metadata_Delete() override {}
 
-  int check_caps(const RGWUserCaps& caps) override {
-    return caps.check_cap("metadata", RGW_CAP_WRITE);
-  }
-  void execute(optional_yield y) override;
-  const char* name() const override { return "remove_metadata"; }
+    int check_caps(const RGWUserCaps& caps) override { return caps.check_cap("metadata", RGW_CAP_WRITE); }
+    void execute(optional_yield y) override;
+    const char* name() const override { return "remove_metadata"; }
 };
 
-class RGWHandler_Metadata : public RGWHandler_Auth_S3 {
+class RGWHandler_Metadata : public RGWHandler_Auth_S3
+{
 protected:
-  RGWOp *op_get() override;
-  RGWOp *op_put() override;
-  RGWOp *op_delete() override;
+    RGWOp* op_get() override;
+    RGWOp* op_put() override;
+    RGWOp* op_delete() override;
 
-  int read_permissions(RGWOp*, optional_yield y) override {
-    return 0;
-  }
+    int read_permissions(RGWOp*, optional_yield y) override { return 0; }
+
 public:
-  using RGWHandler_Auth_S3::RGWHandler_Auth_S3;
-  ~RGWHandler_Metadata() override = default;
+    using RGWHandler_Auth_S3::RGWHandler_Auth_S3;
+    ~RGWHandler_Metadata() override = default;
 };
 
-class RGWRESTMgr_Metadata : public RGWRESTMgr {
+class RGWRESTMgr_Metadata : public RGWRESTMgr
+{
 public:
-  RGWRESTMgr_Metadata() = default;
-  ~RGWRESTMgr_Metadata() override = default;
+    RGWRESTMgr_Metadata() = default;
+    ~RGWRESTMgr_Metadata() override = default;
 
-  RGWHandler_REST* get_handler(rgw::sal::Driver* driver,
-			       req_state* const s,
-                               const rgw::auth::StrategyRegistry& auth_registry,
-                               const std::string& frontend_prefix) override {
-    return new RGWHandler_Metadata(auth_registry);
-  }
+    RGWHandler_REST* get_handler(rgw::sal::Driver* driver, req_state* const s,
+                                 const rgw::auth::StrategyRegistry& auth_registry,
+                                 const std::string& frontend_prefix) override
+    {
+        return new RGWHandler_Metadata(auth_registry);
+    }
 };

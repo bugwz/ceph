@@ -18,37 +18,35 @@
 
 #pragma once
 
-#include <atomic>
-
 #include "rgw_service.h"
-
 #include "svc_config_key.h"
+
+#include <atomic>
 
 class RGWSI_RADOS;
 
 class RGWSI_ConfigKey_RADOS : public RGWSI_ConfigKey
 {
-  bool maybe_insecure_mon_conn{false};
-  std::atomic_flag warned_insecure = ATOMIC_FLAG_INIT;
+    bool maybe_insecure_mon_conn{false};
+    std::atomic_flag warned_insecure = ATOMIC_FLAG_INIT;
 
-  int do_start(optional_yield, const DoutPrefixProvider *dpp) override;
+    int do_start(optional_yield, const DoutPrefixProvider* dpp) override;
 
-  void warn_if_insecure();
+    void warn_if_insecure();
 
 public:
-  struct Svc {
-    RGWSI_RADOS *rados{nullptr};
-  } svc;
+    struct Svc
+    {
+        RGWSI_RADOS* rados{nullptr};
+    } svc;
 
-  void init(RGWSI_RADOS *rados_svc) {
-    svc.rados = rados_svc;
-  }
+    void init(RGWSI_RADOS* rados_svc) { svc.rados = rados_svc; }
 
-  RGWSI_ConfigKey_RADOS(CephContext *cct) : RGWSI_ConfigKey(cct) {}
+    RGWSI_ConfigKey_RADOS(CephContext* cct)
+        : RGWSI_ConfigKey(cct)
+    {}
 
-  virtual ~RGWSI_ConfigKey_RADOS() override;
+    virtual ~RGWSI_ConfigKey_RADOS() override;
 
-  int get(const std::string& key, bool secure, bufferlist *result) override;
+    int get(const std::string& key, bool secure, bufferlist* result) override;
 };
-
-

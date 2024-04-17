@@ -24,60 +24,67 @@ BINARIES="${BINARIES_TO_RUN}hello_radosstriper_cpp
 "
 # parse output like "octopus (dev)"
 case $(librados-config --release | grep -Po ' \(\K[^\)]+') in
-    dev)
-        BRANCH=main;;
-    rc|stable)
-        BRANCH=$(librados-config --release | cut -d' ' -f1);;
-    *)
-        echo "unknown release '$(librados-config --release)'" >&2
-        return 1;;
+dev)
+    BRANCH=main
+    ;;
+rc | stable)
+    BRANCH=$(librados-config --release | cut -d' ' -f1)
+    ;;
+*)
+    echo "unknown release '$(librados-config --release)'" >&2
+    return 1
+    ;;
 esac
 DL_PREFIX="http://git.ceph.com/?p=ceph.git;a=blob_plain;hb=${BRANCH};f=examples/librados/"
 #DL_PREFIX="https://raw.githubusercontent.com/ceph/ceph/master/examples/librados/"
 DESTDIR=$(pwd)
 
-function cleanup () {
-    for f in $BINARIES$SOURCES ; do
+function cleanup() {
+    for f in $BINARIES$SOURCES; do
         rm -f "${DESTDIR}/$f"
     done
 }
 
-function get_sources () {
-    for s in $SOURCES ; do
+function get_sources() {
+    for s in $SOURCES; do
         curl --progress-bar --output $s -L ${DL_PREFIX}$s
     done
 }
 
-function check_sources () {
-    for s in $SOURCES ; do
+function check_sources() {
+    for s in $SOURCES; do
         test -f $s
     done
 }
 
-function check_binaries () {
-    for b in $BINARIES ; do
+function check_binaries() {
+    for b in $BINARIES; do
         file $b
         test -f $b
     done
 }
 
-function run_binaries () {
-    for b in $BINARIES_TO_RUN ; do
+function run_binaries() {
+    for b in $BINARIES_TO_RUN; do
         ./$b -c /etc/ceph/ceph.conf
     done
 }
 
 pushd $DESTDIR
 case $(distro_id) in
-    centos|fedora|rhel|opensuse*|suse|sles)
-        install gcc-c++ make libradospp-devel librados-devel;;
-    ubuntu)
-        install gcc-11 g++-11 make libradospp-dev librados-dev
-        export CXX_FLAGS="-std=c++20";;
-    debian|devuan|softiron)
-        install g++ make libradospp-dev librados-dev;;
-    *)
-        echo "$(distro_id) is unknown, $@ will have to be installed manually."
+centos | fedora | rhel | opensuse* | suse | sles)
+    install gcc-c++ make libradospp-devel librados-devel
+    ;;
+ubuntu)
+    install gcc-11 g++-11 make libradospp-dev librados-dev
+    export CXX_FLAGS="-std=c++20"
+    ;;
+debian | devuan | softiron)
+    install g++ make libradospp-dev librados-dev
+    ;;
+*)
+    echo "$(distro_id) is unknown, $@ will have to be installed manually."
+    ;;
 esac
 get_sources
 check_sources

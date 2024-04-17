@@ -8,11 +8,10 @@
 
 struct Context;
 
-struct MockContextWQ {
-  void queue(Context *ctx) {
-    queue(ctx, 0);
-  }
-  MOCK_METHOD2(queue, void(Context *, int));
+struct MockContextWQ
+{
+    void queue(Context* ctx) { queue(ctx, 0); }
+    MOCK_METHOD2(queue, void(Context*, int));
 };
 
-#endif // CEPH_MOCK_CONTEXT_WQ_H
+#endif   // CEPH_MOCK_CONTEXT_WQ_H

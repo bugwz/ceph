@@ -4,4 +4,3 @@
 #include "Python.h"
 
 extern PyTypeObject BaseMgrModuleType;
-

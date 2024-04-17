@@ -26,10 +26,10 @@ function clean_up_after_myself() {
 
 function get_processors() {
     # get_processors() depends on coreutils nproc.
-    if test -n "$NPROC" ; then
+    if test -n "$NPROC"; then
         echo $NPROC
     else
-        if test $(nproc) -ge 2 ; then
+        if test $(nproc) -ge 2; then
             expr $(nproc) / 2
         else
             echo 1
@@ -49,10 +49,12 @@ function detect_ceph_dev_pkgs() {
     source /etc/os-release
     if [[ "$ID" == "ubuntu" ]]; then
         case "$VERSION" in
-            *Xenial*)
-                cmake_opts+=" -DWITH_RADOSGW_KAFKA_ENDPOINT=OFF";;
-            *Focal*)
-                cmake_opts+=" -DWITH_SYSTEM_ZSTD=ON";;
+        *Xenial*)
+            cmake_opts+=" -DWITH_RADOSGW_KAFKA_ENDPOINT=OFF"
+            ;;
+        *Focal*)
+            cmake_opts+=" -DWITH_SYSTEM_ZSTD=ON"
+            ;;
         esac
     fi
     echo "$cmake_opts"
@@ -68,12 +70,12 @@ function do_install() {
     shift
     ret=0
     $DRY_RUN sudo $install_cmd $pkgs || ret=$?
-    if test $ret -eq 0 ; then
+    if test $ret -eq 0; then
         return
     fi
     # try harder if apt-get, and it was interrutped
     if [[ $install_cmd == *"apt-get"* ]]; then
-        if test $ret -eq 100 ; then
+        if test $ret -eq 100; then
             # dpkg was interrupted
             $DRY_RUN sudo dpkg --configure -a
             in_jenkins && echo "CI_DEBUG: Running 'sudo $install_cmd $pkgs'"
@@ -87,9 +89,9 @@ function prepare() {
     local install_cmd
     local which_pkg="which"
     source /etc/os-release
-    if test -f /etc/redhat-release ; then
-        if ! type bc > /dev/null 2>&1 ; then
-            echo "Please install bc and re-run." 
+    if test -f /etc/redhat-release; then
+        if ! type bc >/dev/null 2>&1; then
+            echo "Please install bc and re-run."
             exit 1
         fi
         if test "$(echo "$VERSION_ID >= 22" | bc)" -ne 0; then
@@ -97,16 +99,16 @@ function prepare() {
         else
             install_cmd="yum install -y"
         fi
-    elif type zypper > /dev/null 2>&1 ; then
+    elif type zypper >/dev/null 2>&1; then
         install_cmd="zypper --gpg-auto-import-keys --non-interactive install --no-recommends"
-    elif type apt-get > /dev/null 2>&1 ; then
+    elif type apt-get >/dev/null 2>&1; then
         install_cmd="apt-get install -y"
         which_pkg="debianutils"
     fi
 
-    if ! type sudo > /dev/null 2>&1 ; then
+    if ! type sudo >/dev/null 2>&1; then
         echo "Please install sudo and re-run. This script assumes it is running"
-        echo "as a normal user with the ability to run commands as root via sudo." 
+        echo "as a normal user with the ability to run commands as root via sudo."
         exit 1
     fi
     if [ -n "$install_cmd" ]; then
@@ -117,12 +119,12 @@ function prepare() {
         echo "This probably means distribution $ID is not supported by run-make-check.sh" >&2
     fi
 
-    if ! type ccache > /dev/null 2>&1 ; then
+    if ! type ccache >/dev/null 2>&1; then
         echo "ERROR: ccache could not be installed"
         exit 1
     fi
 
-    if test -f ./install-deps.sh ; then
+    if test -f ./install-deps.sh; then
         in_jenkins && echo "CI_DEBUG: Running install-deps.sh"
         $DRY_RUN source ./install-deps.sh || return 1
         trap clean_up_after_myself EXIT
@@ -174,7 +176,7 @@ DEFAULT_MAKEOPTS=${DEFAULT_MAKEOPTS:--j$(get_processors)}
 
 if [ "$0" = "$BASH_SOURCE" ]; then
     # not sourced
-    if [ `uname` = FreeBSD ]; then
+    if [ $(uname) = FreeBSD ]; then
         GETOPT=/usr/local/bin/getopt
     else
         GETOPT=getopt
@@ -187,15 +189,18 @@ if [ "$0" = "$BASH_SOURCE" ]; then
     eval set -- "${options}"
     while true; do
         case "$1" in
-            --cmake-args)
-                cmake_args=$2
-                shift 2;;
-            --)
-                shift
-                break;;
-            *)
-                echo "bad option $1" >& 2
-                exit 2;;
+        --cmake-args)
+            cmake_args=$2
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "bad option $1" >&2
+            exit 2
+            ;;
         esac
     done
     prepare

@@ -14,18 +14,17 @@
 
 #pragma once
 
-#include <boost/container/small_vector.hpp>
-#include <seastar/core/future.hh>
-#include <seastar/core/future-util.hh>
-#include <seastar/core/shared_ptr.hh>
-#include <seastar/core/sharded.hh>
-
+#include "crimson/common/errorator.h"
+#include "crimson/common/local_shared_foreign_ptr.h"
 #include "msg/Connection.h"
 #include "msg/MessageRef.h"
 #include "msg/msg_types.h"
 
-#include "crimson/common/errorator.h"
-#include "crimson/common/local_shared_foreign_ptr.h"
+#include <boost/container/small_vector.hpp>
+#include <seastar/core/future-util.hh>
+#include <seastar/core/future.hh>
+#include <seastar/core/sharded.hh>
+#include <seastar/core/shared_ptr.hh>
 
 class AuthConnectionMeta;
 
@@ -49,4 +48,4 @@ using MessengerRef = seastar::shared_ptr<Messenger>;
 
 using MessageFRef = seastar::foreign_ptr<MessageURef>;
 
-} // namespace crimson::net
+}   // namespace crimson::net

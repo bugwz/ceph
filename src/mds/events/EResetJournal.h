@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
  * Ceph - scalable distributed file system
@@ -7,9 +7,9 @@
  *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
- * License version 2.1, as published by the Free Software 
+ * License version 2.1, as published by the Free Software
  * Foundation.  See file COPYING.
- * 
+ *
  */
 
 
@@ -19,20 +19,21 @@
 #include "../LogEvent.h"
 
 // generic log event
-class EResetJournal : public LogEvent {
- public:
-  EResetJournal() : LogEvent(EVENT_RESETJOURNAL) { }
-  ~EResetJournal() override {}
+class EResetJournal : public LogEvent
+{
+public:
+    EResetJournal()
+        : LogEvent(EVENT_RESETJOURNAL)
+    {}
+    ~EResetJournal() override {}
 
-  void encode(bufferlist& bl, uint64_t features) const override;
-  void decode(bufferlist::const_iterator& bl) override;
-  void dump(Formatter *f) const override;
-  static void generate_test_instances(std::list<EResetJournal*>& ls);
-  void print(std::ostream& out) const override {
-    out << "EResetJournal";
-  }
+    void encode(bufferlist& bl, uint64_t features) const override;
+    void decode(bufferlist::const_iterator& bl) override;
+    void dump(Formatter* f) const override;
+    static void generate_test_instances(std::list<EResetJournal*>& ls);
+    void print(std::ostream& out) const override { out << "EResetJournal"; }
 
-  void replay(MDSRank *mds) override;
+    void replay(MDSRank* mds) override;
 };
 WRITE_CLASS_ENCODER_FEATURES(EResetJournal)
 

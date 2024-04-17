@@ -28,6 +28,6 @@
 //
 // Returns an empty string on success, and an error string otherwise.
 //
-std::string run_cmd(const char *cmd, ...);
+std::string run_cmd(const char* cmd, ...);
 
 #endif

@@ -36,13 +36,12 @@ function run() {
     CEPH_ARGS+="--osd_min_pg_log_entries=$loglen --osd_max_pg_log_entries=$loglen --osd_pg_log_trim_min=$trim "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
     done
 }
-
 
 function TEST_repeer_on_down_acting_member_coming_back() {
     local dir=$1
@@ -52,9 +51,8 @@ function TEST_repeer_on_down_acting_member_coming_back() {
     local osds="$(seq 0 $(expr $num_osds - 1))"
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    for i in $osds
-    do
-      run_osd $dir $i || return 1
+    for i in $osds; do
+        run_osd $dir $i || return 1
     done
 
     create_pool $poolname 1 1
@@ -73,9 +71,8 @@ function TEST_repeer_on_down_acting_member_coming_back() {
 
     echo "writing initial objects"
     # write a bunch of objects
-    for i in $(seq 1 $testobjects)
-    do
-      rados -p $poolname put existing_$i $dummyfile
+    for i in $(seq 1 $testobjects); do
+        rados -p $poolname put existing_$i $dummyfile
     done
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
@@ -111,10 +108,9 @@ function TEST_repeer_on_down_acting_member_coming_back() {
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
 
-    if ! grep -q "Active: got notify from previous acting member.*, requesting pg_temp change" $(find $dir -name '*osd*log')
-    then
-            echo failure
-            return 1
+    if ! grep -q "Active: got notify from previous acting member.*, requesting pg_temp change" $(find $dir -name '*osd*log'); then
+        echo failure
+        return 1
     fi
     echo "success"
 

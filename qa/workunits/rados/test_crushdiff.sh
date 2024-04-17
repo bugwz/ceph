@@ -12,7 +12,7 @@ test ${OSD_NUM} -gt 0
 setup() {
     local pool
 
-    TEMPDIR=`mktemp -d`
+    TEMPDIR=$(mktemp -d)
 
     pool=test-crushdiff-rep-$$
     ceph osd pool create ${pool} 32
@@ -32,12 +32,12 @@ cleanup() {
 
     test -n "${EC_POOL}" &&
         ceph osd pool delete "${EC_POOL}" "${EC_POOL}" \
-             --yes-i-really-really-mean-it
+            --yes-i-really-really-mean-it
     EC_POOL=
 
     test -n "${REP_POOL}" &&
         ceph osd pool delete "${REP_POOL}" "${REP_POOL}" \
-             --yes-i-really-really-mean-it
+            --yes-i-really-really-mean-it
     REP_POOL=
 
     test -n "${TEMPDIR}" && rm -Rf ${TEMPDIR}
@@ -63,11 +63,11 @@ crushdiff import ${TEMPDIR}/cm --compiled --verbose
 # test using "offline" osdmap and pg-dump
 
 ceph osd getmap -o ${TEMPDIR}/osdmap
-ceph pg dump --format json > ${TEMPDIR}/pg-dump
+ceph pg dump --format json >${TEMPDIR}/pg-dump
 
 crushdiff export ${TEMPDIR}/cm.txt --osdmap ${TEMPDIR}/osdmap --verbose
 crushdiff compare ${TEMPDIR}/cm.txt --osdmap ${TEMPDIR}/osdmap \
-          --pg-dump ${TEMPDIR}/pg-dump --verbose | tee ${TEMPDIR}/compare.txt
+    --pg-dump ${TEMPDIR}/pg-dump --verbose | tee ${TEMPDIR}/compare.txt
 
 # test the diff is zero when the crushmap is not modified
 
@@ -85,7 +85,7 @@ if [ ${OSD_NUM} -gt 3 ]; then
     cat ${TEMPDIR}/cm.txt >&2
 
     weight=$(awk '/item osd\.0 weight ([0-9.]+)/ {print $4 * 3}' \
-                 ${TEMPDIR}/cm.txt)
+        ${TEMPDIR}/cm.txt)
     test -n "${weight}"
     sed -i -Ee 's/^(.*item osd\.0 weight )[0-9.]+/\1'${weight}'/' \
         ${TEMPDIR}/cm.txt
@@ -95,7 +95,7 @@ if [ ${OSD_NUM} -gt 3 ]; then
     grep '^[1-9][0-9]*/[0-9]* (.*%) objects affected' ${TEMPDIR}/compare.txt
     grep '^[1-9][0-9]*/[0-9]* (.*%) pg shards to move' ${TEMPDIR}/compare.txt
     grep '^[1-9][0-9]*/[0-9]* (.*%) pg object shards to move' \
-         ${TEMPDIR}/compare.txt
+        ${TEMPDIR}/compare.txt
     grep '^.*/.* (.*%) bytes to move' ${TEMPDIR}/compare.txt
     crushdiff import ${TEMPDIR}/cm.txt --osdmap ${TEMPDIR}/osdmap --verbose
 fi

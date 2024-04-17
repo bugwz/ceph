@@ -11,88 +11,79 @@ testno=1
 mkdir -p merge_diff_test
 pushd merge_diff_test
 
-function expect_false()
-{
-  if "$@"; then return 1; else return 0; fi
+function expect_false() {
+    if "$@"; then return 1; else return 0; fi
 }
 
-function clear_all()
-{
-  fusermount -u mnt || true
+function clear_all() {
+    fusermount -u mnt || true
 
-  rbd snap purge --no-progress $gen || true
-  rbd rm --no-progress $gen || true
-  rbd snap purge --no-progress $out || true
-  rbd rm --no-progress $out || true
+    rbd snap purge --no-progress $gen || true
+    rbd rm --no-progress $gen || true
+    rbd snap purge --no-progress $out || true
+    rbd rm --no-progress $out || true
 
-  rm -rf diffs || true
+    rm -rf diffs || true
 }
 
-function rebuild()
-{
-  clear_all
-  echo Starting test $testno
-  ((testno++))
-  if [[ "$2" -lt "$1" ]] && [[ "$3" -gt "1" ]]; then
-    rbd create $gen --size 100 --object-size $1 --stripe-unit $2 --stripe-count $3 --image-format $4
-  else
-    rbd create $gen --size 100 --object-size $1 --image-format $4
-  fi
-  rbd create $out --size 1 --object-size 524288
-  mkdir -p mnt diffs
-  # lttng has atexit handlers that need to be fork/clone aware
-  LD_PRELOAD=liblttng-ust-fork.so.0 rbd-fuse -p $pool mnt
+function rebuild() {
+    clear_all
+    echo Starting test $testno
+    ((testno++))
+    if [[ "$2" -lt "$1" ]] && [[ "$3" -gt "1" ]]; then
+        rbd create $gen --size 100 --object-size $1 --stripe-unit $2 --stripe-count $3 --image-format $4
+    else
+        rbd create $gen --size 100 --object-size $1 --image-format $4
+    fi
+    rbd create $out --size 1 --object-size 524288
+    mkdir -p mnt diffs
+    # lttng has atexit handlers that need to be fork/clone aware
+    LD_PRELOAD=liblttng-ust-fork.so.0 rbd-fuse -p $pool mnt
 }
 
-function write()
-{
-  dd if=/dev/urandom of=mnt/gen bs=1M conv=notrunc seek=$1 count=$2
+function write() {
+    dd if=/dev/urandom of=mnt/gen bs=1M conv=notrunc seek=$1 count=$2
 }
 
-function snap()
-{
-  rbd snap create $gen@$1
+function snap() {
+    rbd snap create $gen@$1
 }
 
-function resize()
-{
-  rbd resize --no-progress $gen --size $1 --allow-shrink
+function resize() {
+    rbd resize --no-progress $gen --size $1 --allow-shrink
 }
 
-function export_diff()
-{
-  if [ $2 == "head" ]; then
-    target="$gen"
-  else
-    target="$gen@$2"
-  fi
-  if [ $1 == "null" ]; then
-    rbd export-diff --no-progress $target diffs/$1.$2
-  else
-    rbd export-diff --no-progress $target --from-snap $1 diffs/$1.$2
-  fi
+function export_diff() {
+    if [ $2 == "head" ]; then
+        target="$gen"
+    else
+        target="$gen@$2"
+    fi
+    if [ $1 == "null" ]; then
+        rbd export-diff --no-progress $target diffs/$1.$2
+    else
+        rbd export-diff --no-progress $target --from-snap $1 diffs/$1.$2
+    fi
 }
 
-function merge_diff()
-{
-  rbd merge-diff diffs/$1.$2 diffs/$2.$3 diffs/$1.$3
+function merge_diff() {
+    rbd merge-diff diffs/$1.$2 diffs/$2.$3 diffs/$1.$3
 }
 
-function check()
-{
-  rbd import-diff --no-progress diffs/$1.$2 $out || return -1
-  if [ "$2" == "head" ]; then
-    sum1=`rbd export $gen - | md5sum`
-  else
-    sum1=`rbd export $gen@$2 - | md5sum`
-  fi
-  sum2=`rbd export $out - | md5sum`
-  if [ "$sum1" != "$sum2" ]; then
-    exit -1
-  fi
-  if [ "$2" != "head" ]; then
-    rbd snap ls $out | awk '{print $2}' | grep "^$2\$" || return -1
-  fi
+function check() {
+    rbd import-diff --no-progress diffs/$1.$2 $out || return -1
+    if [ "$2" == "head" ]; then
+        sum1=$(rbd export $gen - | md5sum)
+    else
+        sum1=$(rbd export $gen@$2 - | md5sum)
+    fi
+    sum2=$(rbd export $out - | md5sum)
+    if [ "$sum1" != "$sum2" ]; then
+        exit -1
+    fi
+    if [ "$2" != "head" ]; then
+        rbd snap ls $out | awk '{print $2}' | grep "^$2\$" || return -1
+    fi
 }
 
 #test f/t header
@@ -139,7 +130,7 @@ write 2 1
 export_diff null a
 export_diff a b
 export_diff b head
-rbd merge-diff diffs/null.a diffs/a.b - | rbd merge-diff - diffs/b.head - > diffs/null.head
+rbd merge-diff diffs/null.a diffs/a.b - | rbd merge-diff - diffs/b.head - >diffs/null.head
 check null head
 
 #data test

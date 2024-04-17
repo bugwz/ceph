@@ -5,6 +5,7 @@
 #define CEPH_MOCK_BASE_REQUEST_H
 
 #include "tools/rbd_mirror/BaseRequest.h"
+
 #include <gmock/gmock.h>
 
 struct Context;
@@ -12,15 +13,18 @@ struct Context;
 namespace rbd {
 namespace mirror {
 
-struct MockBaseRequest : public BaseRequest {
-  MockBaseRequest() : BaseRequest(nullptr) {}
+struct MockBaseRequest : public BaseRequest
+{
+    MockBaseRequest()
+        : BaseRequest(nullptr)
+    {}
 
-  Context* on_finish = nullptr;
+    Context* on_finish = nullptr;
 
-  MOCK_METHOD0(send, void());
+    MOCK_METHOD0(send, void());
 };
 
-} // namespace mirror
-} // namepace rbd
+}   // namespace mirror
+}   // namespace rbd
 
-#endif // CEPH_MOCK_BASE_REQUEST_H
+#endif   // CEPH_MOCK_BASE_REQUEST_H

@@ -12,16 +12,15 @@ on_error() {
         echo "Saving MGR logs:"
         echo
         mkdir -p ${CEPH_DEV_FOLDER}/logs
-        kcli ssh -u root -- ceph-node-00 'cephadm logs -n \$(cephadm ls | grep -Eo "mgr\.ceph[0-9a-z.-]+" | head -n 1) -- --no-tail --no-pager' > ${CEPH_DEV_FOLDER}/logs/mgr.cephadm.log
-        for vm_id in {0..3}
-        do
+        kcli ssh -u root -- ceph-node-00 'cephadm logs -n \$(cephadm ls | grep -Eo "mgr\.ceph[0-9a-z.-]+" | head -n 1) -- --no-tail --no-pager' >${CEPH_DEV_FOLDER}/logs/mgr.cephadm.log
+        for vm_id in {0..3}; do
             local vm="ceph-node-0${vm_id}"
             echo "Saving journalctl from VM ${vm}:"
             echo
-            kcli ssh -u root -- ${vm} 'journalctl --no-tail --no-pager -t cloud-init' > ${CEPH_DEV_FOLDER}/logs/journal.ceph-node-0${vm_id}.log || true
+            kcli ssh -u root -- ${vm} 'journalctl --no-tail --no-pager -t cloud-init' >${CEPH_DEV_FOLDER}/logs/journal.ceph-node-0${vm_id}.log || true
             echo "Saving container logs:"
             echo
-            kcli ssh -u root -- ${vm} 'podman logs --names --since 30s \$(podman ps -aq)' > ${CEPH_DEV_FOLDER}/logs/container.ceph-node-0${vm_id}.log || true
+            kcli ssh -u root -- ${vm} 'podman logs --names --since 30s \$(podman ps -aq)' >${CEPH_DEV_FOLDER}/logs/container.ceph-node-0${vm_id}.log || true
         done
         echo "TEST FAILED."
     fi
@@ -36,11 +35,14 @@ EXTRA_PARAMS=''
 DEV_MODE=''
 # Check script args/options.
 for arg in "$@"; do
-  shift
-  case "$arg" in
-    "--dev-mode") DEV_MODE='true'; EXTRA_PARAMS+=" -P dev_mode=${DEV_MODE}" ;;
+    shift
+    case "$arg" in
+    "--dev-mode")
+        DEV_MODE='true'
+        EXTRA_PARAMS+=" -P dev_mode=${DEV_MODE}"
+        ;;
     "--expanded") EXTRA_PARAMS+=" -P expanded_cluster=true" ;;
-  esac
+    esac
 done
 
 kcli delete plan -y ceph || true

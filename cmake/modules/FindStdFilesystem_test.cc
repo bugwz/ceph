@@ -2,7 +2,8 @@
 
 namespace fs = std::filesystem;
 
-int main() {
+int main()
+{
     fs::create_directory("sandbox");
     fs::remove_all("sandbox");
 }

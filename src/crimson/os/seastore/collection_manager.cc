@@ -2,13 +2,15 @@
 // vim: ts=8 sw=2 smarttab
 //
 #include "crimson/os/seastore/collection_manager.h"
-#include "crimson/os/seastore/transaction_manager.h"
+
 #include "crimson/os/seastore/collection_manager/flat_collection_manager.h"
+#include "crimson/os/seastore/transaction_manager.h"
 
 namespace crimson::os::seastore::collection_manager {
 
-CollectionManagerRef create_coll_manager(TransactionManager &trans_manager) {
-  return CollectionManagerRef(new FlatCollectionManager(trans_manager));
+CollectionManagerRef create_coll_manager(TransactionManager& trans_manager)
+{
+    return CollectionManagerRef(new FlatCollectionManager(trans_manager));
 }
 
-}
+}   // namespace crimson::os::seastore::collection_manager

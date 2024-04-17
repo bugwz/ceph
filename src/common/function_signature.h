@@ -10,14 +10,13 @@
 #ifndef FUNCTION_SIGNATURE_H
 #define FUNCTION_SIGNATURE_H
 
+#include <boost/function_types/function_type.hpp>
+#include <boost/function_types/parameter_types.hpp>
+#include <boost/function_types/result_type.hpp>
 #include <boost/mpl/pop_front.hpp>
 #include <boost/mpl/push_front.hpp>
-#include <boost/function_types/function_type.hpp>
-#include <boost/function_types/result_type.hpp>
-#include <boost/function_types/parameter_types.hpp>
 
-template <typename F>
-struct signature_of_member
+template<typename F> struct signature_of_member
 {
     typedef typename boost::function_types::result_type<F>::type result_type;
     typedef typename boost::function_types::parameter_types<F>::type parameter_types;
@@ -26,20 +25,17 @@ struct signature_of_member
     typedef typename boost::function_types::function_type<L>::type type;
 };
 
-template <typename F, bool is_class>
-struct signature_of_impl
+template<typename F, bool is_class> struct signature_of_impl
 {
     typedef typename boost::function_types::function_type<F>::type type;
 };
 
-template <typename F>
-struct signature_of_impl<F, true>
+template<typename F> struct signature_of_impl<F, true>
 {
     typedef typename signature_of_member<decltype(&F::operator())>::type type;
 };
 
-template <typename F>
-struct signature_of
+template<typename F> struct signature_of
 {
     typedef typename signature_of_impl<F, boost::is_class<F>::value>::type type;
 };

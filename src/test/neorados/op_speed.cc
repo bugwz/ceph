@@ -17,18 +17,19 @@
 
 constexpr int to_create = 10'000'000;
 
-int main() {
-  for (int i = 0; i < to_create; ++i) {
-    neorados::ReadOp op;
-    bufferlist bl;
-    std::uint64_t sz;
-    ceph::real_time tm;
-    boost::container::flat_map<std::string, ceph::buffer::list> xattrs;
-    boost::container::flat_map<std::string, ceph::buffer::list> omap;
-    bool trunc;
-    op.read(0, 0, &bl);
-    op.stat(&sz, &tm);
-    op.get_xattrs(&xattrs);
-    op.get_omap_vals(std::nullopt, std::nullopt, 1000, &omap, &trunc);
-  }
+int main()
+{
+    for (int i = 0; i < to_create; ++i) {
+        neorados::ReadOp op;
+        bufferlist bl;
+        std::uint64_t sz;
+        ceph::real_time tm;
+        boost::container::flat_map<std::string, ceph::buffer::list> xattrs;
+        boost::container::flat_map<std::string, ceph::buffer::list> omap;
+        bool trunc;
+        op.read(0, 0, &bl);
+        op.stat(&sz, &tm);
+        op.get_xattrs(&xattrs);
+        op.get_omap_vals(std::nullopt, std::nullopt, 1000, &omap, &trunc);
+    }
 }

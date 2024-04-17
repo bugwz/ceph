@@ -20,20 +20,17 @@
 
 namespace ceph::async {
 template<typename Executor, typename Allocator, typename Completion>
-auto bind_ea(const Executor& executor, const Allocator& allocator,
-	     Completion&& completion) {
-  return bind_allocator(allocator,
-			boost::asio::bind_executor(
-			  executor,
-			  std::forward<Completion>(completion)));
+auto bind_ea(const Executor& executor, const Allocator& allocator, Completion&& completion)
+{
+    return bind_allocator(allocator, boost::asio::bind_executor(executor, std::forward<Completion>(completion)));
 }
 
 
 // Bind `Completion` to the executor and allocator of `Proto`
-template<typename Proto, typename Completion>
-auto bind_like(const Proto& proto, Completion&& completion) {
-  return bind_ea(boost::asio::get_associated_executor(proto),
-		 boost::asio::get_associated_allocator(proto),
-		 std::forward<Completion>(completion));
+template<typename Proto, typename Completion> auto bind_like(const Proto& proto, Completion&& completion)
+{
+    return bind_ea(boost::asio::get_associated_executor(proto),
+                   boost::asio::get_associated_allocator(proto),
+                   std::forward<Completion>(completion));
 }
-}
+}   // namespace ceph::async

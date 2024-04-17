@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# test pidfile here 
+# test pidfile here
 #
 
 # Includes
@@ -18,7 +18,7 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         $func $dir || return 1
     done
 }
@@ -36,7 +36,7 @@ function TEST_without_pidfile() {
     expect_failure $dir "ignore empty --pid-file" ceph-mon \
         -f \
         --log-to-stderr \
-	--log_flush_on_exit \
+        --log_flush_on_exit \
         --pid-file= \
         --id $id \
         --mon-data=$data \
@@ -46,7 +46,7 @@ function TEST_without_pidfile() {
 
 function TEST_pidfile() {
     local dir=$1
-    setup $dir 
+    setup $dir
 
     # no daemon can use a pidfile that is owned by another daemon
     run_mon $dir a || return 1
@@ -73,8 +73,8 @@ function TEST_pidfile() {
     # the file is not removed because it is assumed to be owned by
     # another daemon
     mkdir $dir/old
-    cp $dir/osd.0.pid $dir/old/osd.0.pid  # so that kill_daemon finds the pid
-    echo 123 > $dir/osd.0.pid
+    cp $dir/osd.0.pid $dir/old/osd.0.pid # so that kill_daemon finds the pid
+    echo 123 >$dir/osd.0.pid
     kill_daemons $dir/old TERM osd.0 || return 1
     test -f $dir/osd.0.pid || return 1
 
@@ -87,4 +87,3 @@ function TEST_pidfile() {
 }
 
 main pidfile "$@"
-

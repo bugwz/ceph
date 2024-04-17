@@ -14,60 +14,54 @@
 #ifndef MGR_CONTEXT_H_
 #define MGR_CONTEXT_H_
 
-#include <memory>
-
-#include "common/ceph_json.h"
 #include "common/Cond.h"
+#include "common/ceph_json.h"
 #include "mon/MonClient.h"
+
+#include <memory>
 
 class Command
 {
 protected:
-  C_SaferCond cond;
+    C_SaferCond cond;
+
 public:
-  ceph::buffer::list outbl;
-  std::string outs;
-  int r;
+    ceph::buffer::list outbl;
+    std::string outs;
+    int r;
 
-  void run(MonClient *monc, const std::string &command)
-  {
-    monc->start_mon_command({command}, {},
-        &outbl, &outs, &cond);
-  }
+    void run(MonClient* monc, const std::string& command)
+    {
+        monc->start_mon_command({command}, {}, &outbl, &outs, &cond);
+    }
 
-  void run(MonClient *monc, const std::string &command, const ceph::buffer::list &inbl)
-  {
-    monc->start_mon_command({command}, inbl,
-        &outbl, &outs, &cond);
-  }
+    void run(MonClient* monc, const std::string& command, const ceph::buffer::list& inbl)
+    {
+        monc->start_mon_command({command}, inbl, &outbl, &outs, &cond);
+    }
 
-  virtual void wait()
-  {
-    r = cond.wait();
-  }
+    virtual void wait() { r = cond.wait(); }
 
-  virtual ~Command() {}
+    virtual ~Command() {}
 };
 
 
 class JSONCommand : public Command
 {
 public:
-  json_spirit::mValue json_result;
+    json_spirit::mValue json_result;
 
-  void wait() override
-  {
-    Command::wait();
+    void wait() override
+    {
+        Command::wait();
 
-    if (r == 0) {
-      bool read_ok = json_spirit::read(
-          outbl.to_str(), json_result);
-      if (!read_ok) {
-        r = -EINVAL;
-      }
+        if (r == 0) {
+            bool read_ok = json_spirit::read(outbl.to_str(), json_result);
+            if (!read_ok) {
+                r = -EINVAL;
+            }
+        }
     }
-  }
 };
 
 #endif
-

@@ -15,9 +15,10 @@
 #ifndef CEPH_GLOBAL_SIGNAL_HANDLER_H
 #define CEPH_GLOBAL_SIGNAL_HANDLER_H
 
-#include <signal.h>
 #include "acconfig.h"
+
 #include <map>
+#include <signal.h>
 #include <string>
 
 typedef void (*signal_handler_t)(int);
@@ -26,11 +27,11 @@ struct BackTrace;
 }
 
 #if defined(HAVE_SIGDESCR_NP)
-# define sig_str(signum) sigdescr_np(signum)
+#define sig_str(signum) sigdescr_np(signum)
 #elif defined(HAVE_REENTRANT_STRSIGNAL)
-# define sig_str(signum) strsignal(signum)
+#define sig_str(signum) strsignal(signum)
 #else
-# define sig_str(signum) sys_siglist[signum]
+#define sig_str(signum) sys_siglist[signum]
 #endif
 
 void install_sighandler(int signum, signal_handler_t handler, int flags);
@@ -58,8 +59,6 @@ void register_async_signal_handler_oneshot(int signum, signal_handler_t handler)
 /// uninstall a safe async signal callback
 void unregister_async_signal_handler(int signum, signal_handler_t handler);
 
-void generate_crash_dump(char *base,
-			 const ceph::BackTrace& bt,
-			 std::map<std::string,std::string> *extra = 0);
+void generate_crash_dump(char* base, const ceph::BackTrace& bt, std::map<std::string, std::string>* extra = 0);
 
 #endif

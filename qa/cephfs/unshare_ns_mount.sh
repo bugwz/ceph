@@ -16,7 +16,7 @@
 #           |                       |                      |
 #            \                      | brx.Y               /
 #             \          ----------------------          /
-#              \  brx.X |       ceph-brx       | brx.Z  / 
+#              \  brx.X |       ceph-brx       | brx.Z  /
 #               \------>|       default        |<------/
 #                   |   |  192.168.255.254/16  |   |
 #                   |    ----------------------    |
@@ -40,7 +40,7 @@ usage() {
     echo "This will help to isolate the network namespace from OS for the mount client!"
     echo ""
     echo "usage: unshare_ns_mount.sh [OPTIONS [paramters]] [--brxip <ip_address/mask>]"
-    echo "OPTIONS:" 
+    echo "OPTIONS:"
     echo -e "  --fuse    <ceph-fuse options>"
     echo -e "\tThe ceph-fuse command options"
     echo -e "\t  $ unshare_ns_mount.sh --fuse -m 192.168.0.1:6789 /mnt/cephfs -o nonempty"
@@ -86,15 +86,14 @@ new_netns=""
 fuse_type=false
 
 function get_mountpoint() {
-    for param in $@
-    do
+    for param in $@; do
         if [ -d $param ]; then
             # skipping "--client_mountpoint/-r root_directory"
             # option for ceph-fuse command
             if [ "$last" == "-r" -o "$last" == "--client_mountpoint" ]; then
                 last=$param
                 continue
-	        fi
+            fi
             if [ "0$mountpoint" != "0" ]; then
                 echo "Oops: too many mountpiont options!"
                 exit 1
@@ -113,17 +112,15 @@ function get_mountpoint() {
 function get_new_netns() {
     # prune the repeating slashes:
     # "/mnt///cephfs///" --> "/mnt/cephfs/"
-    __mountpoint=`echo "$mountpoint" | sed 's/\/\+/\//g'`
+    __mountpoint=$(echo "$mountpoint" | sed 's/\/\+/\//g')
 
     # prune the leading slashes
-    while [ ${__mountpoint:0:1} == "/" ]
-    do
+    while [ ${__mountpoint:0:1} == "/" ]; do
         __mountpoint=${__mountpoint:1}
     done
 
     # prune the last slashes
-    while [ ${__mountpoint: -1} == "/" ]
-    do
+    while [ ${__mountpoint: -1} == "/" ]; do
         __mountpoint=${__mountpoint:0:-1}
     done
 
@@ -132,20 +129,19 @@ function get_new_netns() {
 
     # "mnt/cephfs" --> "ceph-fuse-mnt-cephfs"
     if [ "$1" == "--fuse" ]; then
-        new_netns=`echo ceph-fuse-$__mountpoint`
+        new_netns=$(echo ceph-fuse-$__mountpoint)
         fuse_type=true
         return
     fi
 
     # "mnt/cephfs" --> "ceph-kernel-mnt-cephfs"
     if [ "$1" == "--kernel" ]; then
-        new_netns=`echo ceph-kernel-$__mountpoint`
+        new_netns=$(echo ceph-kernel-$__mountpoint)
         return
     fi
 
     # we are in umount/suspend/resume routines
-    for ns in `ip netns list | awk '{print $1}'`
-    do
+    for ns in $(ip netns list | awk '{print $1}'); do
         if [ "$ns" == "ceph-fuse-$__mountpoint" ]; then
             new_netns=$ns
             fuse_type=true
@@ -156,7 +152,7 @@ function get_new_netns() {
             return
         fi
     done
-    
+
     if [ "0$new_netns" == "0" ]; then
         echo "Oops, netns 'ceph-{fuse/kernel}-$__mountpoint' does not exists!"
         exit 1
@@ -165,9 +161,9 @@ function get_new_netns() {
 
 # the peer veth name will be "brx.$nsid" on host node
 function get_netns_brx() {
-    get_new_netns 
+    get_new_netns
 
-    nsid=`ip netns list-id | grep "$new_netns" | awk '{print $2}'`
+    nsid=$(ip netns list-id | grep "$new_netns" | awk '{print $2}')
     netns_veth=brx.$nsid
     eval $1="$netns_veth"
 }
@@ -218,11 +214,9 @@ function ceph_umount() {
 
     # let's wait for a while to let the umount operation
     # to finish before deleting the netns
-    while [ 1 ]
-    do
-        for pid in `ip netns pids $new_netns 2>/dev/null`
-        do
-            name=`cat /proc/$pid/comm 2>/dev/null`
+    while [ 1 ]; do
+        for pid in $(ip netns pids $new_netns 2>/dev/null); do
+            name=$(cat /proc/$pid/comm 2>/dev/null)
             if [ "$name" == "ceph-fuse" ]; then
                 break
             fi
@@ -237,7 +231,7 @@ function ceph_umount() {
         break
     done
 
-    nsid=`ip netns list-id | grep "$new_netns" | awk '{print $2}'`
+    nsid=$(ip netns list-id | grep "$new_netns" | awk '{print $2}')
     netns_brx=brx.$nsid
 
     # brctl delif $CEPH_BRX $netns_brx 2>/dev/null
@@ -245,29 +239,29 @@ function ceph_umount() {
     nmcli connection delete $netns_brx 2>/dev/null
 
     ip netns delete $new_netns 2>/dev/null
-    
+
     # if this is the last netns_brx, will delete
     # the $CEPH_BRX and restore the OS configure
     # rc=`brctl show ceph-brx 2>/dev/null | grep 'brx\.'|wc -l`
-    rc=`nmcli connection show 2>/dev/null | grep 'brx\.' | wc -l`
+    rc=$(nmcli connection show 2>/dev/null | grep 'brx\.' | wc -l)
     if [ $rc == 0 ]; then
         ip link set $CEPH_BRX down 2>/dev/null
         # brctl delbr $CEPH_BRX 2>/dev/null
         nmcli connection delete $CEPH_BRX 2>/dev/null
 
         # restore the ip forward
-        tmpfile=`ls /tmp/ | grep "$CEPH_BRX\."`
+        tmpfile=$(ls /tmp/ | grep "$CEPH_BRX\.")
         tmpfile=/tmp/$tmpfile
         if [ ! -f $tmpfile ]; then
             echo "Oops, the $CEPH_BRX.XXX temp file does not exist!"
         else
-            save=`cat $tmpfile`
-            echo $save > /proc/sys/net/ipv4/ip_forward
+            save=$(cat $tmpfile)
+            echo $save >/proc/sys/net/ipv4/ip_forward
             rm -rf $tmpfile
         fi
 
         # drop the iptables NAT rules
-        host_nic=`route | grep default | awk '{print $8}'`
+        host_nic=$(route | grep default | awk '{print $8}')
         iptables -D FORWARD -o $host_nic -i $CEPH_BRX -j ACCEPT
         iptables -D FORWARD -i $host_nic -o $CEPH_BRX -j ACCEPT
         iptables -t nat -D POSTROUTING -s $CEPH_BRX_IP/$NET_MASK -o $host_nic -j MASQUERADE
@@ -275,10 +269,10 @@ function ceph_umount() {
 }
 
 function get_brd_mask() {
-    first=`echo "$CEPH_BRX_IP" | awk -F. '{print $1}'`
-    second=`echo "$CEPH_BRX_IP" | awk -F. '{print $2}'`
-    third=`echo "$CEPH_BRX_IP" | awk -F. '{print $3}'`
-    fourth=`echo "$CEPH_BRX_IP" | awk -F. '{print $4}'`
+    first=$(echo "$CEPH_BRX_IP" | awk -F. '{print $1}')
+    second=$(echo "$CEPH_BRX_IP" | awk -F. '{print $2}')
+    third=$(echo "$CEPH_BRX_IP" | awk -F. '{print $3}')
+    fourth=$(echo "$CEPH_BRX_IP" | awk -F. '{print $4}')
 
     if [ "$first" == "172" ]; then
         second_max=31
@@ -290,19 +284,19 @@ function get_brd_mask() {
 
     if [ $NET_MASK -lt 16 ]; then
         let power=16-$NET_MASK
-        m=`awk 'BEGIN{printf 2^"'$power'"-1}'`
-        second=$((second&~m))
+        m=$(awk 'BEGIN{printf 2^"'$power'"-1}')
+        second=$((second & ~m))
         let second_max=$second+$m
     elif [ $NET_MASK -lt 24 ]; then
         let power=24-$NET_MASK
-        m=`awk 'BEGIN{printf 2^"'$power'"-1}'`
-        third=$((third&~m))
+        m=$(awk 'BEGIN{printf 2^"'$power'"-1}')
+        third=$((third & ~m))
         let third_max=$third+$m
         second_max=$second
     elif [ $NET_MASK -lt 32 ]; then
         let power=32-$NET_MASK
-        m=`awk 'BEGIN{printf 2^"'$power'"-1}'`
-        fourth=$((fourth&~m))
+        m=$(awk 'BEGIN{printf 2^"'$power'"-1}')
+        fourth=$((fourth & ~m))
         let fourth_max=$fourth+$m
         second_max=$second
         third_max=$third
@@ -315,10 +309,10 @@ function get_brd_mask() {
 # The netns IP will be 192.168.0.1 ~ 192.168.255.253,
 # and 192.168.255.254 is saved for $CEPH_BRX
 function get_new_ns_ip() {
-    first=`echo "$CEPH_BRX_IP" | awk -F. '{print $1}'`
-    second=`echo "$CEPH_BRX_IP" | awk -F. '{print $2}'`
-    third=`echo "$CEPH_BRX_IP" | awk -F. '{print $3}'`
-    fourth=`echo "$CEPH_BRX_IP" | awk -F. '{print $4}'`
+    first=$(echo "$CEPH_BRX_IP" | awk -F. '{print $1}')
+    second=$(echo "$CEPH_BRX_IP" | awk -F. '{print $2}')
+    third=$(echo "$CEPH_BRX_IP" | awk -F. '{print $3}')
+    fourth=$(echo "$CEPH_BRX_IP" | awk -F. '{print $4}')
 
     if [ "$first" == ""172 ]; then
         second_max=31
@@ -330,37 +324,35 @@ function get_new_ns_ip() {
 
     if [ $NET_MASK -lt 16 ]; then
         let power=16-$NET_MASK
-        m=`awk 'BEGIN{printf 2^"'$power'"-1}'`
-        second=$((second&~m))
+        m=$(awk 'BEGIN{printf 2^"'$power'"-1}')
+        second=$((second & ~m))
         let second_max=$second+$m
         third=0
         fourth=1
     elif [ $NET_MASK -lt 24 ]; then
         let power=24-$NET_MASK
-        m=`awk 'BEGIN{printf 2^"'$power'"-1}'`
-        third=$((third&~m))
+        m=$(awk 'BEGIN{printf 2^"'$power'"-1}')
+        third=$((third & ~m))
         let third_max=$third+$m
         second_max=$second
         fourth=1
     elif [ $NET_MASK -lt 32 ]; then
         let power=32-$NET_MASK
-        m=`awk 'BEGIN{printf 2^"'$power'"-1}'`
-        fourth=$((fourth&~m))
+        m=$(awk 'BEGIN{printf 2^"'$power'"-1}')
+        fourth=$((fourth & ~m))
         let fourth+=1
         let fourth_max=$fourth+$m-1
         second_max=$second
         third_max=$third
     fi
 
-    while [ $second -le $second_max -a $third -le $third_max -a $fourth -le $fourth_max ]
-    do
+    while [ $second -le $second_max -a $third -le $third_max -a $fourth -le $fourth_max ]; do
         conflict=false
 
         # check from the existing network namespaces
-        for netns in `ip netns list | awk '{print $1}'`
-        do
-            ip=`ip netns exec $netns ip addr | grep "inet " | grep "veth0"`
-            ip=`echo "$ip" | awk '{print $2}' | awk -F/ '{print $1}'`
+        for netns in $(ip netns list | awk '{print $1}'); do
+            ip=$(ip netns exec $netns ip addr | grep "inet " | grep "veth0")
+            ip=$(echo "$ip" | awk '{print $2}' | awk -F/ '{print $1}')
             if [ "0$ip" == "0" ]; then
                 continue
             fi
@@ -369,13 +361,13 @@ function get_new_ns_ip() {
 
                 let fourth+=1
                 if [ $fourth -le $fourth_max ]; then
-                     break
+                    break
                 fi
-		
+
                 fourth=0
                 let third+=1
                 if [ $third -le $third_max ]; then
-                     break
+                    break
                 fi
 
                 third=0
@@ -406,8 +398,8 @@ function get_new_ns_ip() {
 }
 
 function check_valid_private_ip() {
-    first=`echo "$1" | awk -F. '{print $1}'`
-    second=`echo "$1" | awk -F. '{print $2}'`
+    first=$(echo "$1" | awk -F. '{print $1}')
+    second=$(echo "$1" | awk -F. '{print $2}')
 
     # private network class A 10.0.0.0 - 10.255.255.255
     if [ "$first" == "10" -a $NET_MASK -ge 8 ]; then
@@ -431,8 +423,7 @@ function check_valid_private_ip() {
 function setup_bridge_and_nat() {
     # check and parse the --brxip parameter
     is_brxip=false
-    for ip in $@
-    do
+    for ip in $@; do
         if [ "$ip" == "--brxip" ]; then
             is_brxip=true
             continue
@@ -445,16 +436,16 @@ function setup_bridge_and_nat() {
 
     # if the $CEPH_BRX already exists, then check the new
     # brxip, if not match fail it without doing anything.
-    rc=`ip addr | grep "inet " | grep " $CEPH_BRX"`
+    rc=$(ip addr | grep "inet " | grep " $CEPH_BRX")
     if [ "0$rc" != "0" ]; then
-        existing_brxip=`echo "$rc" | awk '{print $2}'`
+        existing_brxip=$(echo "$rc" | awk '{print $2}')
         if [ "0$new_brxip" != "0" -a "$existing_brxip" != "$new_brxip" ]; then
             echo "Oops: conflict with the existing $CEPH_BRX ip '$existing_brxip', new '$new_brxip'!"
             exit 1
         fi
 
-        CEPH_BRX_IP=`echo "$existing_brxip" | awk -F/ '{print $1}'`
-        NET_MASK=`echo "$existing_brxip" | awk -F/ '{print $2}'`
+        CEPH_BRX_IP=$(echo "$existing_brxip" | awk -F/ '{print $1}')
+        NET_MASK=$(echo "$existing_brxip" | awk -F/ '{print $2}')
         get_brd_mask
         return
     fi
@@ -464,8 +455,8 @@ function setup_bridge_and_nat() {
     # the $CEPH_BRX, if no --brxip is specified will use the
     # default $CEPH_BRX_IP/$NET_MASK
     if [ "0$new_brxip" != "0" ]; then
-        CEPH_BRX_IP=`echo "$new_brxip" | awk -F/ '{print $1}'`
-        NET_MASK=`echo "$new_brxip" | awk -F/ '{print $2}'`
+        CEPH_BRX_IP=$(echo "$new_brxip" | awk -F/ '{print $1}')
+        NET_MASK=$(echo "$new_brxip" | awk -F/ '{print $2}')
         get_brd_mask
         check_valid_private_ip $CEPH_BRX_IP
     fi
@@ -480,11 +471,11 @@ function setup_bridge_and_nat() {
     # setup the NAT
     rm -rf /tmp/ceph-brx.*
     tmpfile=$(mktemp /tmp/ceph-brx.XXXXXXXX)
-    save=`cat /proc/sys/net/ipv4/ip_forward`
-    echo $save > $tmpfile
-    echo 1 > /proc/sys/net/ipv4/ip_forward
+    save=$(cat /proc/sys/net/ipv4/ip_forward)
+    echo $save >$tmpfile
+    echo 1 >/proc/sys/net/ipv4/ip_forward
 
-    host_nic=`route | grep default | awk '{print $8}'`
+    host_nic=$(route | grep default | awk '{print $8}')
     iptables -A FORWARD -o $host_nic -i $CEPH_BRX -j ACCEPT
     iptables -A FORWARD -i $host_nic -o $CEPH_BRX -j ACCEPT
     iptables -t nat -A POSTROUTING -s $CEPH_BRX_IP/$NET_MASK -o $host_nic -j MASQUERADE
@@ -498,20 +489,21 @@ function __ceph_mount() {
     tmpfile=$(mktemp /tmp/ceph-nsenter.XXXXXXXX)
     chmod +x $tmpfile
     if [ "$1" == "--kernel" ]; then
-        cmd=`echo "$@" | sed 's/--kernel/mount/'`
+        cmd=$(echo "$@" | sed 's/--kernel/mount/')
     else
-        cmd=`echo "$@" | sed 's/--fuse/ceph-fuse/'`
+        cmd=$(echo "$@" | sed 's/--fuse/ceph-fuse/')
     fi
 
     # remove the --brxip parameter
-    cmd=`echo "$cmd" | sed 's/--brxip.*\/[0-9]* //'`
+    cmd=$(echo "$cmd" | sed 's/--brxip.*\/[0-9]* //')
 
     # enter $new_netns and run ceph fuse client mount,
     # we couldn't use 'ip netns exec' here because it
     # will unshare the mount namespace.
-    echo "$cmd" > $tmpfile
-    nsenter --net=/var/run/netns/$new_netns /bin/bash $tmpfile ; echo $? > $tmpfile
-    rc=`cat $tmpfile`
+    echo "$cmd" >$tmpfile
+    nsenter --net=/var/run/netns/$new_netns /bin/bash $tmpfile
+    echo $? >$tmpfile
+    rc=$(cat $tmpfile)
     rm -f $tmpfile
 
     # fall back
@@ -525,9 +517,8 @@ function __ceph_mount() {
 function get_new_nsid() {
     # get one uniq netns id
     uniq_id=0
-    while [ 1 ]
-    do
-        rc=`ip netns list-id | grep "nsid $uniq_id "`
+    while [ 1 ]; do
+        rc=$(ip netns list-id | grep "nsid $uniq_id ")
         if [ "0$rc" == "0" ]; then
             break
         fi
@@ -542,7 +533,7 @@ function ceph_mount() {
     setup_bridge_and_nat $@
 
     get_new_netns $1
-    rc=`ip netns list | grep "$new_netns" | awk '{print $1}'`
+    rc=$(ip netns list | grep "$new_netns" | awk '{print $1}')
     if [ "0$rc" != "0" ]; then
         echo "Oops: the netns "$new_netns" already exists!"
         exit 1

@@ -46,11 +46,11 @@ typedef int64_t __s64;
 #endif
 
 #ifndef BOOST_MPL_LIMIT_VECTOR_SIZE
-#define BOOST_MPL_LIMIT_VECTOR_SIZE 30 // or whatever you need
+#define BOOST_MPL_LIMIT_VECTOR_SIZE 30   // or whatever you need
 #endif
 
 #ifndef BOOST_MPL_LIMIT_MAP_SIZE
-#define BOOST_MPL_LIMIT_MAP_SIZE 30 // or whatever you need
+#define BOOST_MPL_LIMIT_MAP_SIZE 30   // or whatever you need
 #endif
 
 #endif

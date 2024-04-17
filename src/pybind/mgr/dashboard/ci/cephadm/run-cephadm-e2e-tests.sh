@@ -8,7 +8,7 @@ set -ex
 : ${CYPRESS_ARGS:=''}
 : ${DASHBOARD_PORT:='8443'}
 
-get_vm_ip () {
+get_vm_ip() {
     local ip=$(kcli info vm "$1" -f ip -v | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
     echo -n $ip
 }
@@ -21,7 +21,7 @@ fi
 
 export CYPRESS_BASE_URL CYPRESS_LOGIN_USER CYPRESS_LOGIN_PWD
 
-cypress_run () {
+cypress_run() {
     local specs="$1"
     local timeout="$2"
     local override_config="excludeSpecPattern=*.po.ts,retries=0,specPattern=${specs},chromeWebSecurity=false"

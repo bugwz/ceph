@@ -11,13 +11,13 @@
  * OSD performance query class.
  */
 class OSDPerfMetricCollector
-  : public MetricCollector<OSDPerfMetricQuery, OSDPerfMetricLimit, OSDPerfMetricKey,
-                           OSDPerfMetricReport> {
+    : public MetricCollector<OSDPerfMetricQuery, OSDPerfMetricLimit, OSDPerfMetricKey, OSDPerfMetricReport>
+{
 public:
-  OSDPerfMetricCollector(MetricListener &listener);
+    OSDPerfMetricCollector(MetricListener& listener);
 
-  void process_reports(const MetricPayload &payload) override;
-  int get_counters(PerfCollector *collector) override;
+    void process_reports(const MetricPayload& payload) override;
+    int get_counters(PerfCollector* collector) override;
 };
 
-#endif // OSD_PERF_METRIC_COLLECTOR_H_
+#endif   // OSD_PERF_METRIC_COLLECTOR_H_

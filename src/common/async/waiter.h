@@ -15,15 +15,13 @@
 #ifndef CEPH_COMMON_WAITER_H
 #define CEPH_COMMON_WAITER_H
 
-#include <condition_variable>
-#include <tuple>
-
-#include <boost/asio/async_result.hpp>
-
+#include "common/ceph_mutex.h"
 #include "include/ceph_assert.h"
 #include "include/function2.hpp"
 
-#include "common/ceph_mutex.h"
+#include <boost/asio/async_result.hpp>
+#include <condition_variable>
+#include <tuple>
 
 namespace ceph::async {
 namespace detail {
@@ -33,191 +31,177 @@ namespace detail {
 // that unavoidably moves.
 //
 // It should not be used generally.
-template<typename T>
-class rvalue_reference_wrapper {
+template<typename T> class rvalue_reference_wrapper
+{
 public:
-  // types
-  using type = T;
+    // types
+    using type = T;
 
-  rvalue_reference_wrapper(T& r) noexcept
-    : p(std::addressof(r)) {}
+    rvalue_reference_wrapper(T& r) noexcept
+        : p(std::addressof(r))
+    {}
 
-  // We write our semantics to match those of reference collapsing. If
-  // we're treated as an lvalue, collapse to one.
+    // We write our semantics to match those of reference collapsing. If
+    // we're treated as an lvalue, collapse to one.
 
-  rvalue_reference_wrapper(const rvalue_reference_wrapper&) noexcept = default;
-  rvalue_reference_wrapper(rvalue_reference_wrapper&&) noexcept = default;
+    rvalue_reference_wrapper(const rvalue_reference_wrapper&) noexcept = default;
+    rvalue_reference_wrapper(rvalue_reference_wrapper&&) noexcept = default;
 
-  // assignment
-  rvalue_reference_wrapper& operator=(
-    const rvalue_reference_wrapper& x) noexcept = default;
-  rvalue_reference_wrapper& operator=(
-    rvalue_reference_wrapper&& x) noexcept = default;
+    // assignment
+    rvalue_reference_wrapper& operator=(const rvalue_reference_wrapper& x) noexcept = default;
+    rvalue_reference_wrapper& operator=(rvalue_reference_wrapper&& x) noexcept = default;
 
-  operator T& () const noexcept {
-    return *p;
-  }
-  T& get() const noexcept {
-    return *p;
-  }
+    operator T&() const noexcept { return *p; }
+    T& get() const noexcept { return *p; }
 
-  operator T&& () noexcept {
-    return std::move(*p);
-  }
-  T&& get() noexcept {
-    return std::move(*p);
-  }
+    operator T&&() noexcept { return std::move(*p); }
+    T&& get() noexcept { return std::move(*p); }
 
-  template<typename... Args>
-  std::result_of_t<T&(Args&&...)> operator ()(Args&&... args ) const {
-    return (*p)(std::forward<Args>(args)...);
-  }
+    template<typename... Args> std::result_of_t<T&(Args&&...)> operator()(Args&&... args) const
+    {
+        return (*p)(std::forward<Args>(args)...);
+    }
 
-  template<typename... Args>
-  std::result_of_t<T&&(Args&&...)> operator ()(Args&&... args ) {
-    return std::move(*p)(std::forward<Args>(args)...);
-  }
+    template<typename... Args> std::result_of_t<T && (Args && ...)> operator()(Args&&... args)
+    {
+        return std::move(*p)(std::forward<Args>(args)...);
+    }
 
 private:
-  T* p;
+    T* p;
 };
 
-class base {
+class base
+{
 protected:
-  ceph::mutex lock = ceph::make_mutex("ceph::async::detail::base::lock");
-  ceph::condition_variable cond;
-  bool has_value = false;
+    ceph::mutex lock = ceph::make_mutex("ceph::async::detail::base::lock");
+    ceph::condition_variable cond;
+    bool has_value = false;
 
-  ~base() = default;
+    ~base() = default;
 
-  auto wait_base() {
-    std::unique_lock l(lock);
-    cond.wait(l, [this](){ return has_value; });
-    return l;
-  }
+    auto wait_base()
+    {
+        std::unique_lock l(lock);
+        cond.wait(l, [this]() { return has_value; });
+        return l;
+    }
 
-  auto exec_base() {
-    std::unique_lock l(lock);
-    // There's no really good way to handle being called twice
-    // without being reset.
-    ceph_assert(!has_value);
-    has_value = true;
-    cond.notify_one();
-    return l;
-  }
+    auto exec_base()
+    {
+        std::unique_lock l(lock);
+        // There's no really good way to handle being called twice
+        // without being reset.
+        ceph_assert(!has_value);
+        has_value = true;
+        cond.notify_one();
+        return l;
+    }
 };
-}
+}   // namespace detail
 
 // waiter is a replacement for C_SafeCond and friends. It is the
 // moral equivalent of a future but plays well with a world of
 // callbacks.
-template<typename ...S>
-class waiter;
+template<typename... S> class waiter;
 
-template<>
-class waiter<> final : public detail::base {
+template<> class waiter<> final : public detail::base
+{
 public:
-  void wait() {
-    wait_base();
-    has_value = false;
-  }
+    void wait()
+    {
+        wait_base();
+        has_value = false;
+    }
 
-  void operator()() {
-    exec_base();
-  }
+    void operator()() { exec_base(); }
 
-  auto ref() {
-    return detail::rvalue_reference_wrapper(*this);
-  }
+    auto ref() { return detail::rvalue_reference_wrapper(*this); }
 
 
-  operator fu2::unique_function<void() &&>() {
-    return fu2::unique_function<void() &&>(ref());
-  }
+    operator fu2::unique_function<void() &&>() { return fu2::unique_function<void() &&>(ref()); }
 };
 
-template<typename Ret>
-class waiter<Ret> final : public detail::base {
-  std::aligned_storage_t<sizeof(Ret)> ret;
+template<typename Ret> class waiter<Ret> final : public detail::base
+{
+    std::aligned_storage_t<sizeof(Ret)> ret;
 
 public:
-  Ret wait() {
-    auto l = wait_base();
-    auto r = reinterpret_cast<Ret*>(&ret);
-    auto t = std::move(*r);
-    r->~Ret();
-    has_value = false;
-    return t;
-  }
+    Ret wait()
+    {
+        auto l = wait_base();
+        auto r = reinterpret_cast<Ret*>(&ret);
+        auto t = std::move(*r);
+        r->~Ret();
+        has_value = false;
+        return t;
+    }
 
-  void operator()(Ret&& _ret) {
-    auto l = exec_base();
-    auto r = reinterpret_cast<Ret*>(&ret);
-    *r = std::move(_ret);
-  }
+    void operator()(Ret&& _ret)
+    {
+        auto l = exec_base();
+        auto r = reinterpret_cast<Ret*>(&ret);
+        *r = std::move(_ret);
+    }
 
-  void operator()(const Ret& _ret) {
-    auto l = exec_base();
-    auto r = reinterpret_cast<Ret*>(&ret);
-    *r = std::move(_ret);
-  }
+    void operator()(const Ret& _ret)
+    {
+        auto l = exec_base();
+        auto r = reinterpret_cast<Ret*>(&ret);
+        *r = std::move(_ret);
+    }
 
-  auto ref() {
-    return detail::rvalue_reference_wrapper(*this);
-  }
+    auto ref() { return detail::rvalue_reference_wrapper(*this); }
 
-  operator fu2::unique_function<void(Ret) &&>() {
-    return fu2::unique_function<void(Ret) &&>(ref());
-  }
+    operator fu2::unique_function<void(Ret) &&>() { return fu2::unique_function<void(Ret) &&>(ref()); }
 
-  ~waiter() {
-    if (has_value)
-      reinterpret_cast<Ret*>(&ret)->~Ret();
-  }
+    ~waiter()
+    {
+        if (has_value) reinterpret_cast<Ret*>(&ret)->~Ret();
+    }
 };
 
-template<typename ...Ret>
-class waiter final : public detail::base {
-  std::tuple<Ret...> ret;
+template<typename... Ret> class waiter final : public detail::base
+{
+    std::tuple<Ret...> ret;
 
 public:
-  std::tuple<Ret...> wait() {
-    using std::tuple;
-    auto l = wait_base();
-    return std::move(ret);
-    auto r = reinterpret_cast<std::tuple<Ret...>*>(&ret);
-    auto t = std::move(*r);
-    r->~tuple<Ret...>();
-    has_value = false;
-    return t;
-  }
+    std::tuple<Ret...> wait()
+    {
+        using std::tuple;
+        auto l = wait_base();
+        return std::move(ret);
+        auto r = reinterpret_cast<std::tuple<Ret...>*>(&ret);
+        auto t = std::move(*r);
+        r->~tuple<Ret...>();
+        has_value = false;
+        return t;
+    }
 
-  void operator()(Ret&&... _ret) {
-    auto l = exec_base();
-    auto r = reinterpret_cast<std::tuple<Ret...>*>(&ret);
-    *r = std::forward_as_tuple(_ret...);
-  }
+    void operator()(Ret&&... _ret)
+    {
+        auto l = exec_base();
+        auto r = reinterpret_cast<std::tuple<Ret...>*>(&ret);
+        *r = std::forward_as_tuple(_ret...);
+    }
 
-  void operator()(const Ret&... _ret) {
-    auto l = exec_base();
-    auto r = reinterpret_cast<std::tuple<Ret...>*>(&ret);
-    *r = std::forward_as_tuple(_ret...);
-  }
+    void operator()(const Ret&... _ret)
+    {
+        auto l = exec_base();
+        auto r = reinterpret_cast<std::tuple<Ret...>*>(&ret);
+        *r = std::forward_as_tuple(_ret...);
+    }
 
-  auto ref() {
-    return detail::rvalue_reference_wrapper(*this);
-  }
+    auto ref() { return detail::rvalue_reference_wrapper(*this); }
 
-  operator fu2::unique_function<void(Ret...) &&>() {
-    return fu2::unique_function<void(Ret...) &&>(ref());
-  }
+    operator fu2::unique_function<void(Ret...) &&>() { return fu2::unique_function<void(Ret...) &&>(ref()); }
 
-  ~waiter() {
-    using std::tuple;
-    if (has_value)
-      reinterpret_cast<tuple<Ret...>*>(&ret)->~tuple<Ret...>();
-  }
+    ~waiter()
+    {
+        using std::tuple;
+        if (has_value) reinterpret_cast<tuple<Ret...>*>(&ret)->~tuple<Ret...>();
+    }
 };
-}
+}   // namespace ceph::async
 
-#endif // CEPH_COMMON_WAITER_H
+#endif   // CEPH_COMMON_WAITER_H

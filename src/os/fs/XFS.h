@@ -17,15 +17,14 @@
 
 #include "FS.h"
 
-# ifndef XFS_SUPER_MAGIC
+#ifndef XFS_SUPER_MAGIC
 #define XFS_SUPER_MAGIC 0x58465342
-# endif
+#endif
 
-class XFS : public FS {
-  const char *get_name() override {
-    return "xfs";
-  }
-  int set_alloc_hint(int fd, uint64_t hint) override;
+class XFS : public FS
+{
+    const char* get_name() override { return "xfs"; }
+    int set_alloc_hint(int fd, uint64_t hint) override;
 };
 
 #endif

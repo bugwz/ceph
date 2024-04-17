@@ -7,49 +7,42 @@ trap "rm -fr $TMPDIR" 0
 
 . $(dirname $0)/../../standalone/ceph-helpers.sh
 
-function expect_false()
-{
+function expect_false() {
     set -x
     if "$@"; then return 1; else return 0; fi
 }
 
-function rbd_watch_out_file()
-{
+function rbd_watch_out_file() {
     echo ${TMPDIR}/rbd_watch_$1.out
 }
 
-function rbd_watch_pid_file()
-{
+function rbd_watch_pid_file() {
     echo ${TMPDIR}/rbd_watch_$1.pid
 }
 
-function rbd_watch_fifo()
-{
+function rbd_watch_fifo() {
     echo ${TMPDIR}/rbd_watch_$1.fifo
 }
 
-function rbd_watch_asok()
-{
+function rbd_watch_asok() {
     echo ${TMPDIR}/rbd_watch_$1.asok
 }
 
-function rbd_get_perfcounter()
-{
+function rbd_get_perfcounter() {
     local image=$1
     local counter=$2
     local name
 
     name=$(ceph --format xml --admin-daemon $(rbd_watch_asok ${image}) \
-		perf schema | $XMLSTARLET el -d3 |
-		  grep "/librbd-.*-${image}/${counter}\$")
+        perf schema | $XMLSTARLET el -d3 |
+        grep "/librbd-.*-${image}/${counter}\$")
     test -n "${name}" || return 1
 
     ceph --format xml --admin-daemon $(rbd_watch_asok ${image}) perf dump |
-	$XMLSTARLET sel -t -m "${name}" -v .
+        $XMLSTARLET sel -t -m "${name}" -v .
 }
 
-function rbd_check_perfcounter()
-{
+function rbd_check_perfcounter() {
     local image=$1
     local counter=$2
     local expected_val=$3
@@ -60,31 +53,30 @@ function rbd_check_perfcounter()
     test "${val}" -eq "${expected_val}"
 }
 
-function rbd_watch_start()
-{
+function rbd_watch_start() {
     local image=$1
     local asok=$(rbd_watch_asok ${image})
 
     mkfifo $(rbd_watch_fifo ${image})
     (cat $(rbd_watch_fifo ${image}) |
-	    rbd --admin-socket ${asok} watch ${image} \
-                > $(rbd_watch_out_file ${image}) 2>&1)&
+        rbd --admin-socket ${asok} watch ${image} \
+            >$(rbd_watch_out_file ${image}) 2>&1) &
 
     # find pid of the started rbd watch process
     local pid
-    for i in `seq 10`; do
-	pid=$(ps auxww | awk "/[r]bd --admin.* watch ${image}/ {print \$2}")
-	test -n "${pid}" && break
-	sleep 0.1
+    for i in $(seq 10); do
+        pid=$(ps auxww | awk "/[r]bd --admin.* watch ${image}/ {print \$2}")
+        test -n "${pid}" && break
+        sleep 0.1
     done
     test -n "${pid}"
-    echo ${pid} > $(rbd_watch_pid_file ${image})
+    echo ${pid} >$(rbd_watch_pid_file ${image})
 
     # find watcher admin socket
     test -n "${asok}"
-    for i in `seq 10`; do
-	test -S "${asok}" && break
-	sleep 0.1
+    for i in $(seq 10); do
+        test -S "${asok}" && break
+        sleep 0.1
     done
     test -S "${asok}"
 
@@ -95,13 +87,12 @@ function rbd_watch_start()
     rbd status ${image} | expect_false grep "Watchers: none"
 }
 
-function rbd_watch_end()
-{
+function rbd_watch_end() {
     local image=$1
     local regexp=$2
 
     # send 'enter' to watch to exit
-    echo > $(rbd_watch_fifo ${image})
+    echo >$(rbd_watch_fifo ${image})
     # just in case it is not terminated
     kill $(cat $(rbd_watch_pid_file ${image})) || :
 
@@ -110,7 +101,7 @@ function rbd_watch_end()
 
     # cleanup
     rm -f $(rbd_watch_fifo ${image}) $(rbd_watch_pid_file ${image}) \
-       $(rbd_watch_out_file ${image}) $(rbd_watch_asok ${image})
+        $(rbd_watch_out_file ${image}) $(rbd_watch_asok ${image})
 }
 
 pool="rbd"

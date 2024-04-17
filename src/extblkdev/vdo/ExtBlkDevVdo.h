@@ -30,23 +30,26 @@
 
 class ExtBlkDevVdo final : public ceph::ExtBlkDevInterface
 {
-  int vdo_dir_fd = -1;      ///< fd for vdo sysfs directory
-  std::string name;   // name of the underlying vdo device
-  std::string logdevname; // name of the top level logical device
-  CephContext *cct;
+    int vdo_dir_fd = -1;      ///< fd for vdo sysfs directory
+    std::string name;         // name of the underlying vdo device
+    std::string logdevname;   // name of the top level logical device
+    CephContext* cct;
+
 public:
-  explicit ExtBlkDevVdo(CephContext *cct) : cct(cct) {}
-  ~ExtBlkDevVdo(){
-    if(vdo_dir_fd >= 0)
-      VOID_TEMP_FAILURE_RETRY(::close(vdo_dir_fd));
-  }
-  int _get_vdo_stats_handle(const std::string& devname);
-  int get_vdo_stats_handle();
-  int64_t get_vdo_stat(const char *property);
-  virtual int init(const std::string& logdevname);
-  virtual const std::string& get_devname() const {return name;}
-  virtual int get_state(ceph::ExtBlkDevState& state);
-  virtual int collect_metadata(const std::string& prefix, std::map<std::string,std::string> *pm);
+    explicit ExtBlkDevVdo(CephContext* cct)
+        : cct(cct)
+    {}
+    ~ExtBlkDevVdo()
+    {
+        if (vdo_dir_fd >= 0) VOID_TEMP_FAILURE_RETRY(::close(vdo_dir_fd));
+    }
+    int _get_vdo_stats_handle(const std::string& devname);
+    int get_vdo_stats_handle();
+    int64_t get_vdo_stat(const char* property);
+    virtual int init(const std::string& logdevname);
+    virtual const std::string& get_devname() const { return name; }
+    virtual int get_state(ceph::ExtBlkDevState& state);
+    virtual int collect_metadata(const std::string& prefix, std::map<std::string, std::string>* pm);
 };
 
 #endif

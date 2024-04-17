@@ -5,17 +5,16 @@
 
 #include <csignal>
 
-class FatalSignal {
+class FatalSignal
+{
 public:
-  FatalSignal();
+    FatalSignal();
 
 private:
-  static void signal_entry(int signum, siginfo_t* siginfo, void* p);
-  static void signaled(int signum, const siginfo_t& siginfo);
+    static void signal_entry(int signum, siginfo_t* siginfo, void* p);
+    static void signaled(int signum, const siginfo_t& siginfo);
 
-  template <int... SigNums>
-  void install_oneshot_signals_handler();
+    template<int... SigNums> void install_oneshot_signals_handler();
 
-  template <int SigNum>
-  void install_oneshot_signal_handler();
+    template<int SigNum> void install_oneshot_signal_handler();
 };

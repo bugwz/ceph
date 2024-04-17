@@ -15,10 +15,9 @@ timeout 1800 git clone https://git.ceph.com/ceph.git
 trap - EXIT
 cd ceph
 
-versions=`seq 1 90`
+versions=$(seq 1 90)
 
-for v in $versions
-do
+for v in $versions; do
     if [ $v -eq 48 ]; then
         continue
     fi
@@ -28,8 +27,7 @@ do
     mkdir .snap/$ver
 done
 
-for v in $versions
-do
+for v in $versions; do
     if [ $v -eq 48 ]; then
         continue
     fi
@@ -40,8 +38,7 @@ do
     cd ../..
 done
 
-for v in $versions
-do
+for v in $versions; do
     if [ $v -eq 48 ]; then
         continue
     fi

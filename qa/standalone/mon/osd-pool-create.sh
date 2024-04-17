@@ -27,7 +27,7 @@ function run() {
     export CEPH_ARGS
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -92,7 +92,7 @@ function TEST_erasure_crush_stripe_unit() {
     stripe_width = $((stripe_unit * k))
     ceph osd pool create pool_erasure 12 12 erasure
     ceph --format json osd dump | tee $dir/osd.json
-    grep '"stripe_width":'$stripe_width $dir/osd.json > /dev/null || return 1
+    grep '"stripe_width":'$stripe_width $dir/osd.json >/dev/null || return 1
 }
 
 function TEST_erasure_crush_stripe_unit_padded() {
@@ -112,22 +112,22 @@ function TEST_erasure_crush_stripe_unit_padded() {
         --osd_pool_default_erasure_code_profile "$profile" || return 1
     ceph osd pool create pool_erasure 12 12 erasure
     ceph osd dump | tee $dir/osd.json
-    grep "stripe_width $actual_stripe_width" $dir/osd.json > /dev/null || return 1
+    grep "stripe_width $actual_stripe_width" $dir/osd.json >/dev/null || return 1
 }
 
 function TEST_erasure_code_pool() {
     local dir=$1
     run_mon $dir a || return 1
-    ceph --format json osd dump > $dir/osd.json
+    ceph --format json osd dump >$dir/osd.json
     local expected='"erasure_code_profile":"default"'
     ! grep "$expected" $dir/osd.json || return 1
     ceph osd pool create erasurecodes 12 12 erasure
     ceph --format json osd dump | tee $dir/osd.json
-    grep "$expected" $dir/osd.json > /dev/null || return 1
+    grep "$expected" $dir/osd.json >/dev/null || return 1
 
-    ceph osd pool create erasurecodes 12 12 erasure 2>&1 | \
+    ceph osd pool create erasurecodes 12 12 erasure 2>&1 |
         grep 'already exists' || return 1
-    ceph osd pool create erasurecodes 12 12 2>&1 | \
+    ceph osd pool create erasurecodes 12 12 2>&1 |
         grep 'cannot change to type replicated' || return 1
 }
 
@@ -142,11 +142,11 @@ function TEST_replicated_pool_with_rule() {
     ceph osd crush rule create-simple $rule $root $failure_domain || return 1
     ceph osd crush rule ls | grep $rule
     ceph osd pool create $poolname 12 12 replicated $rule || return 1
-    rule_id=`ceph osd crush rule dump $rule | grep "rule_id" | awk -F[' ':,] '{print $4}'`
-    ceph osd pool get $poolname crush_rule  2>&1 | \
+    rule_id=$(ceph osd crush rule dump $rule | grep "rule_id" | awk -F[' ':,] '{print $4}')
+    ceph osd pool get $poolname crush_rule 2>&1 |
         grep "crush_rule: $rule_id" || return 1
     #non-existent crush rule
-    ceph osd pool create newpool 12 12 replicated non-existent 2>&1 | \
+    ceph osd pool create newpool 12 12 replicated non-existent 2>&1 |
         grep "doesn't exist" || return 1
 }
 
@@ -155,17 +155,17 @@ function TEST_erasure_code_pool_lrc() {
     run_mon $dir a || return 1
 
     ceph osd erasure-code-profile set LRCprofile \
-             plugin=lrc \
-             mapping=DD_ \
-             layers='[ [ "DDc", "" ] ]' || return 1
+        plugin=lrc \
+        mapping=DD_ \
+        layers='[ [ "DDc", "" ] ]' || return 1
 
-    ceph --format json osd dump > $dir/osd.json
+    ceph --format json osd dump >$dir/osd.json
     local expected='"erasure_code_profile":"LRCprofile"'
     local poolname=erasurecodes
     ! grep "$expected" $dir/osd.json || return 1
     ceph osd pool create $poolname 12 12 erasure LRCprofile
     ceph --format json osd dump | tee $dir/osd.json
-    grep "$expected" $dir/osd.json > /dev/null || return 1
+    grep "$expected" $dir/osd.json >/dev/null || return 1
     ceph osd crush rule ls | grep $poolname || return 1
 }
 
@@ -173,13 +173,13 @@ function TEST_replicated_pool() {
     local dir=$1
     run_mon $dir a || return 1
     ceph osd pool create replicated 12 12 replicated replicated_rule || return 1
-    ceph osd pool create replicated 12 12 replicated replicated_rule 2>&1 | \
+    ceph osd pool create replicated 12 12 replicated replicated_rule 2>&1 |
         grep 'already exists' || return 1
     # default is replicated
     ceph osd pool create replicated1 12 12 || return 1
     # default is replicated, pgp_num = pg_num
     ceph osd pool create replicated2 12 || return 1
-    ceph osd pool create replicated 12 12 erasure 2>&1 | \
+    ceph osd pool create replicated 12 12 erasure 2>&1 |
         grep 'cannot change to type erasure' || return 1
 }
 
@@ -203,9 +203,9 @@ function TEST_utf8_cli() {
     OLDLANG="$LANG"
     export LANG=en_US.UTF-8
     ceph osd pool create 黄 16 || return 1
-    ceph osd lspools 2>&1 | \
+    ceph osd lspools 2>&1 |
         grep "黄" || return 1
-    ceph -f json-pretty osd dump | \
+    ceph -f json-pretty osd dump |
         python3 -c "import json; import sys; json.load(sys.stdin)" || return 1
     ceph osd pool delete 黄 黄 --yes-i-really-really-mean-it
     export LANG="$OLDLANG"
@@ -231,17 +231,15 @@ function check_pool_priority() {
     run_osd $dir 2 || return 1
 
     # Add pool 0 too
-    for i in $(seq 0 $pools)
-    do
-      num=$(expr $i + 1)
-      ceph osd pool create test${num} 1 1
+    for i in $(seq 0 $pools); do
+        num=$(expr $i + 1)
+        ceph osd pool create test${num} 1 1
     done
 
     wait_for_clean || return 1
-    for i in $(seq 0 $pools)
-    do
-	num=$(expr $i + 1)
-	ceph osd pool set test${num} recovery_priority $(expr $i \* $spread)
+    for i in $(seq 0 $pools); do
+        num=$(expr $i + 1)
+        ceph osd pool set test${num} recovery_priority $(expr $i \* $spread)
     done
 
     #grep "recovery_priority.*pool set" out/mon.a.log
@@ -261,44 +259,41 @@ function check_pool_priority() {
     ceph osd dump
 
     pos=1
-    for i in $(ceph osd dump | grep ^pool | sed 's/.*recovery_priority //' | awk '{ print $1 }')
-    do
-      result=$(echo $results | awk "{ print \$${pos} }")
-      # A value of 0 is an unset value so sed/awk gets "pool"
-      if test $result = "0"
-      then
-        result="pool"
-      fi
-      test "$result" = "$i" || return 1
-      pos=$(expr $pos + 1)
+    for i in $(ceph osd dump | grep ^pool | sed 's/.*recovery_priority //' | awk '{ print $1 }'); do
+        result=$(echo $results | awk "{ print \$${pos} }")
+        # A value of 0 is an unset value so sed/awk gets "pool"
+        if test $result = "0"; then
+            result="pool"
+        fi
+        test "$result" = "$i" || return 1
+        pos=$(expr $pos + 1)
     done
 }
 
 function TEST_pool_pos_only_prio() {
-   local dir=$1
-   check_pool_priority $dir 20 5 "0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7 8 8 9 9 10" || return 1
+    local dir=$1
+    check_pool_priority $dir 20 5 "0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7 8 8 9 9 10" || return 1
 }
 
 function TEST_pool_neg_only_prio() {
-   local dir=$1
-   check_pool_priority $dir 20 -5 "0 0 -1 -1 -2 -2 -3 -3 -4 -4 -5 -5 -6 -6 -7 -7 -8 -8 -9 -9 -10" || return 1
+    local dir=$1
+    check_pool_priority $dir 20 -5 "0 0 -1 -1 -2 -2 -3 -3 -4 -4 -5 -5 -6 -6 -7 -7 -8 -8 -9 -9 -10" || return 1
 }
 
 function TEST_pool_both_prio() {
-   local dir=$1
-   check_pool_priority $dir 20 "5 - 50" "-10 -9 -8 -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6 7 8 9 10" || return 1
+    local dir=$1
+    check_pool_priority $dir 20 "5 - 50" "-10 -9 -8 -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6 7 8 9 10" || return 1
 }
 
 function TEST_pool_both_prio_no_neg() {
-   local dir=$1
-   check_pool_priority $dir 20 "2 - 4" "-4 -2 0 0 1 1 2 2 3 3 4 5 5 6 6 7 7 8 8 9 10" || return 1
+    local dir=$1
+    check_pool_priority $dir 20 "2 - 4" "-4 -2 0 0 1 1 2 2 3 3 4 5 5 6 6 7 7 8 8 9 10" || return 1
 }
 
 function TEST_pool_both_prio_no_pos() {
-   local dir=$1
-   check_pool_priority $dir 20 "2 - 36" "-10 -9 -8 -8 -7 -7 -6 -6 -5 -5 -4 -3 -3 -2 -2 -1 -1 0 0 2 4" || return 1
+    local dir=$1
+    check_pool_priority $dir 20 "2 - 36" "-10 -9 -8 -8 -7 -7 -6 -6 -5 -5 -4 -3 -3 -2 -2 -1 -1 0 0 2 4" || return 1
 }
-
 
 main osd-pool-create "$@"
 

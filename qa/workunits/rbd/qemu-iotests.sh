@@ -10,7 +10,6 @@ testlist='001 002 003 004 005 008 009 010 011 021 025 032 033'
 git clone https://github.com/qemu/qemu.git
 cd qemu
 
-
 if grep -iqE '(bionic|focal|jammy|platform:el9)' /etc/os-release; then
     git checkout v2.11.0
 elif grep -iqE '(xenial|platform:el8)' /etc/os-release; then
@@ -22,8 +21,7 @@ fi
 
 cd tests/qemu-iotests
 # qemu-iotests expects a binary called just 'qemu' to be available
-if [ -x '/usr/bin/qemu-system-x86_64' ]
-then
+if [ -x '/usr/bin/qemu-system-x86_64' ]; then
     QEMU='/usr/bin/qemu-system-x86_64'
 else
     QEMU='/usr/libexec/qemu-kvm'

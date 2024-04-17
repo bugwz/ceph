@@ -18,7 +18,6 @@
 #pragma once
 
 #include "common/ptr_wrapper.h"
-
 #include "svc_meta_be.h"
 #include "svc_meta_be_types.h"
 
@@ -31,8 +30,8 @@ using RGWSI_BucketInstance_BE_Handler = ptr_wrapper<RGWSI_MetaBackend_Handler, R
 using RGWSI_Bucket_EP_Ctx = ptr_wrapper<RGWSI_MetaBackend::Context, RGWSI_META_BE_TYPES::BUCKET>;
 using RGWSI_Bucket_BI_Ctx = ptr_wrapper<RGWSI_MetaBackend::Context, RGWSI_META_BE_TYPES::BI>;
 
-struct RGWSI_Bucket_X_Ctx {
-  RGWSI_Bucket_EP_Ctx ep;
-  RGWSI_Bucket_BI_Ctx bi;
+struct RGWSI_Bucket_X_Ctx
+{
+    RGWSI_Bucket_EP_Ctx ep;
+    RGWSI_Bucket_BI_Ctx bi;
 };
-

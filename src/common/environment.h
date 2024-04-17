@@ -15,7 +15,7 @@
 #ifndef CEPH_COMMON_ENVIRONMENT_H
 #define CEPH_COMMON_ENVIRONMENT_H
 
-extern bool get_env_bool(const char *key);
-extern int get_env_int(const char *key);
+extern bool get_env_bool(const char* key);
+extern int get_env_int(const char* key);
 
 #endif

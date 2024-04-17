@@ -16,61 +16,61 @@
 #define CEPH_ADMIN_SOCKET_OUTPUT_H
 
 #include <filesystem>
-#include <string>
 #include <map>
 #include <set>
+#include <string>
 #include <vector>
 
 namespace fs = std::filesystem;
 
 using socket_results = std::map<std::string, std::string>;
-using test_functions =
-    std::vector<std::pair<std::string, bool (*)(std::string &)>>;
+using test_functions = std::vector<std::pair<std::string, bool (*)(std::string&)>>;
 
 class AdminSocketClient;
 
-class AdminSocketOutput {
+class AdminSocketOutput
+{
 public:
-  AdminSocketOutput() {}
+    AdminSocketOutput() {}
 
-  void add_target(const std::string &target);
-  void add_command(const std::string &target, const std::string &command);
-  void add_test(const std::string &target, const std::string &command,
-                bool (*test)(std::string &));
-  void postpone(const std::string &target, const std::string &command);
+    void add_target(const std::string& target);
+    void add_command(const std::string& target, const std::string& command);
+    void add_test(const std::string& target, const std::string& command, bool (*test)(std::string&));
+    void postpone(const std::string& target, const std::string& command);
 
-  void exec();
+    void exec();
 
-  void mod_for_vstart(const std::string& dir) {
-    socketdir = dir;
-    prefix = "";
-  }
+    void mod_for_vstart(const std::string& dir)
+    {
+        socketdir = dir;
+        prefix = "";
+    }
 
 private:
-  bool init_directories() const {
-    std::cout << "Checking " << socketdir << std::endl;
-    return exists(socketdir) && is_directory(socketdir);
-  }
+    bool init_directories() const
+    {
+        std::cout << "Checking " << socketdir << std::endl;
+        return exists(socketdir) && is_directory(socketdir);
+    }
 
-  bool init_sockets();
-  bool gather_socket_output();
-  std::string get_result(const std::string &target, const std::string &command) const;
+    bool init_sockets();
+    bool gather_socket_output();
+    std::string get_result(const std::string& target, const std::string& command) const;
 
-  std::pair<std::string, std::string>
-  run_command(AdminSocketClient &client, const std::string &raw_command,
-              bool send_untouched = false);
+    std::pair<std::string, std::string> run_command(AdminSocketClient& client, const std::string& raw_command,
+                                                    bool send_untouched = false);
 
-  bool run_tests() const;
+    bool run_tests() const;
 
-  std::set<std::string> targets;
-  std::map<std::string, std::string> sockets;
-  std::map<std::string, socket_results> results;
-  std::map<std::string, std::vector<std::string>> custom_commands;
-  std::map<std::string, std::vector<std::string>> postponed_commands;
-  std::map<std::string, test_functions> tests;
+    std::set<std::string> targets;
+    std::map<std::string, std::string> sockets;
+    std::map<std::string, socket_results> results;
+    std::map<std::string, std::vector<std::string>> custom_commands;
+    std::map<std::string, std::vector<std::string>> postponed_commands;
+    std::map<std::string, test_functions> tests;
 
-  std::string prefix = "ceph-";
-  fs::path socketdir = "/var/run/ceph";
+    std::string prefix = "ceph-";
+    fs::path socketdir = "/var/run/ceph";
 };
 
-#endif // CEPH_ADMIN_SOCKET_OUTPUT_H
+#endif   // CEPH_ADMIN_SOCKET_OUTPUT_H

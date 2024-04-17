@@ -5,8 +5,8 @@
 #define CEPH_TEST_RADOS_TESTCASE_H
 
 #include "include/rados/librados.h"
-#include "gtest/gtest.h"
 
+#include "gtest/gtest.h"
 #include <string>
 
 /**
@@ -18,48 +18,62 @@
  * Since pool creation and deletion is slow, this allows many tests to
  * run faster.
  */
-class RadosTestNS : public ::testing::Test {
+class RadosTestNS : public ::testing::Test
+{
 public:
-  RadosTestNS(bool c=false) : cleanup(c) {}
-  ~RadosTestNS() override {}
+    RadosTestNS(bool c = false)
+        : cleanup(c)
+    {}
+    ~RadosTestNS() override {}
+
 protected:
-  static void SetUpTestCase();
-  static void TearDownTestCase();
-  static void cleanup_all_objects(rados_ioctx_t ioctx);
-  static rados_t s_cluster;
-  static std::string pool_name;
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    static void cleanup_all_objects(rados_ioctx_t ioctx);
+    static rados_t s_cluster;
+    static std::string pool_name;
 
-  void SetUp() override;
-  void TearDown() override;
-  rados_t cluster = nullptr;
-  rados_ioctx_t ioctx = nullptr;
-  bool cleanup;
+    void SetUp() override;
+    void TearDown() override;
+    rados_t cluster = nullptr;
+    rados_ioctx_t ioctx = nullptr;
+    bool cleanup;
 };
 
-struct RadosTestNSCleanup : public RadosTestNS {
-  RadosTestNSCleanup() : RadosTestNS(true) {}
+struct RadosTestNSCleanup : public RadosTestNS
+{
+    RadosTestNSCleanup()
+        : RadosTestNS(true)
+    {}
 };
 
-class RadosTestECNS : public RadosTestNS {
+class RadosTestECNS : public RadosTestNS
+{
 public:
-  RadosTestECNS(bool c=false) : cleanup(c) {}
-  ~RadosTestECNS() override {}
-protected:
-  static void SetUpTestCase();
-  static void TearDownTestCase();
-  static rados_t s_cluster;
-  static std::string pool_name;
+    RadosTestECNS(bool c = false)
+        : cleanup(c)
+    {}
+    ~RadosTestECNS() override {}
 
-  void SetUp() override;
-  void TearDown() override;
-  rados_t cluster = nullptr; 
-  rados_ioctx_t ioctx = nullptr;
-  uint64_t alignment = 0;
-  bool cleanup;
+protected:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    static rados_t s_cluster;
+    static std::string pool_name;
+
+    void SetUp() override;
+    void TearDown() override;
+    rados_t cluster = nullptr;
+    rados_ioctx_t ioctx = nullptr;
+    uint64_t alignment = 0;
+    bool cleanup;
 };
 
-struct RadosTestECNSCleanup : public RadosTestECNS {
-  RadosTestECNSCleanup() : RadosTestECNS(true) {}
+struct RadosTestECNSCleanup : public RadosTestECNS
+{
+    RadosTestECNSCleanup()
+        : RadosTestECNS(true)
+    {}
 };
 
 /**
@@ -70,43 +84,51 @@ struct RadosTestECNSCleanup : public RadosTestECNS {
  * Since pool creation and deletion is slow, this allows many tests to
  * run faster.
  */
-class RadosTest : public ::testing::Test {
+class RadosTest : public ::testing::Test
+{
 public:
-  RadosTest(bool c=false) : cleanup(c) {}
-  ~RadosTest() override {}
-protected:
-  static void SetUpTestCase();
-  static void TearDownTestCase();
-  static void cleanup_default_namespace(rados_ioctx_t ioctx);
-  static void cleanup_namespace(rados_ioctx_t ioctx, std::string ns);
-  static rados_t s_cluster;
-  static std::string pool_name;
+    RadosTest(bool c = false)
+        : cleanup(c)
+    {}
+    ~RadosTest() override {}
 
-  void SetUp() override;
-  void TearDown() override;
-  rados_t cluster = nullptr;
-  rados_ioctx_t ioctx = nullptr;
-  std::string nspace;
-  bool cleanup;
+protected:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    static void cleanup_default_namespace(rados_ioctx_t ioctx);
+    static void cleanup_namespace(rados_ioctx_t ioctx, std::string ns);
+    static rados_t s_cluster;
+    static std::string pool_name;
+
+    void SetUp() override;
+    void TearDown() override;
+    rados_t cluster = nullptr;
+    rados_ioctx_t ioctx = nullptr;
+    std::string nspace;
+    bool cleanup;
 };
 
-class RadosTestEC : public RadosTest {
+class RadosTestEC : public RadosTest
+{
 public:
-  RadosTestEC(bool c=false) : cleanup(c) {}
-  ~RadosTestEC() override {}
-protected:
-  static void SetUpTestCase();
-  static void TearDownTestCase();
-  static rados_t s_cluster;
-  static std::string pool_name;
+    RadosTestEC(bool c = false)
+        : cleanup(c)
+    {}
+    ~RadosTestEC() override {}
 
-  void SetUp() override;
-  void TearDown() override;
-  rados_t cluster = nullptr;
-  rados_ioctx_t ioctx = nullptr;
-  bool cleanup;
-  std::string nspace;
-  uint64_t alignment = 0;
+protected:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    static rados_t s_cluster;
+    static std::string pool_name;
+
+    void SetUp() override;
+    void TearDown() override;
+    rados_t cluster = nullptr;
+    rados_ioctx_t ioctx = nullptr;
+    bool cleanup;
+    std::string nspace;
+    uint64_t alignment = 0;
 };
 
 /**
@@ -115,10 +137,11 @@ protected:
  * manually create a pool, start some long-runing tasks and
  * then the related pool is suddenly gone.
  */
-class RadosTestNP: public ::testing::Test {
+class RadosTestNP : public ::testing::Test
+{
 public:
-  RadosTestNP() {}
-  ~RadosTestNP() override {}
+    RadosTestNP() {}
+    ~RadosTestNP() override {}
 };
 
 #endif

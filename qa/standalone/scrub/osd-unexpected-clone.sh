@@ -29,7 +29,7 @@ function run() {
 
     export -n CEPH_CLI_TEST_DUP_COMMAND
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -54,10 +54,10 @@ function TEST_recover_unexpected() {
 
     local osd=$(get_primary foo foo)
 
-    JSON=`objectstore_tool $dir $osd --op list foo | grep snapid.:1`
+    JSON=$(objectstore_tool $dir $osd --op list foo | grep snapid.:1)
     echo "JSON is $JSON"
     rm -f $dir/_ $dir/data
-    objectstore_tool $dir $osd "$JSON" get-attr _ > $dir/_ || return 1
+    objectstore_tool $dir $osd "$JSON" get-attr _ >$dir/_ || return 1
     objectstore_tool $dir $osd "$JSON" get-bytes $dir/data || return 1
 
     rados -p foo rmsnap snap
@@ -80,7 +80,6 @@ function TEST_recover_unexpected() {
     timeout 60 ceph tell osd.1 version || return 1
     timeout 60 ceph tell osd.2 version || return 1
 }
-
 
 main osd-unexpected-clone "$@"
 

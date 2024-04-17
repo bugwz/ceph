@@ -24,42 +24,40 @@
  */
 
 // -----------------------------------------------------------------------------
+#include "ErasureCodePluginIsa.h"
+
+#include "ErasureCodeIsa.h"
 #include "ceph_ver.h"
 #include "include/buffer.h"
-#include "ErasureCodePluginIsa.h"
-#include "ErasureCodeIsa.h"
 // -----------------------------------------------------------------------------
 
-int ErasureCodePluginIsa::factory(const std::string &directory,
-                                  ceph::ErasureCodeProfile &profile,
-                                  ceph::ErasureCodeInterfaceRef *erasure_code,
-                                  std::ostream *ss)
+int ErasureCodePluginIsa::factory(const std::string& directory, ceph::ErasureCodeProfile& profile,
+                                  ceph::ErasureCodeInterfaceRef* erasure_code, std::ostream* ss)
 {
-  ErasureCodeIsa *interface;
+    ErasureCodeIsa* interface;
     std::string t;
-    if (profile.find("technique") == profile.end())
-      profile["technique"] = "reed_sol_van";
+    if (profile.find("technique") == profile.end()) profile["technique"] = "reed_sol_van";
     t = profile.find("technique")->second;
     if ((t == "reed_sol_van")) {
-      interface = new ErasureCodeIsaDefault(tcache,
-                                            ErasureCodeIsaDefault::kVandermonde);
-    } else {
-      if ((t == "cauchy")) {
-        interface = new ErasureCodeIsaDefault(tcache,
-                                              ErasureCodeIsaDefault::kCauchy);
-      } else {
-        *ss << "technique=" << t << " is not a valid coding technique. "
-          << " Choose one of the following: "
-          << "reed_sol_van,"
-          << "cauchy" << std::endl;
-        return -ENOENT;
-      }
+        interface = new ErasureCodeIsaDefault(tcache, ErasureCodeIsaDefault::kVandermonde);
+    }
+    else {
+        if ((t == "cauchy")) {
+            interface = new ErasureCodeIsaDefault(tcache, ErasureCodeIsaDefault::kCauchy);
+        }
+        else {
+            *ss << "technique=" << t << " is not a valid coding technique. "
+                << " Choose one of the following: "
+                << "reed_sol_van,"
+                << "cauchy" << std::endl;
+            return -ENOENT;
+        }
     }
 
     int r = interface->init(profile, ss);
     if (r) {
-      delete interface;
-      return r;
+        delete interface;
+        return r;
     }
     *erasure_code = ceph::ErasureCodeInterfaceRef(interface);
     return 0;
@@ -67,16 +65,16 @@ int ErasureCodePluginIsa::factory(const std::string &directory,
 
 // -----------------------------------------------------------------------------
 
-const char *__erasure_code_version()
+const char* __erasure_code_version()
 {
-  return CEPH_GIT_NICE_VER;
+    return CEPH_GIT_NICE_VER;
 }
 
 // -----------------------------------------------------------------------------
 
-int __erasure_code_init(char *plugin_name, char *directory)
+int __erasure_code_init(char* plugin_name, char* directory)
 {
-  auto& instance = ceph::ErasureCodePluginRegistry::instance();
+    auto& instance = ceph::ErasureCodePluginRegistry::instance();
 
-  return instance.add(plugin_name, new ErasureCodePluginIsa());
+    return instance.add(plugin_name, new ErasureCodePluginIsa());
 }

@@ -17,7 +17,7 @@ source $(dirname $0)/../detect-build-env-vars.sh
 source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
 
 mon_port=$(get_unused_port)
-dashboard_port=$((mon_port+1))
+dashboard_port=$((mon_port + 1))
 
 function run() {
     local dir=$1
@@ -46,30 +46,27 @@ function TEST_dashboard() {
     run_mgr $dir x ${MGR_ARGS} || return 1
 
     tries=0
-    while [[ $tries < 30 ]] ; do
-        if [ $(ceph status -f json | jq .mgrmap.available) = "true" ]
-        then
+    while [[ $tries < 30 ]]; do
+        if [ $(ceph status -f json | jq .mgrmap.available) = "true" ]; then
             break
         fi
-        tries=$((tries+1))
+        tries=$((tries + 1))
         sleep 1
     done
 
     DASHBOARD_ADMIN_SECRET_FILE="/tmp/dashboard-admin-secret.txt"
-    printf 'admin' > "${DASHBOARD_ADMIN_SECRET_FILE}"
+    printf 'admin' >"${DASHBOARD_ADMIN_SECRET_FILE}"
     ceph_adm dashboard ac-user-create admin -i "${DASHBOARD_ADMIN_SECRET_FILE}" --force-password
 
     tries=0
-    while [[ $tries < 30 ]] ; do
-        if curl -c $dir/cookiefile -X POST -d '{"username":"admin","password":"admin"}' http://127.0.0.1:$dashboard_port/api/auth
-        then
-            if curl -b $dir/cookiefile -s http://127.0.0.1:$dashboard_port/api/summary | \
-                 jq '.health.overall_status' | grep HEALTH_
-            then
+    while [[ $tries < 30 ]]; do
+        if curl -c $dir/cookiefile -X POST -d '{"username":"admin","password":"admin"}' http://127.0.0.1:$dashboard_port/api/auth; then
+            if curl -b $dir/cookiefile -s http://127.0.0.1:$dashboard_port/api/summary |
+                jq '.health.overall_status' | grep HEALTH_; then
                 break
             fi
         fi
-        tries=$((tries+1))
+        tries=$((tries + 1))
         sleep 0.5
     done
 }

@@ -16,20 +16,21 @@ MYPY_INI="$PWD"/mypy.ini
 
 export MYPYPATH="$PWD/pybind/rados:$PWD/pybind/rbd:$PWD/pybind/cephfs"
 
-echo -n > mypy_report.txt
+echo -n >mypy_report.txt
 pushd pybind
-mypy --config-file="$MYPY_INI" *.py | awk '{print "pybind/" $0}' >> ../mypy_report.txt
+mypy --config-file="$MYPY_INI" *.py | awk '{print "pybind/" $0}' >>../mypy_report.txt
 popd
 
 pushd pybind/mgr
-mypy --config-file="$MYPY_INI" $(find * -name '*.py' | grep -v -e venv -e tox -e env -e gyp -e node_modules) | awk '{print "pybind/mgr/" $0}' >> ../../mypy_report.txt
+mypy --config-file="$MYPY_INI" $(find * -name '*.py' | grep -v -e venv -e tox -e env -e gyp -e node_modules) | awk '{print "pybind/mgr/" $0}' >>../../mypy_report.txt
 popd
 
 pushd ceph-volume/ceph_volume
-mypy --config-file="$MYPY_INI" $(find * -name '*.py' | grep -v -e venv -e tox -e env -e gyp -e node_modules -e tests) | awk '{print "ceph-volume/ceph_volume/" $0}' >> ../../mypy_report.txt
+mypy --config-file="$MYPY_INI" $(find * -name '*.py' | grep -v -e venv -e tox -e env -e gyp -e node_modules -e tests) | awk '{print "ceph-volume/ceph_volume/" $0}' >>../../mypy_report.txt
 popd
 
-SORT_MYPY=$(cat <<-EOF
+SORT_MYPY=$(
+    cat <<-EOF
 #!/bin/python3
 import re
 from collections import namedtuple

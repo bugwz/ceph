@@ -25,4 +25,3 @@ mkdir -p ./a/dir5/1/2/3/4
 $CEPH_TOOL mds tell 0 export_dir /a/dir5/1/2/3 2
 sleep 5
 mv ./a/dir5 ./b
-

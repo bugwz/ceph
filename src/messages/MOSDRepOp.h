@@ -22,175 +22,176 @@
  * OSD sub op - for internal ops on pobjects between primary and replicas(/stripes/whatever)
  */
 
-class MOSDRepOp final : public MOSDFastDispatchOp {
+class MOSDRepOp final : public MOSDFastDispatchOp
+{
 private:
-  static constexpr int HEAD_VERSION = 3;
-  static constexpr int COMPAT_VERSION = 1;
+    static constexpr int HEAD_VERSION = 3;
+    static constexpr int COMPAT_VERSION = 1;
 
 public:
-  epoch_t map_epoch, min_epoch;
+    epoch_t map_epoch, min_epoch;
 
-  // metadata from original request
-  osd_reqid_t reqid;
+    // metadata from original request
+    osd_reqid_t reqid;
 
-  spg_t pgid;
+    spg_t pgid;
 
-  ceph::buffer::list::const_iterator p;
-  // Decoding flags. Decoding is only needed for messages caught by pipe reader.
-  bool final_decode_needed;
+    ceph::buffer::list::const_iterator p;
+    // Decoding flags. Decoding is only needed for messages caught by pipe reader.
+    bool final_decode_needed;
 
-  // subop
-  pg_shard_t from;
-  hobject_t poid;
+    // subop
+    pg_shard_t from;
+    hobject_t poid;
 
-  __u8 acks_wanted;
+    __u8 acks_wanted;
 
-  // transaction to exec
-  ceph::buffer::list logbl;
-  pg_stat_t pg_stats;
+    // transaction to exec
+    ceph::buffer::list logbl;
+    pg_stat_t pg_stats;
 
-  // subop metadata
-  eversion_t version;
+    // subop metadata
+    eversion_t version;
 
-  // piggybacked osd/og state
-  eversion_t pg_trim_to;   // primary->replica: trim to here
-  eversion_t min_last_complete_ondisk; // lower bound on committed version
+    // piggybacked osd/og state
+    eversion_t pg_trim_to;                 // primary->replica: trim to here
+    eversion_t min_last_complete_ondisk;   // lower bound on committed version
 
-  hobject_t new_temp_oid;      ///< new temp object that we must now start tracking
-  hobject_t discard_temp_oid;  ///< previously used temp object that we can now stop tracking
+    hobject_t new_temp_oid;       ///< new temp object that we must now start tracking
+    hobject_t discard_temp_oid;   ///< previously used temp object that we can now stop tracking
 
-  /// non-empty if this transaction involves a hit_set history update
-  std::optional<pg_hit_set_history_t> updated_hit_set_history;
+    /// non-empty if this transaction involves a hit_set history update
+    std::optional<pg_hit_set_history_t> updated_hit_set_history;
 
-  epoch_t get_map_epoch() const override {
-    return map_epoch;
-  }
-  epoch_t get_min_epoch() const override {
-    return min_epoch;
-  }
-  spg_t get_spg() const override {
-    return pgid;
-  }
+    epoch_t get_map_epoch() const override { return map_epoch; }
+    epoch_t get_min_epoch() const override { return min_epoch; }
+    spg_t get_spg() const override { return pgid; }
 
-  int get_cost() const override {
-    return data.length();
-  }
+    int get_cost() const override { return data.length(); }
 
-  void decode_payload() override {
-    using ceph::decode;
-    p = payload.cbegin();
-    // split to partial and final
-    decode(map_epoch, p);
-    if (header.version >= 2) {
-      decode(min_epoch, p);
-      decode_trace(p);
-    } else {
-      min_epoch = map_epoch;
+    void decode_payload() override
+    {
+        using ceph::decode;
+        p = payload.cbegin();
+        // split to partial and final
+        decode(map_epoch, p);
+        if (header.version >= 2) {
+            decode(min_epoch, p);
+            decode_trace(p);
+        }
+        else {
+            min_epoch = map_epoch;
+        }
+        decode(reqid, p);
+        decode(pgid, p);
     }
-    decode(reqid, p);
-    decode(pgid, p);
-  }
 
-  void finish_decode() {
-    using ceph::decode;
-    if (!final_decode_needed)
-      return; // Message is already final decoded
-    decode(poid, p);
+    void finish_decode()
+    {
+        using ceph::decode;
+        if (!final_decode_needed) return;   // Message is already final decoded
+        decode(poid, p);
 
-    decode(acks_wanted, p);
-    decode(version, p);
-    decode(logbl, p);
-    decode(pg_stats, p);
-    decode(pg_trim_to, p);
+        decode(acks_wanted, p);
+        decode(version, p);
+        decode(logbl, p);
+        decode(pg_stats, p);
+        decode(pg_trim_to, p);
 
 
-    decode(new_temp_oid, p);
-    decode(discard_temp_oid, p);
+        decode(new_temp_oid, p);
+        decode(discard_temp_oid, p);
 
-    decode(from, p);
-    decode(updated_hit_set_history, p);
+        decode(from, p);
+        decode(updated_hit_set_history, p);
 
-    if (header.version >= 3) {
-      decode(min_last_complete_ondisk, p);
-    } else {
-      /* This field used to mean pg_roll_foward_to, but ReplicatedBackend
-       * simply assumes that we're rolling foward to version. */
-      eversion_t pg_roll_forward_to;
-      decode(pg_roll_forward_to, p);
+        if (header.version >= 3) {
+            decode(min_last_complete_ondisk, p);
+        }
+        else {
+            /* This field used to mean pg_roll_foward_to, but ReplicatedBackend
+             * simply assumes that we're rolling foward to version. */
+            eversion_t pg_roll_forward_to;
+            decode(pg_roll_forward_to, p);
+        }
+        final_decode_needed = false;
     }
-    final_decode_needed = false;
-  }
 
-  void encode_payload(uint64_t features) override {
-    using ceph::encode;
-    encode(map_epoch, payload);
-    assert(HAVE_FEATURE(features, SERVER_OCTOPUS));
-    header.version = HEAD_VERSION;
-    encode(min_epoch, payload);
-    encode_trace(payload, features);
-    encode(reqid, payload);
-    encode(pgid, payload);
-    encode(poid, payload);
+    void encode_payload(uint64_t features) override
+    {
+        using ceph::encode;
+        encode(map_epoch, payload);
+        assert(HAVE_FEATURE(features, SERVER_OCTOPUS));
+        header.version = HEAD_VERSION;
+        encode(min_epoch, payload);
+        encode_trace(payload, features);
+        encode(reqid, payload);
+        encode(pgid, payload);
+        encode(poid, payload);
 
-    encode(acks_wanted, payload);
-    encode(version, payload);
-    encode(logbl, payload);
-    encode(pg_stats, payload);
-    encode(pg_trim_to, payload);
-    encode(new_temp_oid, payload);
-    encode(discard_temp_oid, payload);
-    encode(from, payload);
-    encode(updated_hit_set_history, payload);
-    encode(min_last_complete_ondisk, payload);
-  }
+        encode(acks_wanted, payload);
+        encode(version, payload);
+        encode(logbl, payload);
+        encode(pg_stats, payload);
+        encode(pg_trim_to, payload);
+        encode(new_temp_oid, payload);
+        encode(discard_temp_oid, payload);
+        encode(from, payload);
+        encode(updated_hit_set_history, payload);
+        encode(min_last_complete_ondisk, payload);
+    }
 
-  MOSDRepOp()
-    : MOSDFastDispatchOp{MSG_OSD_REPOP, HEAD_VERSION, COMPAT_VERSION},
-      map_epoch(0),
-      final_decode_needed(true), acks_wanted (0) {}
-  MOSDRepOp(osd_reqid_t r, pg_shard_t from,
-	    spg_t p, const hobject_t& po, int aw,
-	    epoch_t mape, epoch_t min_epoch, ceph_tid_t rtid, eversion_t v)
-    : MOSDFastDispatchOp{MSG_OSD_REPOP, HEAD_VERSION, COMPAT_VERSION},
-      map_epoch(mape),
-      min_epoch(min_epoch),
-      reqid(r),
-      pgid(p),
-      final_decode_needed(false),
-      from(from),
-      poid(po),
-      acks_wanted(aw),
-      version(v) {
-    set_tid(rtid);
-  }
+    MOSDRepOp()
+        : MOSDFastDispatchOp{MSG_OSD_REPOP, HEAD_VERSION, COMPAT_VERSION}
+        , map_epoch(0)
+        , final_decode_needed(true)
+        , acks_wanted(0)
+    {}
+    MOSDRepOp(osd_reqid_t r, pg_shard_t from, spg_t p, const hobject_t& po, int aw, epoch_t mape, epoch_t min_epoch,
+              ceph_tid_t rtid, eversion_t v)
+        : MOSDFastDispatchOp{MSG_OSD_REPOP, HEAD_VERSION, COMPAT_VERSION}
+        , map_epoch(mape)
+        , min_epoch(min_epoch)
+        , reqid(r)
+        , pgid(p)
+        , final_decode_needed(false)
+        , from(from)
+        , poid(po)
+        , acks_wanted(aw)
+        , version(v)
+    {
+        set_tid(rtid);
+    }
 
-  void set_rollback_to(const eversion_t &rollback_to) {
-    header.version = 2;
-    min_last_complete_ondisk = rollback_to;
-  }
+    void set_rollback_to(const eversion_t& rollback_to)
+    {
+        header.version = 2;
+        min_last_complete_ondisk = rollback_to;
+    }
+
 private:
-  ~MOSDRepOp() final {}
+    ~MOSDRepOp() final {}
 
 public:
-  std::string_view get_type_name() const override { return "osd_repop"; }
-  void print(std::ostream& out) const override {
-    out << "osd_repop(" << reqid
-	<< " " << pgid << " e" << map_epoch << "/" << min_epoch;
-    if (!final_decode_needed) {
-      out << " " << poid << " v " << version;
-      if (updated_hit_set_history)
-        out << ", has_updated_hit_set_history";
-      if (header.version < 3) {
-	out << ", rollback_to(legacy)=" << min_last_complete_ondisk;
-      } else {
-	out << ", mlcod=" << min_last_complete_ondisk;
-      }
+    std::string_view get_type_name() const override { return "osd_repop"; }
+    void print(std::ostream& out) const override
+    {
+        out << "osd_repop(" << reqid << " " << pgid << " e" << map_epoch << "/" << min_epoch;
+        if (!final_decode_needed) {
+            out << " " << poid << " v " << version;
+            if (updated_hit_set_history) out << ", has_updated_hit_set_history";
+            if (header.version < 3) {
+                out << ", rollback_to(legacy)=" << min_last_complete_ondisk;
+            }
+            else {
+                out << ", mlcod=" << min_last_complete_ondisk;
+            }
+        }
+        out << ")";
     }
-    out << ")";
-  }
+
 private:
-  template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+    template<class T, typename... Args> friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
 };
 
 #endif

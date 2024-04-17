@@ -27,7 +27,7 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         $func $dir || return 1
     done
 }
@@ -43,27 +43,27 @@ function TEST_osd_pool_get_set() {
 
     local flag
     for flag in nodelete nopgchange nosizechange write_fadvise_dontneed noscrub nodeep-scrub; do
-	ceph osd pool set $TEST_POOL $flag 0 || return 1
-	! ceph osd dump | grep 'pool ' | grep $flag || return 1
-	ceph osd pool set $TEST_POOL $flag 1 || return 1
-	ceph osd dump | grep 'pool ' | grep $flag || return 1
-	ceph osd pool set $TEST_POOL $flag false || return 1
-	! ceph osd dump | grep 'pool ' | grep $flag || return 1
-	ceph osd pool set $TEST_POOL $flag false || return 1
+        ceph osd pool set $TEST_POOL $flag 0 || return 1
+        ! ceph osd dump | grep 'pool ' | grep $flag || return 1
+        ceph osd pool set $TEST_POOL $flag 1 || return 1
+        ceph osd dump | grep 'pool ' | grep $flag || return 1
+        ceph osd pool set $TEST_POOL $flag false || return 1
+        ! ceph osd dump | grep 'pool ' | grep $flag || return 1
+        ceph osd pool set $TEST_POOL $flag false || return 1
         # check that setting false twice does not toggle to true (bug)
-	! ceph osd dump | grep 'pool ' | grep $flag || return 1
-	ceph osd pool set $TEST_POOL $flag true || return 1
-	ceph osd dump | grep 'pool ' | grep $flag || return 1
-	# cleanup
-	ceph osd pool set $TEST_POOL $flag 0 || return 1
+        ! ceph osd dump | grep 'pool ' | grep $flag || return 1
+        ceph osd pool set $TEST_POOL $flag true || return 1
+        ceph osd dump | grep 'pool ' | grep $flag || return 1
+        # cleanup
+        ceph osd pool set $TEST_POOL $flag 0 || return 1
     done
 
-    local size=$(ceph osd pool get $TEST_POOL size|awk '{print $2}')
-    local min_size=$(ceph osd pool get $TEST_POOL min_size|awk '{print $2}')
+    local size=$(ceph osd pool get $TEST_POOL size | awk '{print $2}')
+    local min_size=$(ceph osd pool get $TEST_POOL min_size | awk '{print $2}')
     local expected_min_size=$(expr $size - $size / 2)
     if [ $min_size -ne $expected_min_size ]; then
-	echo "default min_size is wrong: expected $expected_min_size, got $min_size"
-	return 1
+        echo "default min_size is wrong: expected $expected_min_size, got $min_size"
+        return 1
     fi
 
     ceph osd pool set $TEST_POOL scrub_min_interval 123456 || return 1
@@ -88,11 +88,11 @@ function TEST_osd_pool_get_set() {
     local ecpool=erasepool
     create_pool $ecpool 12 12 erasure default || return 1
     #erasue pool size=k+m, min_size=k
-    local size=$(ceph osd pool get $ecpool size|awk '{print $2}')
-    local min_size=$(ceph osd pool get $ecpool min_size|awk '{print $2}')
-    local k=$(expr $min_size - 1)  # default min_size=k+1
+    local size=$(ceph osd pool get $ecpool size | awk '{print $2}')
+    local min_size=$(ceph osd pool get $ecpool min_size | awk '{print $2}')
+    local k=$(expr $min_size - 1) # default min_size=k+1
     #erasure pool size can't change
-    ! ceph osd pool set $ecpool size  $(expr $size + 1) || return 1
+    ! ceph osd pool set $ecpool size $(expr $size + 1) || return 1
     #erasure pool min_size must be between in k and size
     ceph osd pool set $ecpool min_size $(expr $k + 1) || return 1
     ! ceph osd pool set $ecpool min_size $(expr $k - 1) || return 1
@@ -115,7 +115,7 @@ function TEST_mon_add_to_single_mon() {
     setup $dir || return 1
     run_mon $dir a --public-addr $MONA || return 1
     # wait for the quorum
-    timeout 120 ceph -s > /dev/null || return 1
+    timeout 120 ceph -s >/dev/null || return 1
     run_mon $dir b --public-addr $MONB || return 1
     teardown $dir || return 1
 
@@ -127,7 +127,7 @@ function TEST_mon_add_to_single_mon() {
     # make sure mon.b get's it's join request in first, then
     sleep 2
     # wait for the quorum
-    timeout 120 ceph -s > /dev/null || return 1
+    timeout 120 ceph -s >/dev/null || return 1
     ceph mon dump
     ceph mon dump -f json-pretty
     local num_mons
@@ -150,9 +150,9 @@ function TEST_no_segfault_for_bad_keyring() {
     CEPH_ARGS="$CEPH_ARGS_TMP --keyring=$dir/ceph.mon.keyring "
     run_mon $dir a
     # create a bad keyring and make sure no segfault occurs when using the bad keyring
-    echo -e "[client.admin]\nkey = BQAUlgtWoFePIxAAQ9YLzJSVgJX5V1lh5gyctg==" > $dir/bad.keyring
+    echo -e "[client.admin]\nkey = BQAUlgtWoFePIxAAQ9YLzJSVgJX5V1lh5gyctg==" >$dir/bad.keyring
     CEPH_ARGS="$CEPH_ARGS_TMP --keyring=$dir/bad.keyring"
-    ceph osd dump 2> /dev/null
+    ceph osd dump 2>/dev/null
     # 139(11|128) means segfault and core dumped
     [ $? -eq 139 ] && return 1
     CEPH_ARGS=$CEPH_ARGS_orig
@@ -175,7 +175,7 @@ function TEST_mon_features() {
 
     run_mon $dir a --public-addr $MONA || return 1
     run_mon $dir b --public-addr $MONB || return 1
-    timeout 120 ceph -s > /dev/null || return 1
+    timeout 120 ceph -s >/dev/null || return 1
 
     # expect monmap to contain 3 monitors (a, b, and c)
     jqinput="$(ceph quorum_status --format=json 2>/dev/null)"
@@ -237,7 +237,7 @@ function TEST_mon_features() {
 
     wait_for_quorum 300 3 || return 1
 
-    timeout 300 ceph -s > /dev/null || return 1
+    timeout 300 ceph -s >/dev/null || return 1
 
     jqinput="$(ceph quorum_status --format=json 2>/dev/null)"
     # expect quorum to have all three monitors

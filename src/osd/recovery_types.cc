@@ -5,12 +5,8 @@
 
 std::ostream& operator<<(std::ostream& out, const BackfillInterval& bi)
 {
-  out << "BackfillInfo(" << bi.begin << "-" << bi.end
-      << " " << bi.objects.size() << " objects";
-  if (!bi.objects.empty())
-    out << " " << bi.objects;
-  out << ")";
-  return out;
+    out << "BackfillInfo(" << bi.begin << "-" << bi.end << " " << bi.objects.size() << " objects";
+    if (!bi.objects.empty()) out << " " << bi.objects;
+    out << ")";
+    return out;
 }
-
-

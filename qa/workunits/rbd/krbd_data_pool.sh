@@ -19,7 +19,7 @@ function create_clones() {
     rbd snap create $spec@snap
     rbd snap protect $spec@snap
 
-    local pool=${spec%/*}  # pool/image is assumed
+    local pool=${spec%/*} # pool/image is assumed
     local image=${spec#*/}
     local child_pool
     for child_pool in $pool clonesonly; do
@@ -86,7 +86,7 @@ function count_data_objects() {
     local pool
     pool=$(rbd info $spec | grep 'data_pool: ' | awk '{ print $NF }')
     if [[ -z $pool ]]; then
-        pool=${spec%/*}  # pool/image is assumed
+        pool=${spec%/*} # pool/image is assumed
     fi
 
     local prefix
@@ -124,13 +124,13 @@ OBJECT_SIZE=$(rbd info --format=json img1 | python3 -c 'import sys, json; print(
 NUM_OBJECTS=$((IMAGE_SIZE / OBJECT_SIZE))
 [[ $((IMAGE_SIZE % OBJECT_SIZE)) -eq 0 ]]
 
-OBJECT_X=$(mktemp)   # xxxx
+OBJECT_X=$(mktemp) # xxxx
 xfs_io -c "pwrite -b $OBJECT_SIZE -S 0x78 0 $OBJECT_SIZE" $OBJECT_X
 
-OBJECT_XY=$(mktemp)  # xxYY
+OBJECT_XY=$(mktemp) # xxYY
 xfs_io -c "pwrite -b $OBJECT_SIZE -S 0x78 0 $((OBJECT_SIZE / 2))" \
-       -c "pwrite -b $OBJECT_SIZE -S 0x59 $((OBJECT_SIZE / 2)) $((OBJECT_SIZE / 2))" \
-       $OBJECT_XY
+    -c "pwrite -b $OBJECT_SIZE -S 0x59 $((OBJECT_SIZE / 2)) $((OBJECT_SIZE / 2))" \
+    $OBJECT_XY
 
 for pool in rbd rbdnonzero; do
     for i in {0..3}; do
@@ -147,9 +147,9 @@ for pool in rbd rbdnonzero; do
 done
 
 # rbd_directory, rbd_children, rbd_info + img0 header + ...
-NUM_META_RBDS=$((3 + 1 + 3 * (1*2 + 3*2)))
+NUM_META_RBDS=$((3 + 1 + 3 * (1 * 2 + 3 * 2)))
 # rbd_directory, rbd_children, rbd_info + ...
-NUM_META_CLONESONLY=$((3 + 2 * 3 * (3*2)))
+NUM_META_CLONESONLY=$((3 + 2 * 3 * (3 * 2)))
 
 [[ $(rados -p rbd ls | wc -l) -eq $((NUM_META_RBDS + 5 * NUM_OBJECTS)) ]]
 [[ $(rados -p repdata ls | wc -l) -eq $((1 + 14 * NUM_OBJECTS)) ]]

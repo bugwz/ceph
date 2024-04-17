@@ -13,26 +13,24 @@
  *
  */
 
-#include <stdexcept>
+#include "store.h"
 
 #include <fmt/format.h>
-
-#include "store.h"
+#include <stdexcept>
 #ifdef SQLITE_ENABLED
 #include "sqlite.h"
 #endif
 
 namespace rgw::dbstore {
 
-auto create_config_store(const DoutPrefixProvider* dpp, const std::string& uri)
-  -> std::unique_ptr<sal::ConfigStore>
+auto create_config_store(const DoutPrefixProvider* dpp, const std::string& uri) -> std::unique_ptr<sal::ConfigStore>
 {
 #ifdef SQLITE_ENABLED
-  if (uri.starts_with("file:")) {
-    return config::create_sqlite_store(dpp, uri);
-  }
+    if (uri.starts_with("file:")) {
+        return config::create_sqlite_store(dpp, uri);
+    }
 #endif
-  throw std::runtime_error(fmt::format("unrecognized URI {}", uri));
+    throw std::runtime_error(fmt::format("unrecognized URI {}", uri));
 }
 
-} // namespace rgw::dbstore
+}   // namespace rgw::dbstore

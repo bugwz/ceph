@@ -29,8 +29,8 @@
 
 typedef struct sockaddr_un
 {
-     ADDRESS_FAMILY sun_family;     /* AF_UNIX */
-     char sun_path[UNIX_PATH_MAX];  /* pathname */
+    ADDRESS_FAMILY sun_family;    /* AF_UNIX */
+    char sun_path[UNIX_PATH_MAX]; /* pathname */
 } SOCKADDR_UN, *PSOCKADDR_UN;
 
 #define SIO_AF_UNIX_GETPEERPID _WSAIOR(IOC_VENDOR, 256)

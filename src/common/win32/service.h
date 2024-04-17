@@ -10,40 +10,42 @@
  *
  */
 
-#include "include/compat.h"
 #include "common/ceph_context.h"
+#include "include/compat.h"
 
-class ServiceBase {
+class ServiceBase
+{
 
 public:
-  ServiceBase(CephContext *cct_);
-  virtual ~ServiceBase() {};
+    ServiceBase(CephContext* cct_);
+    virtual ~ServiceBase(){};
 
-  static int initialize(ServiceBase *service);
+    static int initialize(ServiceBase* service);
+
 protected:
-  static void run();
-  static void control_handler(DWORD request);
+    static void run();
+    static void control_handler(DWORD request);
 
-  void shutdown(bool ignore_errors = false);
-  void stop();
+    void shutdown(bool ignore_errors = false);
+    void stop();
 
-  void set_status(DWORD current_state, DWORD exit_code = NO_ERROR);
+    void set_status(DWORD current_state, DWORD exit_code = NO_ERROR);
 
-  /* Subclasses should implement the following service hooks. */
-  virtual int run_hook() = 0;
-  /* Invoked when the service is requested to stop. */
-  virtual int stop_hook() = 0;
-  /* Invoked when the system is shutting down. */
-  virtual int shutdown_hook() = 0;
+    /* Subclasses should implement the following service hooks. */
+    virtual int run_hook() = 0;
+    /* Invoked when the service is requested to stop. */
+    virtual int stop_hook() = 0;
+    /* Invoked when the system is shutting down. */
+    virtual int shutdown_hook() = 0;
 
-  CephContext *cct;
+    CephContext* cct;
 
 private:
-  /* A handle used when reporting the current status. */
-  SERVICE_STATUS_HANDLE hstatus;
-  /* The current service status. */
-  SERVICE_STATUS status;
+    /* A handle used when reporting the current status. */
+    SERVICE_STATUS_HANDLE hstatus;
+    /* The current service status. */
+    SERVICE_STATUS status;
 
-  /* singleton service instance */
-  static ServiceBase *s_service;
+    /* singleton service instance */
+    static ServiceBase* s_service;
 };

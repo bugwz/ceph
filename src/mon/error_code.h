@@ -15,35 +15,38 @@
 
 #pragma once
 
-#include <boost/system/error_code.hpp>
-
 #include "include/rados.h"
+
+#include <boost/system/error_code.hpp>
 
 const boost::system::error_category& mon_category() noexcept;
 
 // The Monitor, like the OSD, mostly replies with POSIX error codes.
 
-enum class mon_errc {
+enum class mon_errc
+{
 };
 
 namespace boost::system {
-template<>
-struct is_error_code_enum<::mon_errc> {
-  static const bool value = true;
+template<> struct is_error_code_enum<::mon_errc>
+{
+    static const bool value = true;
 };
 
-template<>
-struct is_error_condition_enum<::mon_errc> {
-  static const bool value = false;
+template<> struct is_error_condition_enum<::mon_errc>
+{
+    static const bool value = false;
 };
-}
+}   // namespace boost::system
 
 //  explicit conversion:
-inline boost::system::error_code make_error_code(mon_errc e) noexcept {
-  return { static_cast<int>(e), mon_category() };
+inline boost::system::error_code make_error_code(mon_errc e) noexcept
+{
+    return {static_cast<int>(e), mon_category()};
 }
 
 // implicit conversion:
-inline boost::system::error_condition make_error_condition(mon_errc e) noexcept {
-  return { static_cast<int>(e), mon_category() };
+inline boost::system::error_condition make_error_condition(mon_errc e) noexcept
+{
+    return {static_cast<int>(e), mon_category()};
 }

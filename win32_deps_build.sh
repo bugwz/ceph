@@ -49,7 +49,7 @@ dokanLibDir="${depsToolsetDir}/dokany/lib"
 OS=${OS:-"ubuntu"}
 
 function _make() {
-  make -j $NUM_WORKERS $@
+    make -j $NUM_WORKERS $@
 }
 
 if [[ -d $DEPS_DIR ]]; then
@@ -63,41 +63,41 @@ mkdir -p $depsSrcDir
 
 echo "Installing required packages."
 case "$OS" in
-    rhel)
-        # pkgconf needs https://bugzilla.redhat.com/show_bug.cgi?id=1975416
-        sudo yum -y --setopt=skip_missing_names_on_install=False install \
-            mingw64-gcc-c++ \
-            cmake \
-            pkgconf \
-            python3-devel \
-            autoconf \
-            libtool \
-            ninja-build \
-            zip \
-            python3-PyYAML \
-            gcc \
-            diffutils \
-            patch \
-            wget \
-            perl \
-            git-core
-        ;;
-    ubuntu)
-        sudo apt-get update
-        sudo env DEBIAN_FRONTEND=noninteractive apt-get -y install \
-            mingw-w64 g++ cmake pkg-config \
-            python3-dev python3-yaml \
-                autoconf libtool ninja-build wget zip \
-                git
-        ;;
-    suse)
-        for PKG in mingw64-cross-gcc-c++ mingw64-libgcc_s_seh1 mingw64-libstdc++6 \
-                cmake pkgconf python3-devel autoconf libtool ninja zip \
-                python3-PyYAML \
-                gcc patch wget git; do
-            rpm -q $PKG >/dev/null || zypper -n install $PKG
-        done
-        ;;
+rhel)
+    # pkgconf needs https://bugzilla.redhat.com/show_bug.cgi?id=1975416
+    sudo yum -y --setopt=skip_missing_names_on_install=False install \
+        mingw64-gcc-c++ \
+        cmake \
+        pkgconf \
+        python3-devel \
+        autoconf \
+        libtool \
+        ninja-build \
+        zip \
+        python3-PyYAML \
+        gcc \
+        diffutils \
+        patch \
+        wget \
+        perl \
+        git-core
+    ;;
+ubuntu)
+    sudo apt-get update
+    sudo env DEBIAN_FRONTEND=noninteractive apt-get -y install \
+        mingw-w64 g++ cmake pkg-config \
+        python3-dev python3-yaml \
+        autoconf libtool ninja-build wget zip \
+        git
+    ;;
+suse)
+    for PKG in mingw64-cross-gcc-c++ mingw64-libgcc_s_seh1 mingw64-libstdc++6 \
+        cmake pkgconf python3-devel autoconf libtool ninja zip \
+        python3-PyYAML \
+        gcc patch wget git; do
+        rpm -q $PKG >/dev/null || zypper -n install $PKG
+    done
+    ;;
 esac
 
 MINGW_CMAKE_FILE="$DEPS_DIR/mingw.cmake"
@@ -113,10 +113,10 @@ cd $zlibSrcDir
 sed -e s/"PREFIX = *$"/"PREFIX = ${MINGW_PREFIX}"/ -i win32/Makefile.gcc
 _make -f win32/Makefile.gcc
 _make BINARY_PATH=$zlibDir \
-     INCLUDE_PATH=$zlibDir/include \
-     LIBRARY_PATH=$zlibDir/lib \
-     SHARED_MODE=1 \
-     -f win32/Makefile.gcc install
+    INCLUDE_PATH=$zlibDir/include \
+    LIBRARY_PATH=$zlibDir/lib \
+    SHARED_MODE=1 \
+    -f win32/Makefile.gcc install
 
 echo "Building lz4."
 cd $depsToolsetDir
@@ -126,9 +126,9 @@ if [[ ! -d $lz4Dir ]]; then
 fi
 cd $lz4Dir
 _make BUILD_STATIC=no CC=${MINGW_CC%-posix*} \
-      DLLTOOL=${MINGW_DLLTOOL} \
-      WINDRES=${MINGW_WINDRES} \
-      TARGET_OS=Windows_NT
+    DLLTOOL=${MINGW_DLLTOOL} \
+    WINDRES=${MINGW_WINDRES} \
+    TARGET_OS=Windows_NT
 
 echo "Building OpenSSL."
 cd $depsSrcDir
@@ -152,7 +152,7 @@ if [[ ! -d $boostSrcDir ]]; then
 fi
 
 cd $boostSrcDir
-echo "using gcc : mingw32 : ${MINGW_CXX} ;" > user-config.jam
+echo "using gcc : mingw32 : ${MINGW_CXX} ;" >user-config.jam
 
 # Workaround for https://github.com/boostorg/thread/issues/156
 # Older versions of mingw provided a different pthread lib.
@@ -217,8 +217,8 @@ fi
 mkdir -p $backtraceSrcDir/build
 cd $backtraceSrcDir/build
 ../configure --prefix=$backtraceDir --exec-prefix=$backtraceDir \
-             --host ${MINGW_BASE} --enable-host-shared \
-             --libdir="$backtraceDir/lib"
+    --host ${MINGW_BASE} --enable-host-shared \
+    --libdir="$backtraceDir/lib"
 _make LDFLAGS="-no-undefined"
 _make install
 
@@ -232,21 +232,21 @@ mkdir -p $snappySrcDir/build
 cd $snappySrcDir/build
 
 cmake -DCMAKE_INSTALL_PREFIX=$snappyDir \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DBUILD_SHARED_LIBS=ON \
-      -DSNAPPY_BUILD_TESTS=OFF \
-      -DSNAPPY_BUILD_BENCHMARKS=OFF \
-      -DCMAKE_TOOLCHAIN_FILE=$MINGW_CMAKE_FILE \
-      ../
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_SHARED_LIBS=ON \
+    -DSNAPPY_BUILD_TESTS=OFF \
+    -DSNAPPY_BUILD_BENCHMARKS=OFF \
+    -DCMAKE_TOOLCHAIN_FILE=$MINGW_CMAKE_FILE \
+    ../
 _make
 _make install
 
 cmake -DCMAKE_INSTALL_PREFIX=$snappyDir \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DSNAPPY_BUILD_TESTS=OFF \
-      -DCMAKE_TOOLCHAIN_FILE=$MINGW_CMAKE_FILE \
-      ../
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DSNAPPY_BUILD_TESTS=OFF \
+    -DCMAKE_TOOLCHAIN_FILE=$MINGW_CMAKE_FILE \
+    ../
 _make
 _make install
 
@@ -254,7 +254,7 @@ echo "Generating mswsock.lib."
 # mswsock.lib is not provided by mingw, so we'll have to generate
 # it.
 mkdir -p $winLibDir
-cat > $winLibDir/mswsock.def <<EOF
+cat >$winLibDir/mswsock.def <<EOF
 LIBRARY MSWSOCK.DLL
 EXPORTS
 AcceptEx@32
@@ -284,7 +284,7 @@ s_perror@8sethostname@8
 EOF
 
 $MINGW_DLLTOOL -d $winLibDir/mswsock.def \
-               -l $winLibDir/libmswsock.a
+    -l $winLibDir/libmswsock.a
 
 echo "Fetching libwnbd."
 cd $depsSrcDir
@@ -294,8 +294,8 @@ fi
 cd $wnbdSrcDir
 mkdir -p $wnbdLibDir
 $MINGW_DLLTOOL -d $wnbdSrcDir/libwnbd/libwnbd.def \
-               -D libwnbd.dll \
-               -l $wnbdLibDir/libwnbd.a
+    -D libwnbd.dll \
+    -l $wnbdLibDir/libwnbd.a
 
 echo "Fetching dokany."
 cd $depsSrcDir
@@ -305,7 +305,7 @@ fi
 
 mkdir -p $dokanLibDir
 $MINGW_DLLTOOL -d $dokanSrcDir/dokan/dokan.def \
-               -l $dokanLibDir/libdokan.a
+    -l $dokanLibDir/libdokan.a
 
 # That's probably the easiest way to deal with the dokan imports.
 # dokan.h is defined in both ./dokan and ./sys while both are using

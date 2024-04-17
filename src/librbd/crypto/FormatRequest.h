@@ -15,14 +15,14 @@ class ImageCtx;
 
 namespace crypto {
 
-template <typename I>
-class FormatRequest {
+template<typename I> class FormatRequest
+{
 public:
     using EncryptionFormat = decltype(I::encryption_format);
 
-    static FormatRequest* create(
-            I* image_ctx, EncryptionFormat format, Context* on_finish) {
-      return new FormatRequest(image_ctx, std::move(format), on_finish);
+    static FormatRequest* create(I* image_ctx, EncryptionFormat format, Context* on_finish)
+    {
+        return new FormatRequest(image_ctx, std::move(format), on_finish);
     }
 
     FormatRequest(I* image_ctx, EncryptionFormat format, Context* on_finish);
@@ -41,9 +41,9 @@ private:
     Context* m_on_finish;
 };
 
-} // namespace crypto
-} // namespace librbd
+}   // namespace crypto
+}   // namespace librbd
 
 extern template class librbd::crypto::FormatRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_CRYPTO_FORMAT_REQUEST_H
+#endif   // CEPH_LIBRBD_CRYPTO_FORMAT_REQUEST_H

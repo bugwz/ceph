@@ -2,7 +2,8 @@
 // vim: ts=8 sw=2 smarttab
 
 #pragma once
-#include <vector>
 #include "common/options.h"
+
+#include <vector>
 
 std::vector<Option> build_options();

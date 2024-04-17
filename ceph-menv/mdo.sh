@@ -1,6 +1,6 @@
 #!/bin/bash
-cmd=`basename $0`
-MENV_ROOT=`dirname $0`/..
+cmd=$(basename $0)
+MENV_ROOT=$(dirname $0)/..
 
 if [ -f $MENV_ROOT/.menvroot ]; then
     . $MENV_ROOT/.menvroot

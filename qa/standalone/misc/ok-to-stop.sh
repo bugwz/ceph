@@ -16,7 +16,7 @@ function run() {
     export ORIG_CEPH_ARGS="$CEPH_ARGS"
 
     local funcs=${@:-$(set | ${SED} -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         kill_daemons $dir KILL || return 1
@@ -291,6 +291,5 @@ function TEST_0_osd() {
     ! ceph osd ok-to-stop 0 1 2 || return 1
     ! ceph osd ok-to-stop 1 2 3 || return 1
 }
-
 
 main ok-to-stop "$@"

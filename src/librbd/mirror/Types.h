@@ -7,15 +7,15 @@
 namespace librbd {
 namespace mirror {
 
-enum PromotionState {
-  PROMOTION_STATE_UNKNOWN,
-  PROMOTION_STATE_PRIMARY,
-  PROMOTION_STATE_NON_PRIMARY,
-  PROMOTION_STATE_ORPHAN
+enum PromotionState
+{
+    PROMOTION_STATE_UNKNOWN,
+    PROMOTION_STATE_PRIMARY,
+    PROMOTION_STATE_NON_PRIMARY,
+    PROMOTION_STATE_ORPHAN
 };
 
-} // namespace mirror
-} // namespace librbd
+}   // namespace mirror
+}   // namespace librbd
 
-#endif // CEPH_LIBRBD_MIRROR_TYPES_H
-
+#endif   // CEPH_LIBRBD_MIRROR_TYPES_H

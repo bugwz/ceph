@@ -8,18 +8,16 @@ class DoutPrefixProvider;
 class RGWRados;
 class RGWHTTPManager;
 class utime_t;
-namespace rgw { namespace sal {
-  class RadosStore;
-} }
+namespace rgw {
+namespace sal {
+class RadosStore;
+}
+}   // namespace rgw
 
 // MetaLogTrimCR factory function
-RGWCoroutine* create_meta_log_trim_cr(const DoutPrefixProvider *dpp,
-                                      rgw::sal::RadosStore* store,
-                                      RGWHTTPManager *http,
+RGWCoroutine* create_meta_log_trim_cr(const DoutPrefixProvider* dpp, rgw::sal::RadosStore* store, RGWHTTPManager* http,
                                       int num_shards, utime_t interval);
 
 // factory function for mdlog trim via radosgw-admin
-RGWCoroutine* create_admin_meta_log_trim_cr(const DoutPrefixProvider *dpp,
-                                            rgw::sal::RadosStore* store,
-                                            RGWHTTPManager *http,
-                                            int num_shards);
+RGWCoroutine* create_admin_meta_log_trim_cr(const DoutPrefixProvider* dpp, rgw::sal::RadosStore* store,
+                                            RGWHTTPManager* http, int num_shards);

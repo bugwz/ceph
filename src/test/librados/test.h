@@ -22,11 +22,10 @@
 #include <string>
 #include <unistd.h>
 
-std::string create_one_pool(const std::string &pool_name, rados_t *cluster,
-    uint32_t pg_num=0);
-std::string create_one_ec_pool(const std::string &pool_name, rados_t *cluster);
-std::string connect_cluster(rados_t *cluster);
-int destroy_one_pool(const std::string &pool_name, rados_t *cluster);
-int destroy_one_ec_pool(const std::string &pool_name, rados_t *cluster);
+std::string create_one_pool(const std::string& pool_name, rados_t* cluster, uint32_t pg_num = 0);
+std::string create_one_ec_pool(const std::string& pool_name, rados_t* cluster);
+std::string connect_cluster(rados_t* cluster);
+int destroy_one_pool(const std::string& pool_name, rados_t* cluster);
+int destroy_one_ec_pool(const std::string& pool_name, rados_t* cluster);
 
 #endif

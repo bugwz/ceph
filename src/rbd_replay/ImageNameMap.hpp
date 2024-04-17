@@ -15,40 +15,42 @@
 #ifndef _INCLUDED_RBD_REPLAY_IMAGENAMEMAP_HPP
 #define _INCLUDED_RBD_REPLAY_IMAGENAMEMAP_HPP
 
+#include "rbd_loc.hpp"
+
 #include <map>
 #include <string>
-#include "rbd_loc.hpp"
 
 namespace rbd_replay {
 
 /**
    Maps image names.
  */
-class ImageNameMap {
+class ImageNameMap
+{
 public:
-  typedef std::pair<rbd_loc, rbd_loc> Mapping;
+    typedef std::pair<rbd_loc, rbd_loc> Mapping;
 
-  /**
-     Parses a mapping.
-     If parsing fails, the contents of \c mapping are undefined.
-     @param[in] mapping_string string representation of the mapping
-     @param[out] mapping stores the parsed mapping
-     @retval true parsing was successful
-   */
-  bool parse_mapping(std::string mapping_string, Mapping *mapping) const;
+    /**
+       Parses a mapping.
+       If parsing fails, the contents of \c mapping are undefined.
+       @param[in] mapping_string string representation of the mapping
+       @param[out] mapping stores the parsed mapping
+       @retval true parsing was successful
+     */
+    bool parse_mapping(std::string mapping_string, Mapping* mapping) const;
 
-  void add_mapping(const Mapping& mapping);
+    void add_mapping(const Mapping& mapping);
 
-  /**
-     Maps an image name.
-     If no mapping matches the name, it is returned unmodified.
-   */
-  rbd_loc map(const rbd_loc& name) const;
+    /**
+       Maps an image name.
+       If no mapping matches the name, it is returned unmodified.
+     */
+    rbd_loc map(const rbd_loc& name) const;
 
 private:
-  std::map<rbd_loc, rbd_loc> m_map;
+    std::map<rbd_loc, rbd_loc> m_map;
 };
 
-}
+}   // namespace rbd_replay
 
 #endif

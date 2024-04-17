@@ -79,15 +79,16 @@
 #ifndef CEPH_RWRef_Posix__H
 #define CEPH_RWRef_Posix__H
 
-#include <string>
-#include "include/ceph_assert.h"
 #include "common/ceph_mutex.h"
+#include "include/ceph_assert.h"
+
+#include <string>
 
 /* The status mechanism info */
-template<typename T>
-struct RWRefState {
-  public:
-    template <typename T1> friend class RWRef;
+template<typename T> struct RWRefState
+{
+public:
+    template<typename T1> friend class RWRef;
 
     /*
      * This will be status mechanism. Currently you need to define
@@ -122,123 +123,125 @@ struct RWRefState {
      */
     virtual bool is_valid_state(T require) const = 0;
 
-    int64_t get_state() const {
-      std::scoped_lock l{lock};
-      return state;
+    int64_t get_state() const
+    {
+        std::scoped_lock l{lock};
+        return state;
     }
 
-    bool check_current_state(T require) const {
-      ceph_assert(is_valid_state(require));
+    bool check_current_state(T require) const
+    {
+        ceph_assert(is_valid_state(require));
 
-      std::scoped_lock l{lock};
-      return state == require;
+        std::scoped_lock l{lock};
+        return state == require;
     }
 
-    RWRefState(T init_state, const char *lockname, uint64_t _reader_cnt=0)
-      : state(init_state), lock(ceph::make_mutex(lockname)), reader_cnt(_reader_cnt) {}
+    RWRefState(T init_state, const char* lockname, uint64_t _reader_cnt = 0)
+        : state(init_state)
+        , lock(ceph::make_mutex(lockname))
+        , reader_cnt(_reader_cnt)
+    {}
     virtual ~RWRefState() {}
 
-  private:
+private:
     mutable ceph::mutex lock;
     ceph::condition_variable cond;
     uint64_t reader_cnt = 0;
 };
 
-template<typename T>
-class RWRef {
+template<typename T> class RWRef
+{
 public:
-  RWRef(const RWRef& other) = delete;
-  const RWRef& operator=(const RWRef& other) = delete;
+    RWRef(const RWRef& other) = delete;
+    const RWRef& operator=(const RWRef& other) = delete;
 
-  RWRef(RWRefState<T> &s, T require, bool ir=true)
-    :S(s), is_reader(ir) {
-    ceph_assert(S.is_valid_state(require));
+    RWRef(RWRefState<T>& s, T require, bool ir = true)
+        : S(s)
+        , is_reader(ir)
+    {
+        ceph_assert(S.is_valid_state(require));
 
-    std::scoped_lock l{S.lock};
-    if (likely(is_reader)) { // Readers will update the reader_cnt
-      if (S.check_reader_state(require)) {
-        S.reader_cnt++;
-        satisfied = true;
-      }
-    } else { // Writers will update the state
-      is_reader = false;
+        std::scoped_lock l{S.lock};
+        if (likely(is_reader)) {   // Readers will update the reader_cnt
+            if (S.check_reader_state(require)) {
+                S.reader_cnt++;
+                satisfied = true;
+            }
+        }
+        else {   // Writers will update the state
+            is_reader = false;
 
-      /*
-       * If the current state is not the same as "require"
-       * then update the state and we are the first writer.
-       *
-       * Or if there already has one writer running or
-       * finished, it will let user to choose to continue
-       * or just break.
-       */
-      if (S.check_writer_state(require)) {
-        first_writer = true;
-        S.state = require;
-      }
-      satisfied = true;
+            /*
+             * If the current state is not the same as "require"
+             * then update the state and we are the first writer.
+             *
+             * Or if there already has one writer running or
+             * finished, it will let user to choose to continue
+             * or just break.
+             */
+            if (S.check_writer_state(require)) {
+                first_writer = true;
+                S.state = require;
+            }
+            satisfied = true;
+        }
     }
-  }
-
-  /*
-   * Whether the "require" state is in the proper range of
-   * the states.
-   */
-  bool is_state_satisfied() const {
-    return satisfied;
-  }
-
-  /*
-   * Update the state, and only the writer could do the update.
-   */
-  void update_state(T new_state) {
-    ceph_assert(!is_reader);
-    ceph_assert(S.is_valid_state(new_state));
-
-    std::scoped_lock l{S.lock};
-    S.state = new_state;
-  }
-
-  /*
-   * For current state whether we are the first writer or not
-   */
-  bool is_first_writer() const {
-    return first_writer;
-  }
-
-  /*
-   * Will wait for all the in-flight "readers" to finish
-   */
-  void wait_readers_done() {
-    // Only writers can wait
-    ceph_assert(!is_reader);
-
-    std::unique_lock l{S.lock};
-
-    S.cond.wait(l, [this] {
-      return !S.reader_cnt;
-    });
-  }
-
-  ~RWRef() {
-    std::scoped_lock l{S.lock};
-    if (!is_reader)
-      return;
-
-    if (!satisfied)
-      return;
 
     /*
-     * Decrease the refcnt and notify the waiters
+     * Whether the "require" state is in the proper range of
+     * the states.
      */
-    if (--S.reader_cnt == 0)
-      S.cond.notify_all();
-  }
+    bool is_state_satisfied() const { return satisfied; }
+
+    /*
+     * Update the state, and only the writer could do the update.
+     */
+    void update_state(T new_state)
+    {
+        ceph_assert(!is_reader);
+        ceph_assert(S.is_valid_state(new_state));
+
+        std::scoped_lock l{S.lock};
+        S.state = new_state;
+    }
+
+    /*
+     * For current state whether we are the first writer or not
+     */
+    bool is_first_writer() const { return first_writer; }
+
+    /*
+     * Will wait for all the in-flight "readers" to finish
+     */
+    void wait_readers_done()
+    {
+        // Only writers can wait
+        ceph_assert(!is_reader);
+
+        std::unique_lock l{S.lock};
+
+        S.cond.wait(l, [this] { return !S.reader_cnt; });
+    }
+
+    ~RWRef()
+    {
+        std::scoped_lock l{S.lock};
+        if (!is_reader) return;
+
+        if (!satisfied) return;
+
+        /*
+         * Decrease the refcnt and notify the waiters
+         */
+        if (--S.reader_cnt == 0) S.cond.notify_all();
+    }
 
 private:
-  RWRefState<T> &S;
-  bool satisfied = false;
-  bool first_writer = false;
-  bool is_reader = true;
+    RWRefState<T>& S;
+    bool satisfied = false;
+    bool first_writer = false;
+    bool is_reader = true;
 };
 
-#endif // !CEPH_RWRef_Posix__H
+#endif   // !CEPH_RWRef_Posix__H

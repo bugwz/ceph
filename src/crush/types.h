@@ -2,16 +2,16 @@
 #define CEPH_CRUSH_TYPES_H
 
 #ifdef KERNEL
-# define free(x) kfree(x)
+#define free(x) kfree(x)
 #else
-# include <stdlib.h>
+#include <stdlib.h>
 #endif
 
 
-#include <linux/types.h>  /* just for int types */
+#include <linux/types.h> /* just for int types */
 
 #ifndef BUG_ON
-# define BUG_ON(x) ceph_assert(!(x))
+#define BUG_ON(x) ceph_assert(!(x))
 #endif
 
 #endif

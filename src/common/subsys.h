@@ -58,7 +58,7 @@ SUBSYS(finisher, 1, 1)
 SUBSYS(reserver, 1, 1)
 SUBSYS(heartbeatmap, 1, 5)
 SUBSYS(perfcounter, 1, 5)
-SUBSYS(rgw, 1, 5)                 // log level for the Rados gateway
+SUBSYS(rgw, 1, 5)   // log level for the Rados gateway
 SUBSYS(rgw_sync, 1, 5)
 SUBSYS(rgw_datacache, 1, 5)
 SUBSYS(rgw_access, 1, 5)
@@ -84,11 +84,11 @@ SUBSYS(prioritycache, 1, 5)
 SUBSYS(test, 0, 5)
 SUBSYS(cephfs_mirror, 0, 5)
 SUBSYS(cephsqlite, 0, 5)
-SUBSYS(seastore, 0, 5)       // logs above seastore tm
+SUBSYS(seastore, 0, 5)   // logs above seastore tm
 SUBSYS(seastore_onode, 0, 5)
 SUBSYS(seastore_odata, 0, 5)
 SUBSYS(seastore_omap, 0, 5)
-SUBSYS(seastore_tm, 0, 5)    // logs below seastore tm
+SUBSYS(seastore_tm, 0, 5)   // logs below seastore tm
 SUBSYS(seastore_t, 0, 5)
 SUBSYS(seastore_cleaner, 0, 5)
 SUBSYS(seastore_epm, 0, 5)
@@ -107,4 +107,3 @@ SUBSYS(memstore, 1, 5)
 // Developers should update /doc/rados/troubleshooting/log-and-debug.rst
 // when adding or removing a subsystem accordingly.
 // *********************************************************************
-

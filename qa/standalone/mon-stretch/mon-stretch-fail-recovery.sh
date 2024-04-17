@@ -17,13 +17,13 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON_A"
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
     done
 }
-TEST_stretched_cluster_failover_add_three_osds(){
+TEST_stretched_cluster_failover_add_three_osds() {
     local dir=$1
     local OSDS=8
     setup $dir || return 1
@@ -54,17 +54,14 @@ TEST_stretched_cluster_failover_add_three_osds(){
     run_mgr $dir y || return 1
     run_mgr $dir z || return 1
 
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $osd || return 1
-    done
-    
-    for zone in iris pze
-    do
-      ceph osd crush add-bucket $zone zone
-      ceph osd crush move $zone root=default
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $osd || return 1
     done
 
+    for zone in iris pze; do
+        ceph osd crush add-bucket $zone zone
+        ceph osd crush move $zone root=default
+    done
 
     ceph osd crush add-bucket node-2 host
     ceph osd crush add-bucket node-3 host
@@ -84,18 +81,18 @@ TEST_stretched_cluster_failover_add_three_osds(){
     ceph osd crush move osd.5 host=node-4
     ceph osd crush move osd.6 host=node-5
     ceph osd crush move osd.7 host=node-5
-    
+
     ceph mon set_location a zone=iris host=node-2
     ceph mon set_location b zone=iris host=node-3
     ceph mon set_location c zone=pze host=node-4
-    ceph mon set_location d zone=pze  host=node-5
+    ceph mon set_location d zone=pze host=node-5
 
     hostname=$(hostname -s)
     ceph osd crush remove $hostname || return 1
-    ceph osd getcrushmap > crushmap || return 1
-    crushtool --decompile crushmap > crushmap.txt || return 1
-    sed 's/^# end crush map$//' crushmap.txt > crushmap_modified.txt || return 1
-    cat >> crushmap_modified.txt << EOF
+    ceph osd getcrushmap >crushmap || return 1
+    crushtool --decompile crushmap >crushmap.txt || return 1
+    sed 's/^# end crush map$//' crushmap.txt >crushmap_modified.txt || return 1
+    cat >>crushmap_modified.txt <<EOF
 rule stretch_rule {
         id 1
         type replicated
@@ -113,7 +110,7 @@ rule stretch_rule {
 EOF
 
     crushtool --compile crushmap_modified.txt -o crushmap.bin || return 1
-    ceph osd setcrushmap -i crushmap.bin  || return 1
+    ceph osd setcrushmap -i crushmap.bin || return 1
     local stretched_poolname=stretched_rbdpool
     ceph osd pool create $stretched_poolname 32 32 stretch_rule || return 1
     ceph osd pool set $stretched_poolname size 4 || return 1

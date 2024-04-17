@@ -3,7 +3,5 @@
 
 #include "include/rados/librados.h"
 
-std::string set_pg_num(
-    rados_t *cluster, const std::string &pool_name, uint32_t pg_num);
-std::string set_pgp_num(
-    rados_t *cluster, const std::string &pool_name, uint32_t pgp_num);
+std::string set_pg_num(rados_t* cluster, const std::string& pool_name, uint32_t pg_num);
+std::string set_pgp_num(rados_t* cluster, const std::string& pool_name, uint32_t pgp_num);

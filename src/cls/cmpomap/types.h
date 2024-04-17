@@ -14,31 +14,34 @@
 
 #pragma once
 
-#include <string>
-#include <boost/container/flat_map.hpp>
-#include "include/rados.h" // CEPH_OSD_CMPXATTR_*
 #include "include/encoding.h"
+#include "include/rados.h"   // CEPH_OSD_CMPXATTR_*
+
+#include <boost/container/flat_map.hpp>
+#include <string>
 
 namespace cls::cmpomap {
 
 /// comparison operand type
-enum class Mode : uint8_t {
-  String = CEPH_OSD_CMPXATTR_MODE_STRING,
-  U64    = CEPH_OSD_CMPXATTR_MODE_U64,
+enum class Mode : uint8_t
+{
+    String = CEPH_OSD_CMPXATTR_MODE_STRING,
+    U64 = CEPH_OSD_CMPXATTR_MODE_U64,
 };
 
 /// comparison operation, where the left-hand operand is the input value and
 /// the right-hand operand is the stored value (or the optional default)
-enum class Op : uint8_t {
-  EQ  = CEPH_OSD_CMPXATTR_OP_EQ,
-  NE  = CEPH_OSD_CMPXATTR_OP_NE,
-  GT  = CEPH_OSD_CMPXATTR_OP_GT,
-  GTE = CEPH_OSD_CMPXATTR_OP_GTE,
-  LT  = CEPH_OSD_CMPXATTR_OP_LT,
-  LTE = CEPH_OSD_CMPXATTR_OP_LTE,
+enum class Op : uint8_t
+{
+    EQ = CEPH_OSD_CMPXATTR_OP_EQ,
+    NE = CEPH_OSD_CMPXATTR_OP_NE,
+    GT = CEPH_OSD_CMPXATTR_OP_GT,
+    GTE = CEPH_OSD_CMPXATTR_OP_GTE,
+    LT = CEPH_OSD_CMPXATTR_OP_LT,
+    LTE = CEPH_OSD_CMPXATTR_OP_LTE,
 };
 
 /// mapping of omap keys to value comparisons
 using ComparisonMap = boost::container::flat_map<std::string, ceph::bufferlist>;
 
-} // namespace cls::cmpomap
+}   // namespace cls::cmpomap

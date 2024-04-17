@@ -17,20 +17,19 @@
 
 // -----------------------------------------------------------------------------
 #include "common/PluginRegistry.h"
-#include "ostream"
-
 #include "crypto/crypto_accel.h"
+#include "ostream"
 // -----------------------------------------------------------------------------
 
-class CryptoPlugin : public ceph::Plugin {
+class CryptoPlugin : public ceph::Plugin
+{
 
 public:
-  CryptoAccelRef cryptoaccel;
-  explicit CryptoPlugin(CephContext* cct) : Plugin(cct)
-  {}
-  ~CryptoPlugin()
-  {}
-  virtual int factory(CryptoAccelRef *cs,
-                      std::ostream *ss) = 0;
+    CryptoAccelRef cryptoaccel;
+    explicit CryptoPlugin(CephContext* cct)
+        : Plugin(cct)
+    {}
+    ~CryptoPlugin() {}
+    virtual int factory(CryptoAccelRef* cs, std::ostream* ss) = 0;
 };
 #endif

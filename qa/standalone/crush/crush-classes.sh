@@ -31,7 +31,7 @@ function run() {
     CEPH_ARGS+="--osd-class-update-on-start=false "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -43,7 +43,7 @@ function add_something() {
     local obj=${2:-SOMETHING}
 
     local payload=ABCDEF
-    echo $payload > $dir/ORIGINAL
+    echo $payload >$dir/ORIGINAL
     rados --pool rbd put $obj $dir/ORIGINAL || return 1
 }
 
@@ -51,7 +51,7 @@ function get_osds_up() {
     local poolname=$1
     local objectname=$2
 
-    local osds=$(ceph --format xml osd map $poolname $objectname 2>/dev/null | \
+    local osds=$(ceph --format xml osd map $poolname $objectname 2>/dev/null |
         $XMLSTARLET sel -t -m "//up/osd" -v . -o ' ')
     # get rid of the trailing space
     echo $osds
@@ -75,7 +75,7 @@ function TEST_reweight_vs_classes() {
 
     ceph osd crush reweight osd.0 1
 
-    h=`hostname -s`
+    h=$(hostname -s)
     ceph osd crush dump | jq ".buckets[] | select(.name==\"$h\") | .items[0].weight" | grep 65536
     ceph osd crush dump | jq ".buckets[] | select(.name==\"$h~ssd\") | .items[0].weight" | grep 65536
 
@@ -101,7 +101,7 @@ function TEST_classes() {
     # osd.0 has class ssd and the rule is modified
     # to only take ssd devices.
     #
-    ceph osd getcrushmap > $dir/map || return 1
+    ceph osd getcrushmap >$dir/map || return 1
     crushtool -d $dir/map -o $dir/map.txt || return 1
     ${SED} -i \
         -e '/device 0 osd.0/s/$/ class ssd/' \
@@ -115,14 +115,14 @@ function TEST_classes() {
     # one device with ssd class.
     #
     ok=false
-    for delay in 2 4 8 16 32 64 128 256 ; do
-        if test "$(get_osds_up rbd SOMETHING_ELSE)" == "0" ; then
+    for delay in 2 4 8 16 32 64 128 256; do
+        if test "$(get_osds_up rbd SOMETHING_ELSE)" == "0"; then
             ok=true
             break
         fi
         sleep $delay
         ceph osd dump # for debugging purposes
-        ceph pg dump # for debugging purposes
+        ceph pg dump  # for debugging purposes
     done
     $ok || return 1
     #
@@ -150,15 +150,15 @@ function TEST_set_device_class() {
     ceph osd crush set-device-class ssd 0 1 || return 1 # should be idempotent
 
     ok=false
-    for delay in 2 4 8 16 32 64 128 256 ; do
-        if test "$(get_osds_up rbd SOMETHING_ELSE)" == "0 1" ; then
+    for delay in 2 4 8 16 32 64 128 256; do
+        if test "$(get_osds_up rbd SOMETHING_ELSE)" == "0 1"; then
             ok=true
             break
         fi
         sleep $delay
         ceph osd crush dump
         ceph osd dump # for debugging purposes
-        ceph pg dump # for debugging purposes
+        ceph pg dump  # for debugging purposes
     done
     $ok || return 1
 }
@@ -178,11 +178,11 @@ function TEST_mon_classes() {
     # test create and remove class
     ceph osd crush class create CLASS || return 1
     ceph osd crush class create CLASS || return 1 # idempotent
-    ceph osd crush class ls | grep CLASS  || return 1
+    ceph osd crush class ls | grep CLASS || return 1
     ceph osd crush class rename CLASS TEMP || return 1
     ceph osd crush class ls | grep TEMP || return 1
     ceph osd crush class rename TEMP CLASS || return 1
-    ceph osd crush class ls | grep CLASS  || return 1
+    ceph osd crush class ls | grep CLASS || return 1
     ceph osd erasure-code-profile set myprofile plugin=jerasure technique=reed_sol_van k=2 m=1 crush-failure-domain=osd crush-device-class=CLASS || return 1
     expect_failure $dir EBUSY ceph osd crush class rm CLASS || return 1
     ceph osd erasure-code-profile rm myprofile || return 1
@@ -222,7 +222,7 @@ function TEST_mon_classes() {
 
     ceph osd crush set-device-class abc osd.2 || return 1
     ceph osd crush move osd.2 root=foo rack=foo-rack host=foo-host || return 1
-    out=`ceph osd tree |awk '$1 == 2 && $2 == "abc" {print $0}'`
+    out=$(ceph osd tree | awk '$1 == 2 && $2 == "abc" {print $0}')
     if [ "$out" == "" ]; then
         return 1
     fi

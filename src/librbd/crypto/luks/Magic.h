@@ -11,22 +11,22 @@ namespace librbd {
 namespace crypto {
 namespace luks {
 
-class Magic {
+class Magic
+{
 public:
-  static int is_luks(ceph::bufferlist& bl);
-  static int is_rbd_clone(ceph::bufferlist& bl);
+    static int is_luks(ceph::bufferlist& bl);
+    static int is_rbd_clone(ceph::bufferlist& bl);
 
-  static int replace_magic(CephContext* cct, ceph::bufferlist& bl);
+    static int replace_magic(CephContext* cct, ceph::bufferlist& bl);
+
 private:
-  static int read(ceph::bufferlist& bl, uint32_t bl_off,
-                  uint32_t read_size, char* result);
-  static int cmp(ceph::bufferlist& bl, uint32_t bl_off,
-                 const std::string& cmp_str);
-  static void transform_secondary_header_magic(char* magic);
+    static int read(ceph::bufferlist& bl, uint32_t bl_off, uint32_t read_size, char* result);
+    static int cmp(ceph::bufferlist& bl, uint32_t bl_off, const std::string& cmp_str);
+    static void transform_secondary_header_magic(char* magic);
 };
 
-} // namespace luks
-} // namespace crypto
-} // namespace librbd
+}   // namespace luks
+}   // namespace crypto
+}   // namespace librbd
 
-#endif // CEPH_LIBRBD_CRYPTO_LUKS_MAGIC_H
+#endif   // CEPH_LIBRBD_CRYPTO_LUKS_MAGIC_H

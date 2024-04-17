@@ -13,10 +13,10 @@ osds=$*
 ISOVAL=${OS_CEPH_ISO-rhceph-1.3.1-rhel-7-x86_64-dvd.iso}
 sudo mount -o loop ${ISOVAL} /mnt
 
-fqdn=`hostname -f`
-lsetup=`ls /mnt/Installer | grep "^ice_setup"`
+fqdn=$(hostname -f)
+lsetup=$(ls /mnt/Installer | grep "^ice_setup")
 sudo yum -y install /mnt/Installer/${lsetup}
-sudo ice_setup -d /mnt << EOF
+sudo ice_setup -d /mnt <<EOF
 yes
 /mnt
 $fqdn
@@ -43,8 +43,8 @@ done
 
 sudo ./ceph-pool-create.sh
 
-hchk=`sudo ceph health`
+hchk=$(sudo ceph health)
 while [[ $hchk != 'HEALTH_OK' ]]; do
     sleep 30
-    hchk=`sudo ceph health`
+    hchk=$(sudo ceph health)
 done

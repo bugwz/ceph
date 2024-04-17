@@ -16,9 +16,8 @@
 
 #pragma once
 
-#include "svc_meta_be.h"
-
 #include "rgw_service.h"
+#include "svc_meta_be.h"
 
 
 class RGWMetadataLog;
@@ -27,22 +26,18 @@ class RGWCoroutine;
 
 class RGWSI_Meta : public RGWServiceInstance
 {
-  RGWSI_SysObj *sysobj_svc{nullptr};
-  RGWSI_MDLog *mdlog_svc{nullptr};
+    RGWSI_SysObj* sysobj_svc{nullptr};
+    RGWSI_MDLog* mdlog_svc{nullptr};
 
-  std::map<RGWSI_MetaBackend::Type, RGWSI_MetaBackend *> be_svc;
+    std::map<RGWSI_MetaBackend::Type, RGWSI_MetaBackend*> be_svc;
 
-  std::vector<std::unique_ptr<RGWSI_MetaBackend_Handler> > be_handlers;
+    std::vector<std::unique_ptr<RGWSI_MetaBackend_Handler> > be_handlers;
 
 public:
-  RGWSI_Meta(CephContext *cct);
-  ~RGWSI_Meta();
+    RGWSI_Meta(CephContext* cct);
+    ~RGWSI_Meta();
 
-  void init(RGWSI_SysObj *_sysobj_svc,
-            RGWSI_MDLog *_mdlog_svc,
-            std::vector<RGWSI_MetaBackend *>& _be_svc);
+    void init(RGWSI_SysObj* _sysobj_svc, RGWSI_MDLog* _mdlog_svc, std::vector<RGWSI_MetaBackend*>& _be_svc);
 
-  int create_be_handler(RGWSI_MetaBackend::Type be_type,
-                        RGWSI_MetaBackend_Handler **phandler);
+    int create_be_handler(RGWSI_MetaBackend::Type be_type, RGWSI_MetaBackend_Handler** phandler);
 };
-

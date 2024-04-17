@@ -15,7 +15,7 @@ sudo timeout 5m ./wac -l 65536 -n 64 -r /mnt/wac-test
 RET=$?
 set -e
 [[ $RET -eq 124 ]]
-sudo killall -w wac || true  # wac forks
+sudo killall -w wac || true # wac forks
 sudo umount /mnt
 
 sudo wipefs -a $DEV
@@ -29,7 +29,7 @@ sudo timeout 5m ./wac -l 65536 -n 64 -r /mnt/wac-test
 RET=$?
 set -e
 [[ $RET -eq 124 ]]
-sudo killall -w wac || true  # wac forks
+sudo killall -w wac || true # wac forks
 sudo umount /mnt
 sudo vgremove -f vg_img
 sudo pvremove $DEV

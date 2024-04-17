@@ -19,14 +19,15 @@
 namespace crimson::net {
 
 /// net error codes
-enum class error {
-  success = 0,
-  bad_connect_banner,
-  bad_peer_address,
-  negotiation_failure,
-  read_eof,
-  corrupted_message,
-  protocol_aborted,
+enum class error
+{
+    success = 0,
+    bad_connect_banner,
+    bad_peer_address,
+    negotiation_failure,
+    read_eof,
+    corrupted_message,
+    protocol_aborted,
 };
 
 /// net error category
@@ -34,20 +35,20 @@ const std::error_category& net_category();
 
 inline std::error_code make_error_code(error e)
 {
-  return {static_cast<int>(e), net_category()};
+    return {static_cast<int>(e), net_category()};
 }
 
 inline std::error_condition make_error_condition(error e)
 {
-  return {static_cast<int>(e), net_category()};
+    return {static_cast<int>(e), net_category()};
 }
 
-} // namespace crimson::net
+}   // namespace crimson::net
 
 namespace std {
 
 /// enables implicit conversion to std::error_condition
-template <>
-struct is_error_condition_enum<crimson::net::error> : public true_type {};
+template<> struct is_error_condition_enum<crimson::net::error> : public true_type
+{};
 
-} // namespace std
+}   // namespace std

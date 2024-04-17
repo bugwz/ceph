@@ -16,9 +16,9 @@
 #define CEPH_OPENSSL_OPTS_HANDLER_H
 
 namespace ceph {
-  namespace crypto {
-    void init_openssl_engine_once();
-  }
+namespace crypto {
+void init_openssl_engine_once();
 }
+}   // namespace ceph
 
 #endif

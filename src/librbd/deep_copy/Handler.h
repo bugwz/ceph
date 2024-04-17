@@ -10,41 +10,39 @@
 namespace librbd {
 namespace deep_copy {
 
-struct Handler {
-  virtual ~Handler() {}
+struct Handler
+{
+    virtual ~Handler() {}
 
-  virtual void handle_read(uint64_t bytes_read) = 0;
+    virtual void handle_read(uint64_t bytes_read) = 0;
 
-  virtual int update_progress(uint64_t object_number,
-                              uint64_t object_count) = 0;
+    virtual int update_progress(uint64_t object_number, uint64_t object_count) = 0;
 };
 
-struct NoOpHandler : public Handler {
-  void handle_read(uint64_t bytes_read) override {
-  }
+struct NoOpHandler : public Handler
+{
+    void handle_read(uint64_t bytes_read) override {}
 
-  int update_progress(uint64_t object_number,
-                      uint64_t object_count) override {
-    return 0;
-  }
+    int update_progress(uint64_t object_number, uint64_t object_count) override { return 0; }
 };
 
-class ProgressHandler : public NoOpHandler {
+class ProgressHandler : public NoOpHandler
+{
 public:
-  ProgressHandler(ProgressContext* progress_ctx)
-    : m_progress_ctx(progress_ctx) {
-  }
+    ProgressHandler(ProgressContext* progress_ctx)
+        : m_progress_ctx(progress_ctx)
+    {}
 
-  int update_progress(uint64_t object_number,
-                      uint64_t object_count) override {
-    return m_progress_ctx->update_progress(object_number, object_count);
-  }
+    int update_progress(uint64_t object_number, uint64_t object_count) override
+    {
+        return m_progress_ctx->update_progress(object_number, object_count);
+    }
 
 private:
-  librbd::ProgressContext* m_progress_ctx;
+    librbd::ProgressContext* m_progress_ctx;
 };
 
-} // namespace deep_copy
-} // namespace librbd
+}   // namespace deep_copy
+}   // namespace librbd
 
-#endif // CEPH_LIBRBD_DEEP_COPY_HANDLER_H
+#endif   // CEPH_LIBRBD_DEEP_COPY_HANDLER_H

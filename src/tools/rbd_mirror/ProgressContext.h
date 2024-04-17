@@ -10,12 +10,11 @@ namespace mirror {
 class ProgressContext
 {
 public:
-  virtual ~ProgressContext() {}
-  virtual void update_progress(const std::string &description,
-			       bool flush = true) = 0;
+    virtual ~ProgressContext() {}
+    virtual void update_progress(const std::string& description, bool flush = true) = 0;
 };
 
-} // namespace mirror
-} // namespace rbd
+}   // namespace mirror
+}   // namespace rbd
 
-#endif // RBD_MIRROR_PROGRESS_CONTEXT_H
+#endif   // RBD_MIRROR_PROGRESS_CONTEXT_H

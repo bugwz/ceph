@@ -10,41 +10,42 @@ class OpsLogSink;
 class RGWREST;
 
 namespace rgw::auth {
-  class StrategyRegistry;
+class StrategyRegistry;
 }
 namespace rgw::lua {
-  class Background;
+class Background;
 }
 namespace rgw::sal {
-  class Store;
-  class LuaManager;
-}
+class Store;
+class LuaManager;
+}   // namespace rgw::sal
 
 #ifdef WITH_ARROW_FLIGHT
 namespace rgw::flight {
-  class FlightServer;
-  class FlightStore;
-}
+class FlightServer;
+class FlightStore;
+}   // namespace rgw::flight
 #endif
 
-struct RGWLuaProcessEnv {
-  std::string luarocks_path;
-  rgw::lua::Background* background = nullptr;
-  std::unique_ptr<rgw::sal::LuaManager> manager;
+struct RGWLuaProcessEnv
+{
+    std::string luarocks_path;
+    rgw::lua::Background* background = nullptr;
+    std::unique_ptr<rgw::sal::LuaManager> manager;
 };
 
-struct RGWProcessEnv {
-  RGWLuaProcessEnv lua;
-  rgw::sal::Driver* driver = nullptr;
-  RGWREST *rest = nullptr;
-  OpsLogSink *olog = nullptr;
-  std::unique_ptr<rgw::auth::StrategyRegistry> auth_registry;
-  ActiveRateLimiter* ratelimiting = nullptr;
+struct RGWProcessEnv
+{
+    RGWLuaProcessEnv lua;
+    rgw::sal::Driver* driver = nullptr;
+    RGWREST* rest = nullptr;
+    OpsLogSink* olog = nullptr;
+    std::unique_ptr<rgw::auth::StrategyRegistry> auth_registry;
+    ActiveRateLimiter* ratelimiting = nullptr;
 
 #ifdef WITH_ARROW_FLIGHT
-  // managed by rgw:flight::FlightFrontend in rgw_flight_frontend.cc
-  rgw::flight::FlightServer* flight_server = nullptr;
-  rgw::flight::FlightStore* flight_store = nullptr;
+    // managed by rgw:flight::FlightFrontend in rgw_flight_frontend.cc
+    rgw::flight::FlightServer* flight_server = nullptr;
+    rgw::flight::FlightStore* flight_store = nullptr;
 #endif
 };
-

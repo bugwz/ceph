@@ -15,59 +15,65 @@
 #ifndef CEPH_ANCHOR_H
 #define CEPH_ANCHOR_H
 
-#include <string>
-
+#include "include/buffer.h"
 #include "include/types.h"
 #include "mdstypes.h"
-#include "include/buffer.h"
+
+#include <string>
 
 /*
  * Anchor represents primary linkage of an inode. When adding inode to an
  * anchor table, MDS ensures that the table also contains inode's ancestor
  * inodes. MDS can get inode's path by looking up anchor table recursively.
  */
-class Anchor {
+class Anchor
+{
 public:
-  Anchor() {}
-  Anchor(inodeno_t i, inodeno_t di, std::string_view str, __u8 tp) :
-    ino(i), dirino(di), d_name(str), d_type(tp) {}
+    Anchor() {}
+    Anchor(inodeno_t i, inodeno_t di, std::string_view str, __u8 tp)
+        : ino(i)
+        , dirino(di)
+        , d_name(str)
+        , d_type(tp)
+    {}
 
-  void encode(bufferlist &bl) const;
-  void decode(bufferlist::const_iterator &bl);
-  void dump(Formatter *f) const;
-  static void generate_test_instances(std::list<Anchor*>& ls);
-  bool operator==(const Anchor &r) const {
-    return ino == r.ino && dirino == r.dirino &&
-	   d_name == r.d_name && d_type == r.d_type &&
-	   frags == r.frags;
-  }
+    void encode(bufferlist& bl) const;
+    void decode(bufferlist::const_iterator& bl);
+    void dump(Formatter* f) const;
+    static void generate_test_instances(std::list<Anchor*>& ls);
+    bool operator==(const Anchor& r) const
+    {
+        return ino == r.ino && dirino == r.dirino && d_name == r.d_name && d_type == r.d_type && frags == r.frags;
+    }
 
-  inodeno_t ino;	// anchored ino
-  inodeno_t dirino;
-  std::string d_name;
-  __u8 d_type = 0;
-  std::set<frag_t> frags;
+    inodeno_t ino;   // anchored ino
+    inodeno_t dirino;
+    std::string d_name;
+    __u8 d_type = 0;
+    std::set<frag_t> frags;
 
-  int omap_idx = -1;	// stored in which omap object
+    int omap_idx = -1;   // stored in which omap object
 };
 WRITE_CLASS_ENCODER(Anchor)
 
-class RecoveredAnchor : public Anchor {
+class RecoveredAnchor : public Anchor
+{
 public:
-  RecoveredAnchor() {}
+    RecoveredAnchor() {}
 
-  mds_rank_t auth = MDS_RANK_NONE; // auth hint
+    mds_rank_t auth = MDS_RANK_NONE;   // auth hint
 };
 
-class OpenedAnchor : public Anchor {
+class OpenedAnchor : public Anchor
+{
 public:
-  OpenedAnchor(inodeno_t i, inodeno_t di, std::string_view str, __u8 tp, int nr) :
-      Anchor(i, di, str, tp),
-      nref(nr)
-  {}
+    OpenedAnchor(inodeno_t i, inodeno_t di, std::string_view str, __u8 tp, int nr)
+        : Anchor(i, di, str, tp)
+        , nref(nr)
+    {}
 
-  mutable int nref = 0; // how many children
+    mutable int nref = 0;   // how many children
 };
 
-std::ostream& operator<<(std::ostream& out, const Anchor &a);
+std::ostream& operator<<(std::ostream& out, const Anchor& a);
 #endif

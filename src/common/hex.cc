@@ -14,22 +14,20 @@
 
 #include "common/hex.h"
 
-void hex2str(const char *s, int len, char *buf, int dest_len)
+void hex2str(const char* s, int len, char* buf, int dest_len)
 {
-  int pos = 0;
-  for (int i=0; i<len && pos<dest_len; i++) {
-    if (i && !(i%8))
-      pos += snprintf(&buf[pos], dest_len-pos, " ");
-    if (i && !(i%16))
-      pos += snprintf(&buf[pos], dest_len-pos, "\n");
-    pos += snprintf(&buf[pos], dest_len-pos, "%.2x ", (int)(unsigned char)s[i]);
-  }
+    int pos = 0;
+    for (int i = 0; i < len && pos < dest_len; i++) {
+        if (i && !(i % 8)) pos += snprintf(&buf[pos], dest_len - pos, " ");
+        if (i && !(i % 16)) pos += snprintf(&buf[pos], dest_len - pos, "\n");
+        pos += snprintf(&buf[pos], dest_len - pos, "%.2x ", (int)(unsigned char)s[i]);
+    }
 }
 
-std::string hexdump(const std::string &msg, const char *s, int len)
+std::string hexdump(const std::string& msg, const char* s, int len)
 {
-  int buf_len = len*4;
-  char buf[buf_len];
-  hex2str(s, len, buf, buf_len);
-  return buf;
+    int buf_len = len * 4;
+    char buf[buf_len];
+    hex2str(s, len, buf, buf_len);
+    return buf;
 }

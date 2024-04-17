@@ -10,10 +10,10 @@ function assert_locked() {
     local dev_id="${1#/dev/rbd}"
 
     local client_addr
-    client_addr="$(< $SYSFS_DIR/$dev_id/client_addr)"
+    client_addr="$(<$SYSFS_DIR/$dev_id/client_addr)"
 
     local client_id
-    client_id="$(< $SYSFS_DIR/$dev_id/client_id)"
+    client_id="$(<$SYSFS_DIR/$dev_id/client_id)"
     # client4324 -> client.4324
     client_id="client.${client_id#client}"
 
@@ -27,7 +27,8 @@ function assert_locked() {
         python3 -m json.tool --sort-keys)"
 
     local expected
-    expected="$(cat <<EOF | python3 -m json.tool --sort-keys
+    expected="$(
+        cat <<EOF | python3 -m json.tool --sort-keys
 {
     "lockers": [
         {
@@ -57,7 +58,7 @@ function blocklist_add() {
     local dev_id="${1#/dev/rbd}"
 
     local client_addr
-    client_addr="$(< $SYSFS_DIR/$dev_id/client_addr)"
+    client_addr="$(<$SYSFS_DIR/$dev_id/client_addr)"
 
     ceph osd blocklist add $client_addr
 }
@@ -203,7 +204,10 @@ assert_unlocked
 DEV=$(sudo rbd map $IMAGE_NAME)
 assert_locked $DEV
 dd if=/dev/urandom of=$DEV bs=4k count=10 oflag=direct
-{ sleep 10; blocklist_add $DEV; } &
+{
+    sleep 10
+    blocklist_add $DEV
+} &
 PID=$!
 expect_false dd if=/dev/urandom of=$DEV bs=4k count=200000 oflag=direct
 wait $PID
@@ -225,8 +229,7 @@ NEW_WATCHER="$(rados -p rbd listwatchers rbd_header.$IMAGE_ID)"
 # same client_id, old cookie < new cookie
 [ "$(echo "$OLD_WATCHER" | cut -d ' ' -f 2)" = \
     "$(echo "$NEW_WATCHER" | cut -d ' ' -f 2)" ]
-[[ $(echo "$OLD_WATCHER" | cut -d ' ' -f 3 | cut -d '=' -f 2) -lt \
-    $(echo "$NEW_WATCHER" | cut -d ' ' -f 3 | cut -d '=' -f 2) ]]
+[[ $(echo "$OLD_WATCHER" | cut -d ' ' -f 3 | cut -d '=' -f 2) -lt $(echo "$NEW_WATCHER" | cut -d ' ' -f 3 | cut -d '=' -f 2) ]]
 sudo rbd unmap $DEV
 assert_unlocked
 

@@ -22,7 +22,6 @@ class DumpHistoricOpsHook;
 class DumpSlowestHistoricOpsHook;
 class DumpRecoveryReservationsHook;
 
-template<class Hook, class... Args>
-std::unique_ptr<AdminSocketHook> make_asok_hook(Args&&... args);
+template<class Hook, class... Args> std::unique_ptr<AdminSocketHook> make_asok_hook(Args&&... args);
 
-}  // namespace crimson::admin
+}   // namespace crimson::admin

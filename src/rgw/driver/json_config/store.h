@@ -20,8 +20,7 @@ namespace rgw::sal {
 
 /// Create an immutable ConfigStore by parsing the zonegroup and zone from the
 /// given json filename.
-auto create_json_config_store(const DoutPrefixProvider* dpp,
-                              const std::string& filename)
+auto create_json_config_store(const DoutPrefixProvider* dpp, const std::string& filename)
     -> std::unique_ptr<ConfigStore>;
 
-} // namespace rgw::sal
+}   // namespace rgw::sal

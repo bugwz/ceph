@@ -15,50 +15,41 @@
  *
  */
 
+#include "common/config_proxy.h"
+#include "erasure-code/ErasureCodePlugin.h"
+#include "global/global_context.h"
+#include "log/Log.h"
+
+#include "gtest/gtest.h"
 #include <errno.h>
 #include <stdlib.h>
-#include "erasure-code/ErasureCodePlugin.h"
-#include "log/Log.h"
-#include "global/global_context.h"
-#include "common/config_proxy.h"
-#include "gtest/gtest.h"
 
 using namespace std;
 
 TEST(ErasureCodePlugin, factory)
 {
-  ErasureCodePluginRegistry &instance = ErasureCodePluginRegistry::instance();
-  ErasureCodeProfile profile;
-  {
-    ErasureCodeInterfaceRef erasure_code;
-    EXPECT_FALSE(erasure_code);
-    EXPECT_EQ(-ENOENT, instance.factory("jerasure",
-					g_conf().get_val<std::string>("erasure_code_dir"),
-					profile,
-                                        &erasure_code, &cerr));
-    EXPECT_FALSE(erasure_code);
-  }
-  const char *techniques[] = {
-    "reed_sol_van",
-    "reed_sol_r6_op",
-    "cauchy_orig",
-    "cauchy_good",
-    "liberation",
-    "blaum_roth",
-    "liber8tion",
-    0
-  };
-  for(const char **technique = techniques; *technique; technique++) {
-    ErasureCodeInterfaceRef erasure_code;
+    ErasureCodePluginRegistry& instance = ErasureCodePluginRegistry::instance();
     ErasureCodeProfile profile;
-    profile["technique"] = *technique;
-    EXPECT_FALSE(erasure_code);
-    EXPECT_EQ(0, instance.factory("jerasure",
-				  g_conf().get_val<std::string>("erasure_code_dir"),
-				  profile,
-                                  &erasure_code, &cerr));
-    EXPECT_TRUE(erasure_code.get());
-  }
+    {
+        ErasureCodeInterfaceRef erasure_code;
+        EXPECT_FALSE(erasure_code);
+        EXPECT_EQ(-ENOENT,
+                  instance.factory(
+                      "jerasure", g_conf().get_val<std::string>("erasure_code_dir"), profile, &erasure_code, &cerr));
+        EXPECT_FALSE(erasure_code);
+    }
+    const char* techniques[] = {
+        "reed_sol_van", "reed_sol_r6_op", "cauchy_orig", "cauchy_good", "liberation", "blaum_roth", "liber8tion", 0};
+    for (const char** technique = techniques; *technique; technique++) {
+        ErasureCodeInterfaceRef erasure_code;
+        ErasureCodeProfile profile;
+        profile["technique"] = *technique;
+        EXPECT_FALSE(erasure_code);
+        EXPECT_EQ(0,
+                  instance.factory(
+                      "jerasure", g_conf().get_val<std::string>("erasure_code_dir"), profile, &erasure_code, &cerr));
+        EXPECT_TRUE(erasure_code.get());
+    }
 }
 
 /*

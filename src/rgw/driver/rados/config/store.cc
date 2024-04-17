@@ -12,41 +12,38 @@
  *
  */
 
-#include "include/rados/librados.hpp"
+#include "store.h"
+
 #include "common/errno.h"
 #include "impl.h"
-#include "store.h"
+#include "include/rados/librados.hpp"
 
 namespace rgw::rados {
 
 RadosConfigStore::RadosConfigStore(std::unique_ptr<ConfigImpl> impl)
-  : impl(std::move(impl))
-{
-}
+    : impl(std::move(impl))
+{}
 
 RadosConfigStore::~RadosConfigStore() = default;
 
 
-auto create_config_store(const DoutPrefixProvider* dpp)
-    -> std::unique_ptr<RadosConfigStore>
+auto create_config_store(const DoutPrefixProvider* dpp) -> std::unique_ptr<RadosConfigStore>
 {
-  auto impl = std::make_unique<ConfigImpl>(dpp->get_cct()->_conf);
+    auto impl = std::make_unique<ConfigImpl>(dpp->get_cct()->_conf);
 
-  // initialize a Rados client
-  int r = impl->rados.init_with_context(dpp->get_cct());
-  if (r < 0) {
-    ldpp_dout(dpp, -1) << "Rados client initialization failed with "
-        << cpp_strerror(-r) << dendl;
-    return nullptr;
-  }
-  r = impl->rados.connect();
-  if (r < 0) {
-    ldpp_dout(dpp, -1) << "Rados client connection failed with "
-        << cpp_strerror(-r) << dendl;
-    return nullptr;
-  }
+    // initialize a Rados client
+    int r = impl->rados.init_with_context(dpp->get_cct());
+    if (r < 0) {
+        ldpp_dout(dpp, -1) << "Rados client initialization failed with " << cpp_strerror(-r) << dendl;
+        return nullptr;
+    }
+    r = impl->rados.connect();
+    if (r < 0) {
+        ldpp_dout(dpp, -1) << "Rados client connection failed with " << cpp_strerror(-r) << dendl;
+        return nullptr;
+    }
 
-  return std::make_unique<RadosConfigStore>(std::move(impl));
+    return std::make_unique<RadosConfigStore>(std::move(impl));
 }
 
-} // namespace rgw::rados
+}   // namespace rgw::rados

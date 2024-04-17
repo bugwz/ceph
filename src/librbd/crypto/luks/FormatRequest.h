@@ -4,11 +4,12 @@
 #ifndef CEPH_LIBRBD_CRYPTO_LUKS_FORMAT_REQUEST_H
 #define CEPH_LIBRBD_CRYPTO_LUKS_FORMAT_REQUEST_H
 
-#include <string_view>
 #include "include/rbd/librbd.hpp"
 #include "librbd/ImageCtx.h"
 #include "librbd/crypto/CryptoInterface.h"
 #include "librbd/crypto/luks/Header.h"
+
+#include <string_view>
 
 namespace librbd {
 
@@ -17,22 +18,18 @@ class ImageCtx;
 namespace crypto {
 namespace luks {
 
-template <typename I>
-class FormatRequest {
+template<typename I> class FormatRequest
+{
 public:
-    static FormatRequest* create(
-            I* image_ctx, encryption_format_t format,
-            encryption_algorithm_t alg, std::string_view passphrase,
-            std::unique_ptr<CryptoInterface>* result_crypto, Context* on_finish,
-            bool insecure_fast_mode) {
-      return new FormatRequest(image_ctx, format, alg, passphrase,
-                               result_crypto, on_finish, insecure_fast_mode);
+    static FormatRequest* create(I* image_ctx, encryption_format_t format, encryption_algorithm_t alg,
+                                 std::string_view passphrase, std::unique_ptr<CryptoInterface>* result_crypto,
+                                 Context* on_finish, bool insecure_fast_mode)
+    {
+        return new FormatRequest(image_ctx, format, alg, passphrase, result_crypto, on_finish, insecure_fast_mode);
     }
 
-    FormatRequest(I* image_ctx, encryption_format_t format,
-                  encryption_algorithm_t alg, std::string_view passphrase,
-                  std::unique_ptr<CryptoInterface>* result_crypto,
-                  Context* on_finish, bool insecure_fast_mode);
+    FormatRequest(I* image_ctx, encryption_format_t format, encryption_algorithm_t alg, std::string_view passphrase,
+                  std::unique_ptr<CryptoInterface>* result_crypto, Context* on_finish, bool insecure_fast_mode);
     void send();
     void finish(int r);
 
@@ -50,10 +47,10 @@ private:
     void handle_write_header(int r);
 };
 
-} // namespace luks
-} // namespace crypto
-} // namespace librbd
+}   // namespace luks
+}   // namespace crypto
+}   // namespace librbd
 
 extern template class librbd::crypto::luks::FormatRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_CRYPTO_LUKS_FORMAT_REQUEST_H
+#endif   // CEPH_LIBRBD_CRYPTO_LUKS_FORMAT_REQUEST_H

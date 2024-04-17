@@ -2,7 +2,7 @@
 
 set -e
 
-mydir=`dirname $0`
+mydir=$(dirname $0)
 
 # try it again if the clone is slow and the second time
 trap -- 'retry' EXIT
@@ -22,10 +22,8 @@ cd ..
 mkdir tmp
 cd tmp
 
-for f in $mydir/*.ffsb
-do
+for f in $mydir/*.ffsb; do
     ../ffsb/ffsb $f
 done
 cd ..
 rm -r tmp ffsb*
-

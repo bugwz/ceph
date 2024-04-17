@@ -27,7 +27,7 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -45,7 +45,7 @@ function TEST_set() {
     # no key=value pairs : use the default configuration
     #
     ceph osd erasure-code-profile set $profile 2>&1 || return 1
-    ceph osd erasure-code-profile get $profile | \
+    ceph osd erasure-code-profile get $profile |
         grep plugin=jerasure || return 1
     ceph osd erasure-code-profile rm $profile
     #
@@ -53,15 +53,15 @@ function TEST_set() {
     #
     ceph osd erasure-code-profile set $profile \
         key=value plugin=isa || return 1
-    ceph osd erasure-code-profile get $profile | \
+    ceph osd erasure-code-profile get $profile |
         grep -e key=value -e plugin=isa || return 1
     #
     # --force is required to override an existing profile
     #
-    ! ceph osd erasure-code-profile set $profile > $dir/out 2>&1 || return 1
+    ! ceph osd erasure-code-profile set $profile >$dir/out 2>&1 || return 1
     grep 'will not override' $dir/out || return 1
     ceph osd erasure-code-profile set $profile key=other --force || return 1
-    ceph osd erasure-code-profile get $profile | \
+    ceph osd erasure-code-profile get $profile |
         grep key=other || return 1
 
     ceph osd erasure-code-profile rm $profile # cleanup
@@ -77,7 +77,7 @@ function TEST_ls() {
     ! ceph osd erasure-code-profile ls | grep $profile || return 1
     ceph osd erasure-code-profile set $profile 2>&1 || return 1
     ceph osd erasure-code-profile ls | grep $profile || return 1
-    ceph --format xml osd erasure-code-profile ls | \
+    ceph --format xml osd erasure-code-profile ls |
         grep "<profile>$profile</profile>" || return 1
 
     ceph osd erasure-code-profile rm $profile # cleanup
@@ -94,12 +94,12 @@ function TEST_rm() {
     ceph osd erasure-code-profile ls | grep $profile || return 1
     ceph osd erasure-code-profile rm $profile || return 1
     ! ceph osd erasure-code-profile ls | grep $profile || return 1
-    ceph osd erasure-code-profile rm WRONG 2>&1 | \
+    ceph osd erasure-code-profile rm WRONG 2>&1 |
         grep "WRONG does not exist" || return 1
 
     ceph osd erasure-code-profile set $profile || return 1
     create_pool poolname 12 12 erasure $profile || return 1
-    ! ceph osd erasure-code-profile rm $profile > $dir/out 2>&1 || return 1
+    ! ceph osd erasure-code-profile rm $profile >$dir/out 2>&1 || return 1
     grep "poolname.*using.*$profile" $dir/out || return 1
     ceph osd pool delete poolname poolname --yes-i-really-really-mean-it || return 1
     ceph osd erasure-code-profile rm $profile || return 1
@@ -114,11 +114,11 @@ function TEST_get() {
     run_mon $dir a || return 1
 
     local default_profile=default
-    ceph osd erasure-code-profile get $default_profile | \
+    ceph osd erasure-code-profile get $default_profile |
         grep plugin=jerasure || return 1
-    ceph --format xml osd erasure-code-profile get $default_profile | \
+    ceph --format xml osd erasure-code-profile get $default_profile |
         grep '<plugin>jerasure</plugin>' || return 1
-    ! ceph osd erasure-code-profile get WRONG > $dir/out 2>&1 || return 1
+    ! ceph osd erasure-code-profile get WRONG >$dir/out 2>&1 || return 1
     grep -q "unknown erasure code profile 'WRONG'" $dir/out || return 1
 }
 
@@ -165,7 +165,7 @@ function TEST_format_invalid() {
     # valid JSON but not of the expected type
     run_mon $dir a \
         --osd_pool_default_erasure-code-profile 1 || return 1
-    ! ceph osd erasure-code-profile set $profile > $dir/out 2>&1 || return 1
+    ! ceph osd erasure-code-profile set $profile >$dir/out 2>&1 || return 1
     cat $dir/out
     grep 'must be a JSON object' $dir/out || return 1
 }
@@ -177,7 +177,7 @@ function TEST_format_json() {
     expected='"plugin":"isa"'
     run_mon $dir a \
         --osd_pool_default_erasure-code-profile "{$expected}" || return 1
-    ceph --format json osd erasure-code-profile get default | \
+    ceph --format json osd erasure-code-profile get default |
         grep "$expected" || return 1
 }
 
@@ -188,7 +188,7 @@ function TEST_format_plain() {
     expected='"plugin":"isa"'
     run_mon $dir a \
         --osd_pool_default_erasure-code-profile "plugin=isa" || return 1
-    ceph --format json osd erasure-code-profile get default | \
+    ceph --format json osd erasure-code-profile get default |
         grep "$expected" || return 1
 }
 
@@ -205,7 +205,7 @@ function TEST_profile_k_sanity() {
         k=1 \
         m=1 || return 1
 
-    if erasure_code_plugin_exists isa ; then
+    if erasure_code_plugin_exists isa; then
         expect_failure $dir 'k=1 must be >= 2' \
             ceph osd erasure-code-profile set $profile \
             plugin=isa \

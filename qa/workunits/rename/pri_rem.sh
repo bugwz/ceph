@@ -13,7 +13,6 @@ dotest() {
     mv ./$src/src$n ./$destdn/destdn$n
 }
 
-
 # srcdn=destdn=desti
 dotest 'a' 'a' 'a' 1
 
@@ -28,4 +27,3 @@ dotest 'a' 'a' 'b' 4
 
 # all different
 dotest 'a' 'b' 'c' 5
-

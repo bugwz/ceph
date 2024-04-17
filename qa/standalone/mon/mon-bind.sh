@@ -21,7 +21,7 @@ function port_forward() {
     local target_port=$2
 
     socat TCP-LISTEN:${source_port},fork,reuseaddr TCP:localhost:${target_port} &
-    SOCAT_PIDS+=( $! )
+    SOCAT_PIDS+=($!)
 }
 
 function cleanup() {
@@ -48,9 +48,12 @@ function run() {
     CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
-        $func $dir && cleanup || { cleanup; return 1; }
+        $func $dir && cleanup || {
+            cleanup
+            return 1
+        }
         teardown $dir
     done
 }
@@ -134,7 +137,7 @@ function TEST_put_get() {
 
     create_pool hello 8 || return 1
 
-    echo "hello world" > $dir/hello
+    echo "hello world" >$dir/hello
     rados --pool hello put foo $dir/hello || return 1
     rados --pool hello get foo $dir/hello2 || return 1
     diff $dir/hello $dir/hello2 || return 1

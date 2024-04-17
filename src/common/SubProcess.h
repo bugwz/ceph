@@ -24,10 +24,10 @@
 #ifndef _WIN32
 #include <sys/wait.h>
 #endif
+#include "include/compat.h"
+
 #include <sstream>
 #include <vector>
-
-#include "include/compat.h"
 
 /**
  * SubProcess:
@@ -49,87 +49,87 @@
  *   }
  */
 
-class SubProcess {
+class SubProcess
+{
 public:
-  enum std_fd_op{
-    KEEP,
-    CLOSE,
-    PIPE
-  };
+    enum std_fd_op
+    {
+        KEEP,
+        CLOSE,
+        PIPE
+    };
+
 public:
-  SubProcess(const char *cmd,
-             std_fd_op stdin_op = CLOSE,
-             std_fd_op stdout_op = CLOSE,
-             std_fd_op stderr_op = CLOSE);
-  virtual ~SubProcess();
+    SubProcess(const char* cmd, std_fd_op stdin_op = CLOSE, std_fd_op stdout_op = CLOSE, std_fd_op stderr_op = CLOSE);
+    virtual ~SubProcess();
 
-  void add_cmd_args(const char *arg, ...);
-  void add_cmd_arg(const char *arg);
+    void add_cmd_args(const char* arg, ...);
+    void add_cmd_arg(const char* arg);
 
-  virtual int spawn(); // Returns 0 on success or -errno on failure.
-  virtual int join();  // Returns exit code (0 on success).
+    virtual int spawn();   // Returns 0 on success or -errno on failure.
+    virtual int join();    // Returns exit code (0 on success).
 
-  bool is_spawned() const { return pid > 0; }
+    bool is_spawned() const { return pid > 0; }
 
-  int get_stdin() const;
-  int get_stdout() const;
-  int get_stderr() const;
+    int get_stdin() const;
+    int get_stdout() const;
+    int get_stderr() const;
 
-  void close_stdin();
-  void close_stdout();
-  void close_stderr();
+    void close_stdin();
+    void close_stdout();
+    void close_stderr();
 
-  void kill(int signo = SIGTERM) const;
+    void kill(int signo = SIGTERM) const;
 
-  const std::string err() const;
+    const std::string err() const;
 
 protected:
-  bool is_child() const { return pid == 0; }
-  virtual void exec();
+    bool is_child() const { return pid == 0; }
+    virtual void exec();
 
-  void close(int &fd);
+    void close(int& fd);
 
 #ifdef _WIN32
-  void close_h(HANDLE &handle);
+    void close_h(HANDLE& handle);
 #endif
 
 protected:
-  std::string cmd;
-  std::vector<std::string> cmd_args;
-  std_fd_op stdin_op;
-  std_fd_op stdout_op;
-  std_fd_op stderr_op;
-  int stdin_pipe_out_fd;
-  int stdout_pipe_in_fd;
-  int stderr_pipe_in_fd;
-  int pid;
-  std::ostringstream errstr;
+    std::string cmd;
+    std::vector<std::string> cmd_args;
+    std_fd_op stdin_op;
+    std_fd_op stdout_op;
+    std_fd_op stderr_op;
+    int stdin_pipe_out_fd;
+    int stdout_pipe_in_fd;
+    int stderr_pipe_in_fd;
+    int pid;
+    std::ostringstream errstr;
 
 #ifdef _WIN32
-  HANDLE proc_handle = INVALID_HANDLE_VALUE;
+    HANDLE proc_handle = INVALID_HANDLE_VALUE;
 #endif
 };
 
-class SubProcessTimed : public SubProcess {
+class SubProcessTimed : public SubProcess
+{
 public:
-  SubProcessTimed(const char *cmd, std_fd_op stdin_op = CLOSE,
-		  std_fd_op stdout_op = CLOSE, std_fd_op stderr_op = CLOSE,
-		  int timeout = 0, int sigkill = SIGKILL);
+    SubProcessTimed(const char* cmd, std_fd_op stdin_op = CLOSE, std_fd_op stdout_op = CLOSE,
+                    std_fd_op stderr_op = CLOSE, int timeout = 0, int sigkill = SIGKILL);
 
 #ifdef _WIN32
-  int spawn() override;
-  int join() override;
+    int spawn() override;
+    int join() override;
 #endif
 
 protected:
-  void exec() override;
+    void exec() override;
 
 private:
-  int timeout;
-  int sigkill;
+    int timeout;
+    int sigkill;
 
 #ifdef _WIN32
-  std::thread waiter;
+    std::thread waiter;
 #endif
 };
 

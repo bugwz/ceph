@@ -19,9 +19,9 @@
 #ifndef WIN32_ERRNO_H
 #define WIN32_ERRNO_H 1
 
-#include <errno.h>
-
 #include "include/int_types.h"
+
+#include <errno.h>
 
 #ifndef EBADMSG
 #define EBADMSG 104
@@ -55,75 +55,75 @@
 #define ENODATA 120
 #endif
 
-#define ESTALE 256
+#define ESTALE    256
 #define EREMOTEIO 257
 
 #ifndef EBADE
 #define EBADE 258
 #endif
 
-#define EUCLEAN 259
-#define EREMCHG 260
+#define EUCLEAN      259
+#define EREMCHG      260
 #define EKEYREJECTED 261
-#define EREMOTE 262
+#define EREMOTE      262
 
 // Not used at moment. Full coverage ensures that remote errors will be
 // converted and handled properly.
-#define EADV 263
-#define EBADFD 264
-#define EBADR 265
-#define EBADRQC 266
-#define EBADSLT 267
-#define EBFONT 268
-#define ECHRNG 269
-#define ECOMM 270
-#define EDOTDOT 271
+#define EADV      263
+#define EBADFD    264
+#define EBADR     265
+#define EBADRQC   266
+#define EBADSLT   267
+#define EBFONT    268
+#define ECHRNG    269
+#define ECOMM     270
+#define EDOTDOT   271
 #define EHOSTDOWN 272
 #define EHWPOISON 273
 // Defined by Boost.
 #ifndef EIDRM
 #define EIDRM 274
 #endif
-#define EISNAM 275
+#define EISNAM      275
 #define EKEYEXPIRED 276
 #define EKEYREVOKED 277
-#define EL2HLT 278
-#define EL2NSYNC 279
-#define EL3HLT 280
-#define EL3RST 281
-#define ELIBACC 282
-#define ELIBBAD 283
-#define ELIBEXEC 284
-#define ELIBMAX 285
-#define ELIBSCN 286
-#define ELNRNG 287
+#define EL2HLT      278
+#define EL2NSYNC    279
+#define EL3HLT      280
+#define EL3RST      281
+#define ELIBACC     282
+#define ELIBBAD     283
+#define ELIBEXEC    284
+#define ELIBMAX     285
+#define ELIBSCN     286
+#define ELNRNG      287
 #define EMEDIUMTYPE 288
-#define EMULTIHOP 289
-#define ENAVAIL 290
-#define ENOANO 291
-#define ENOCSI 292
-#define ENOKEY 293
-#define ENOMEDIUM 294
-#define ENONET 295
-#define ENOPKG 296
+#define EMULTIHOP   289
+#define ENAVAIL     290
+#define ENOANO      291
+#define ENOCSI      292
+#define ENOKEY      293
+#define ENOMEDIUM   294
+#define ENONET      295
+#define ENOPKG      296
 #ifndef ENOSR
 #define ENOSR 297
 #endif
 #ifndef ENOSTR
 #define ENOSTR 298
 #endif
-#define ENOTNAM 299
-#define ENOTUNIQ 300
-#define EPFNOSUPPORT 301
-#define ERFKILL 302
+#define ENOTNAM         299
+#define ENOTUNIQ        300
+#define EPFNOSUPPORT    301
+#define ERFKILL         302
 #define ESOCKTNOSUPPORT 303
-#define ESRMNT 304
-#define ESTRPIPE 305
-#define ETOOMANYREFS 306
-#define EUNATCH 307
-#define EUSERS 308
-#define EXFULL 309
-#define ENOTBLK 310
+#define ESRMNT          304
+#define ESTRPIPE        305
+#define ETOOMANYREFS    306
+#define EUNATCH         307
+#define EUSERS          308
+#define EXFULL          309
+#define ENOTBLK         310
 
 #ifndef EDQUOT
 #define EDQUOT 311
@@ -143,4 +143,4 @@ __u32 cephfs_errno_to_ntstatus_map(int cephfs_errno);
 }
 #endif
 
-#endif // WIN32_ERRNO_H
+#endif   // WIN32_ERRNO_H

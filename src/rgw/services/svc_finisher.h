@@ -10,35 +10,39 @@ class Finisher;
 
 class RGWSI_Finisher : public RGWServiceInstance
 {
-  friend struct RGWServices_Def;
+    friend struct RGWServices_Def;
+
 public:
-  class ShutdownCB;
+    class ShutdownCB;
 
 private:
-  Finisher *finisher{nullptr};
-  bool finalized{false};
+    Finisher* finisher{nullptr};
+    bool finalized{false};
 
-  void shutdown() override;
+    void shutdown() override;
 
-  std::map<int, ShutdownCB *> shutdown_cbs;
-  std::atomic<int> handles_counter{0};
+    std::map<int, ShutdownCB*> shutdown_cbs;
+    std::atomic<int> handles_counter{0};
 
 protected:
-  void init() {}
-  int do_start(optional_yield y, const DoutPrefixProvider *dpp) override;
+    void init() {}
+    int do_start(optional_yield y, const DoutPrefixProvider* dpp) override;
 
 public:
-  RGWSI_Finisher(CephContext *cct): RGWServiceInstance(cct) {}
-  ~RGWSI_Finisher();
+    RGWSI_Finisher(CephContext* cct)
+        : RGWServiceInstance(cct)
+    {}
+    ~RGWSI_Finisher();
 
-  class ShutdownCB {
-  public:
-      virtual ~ShutdownCB() {}
-      virtual void call() = 0;
-  };
+    class ShutdownCB
+    {
+    public:
+        virtual ~ShutdownCB() {}
+        virtual void call() = 0;
+    };
 
-  void register_caller(ShutdownCB *cb, int *phandle);
-  void unregister_caller(int handle);
+    void register_caller(ShutdownCB* cb, int* phandle);
+    void unregister_caller(int handle);
 
-  void schedule_context(Context *c);
+    void schedule_context(Context* c);
 };

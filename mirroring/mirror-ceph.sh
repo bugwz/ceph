@@ -17,7 +17,7 @@ SOURCES[au]="au.ceph.com"
 SOURCES[us]="download.ceph.com"
 SOURCES[fr]="fr.ceph.com"
 SOURCES[ca]="ca.ceph.com"
-SOURCES[us-west]="us-west.ceph.com"
+SOURCES[us - west]="us-west.ceph.com"
 SOURCES[global]="download.ceph.com"
 
 function print_usage() {
@@ -26,22 +26,22 @@ function print_usage() {
 
 while getopts ":qhs:t:" opt; do
     case $opt in
-        q)
-            SILENT=1
-            ;;
-        s)
-            SOURCE=$OPTARG
-            ;;
-        t)
-            TARGET=$OPTARG
-            ;;
-        h)
-            HELP=1
-            ;;
-        \?)
-            print_usage
-            exit 1
-            ;;
+    q)
+        SILENT=1
+        ;;
+    s)
+        SOURCE=$OPTARG
+        ;;
+    t)
+        TARGET=$OPTARG
+        ;;
+    h)
+        HELP=1
+        ;;
+    \?)
+        print_usage
+        exit 1
+        ;;
     esac
 done
 
@@ -84,17 +84,17 @@ fi
 
 # Exclude all metadata files
 rsync ${RSYNC_OPTS} ${SOURCE_HOST}::ceph --recursive --times --links \
-                                         --hard-links \
-                                         --exclude Packages* \
-                                         --exclude Sources* \
-                                         --exclude Release* \
-                                         --exclude InRelease \
-                                         --exclude i18n/* \
-                                         --exclude ls-lR* \
-                                         --exclude repodata/* \
-                                         ${TARGET}
+    --hard-links \
+    --exclude Packages* \
+    --exclude Sources* \
+    --exclude Release* \
+    --exclude InRelease \
+    --exclude i18n/* \
+    --exclude ls-lR* \
+    --exclude repodata/* \
+    ${TARGET}
 
 # Now also transfer the metadata and delete afterwards
 rsync ${RSYNC_OPTS} ${SOURCE_HOST}::ceph --recursive --times --links \
-                                         --hard-links --delete-after \
-                                         ${TARGET}
+    --hard-links --delete-after \
+    ${TARGET}

@@ -7,18 +7,18 @@
 #endif
 
 namespace TOPNSPC::common {
-  class CephContext;
-  class PerfCounters;
-  class PerfCountersBuilder;
-  class PerfCountersCollection;
-  class PerfCountersCollectionImpl;
-  class PerfGuard;
-  class RefCountedObject;
-  class RefCountedObjectSafe;
-  class RefCountedCond;
-  class RefCountedWaitObject;
-  class ConfigProxy;
-}
+class CephContext;
+class PerfCounters;
+class PerfCountersBuilder;
+class PerfCountersCollection;
+class PerfCountersCollectionImpl;
+class PerfGuard;
+class RefCountedObject;
+class RefCountedObjectSafe;
+class RefCountedCond;
+class RefCountedWaitObject;
+class ConfigProxy;
+}   // namespace TOPNSPC::common
 using TOPNSPC::common::CephContext;
 using TOPNSPC::common::PerfCounters;
 using TOPNSPC::common::PerfCountersBuilder;

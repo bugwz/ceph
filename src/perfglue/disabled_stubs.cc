@@ -15,11 +15,10 @@
 #include "common/LogClient.h"
 #include "perfglue/cpu_profiler.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
-void cpu_profiler_handle_command(const std::vector<std::string> &cmd,
-				 std::ostream& out)
+void cpu_profiler_handle_command(const std::vector<std::string>& cmd, std::ostream& out)
 {
-  out << "cpu_profiler support not linked in";
+    out << "cpu_profiler support not linked in";
 }

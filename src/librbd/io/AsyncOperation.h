@@ -6,6 +6,7 @@
 
 #include "include/ceph_assert.h"
 #include "include/xlist.h"
+
 #include <list>
 
 class Context;
@@ -16,37 +17,30 @@ class ImageCtx;
 
 namespace io {
 
-class AsyncOperation {
+class AsyncOperation
+{
 public:
+    AsyncOperation()
+        : m_image_ctx(NULL)
+        , m_xlist_item(this)
+    {}
 
-  AsyncOperation()
-    : m_image_ctx(NULL), m_xlist_item(this)
-  {
-  }
+    ~AsyncOperation() { ceph_assert(!m_xlist_item.is_on_list()); }
 
-  ~AsyncOperation()
-  {
-    ceph_assert(!m_xlist_item.is_on_list());
-  }
+    inline bool started() const { return m_xlist_item.is_on_list(); }
 
-  inline bool started() const {
-    return m_xlist_item.is_on_list();
-  }
+    void start_op(ImageCtx& image_ctx);
+    void finish_op();
 
-  void start_op(ImageCtx &image_ctx);
-  void finish_op();
-
-  void flush(Context *on_finish);
+    void flush(Context* on_finish);
 
 private:
-
-  ImageCtx *m_image_ctx;
-  xlist<AsyncOperation *>::item m_xlist_item;
-  std::list<Context *> m_flush_contexts;
-
+    ImageCtx* m_image_ctx;
+    xlist<AsyncOperation*>::item m_xlist_item;
+    std::list<Context*> m_flush_contexts;
 };
 
-} // namespace io
-} // namespace librbd
+}   // namespace io
+}   // namespace librbd
 
-#endif // LIBRBD_IO_ASYNC_OPERATION_H
+#endif   // LIBRBD_IO_ASYNC_OPERATION_H

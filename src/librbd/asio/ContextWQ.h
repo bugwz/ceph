@@ -4,49 +4,51 @@
 #ifndef CEPH_LIBRBD_ASIO_CONTEXT_WQ_H
 #define CEPH_LIBRBD_ASIO_CONTEXT_WQ_H
 
-#include "include/common_fwd.h"
 #include "include/Context.h"
+#include "include/common_fwd.h"
+
 #include <atomic>
-#include <memory>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/io_context_strand.hpp>
 #include <boost/asio/post.hpp>
+#include <memory>
 
 namespace librbd {
 namespace asio {
 
-class ContextWQ {
+class ContextWQ
+{
 public:
-  explicit ContextWQ(CephContext* cct, boost::asio::io_context& io_context);
-  ~ContextWQ();
+    explicit ContextWQ(CephContext* cct, boost::asio::io_context& io_context);
+    ~ContextWQ();
 
-  void drain();
+    void drain();
 
-  void queue(Context *ctx, int r = 0) {
-    ++m_queued_ops;
+    void queue(Context* ctx, int r = 0)
+    {
+        ++m_queued_ops;
 
-    // ensure all legacy ContextWQ users are dispatched sequentially for
-    // backwards compatibility (i.e. might not be concurrent thread-safe)
-    boost::asio::post(*m_strand, [this, ctx, r]() {
-      ctx->complete(r);
+        // ensure all legacy ContextWQ users are dispatched sequentially for
+        // backwards compatibility (i.e. might not be concurrent thread-safe)
+        boost::asio::post(*m_strand, [this, ctx, r]() {
+            ctx->complete(r);
 
-      ceph_assert(m_queued_ops > 0);
-      --m_queued_ops;
-    });
-  }
+            ceph_assert(m_queued_ops > 0);
+            --m_queued_ops;
+        });
+    }
 
 private:
-  CephContext* m_cct;
-  boost::asio::io_context& m_io_context;
-  std::unique_ptr<boost::asio::io_context::strand> m_strand;
+    CephContext* m_cct;
+    boost::asio::io_context& m_io_context;
+    std::unique_ptr<boost::asio::io_context::strand> m_strand;
 
-  std::atomic<uint64_t> m_queued_ops;
+    std::atomic<uint64_t> m_queued_ops;
 
-  void drain_handler(Context* ctx);
-
+    void drain_handler(Context* ctx);
 };
 
-} // namespace asio
-} // namespace librbd
+}   // namespace asio
+}   // namespace librbd
 
-#endif // CEPH_LIBRBD_ASIO_CONTEXT_WQ_H
+#endif   // CEPH_LIBRBD_ASIO_CONTEXT_WQ_H

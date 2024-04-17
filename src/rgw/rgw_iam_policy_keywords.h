@@ -6,56 +6,92 @@
 namespace rgw {
 namespace IAM {
 
-enum class TokenKind {
-  pseudo, top, statement, cond_op, cond_key, version_key, effect_key,
-  princ_type
+enum class TokenKind
+{
+    pseudo,
+    top,
+    statement,
+    cond_op,
+    cond_key,
+    version_key,
+    effect_key,
+    princ_type
 };
 
-enum class TokenID {
-  /// Pseudo-token
-  Top,
+enum class TokenID
+{
+    /// Pseudo-token
+    Top,
 
-  /// Top-level tokens
-  Version, Id, Statement,
+    /// Top-level tokens
+    Version,
+    Id,
+    Statement,
 
-  /// Statement level tokens
-  Sid, Effect, Principal, NotPrincipal, Action, NotAction,
-  Resource, NotResource, Condition,
+    /// Statement level tokens
+    Sid,
+    Effect,
+    Principal,
+    NotPrincipal,
+    Action,
+    NotAction,
+    Resource,
+    NotResource,
+    Condition,
 
-  /// Condition Operators!
-  /// Any of these, except Null, can have an IfExists variant.
+    /// Condition Operators!
+    /// Any of these, except Null, can have an IfExists variant.
 
-  // String!
-  StringEquals, StringNotEquals, StringEqualsIgnoreCase,
-  StringNotEqualsIgnoreCase, StringLike, StringNotLike,
-  ForAllValuesStringEquals, ForAnyValueStringEquals,
-  ForAllValuesStringLike, ForAnyValueStringLike,
-  ForAllValuesStringEqualsIgnoreCase, ForAnyValueStringEqualsIgnoreCase,
+    // String!
+    StringEquals,
+    StringNotEquals,
+    StringEqualsIgnoreCase,
+    StringNotEqualsIgnoreCase,
+    StringLike,
+    StringNotLike,
+    ForAllValuesStringEquals,
+    ForAnyValueStringEquals,
+    ForAllValuesStringLike,
+    ForAnyValueStringLike,
+    ForAllValuesStringEqualsIgnoreCase,
+    ForAnyValueStringEqualsIgnoreCase,
 
-  // Numeric!
-  NumericEquals, NumericNotEquals, NumericLessThan, NumericLessThanEquals,
-  NumericGreaterThan, NumericGreaterThanEquals,
+    // Numeric!
+    NumericEquals,
+    NumericNotEquals,
+    NumericLessThan,
+    NumericLessThanEquals,
+    NumericGreaterThan,
+    NumericGreaterThanEquals,
 
-  // Date!
-  DateEquals, DateNotEquals, DateLessThan, DateLessThanEquals,
-  DateGreaterThan, DateGreaterThanEquals,
+    // Date!
+    DateEquals,
+    DateNotEquals,
+    DateLessThan,
+    DateLessThanEquals,
+    DateGreaterThan,
+    DateGreaterThanEquals,
 
-  // Bool!
-  Bool,
+    // Bool!
+    Bool,
 
-  // Binary!
-  BinaryEquals,
+    // Binary!
+    BinaryEquals,
 
-  // IP Address!
-  IpAddress, NotIpAddress,
+    // IP Address!
+    IpAddress,
+    NotIpAddress,
 
-  // Amazon Resource Names! (Does S3 need this?)
-  ArnEquals, ArnNotEquals, ArnLike, ArnNotLike,
+    // Amazon Resource Names! (Does S3 need this?)
+    ArnEquals,
+    ArnNotEquals,
+    ArnLike,
+    ArnNotLike,
 
-  // Null!
-  Null,
+    // Null!
+    Null,
 
-#if 0 // Keys are done at runtime now
+#if 0   // Keys are done at runtime now
 
       /// Condition Keys!
   awsCurrentTime,
@@ -90,50 +126,53 @@ enum class TokenID {
   s3signatureAge,
   s3x_amz_content_sha256,
 #else
-  CondKey,
+    CondKey,
 #endif
 
-  ///
-  /// Versions!
-  ///
-  v2008_10_17,
-  v2012_10_17,
+    ///
+    /// Versions!
+    ///
+    v2008_10_17,
+    v2012_10_17,
 
-  ///
-  /// Effects!
-  ///
-  Allow,
-  Deny,
+    ///
+    /// Effects!
+    ///
+    Allow,
+    Deny,
 
-  /// Principal Types!
-  AWS,
-  Federated,
-  Service,
-  CanonicalUser
+    /// Principal Types!
+    AWS,
+    Federated,
+    Service,
+    CanonicalUser
 };
 
 
-enum class Version {
-  v2008_10_17,
-  v2012_10_17
+enum class Version
+{
+    v2008_10_17,
+    v2012_10_17
 };
 
 
-enum class Effect {
-  Allow,
-  Deny,
-  Pass
+enum class Effect
+{
+    Allow,
+    Deny,
+    Pass
 };
 
-enum class Type {
-  string,
-  number,
-  date,
-  boolean,
-  binary,
-  ipaddr,
-  arn,
-  null
+enum class Type
+{
+    string,
+    number,
+    date,
+    boolean,
+    binary,
+    ipaddr,
+    arn,
+    null
 };
-}
-}
+}   // namespace IAM
+}   // namespace rgw

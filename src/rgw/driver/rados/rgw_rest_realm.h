@@ -5,12 +5,11 @@
 
 #include "rgw_rest.h"
 
-class RGWRESTMgr_Realm : public RGWRESTMgr {
+class RGWRESTMgr_Realm : public RGWRESTMgr
+{
 public:
-  RGWRESTMgr_Realm();
+    RGWRESTMgr_Realm();
 
-  RGWHandler_REST* get_handler(rgw::sal::Driver* driver,
-			       req_state*,
-                               const rgw::auth::StrategyRegistry& auth_registry,
-                               const std::string&) override;
+    RGWHandler_REST* get_handler(rgw::sal::Driver* driver, req_state*, const rgw::auth::StrategyRegistry& auth_registry,
+                                 const std::string&) override;
 };

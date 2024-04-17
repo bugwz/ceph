@@ -66,42 +66,43 @@ namespace btree {
 // instead specify a custom allocator `A` (which in turn requires specifying a
 // custom comparator `C`) as in `btree::btree_map<K, V, C, A>`.
 //
-template <typename Key, typename Value, typename Compare = std::less<Key>,
-          typename Alloc = std::allocator<std::pair<const Key, Value>>>
-class btree_map
-    : public internal::btree_map_container<
-          internal::btree<internal::map_params<
-              Key, Value, Compare, Alloc, /*TargetNodeSize=*/256,
-              /*Multi=*/false>>> {
+template<typename Key, typename Value, typename Compare = std::less<Key>,
+         typename Alloc = std::allocator<std::pair<const Key, Value>>>
+class btree_map : public internal::btree_map_container<
+                      internal::btree<internal::map_params<Key, Value, Compare, Alloc, /*TargetNodeSize=*/256,
+                                                           /*Multi=*/false>>>
+{
 
-  using Base = typename btree_map::btree_map_container;
+    using Base = typename btree_map::btree_map_container;
 
- public:
-  // Default constructor.
-  btree_map() = default;
-  using Base::Base;
+public:
+    // Default constructor.
+    btree_map() = default;
+    using Base::Base;
 };
 
 // btree::swap(btree::btree_map<>, btree::btree_map<>)
 //
 // Swaps the contents of two `btree::btree_map` containers.
-template <typename K, typename V, typename C, typename A>
-void swap(btree_map<K, V, C, A> &x, btree_map<K, V, C, A> &y) {
-  return x.swap(y);
+template<typename K, typename V, typename C, typename A> void swap(btree_map<K, V, C, A>& x, btree_map<K, V, C, A>& y)
+{
+    return x.swap(y);
 }
 
 // btree::erase_if(btree::btree_map<>, Pred)
 //
 // Erases all elements that satisfy the predicate pred from the container.
-template <typename K, typename V, typename C, typename A, typename Pred>
-void erase_if(btree_map<K, V, C, A> &map, Pred pred) {
-  for (auto it = map.begin(); it != map.end();) {
-    if (pred(*it)) {
-      it = map.erase(it);
-    } else {
-      ++it;
+template<typename K, typename V, typename C, typename A, typename Pred>
+void erase_if(btree_map<K, V, C, A>& map, Pred pred)
+{
+    for (auto it = map.begin(); it != map.end();) {
+        if (pred(*it)) {
+            it = map.erase(it);
+        }
+        else {
+            ++it;
+        }
     }
-  }
 }
 
 // btree::btree_multimap
@@ -120,40 +121,42 @@ void erase_if(btree_map<K, V, C, A> &map, Pred pred) {
 // instead specify a custom allocator `A` (which in turn requires specifying a
 // custom comparator `C`) as in `btree::btree_multimap<K, V, C, A>`.
 //
-template <typename Key, typename Value, typename Compare = std::less<Key>,
-          typename Alloc = std::allocator<std::pair<const Key, Value>>>
-class btree_multimap
-    : public internal::btree_multimap_container<
-          internal::btree<internal::map_params<
-              Key, Value, Compare, Alloc, /*TargetNodeSize=*/256,
-              /*Multi=*/true>>> {
-  using Base = typename btree_multimap::btree_multimap_container;
+template<typename Key, typename Value, typename Compare = std::less<Key>,
+         typename Alloc = std::allocator<std::pair<const Key, Value>>>
+class btree_multimap : public internal::btree_multimap_container<
+                           internal::btree<internal::map_params<Key, Value, Compare, Alloc, /*TargetNodeSize=*/256,
+                                                                /*Multi=*/true>>>
+{
+    using Base = typename btree_multimap::btree_multimap_container;
 
- public:
-  btree_multimap() = default;
-  using Base::Base;
+public:
+    btree_multimap() = default;
+    using Base::Base;
 };
 
 // btree::swap(btree::btree_multimap<>, btree::btree_multimap<>)
 //
 // Swaps the contents of two `btree::btree_multimap` containers.
-template <typename K, typename V, typename C, typename A>
-void swap(btree_multimap<K, V, C, A> &x, btree_multimap<K, V, C, A> &y) {
-  return x.swap(y);
+template<typename K, typename V, typename C, typename A>
+void swap(btree_multimap<K, V, C, A>& x, btree_multimap<K, V, C, A>& y)
+{
+    return x.swap(y);
 }
 
 // btree::erase_if(btree::btree_multimap<>, Pred)
 //
 // Erases all elements that satisfy the predicate pred from the container.
-template <typename K, typename V, typename C, typename A, typename Pred>
-void erase_if(btree_multimap<K, V, C, A> &map, Pred pred) {
-  for (auto it = map.begin(); it != map.end();) {
-    if (pred(*it)) {
-      it = map.erase(it);
-    } else {
-      ++it;
+template<typename K, typename V, typename C, typename A, typename Pred>
+void erase_if(btree_multimap<K, V, C, A>& map, Pred pred)
+{
+    for (auto it = map.begin(); it != map.end();) {
+        if (pred(*it)) {
+            it = map.erase(it);
+        }
+        else {
+            ++it;
+        }
     }
-  }
 }
 
-} // namespace btree
+}   // namespace btree

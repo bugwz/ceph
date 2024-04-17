@@ -42,68 +42,86 @@
 
 class Packet;
 class ethernet_address;
-using resolution_cb = std::function<void (const ethernet_address&, Packet, int)>;
+using resolution_cb = std::function<void(const ethernet_address&, Packet, int)>;
 
-struct ipv4_addr {
-  uint32_t ip;
-  uint16_t port;
+struct ipv4_addr
+{
+    uint32_t ip;
+    uint16_t port;
 
-  ipv4_addr() : ip(0), port(0) {}
-  ipv4_addr(uint32_t ip, uint16_t port) : ip(ip), port(port) {}
-  ipv4_addr(uint16_t port) : ip(0), port(port) {}
-  ipv4_addr(const std::string &addr);
-  ipv4_addr(const std::string &addr, uint16_t port);
+    ipv4_addr()
+        : ip(0)
+        , port(0)
+    {}
+    ipv4_addr(uint32_t ip, uint16_t port)
+        : ip(ip)
+        , port(port)
+    {}
+    ipv4_addr(uint16_t port)
+        : ip(0)
+        , port(port)
+    {}
+    ipv4_addr(const std::string& addr);
+    ipv4_addr(const std::string& addr, uint16_t port);
 
-  ipv4_addr(const entity_addr_t &ad) {
-    ip = ntoh(ad.in4_addr().sin_addr.s_addr);
-    port = ad.get_port();
-  }
+    ipv4_addr(const entity_addr_t& ad)
+    {
+        ip = ntoh(ad.in4_addr().sin_addr.s_addr);
+        port = ad.get_port();
+    }
 
-  ipv4_addr(entity_addr_t &&addr) : ipv4_addr(addr) {}
+    ipv4_addr(entity_addr_t&& addr)
+        : ipv4_addr(addr)
+    {}
 };
 
-struct ipv4_address {
-  ipv4_address() : ip(0) {}
-  explicit ipv4_address(uint32_t ip) : ip(ip) {}
-  explicit ipv4_address(const std::string& addr) {
-    ip = static_cast<uint32_t>(boost::asio::ip::address_v4::from_string(addr).to_ulong());
-  }
-  ipv4_address(ipv4_addr addr) {
-    ip = addr.ip;
-  }
+struct ipv4_address
+{
+    ipv4_address()
+        : ip(0)
+    {}
+    explicit ipv4_address(uint32_t ip)
+        : ip(ip)
+    {}
+    explicit ipv4_address(const std::string& addr)
+    {
+        ip = static_cast<uint32_t>(boost::asio::ip::address_v4::from_string(addr).to_ulong());
+    }
+    ipv4_address(ipv4_addr addr) { ip = addr.ip; }
 
-  uint32_t ip;
+    uint32_t ip;
 
-  ipv4_address hton() {
-    ipv4_address addr;
-    addr.ip = ::hton(ip);
-    return addr;
-  }
-  ipv4_address ntoh() {
-    ipv4_address addr;
-    addr.ip = ::ntoh(ip);
-    return addr;
-  }
+    ipv4_address hton()
+    {
+        ipv4_address addr;
+        addr.ip = ::hton(ip);
+        return addr;
+    }
+    ipv4_address ntoh()
+    {
+        ipv4_address addr;
+        addr.ip = ::ntoh(ip);
+        return addr;
+    }
 
-  friend bool operator==(ipv4_address x, ipv4_address y) {
-    return x.ip == y.ip;
-  }
-  friend bool operator!=(ipv4_address x, ipv4_address y) {
-    return x.ip != y.ip;
-  }
+    friend bool operator==(ipv4_address x, ipv4_address y) { return x.ip == y.ip; }
+    friend bool operator!=(ipv4_address x, ipv4_address y) { return x.ip != y.ip; }
 } __attribute__((packed));
 
-static inline bool is_unspecified(ipv4_address addr) { return addr.ip == 0; }
+static inline bool is_unspecified(ipv4_address addr)
+{
+    return addr.ip == 0;
+}
 
 std::ostream& operator<<(std::ostream& os, const ipv4_address& a);
 
 namespace std {
 
-  template <>
-  struct hash<ipv4_address> {
+template<> struct hash<ipv4_address>
+{
     size_t operator()(ipv4_address a) const { return a.ip; }
-  };
+};
 
-}
+}   // namespace std
 
-#endif //CEPH_IP_TYPES_H_H
+#endif   // CEPH_IP_TYPES_H_H

@@ -13,38 +13,40 @@ namespace librbd {
 
 struct ImageCtx;
 
-namespace watcher { class Notifier; }
+namespace watcher {
+class Notifier;
+}
 
 namespace image_watcher {
 
-class NotifyLockOwner {
+class NotifyLockOwner
+{
 public:
-  static NotifyLockOwner *create(ImageCtx &image_ctx,
-                                 watcher::Notifier &notifier,
-                                 bufferlist &&bl, Context *on_finish) {
-    return new NotifyLockOwner(image_ctx, notifier, std::move(bl), on_finish);
-  }
+    static NotifyLockOwner* create(ImageCtx& image_ctx, watcher::Notifier& notifier, bufferlist&& bl,
+                                   Context* on_finish)
+    {
+        return new NotifyLockOwner(image_ctx, notifier, std::move(bl), on_finish);
+    }
 
-  NotifyLockOwner(ImageCtx &image_ctx, watcher::Notifier &notifier,
-                  bufferlist &&bl, Context *on_finish);
+    NotifyLockOwner(ImageCtx& image_ctx, watcher::Notifier& notifier, bufferlist&& bl, Context* on_finish);
 
-  void send();
+    void send();
 
 private:
-  ImageCtx &m_image_ctx;
-  watcher::Notifier &m_notifier;
+    ImageCtx& m_image_ctx;
+    watcher::Notifier& m_notifier;
 
-  bufferlist m_bl;
-  watcher::NotifyResponse m_notify_response;
-  Context *m_on_finish;
+    bufferlist m_bl;
+    watcher::NotifyResponse m_notify_response;
+    Context* m_on_finish;
 
-  void send_notify();
-  void handle_notify(int r);
+    void send_notify();
+    void handle_notify(int r);
 
-  void finish(int r);
+    void finish(int r);
 };
 
-} // namespace image_watcher
-} // namespace librbd
+}   // namespace image_watcher
+}   // namespace librbd
 
-#endif // CEPH_LIBRBD_IMAGE_WATCHER_NOTIFY_LOCK_OWNER_H
+#endif   // CEPH_LIBRBD_IMAGE_WATCHER_NOTIFY_LOCK_OWNER_H

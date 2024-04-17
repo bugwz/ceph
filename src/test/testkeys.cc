@@ -1,29 +1,28 @@
 #include "auth/cephx/CephxKeyServer.h"
 #include "common/ceph_argparse.h"
-#include "global/global_init.h"
 #include "common/config.h"
 #include "common/debug.h"
+#include "global/global_init.h"
 
 #define dout_context g_ceph_context
 
-#define AES_KEY_LEN	16
+#define AES_KEY_LEN 16
 
 using namespace std;
 
-int main(int argc, const char **argv)
+int main(int argc, const char** argv)
 {
-  auto args = argv_to_vec(argc, argv);
+    auto args = argv_to_vec(argc, argv);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
-                         CODE_ENVIRONMENT_UTILITY,
-			 CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
-  common_init_finish(g_ceph_context);
-  KeyRing extra;
-  KeyServer server(g_ceph_context, &extra);
+    auto cct =
+        global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, CINIT_FLAG_NO_DEFAULT_CONFIG_FILE);
+    common_init_finish(g_ceph_context);
+    KeyRing extra;
+    KeyServer server(g_ceph_context, &extra);
 
-  generic_dout(0) << "server created" << dendl;
+    generic_dout(0) << "server created" << dendl;
 
-  getchar();
+    getchar();
 
 #if 0
   char aes_key[AES_KEY_LEN];
@@ -66,4 +65,3 @@ int main(int argc, const char **argv)
   return 0;
 #endif
 }
-

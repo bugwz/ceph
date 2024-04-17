@@ -2,11 +2,11 @@
 set -f
 
 #
-# Generate a libvirt secret on the Openstack node. 
+# Generate a libvirt secret on the Openstack node.
 #
 openstack_node=${1}
-uuid=`uuidgen`
-cat > secret.xml <<EOF
+uuid=$(uuidgen)
+cat >secret.xml <<EOF
 <secret ephemeral='no' private='no'>
   <uuid>${uuid}</uuid>
   <usage type='ceph'>

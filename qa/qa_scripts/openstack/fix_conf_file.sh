@@ -11,13 +11,13 @@ source ./copy_func.sh
 #
 function fix_conf_file() {
     if [[ $# < 3 ]]; then
-        echo 'fix_conf_file: Too few parameters' 
+        echo 'fix_conf_file: Too few parameters'
         exit 1
     fi
     openstack_node_local=${1}
     cp files/${2}.template.conf ${2}.conf
-    hostname=`ssh $openstack_node_local hostname`
-    inet4addr=`ssh $openstack_node_local hostname -i`
+    hostname=$(ssh $openstack_node_local hostname)
+    inet4addr=$(ssh $openstack_node_local hostname -i)
     sed -i s/VARHOSTNAME/$hostname/g ${2}.conf
     sed -i s/VARINET4ADDR/$inet4addr/g ${2}.conf
     if [[ $# == 4 ]]; then

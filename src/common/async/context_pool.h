@@ -16,6 +16,11 @@
 #ifndef CEPH_COMMON_ASYNC_CONTEXT_POOL_H
 #define CEPH_COMMON_ASYNC_CONTEXT_POOL_H
 
+#include "common/Thread.h"
+#include "common/ceph_mutex.h"
+
+#include <boost/asio/executor_work_guard.hpp>
+#include <boost/asio/io_context.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <mutex>
@@ -23,72 +28,58 @@
 #include <thread>
 #include <vector>
 
-#include <boost/asio/io_context.hpp>
-#include <boost/asio/executor_work_guard.hpp>
-
-#include "common/ceph_mutex.h"
-#include "common/Thread.h"
-
 namespace ceph::async {
-class io_context_pool {
-  std::vector<std::thread> threadvec;
-  boost::asio::io_context ioctx;
-  std::optional<boost::asio::executor_work_guard<
-		  boost::asio::io_context::executor_type>> guard;
-  ceph::mutex m = make_mutex("ceph::io_context_pool::m");
+class io_context_pool
+{
+    std::vector<std::thread> threadvec;
+    boost::asio::io_context ioctx;
+    std::optional<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>> guard;
+    ceph::mutex m = make_mutex("ceph::io_context_pool::m");
 
-  void cleanup() noexcept {
-    guard = std::nullopt;
-    for (auto& th : threadvec) {
-      th.join();
+    void cleanup() noexcept
+    {
+        guard = std::nullopt;
+        for (auto& th : threadvec) {
+            th.join();
+        }
+        threadvec.clear();
     }
-    threadvec.clear();
-  }
+
 public:
-  io_context_pool() noexcept {}
-  io_context_pool(std::int16_t threadcnt) noexcept {
-    start(threadcnt);
-  }
-  ~io_context_pool() {
-    stop();
-  }
-  void start(std::int16_t threadcnt) noexcept {
-    auto l = std::scoped_lock(m);
-    if (threadvec.empty()) {
-      guard.emplace(boost::asio::make_work_guard(ioctx));
-      ioctx.restart();
-      for (std::int16_t i = 0; i < threadcnt; ++i) {
-	threadvec.emplace_back(make_named_thread("io_context_pool",
-						 [this]() {
-						   ioctx.run();
-						 }));
-      }
+    io_context_pool() noexcept {}
+    io_context_pool(std::int16_t threadcnt) noexcept { start(threadcnt); }
+    ~io_context_pool() { stop(); }
+    void start(std::int16_t threadcnt) noexcept
+    {
+        auto l = std::scoped_lock(m);
+        if (threadvec.empty()) {
+            guard.emplace(boost::asio::make_work_guard(ioctx));
+            ioctx.restart();
+            for (std::int16_t i = 0; i < threadcnt; ++i) {
+                threadvec.emplace_back(make_named_thread("io_context_pool", [this]() { ioctx.run(); }));
+            }
+        }
     }
-  }
-  void finish() noexcept {
-    auto l = std::scoped_lock(m);
-    if (!threadvec.empty()) {
-      cleanup();
+    void finish() noexcept
+    {
+        auto l = std::scoped_lock(m);
+        if (!threadvec.empty()) {
+            cleanup();
+        }
     }
-  }
-  void stop() noexcept {
-    auto l = std::scoped_lock(m);
-    if (!threadvec.empty()) {
-      ioctx.stop();
-      cleanup();
+    void stop() noexcept
+    {
+        auto l = std::scoped_lock(m);
+        if (!threadvec.empty()) {
+            ioctx.stop();
+            cleanup();
+        }
     }
-  }
 
-  boost::asio::io_context& get_io_context() {
-    return ioctx;
-  }
-  operator boost::asio::io_context&() {
-    return ioctx;
-  }
-  boost::asio::io_context::executor_type get_executor() {
-    return ioctx.get_executor();
-  }
+    boost::asio::io_context& get_io_context() { return ioctx; }
+    operator boost::asio::io_context&() { return ioctx; }
+    boost::asio::io_context::executor_type get_executor() { return ioctx.get_executor(); }
 };
-}
+}   // namespace ceph::async
 
-#endif // CEPH_COMMON_ASYNC_CONTEXT_POOL_H
+#endif   // CEPH_COMMON_ASYNC_CONTEXT_POOL_H

@@ -1,7 +1,7 @@
 #!/bin/sh -ex
 
-cwd=`pwd`
-cat > conf <<EOF
+cwd=$(pwd)
+cat >conf <<EOF
 [mon]
 admin socket = 
 log file = $cwd/\$name.log
@@ -10,7 +10,7 @@ debug ms = 1
 EOF
 
 rm -f mm
-ip=`host \`hostname\` | awk '{print $4}'`
+ip=$(host $(hostname) | awk '{print $4}')
 monmaptool --create mm \
     --add a $ip:6779
 
@@ -31,7 +31,7 @@ ceph-mon -c conf -i d --mon-data $cwd/mon.d --public-network 127.0.0.1/32
 while true; do
     ceph -c conf -k keyring --monmap mm health
     if ceph -c conf -k keyring --monmap mm mon stat | grep 'quorum 0,1'; then
-	break
+        break
     fi
     sleep 1
 done

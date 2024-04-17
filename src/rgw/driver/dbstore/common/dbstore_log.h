@@ -3,13 +3,14 @@
 
 #pragma once
 
-#include <cerrno>
-#include <cstdlib>
-#include <string>
-#include <cstdio>
-#include <iostream>
-#include <fstream>
 #include "common/dout.h"
+
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 #undef dout_prefix
 #define dout_prefix *_dout << "rgw dbstore: "

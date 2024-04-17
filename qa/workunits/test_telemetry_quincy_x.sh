@@ -14,10 +14,9 @@ ceph -s
 COLLECTIONS=$(ceph telemetry collection ls)
 NEW_COLLECTIONS=("perf_perf" "basic_mds_metadata" "basic_pool_usage" "basic_rook_v01" "perf_memory_metrics")
 for col in ${NEW_COLLECTIONS[@]}; do
-    if ! [[ $COLLECTIONS == *$col* ]];
-    then
+    if ! [[ $COLLECTIONS == *$col* ]]; then
         echo "COLLECTIONS does not contain" "'"$col"'."
-	exit 1
+        exit 1
     fi
 done
 

@@ -4,8 +4,9 @@
 #ifndef CEPH_LIBRBD_OBJECT_MAP_REMOVE_REQUEST_H
 #define CEPH_LIBRBD_OBJECT_MAP_REMOVE_REQUEST_H
 
-#include "include/buffer.h"
 #include "common/ceph_mutex.h"
+#include "include/buffer.h"
+
 #include <map>
 #include <string>
 
@@ -17,47 +18,47 @@ class ImageCtx;
 
 namespace object_map {
 
-template <typename ImageCtxT = ImageCtx>
-class RemoveRequest {
+template<typename ImageCtxT = ImageCtx> class RemoveRequest
+{
 public:
-  static RemoveRequest *create(ImageCtxT *image_ctx, Context *on_finish) {
-    return new RemoveRequest(image_ctx, on_finish);
-  }
+    static RemoveRequest* create(ImageCtxT* image_ctx, Context* on_finish)
+    {
+        return new RemoveRequest(image_ctx, on_finish);
+    }
 
-  void send();
+    void send();
 
 private:
-  /**
-   * @verbatim
-   *
-   * <start>
-   *    |          .  .  .
-   *    v          v     .
-   * REMOVE_OBJECT_MAP   . (for every snapshot)
-   *    |          .     .
-   *    v          .  .  .
-   * <finis>
-   *
-   * @endverbatim
-   */
+    /**
+     * @verbatim
+     *
+     * <start>
+     *    |          .  .  .
+     *    v          v     .
+     * REMOVE_OBJECT_MAP   . (for every snapshot)
+     *    |          .     .
+     *    v          .  .  .
+     * <finis>
+     *
+     * @endverbatim
+     */
 
-  RemoveRequest(ImageCtxT *image_ctx, Context *on_finish);
+    RemoveRequest(ImageCtxT* image_ctx, Context* on_finish);
 
-  ImageCtxT *m_image_ctx;
-  Context *m_on_finish;
+    ImageCtxT* m_image_ctx;
+    Context* m_on_finish;
 
-  int m_error_result = 0;
-  int m_ref_counter = 0;
-  mutable ceph::mutex m_lock =
-    ceph::make_mutex("object_map::RemoveRequest::m_lock");
+    int m_error_result = 0;
+    int m_ref_counter = 0;
+    mutable ceph::mutex m_lock = ceph::make_mutex("object_map::RemoveRequest::m_lock");
 
-  void send_remove_object_map();
-  Context *handle_remove_object_map(int *result);
+    void send_remove_object_map();
+    Context* handle_remove_object_map(int* result);
 };
 
-} // namespace object_map
-} // namespace librbd
+}   // namespace object_map
+}   // namespace librbd
 
 extern template class librbd::object_map::RemoveRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_OBJECT_MAP_REMOVE_REQUEST_H
+#endif   // CEPH_LIBRBD_OBJECT_MAP_REMOVE_REQUEST_H

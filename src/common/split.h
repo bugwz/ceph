@@ -20,57 +20,65 @@
 namespace ceph {
 
 // a forward iterator over the parts of a split string
-class spliterator {
-  std::string_view str; // full string
-  std::string_view delims; // delimiters
+class spliterator
+{
+    std::string_view str;      // full string
+    std::string_view delims;   // delimiters
 
-  using size_type = std::string_view::size_type;
-  size_type pos = 0; // start position of current part
-  std::string_view part; // view of current part
+    using size_type = std::string_view::size_type;
+    size_type pos = 0;       // start position of current part
+    std::string_view part;   // view of current part
 
-  // return the next part after the given position
-  std::string_view next(size_type end) {
-    pos = str.find_first_not_of(delims, end);
-    if (pos == str.npos) {
-      return {};
+    // return the next part after the given position
+    std::string_view next(size_type end)
+    {
+        pos = str.find_first_not_of(delims, end);
+        if (pos == str.npos) {
+            return {};
+        }
+        return str.substr(pos, str.find_first_of(delims, pos) - pos);
     }
-    return str.substr(pos, str.find_first_of(delims, pos) - pos);
-  }
- public:
-  // types required by std::iterator_traits
-  using difference_type = int;
-  using value_type = std::string_view;
-  using pointer = const value_type*;
-  using reference = const value_type&;
-  using iterator_category = std::forward_iterator_tag;
 
-  spliterator() = default;
+public:
+    // types required by std::iterator_traits
+    using difference_type = int;
+    using value_type = std::string_view;
+    using pointer = const value_type*;
+    using reference = const value_type&;
+    using iterator_category = std::forward_iterator_tag;
 
-  spliterator(std::string_view str, std::string_view delims)
-    : str(str), delims(delims), pos(0), part(next(0))
-  {}
+    spliterator() = default;
 
-  spliterator& operator++() {
-    part = next(pos + part.size());
-    return *this;
-  }
-  spliterator operator++(int) {
-    spliterator tmp = *this;
-    part = next(pos + part.size());
-    return tmp;
-  }
+    spliterator(std::string_view str, std::string_view delims)
+        : str(str)
+        , delims(delims)
+        , pos(0)
+        , part(next(0))
+    {}
 
-  reference operator*() const { return part; }
-  pointer operator->() const { return &part; }
+    spliterator& operator++()
+    {
+        part = next(pos + part.size());
+        return *this;
+    }
+    spliterator operator++(int)
+    {
+        spliterator tmp = *this;
+        part = next(pos + part.size());
+        return tmp;
+    }
 
-  friend bool operator==(const spliterator& lhs, const spliterator& rhs) {
-    return lhs.part.data() == rhs.part.data()
-        && lhs.part.size() == rhs.part.size();
-  }
-  friend bool operator!=(const spliterator& lhs, const spliterator& rhs) {
-    return lhs.part.data() != rhs.part.data()
-        || lhs.part.size() != rhs.part.size();
-  }
+    reference operator*() const { return part; }
+    pointer operator->() const { return &part; }
+
+    friend bool operator==(const spliterator& lhs, const spliterator& rhs)
+    {
+        return lhs.part.data() == rhs.part.data() && lhs.part.size() == rhs.part.size();
+    }
+    friend bool operator!=(const spliterator& lhs, const spliterator& rhs)
+    {
+        return lhs.part.data() != rhs.part.data() || lhs.part.size() != rhs.part.size();
+    }
 };
 
 // represents an immutable range of split string parts
@@ -87,21 +95,24 @@ class spliterator {
 //   std::vector<std::string> strings;
 //   strings.assign(parts.begin(), parts.end());
 //
-class split {
-  std::string_view str; // full string
-  std::string_view delims; // delimiters
- public:
-  split(std::string_view str, std::string_view delims = ";,= \t\n")
-    : str(str), delims(delims) {}
+class split
+{
+    std::string_view str;      // full string
+    std::string_view delims;   // delimiters
+public:
+    split(std::string_view str, std::string_view delims = ";,= \t\n")
+        : str(str)
+        , delims(delims)
+    {}
 
-  using iterator = spliterator;
-  using const_iterator = spliterator;
+    using iterator = spliterator;
+    using const_iterator = spliterator;
 
-  iterator begin() const { return {str, delims}; }
-  const_iterator cbegin() const { return {str, delims}; }
+    iterator begin() const { return {str, delims}; }
+    const_iterator cbegin() const { return {str, delims}; }
 
-  iterator end() const { return {}; }
-  const_iterator cend() const { return {}; }
+    iterator end() const { return {}; }
+    const_iterator cend() const { return {}; }
 };
 
-} // namespace ceph
+}   // namespace ceph

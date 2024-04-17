@@ -27,5 +27,5 @@ void handle_sigterm(int signum);
 void handle_sigterm(int signum);
 void sighup_handler(int signum);
 
-} // namespace signal
-} // namespace rgw
+}   // namespace signal
+}   // namespace rgw

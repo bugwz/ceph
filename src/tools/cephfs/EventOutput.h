@@ -1,4 +1,4 @@
-// -*- mode:c++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
+// -*- mode:c++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
  * ceph - scalable distributed file system
@@ -24,13 +24,15 @@ class JournalScanner;
  */
 class EventOutput
 {
-  private:
-    JournalScanner const &scan;
+private:
+    JournalScanner const& scan;
     std::string const path;
 
-  public:
-    EventOutput(JournalScanner const &scan_, std::string const &path_)
-      : scan(scan_), path(path_) {}
+public:
+    EventOutput(JournalScanner const& scan_, std::string const& path_)
+        : scan(scan_)
+        , path(path_)
+    {}
 
     void summary() const;
     void list() const;
@@ -38,5 +40,4 @@ class EventOutput
     int binary() const;
 };
 
-#endif // EVENT_OUTPUT_H
-
+#endif   // EVENT_OUTPUT_H

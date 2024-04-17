@@ -3,19 +3,15 @@
 
 #pragma once
 
-#include <seastar/core/future.hh>
-#include <seastar/core/file-types.hh>
-
 #include "include/buffer_fwd.h"
 
+#include <seastar/core/file-types.hh>
+#include <seastar/core/future.hh>
+
 namespace crimson {
-  seastar::future<> write_file(ceph::buffer::list&& bl,
-                               seastar::sstring fn,
-                               seastar::file_permissions= // 0644
-                                 (seastar::file_permissions::user_read |
-                                  seastar::file_permissions::user_write |
-                                  seastar::file_permissions::group_read |
-                                  seastar::file_permissions::others_read));
-  seastar::future<seastar::temporary_buffer<char>>
-  read_file(const seastar::sstring fn);
-}
+seastar::future<> write_file(ceph::buffer::list&& bl, seastar::sstring fn,
+                             seastar::file_permissions =   // 0644
+                             (seastar::file_permissions::user_read | seastar::file_permissions::user_write |
+                              seastar::file_permissions::group_read | seastar::file_permissions::others_read));
+seastar::future<seastar::temporary_buffer<char>> read_file(const seastar::sstring fn);
+}   // namespace crimson

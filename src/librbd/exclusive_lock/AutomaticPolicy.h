@@ -12,23 +12,22 @@ struct ImageCtx;
 
 namespace exclusive_lock {
 
-class AutomaticPolicy : public Policy {
+class AutomaticPolicy : public Policy
+{
 public:
-  AutomaticPolicy(ImageCtx *image_ctx) : m_image_ctx(image_ctx) {
-  }
+    AutomaticPolicy(ImageCtx* image_ctx)
+        : m_image_ctx(image_ctx)
+    {}
 
-  bool may_auto_request_lock() override {
-    return true;
-  }
+    bool may_auto_request_lock() override { return true; }
 
-  int lock_requested(bool force) override;
+    int lock_requested(bool force) override;
 
 private:
-  ImageCtx *m_image_ctx;
-
+    ImageCtx* m_image_ctx;
 };
 
-} // namespace exclusive_lock
-} // namespace librbd
+}   // namespace exclusive_lock
+}   // namespace librbd
 
-#endif // CEPH_LIBRBD_EXCLUSIVE_LOCK_AUTOMATIC_POLICY_H
+#endif   // CEPH_LIBRBD_EXCLUSIVE_LOCK_AUTOMATIC_POLICY_H

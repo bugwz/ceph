@@ -25,7 +25,7 @@ for ((i = 1; i <= ${NUM_IMAGES}; i++)); do
     DEVS[$i]=$(sudo rbd device map ${POOL}/${IMAGE_PREFIX}$i)
     fio --name=fiotest --filename=${DEVS[$i]} --rw=randrw --bs=4K --direct=1 \
         --ioengine=libaio --iodepth=2 --runtime=43200 --time_based \
-        &> /dev/null &
+        &>/dev/null &
 done
 
 # Repeatedly blocklist rbd_support module's client ~10s after the module
@@ -36,11 +36,11 @@ PREV_CLIENT_ADDR=""
 CLIENT_ADDR=""
 while ((CURRENT_TIME <= END_TIME)); do
     if [[ -n "${CLIENT_ADDR}" ]] &&
-       [[ "${CLIENT_ADDR}" != "${PREV_CLIENT_ADDR}" ]]; then
-            ceph osd blocklist add ${CLIENT_ADDR}
-            # Confirm rbd_support module's client is blocklisted
-            ceph osd blocklist ls | grep -q ${CLIENT_ADDR}
-            PREV_CLIENT_ADDR=${CLIENT_ADDR}
+        [[ "${CLIENT_ADDR}" != "${PREV_CLIENT_ADDR}" ]]; then
+        ceph osd blocklist add ${CLIENT_ADDR}
+        # Confirm rbd_support module's client is blocklisted
+        ceph osd blocklist ls | grep -q ${CLIENT_ADDR}
+        PREV_CLIENT_ADDR=${CLIENT_ADDR}
     fi
     sleep 10
     CLIENT_ADDR=$(ceph mgr dump |

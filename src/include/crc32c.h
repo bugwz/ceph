@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-typedef uint32_t (*ceph_crc32c_func_t)(uint32_t crc, unsigned char const *data, unsigned length);
+typedef uint32_t (*ceph_crc32c_func_t)(uint32_t crc, unsigned char const* data, unsigned length);
 
 /*
  * this is a static global with the chosen crc32c implementation for
@@ -20,10 +20,10 @@ extern ceph_crc32c_func_t ceph_choose_crc32(void);
 /**
  * calculate crc32c for data that is entirely 0 (ZERO)
  *
- * Note: works the same as ceph_crc32c_func for data == nullptr, 
+ * Note: works the same as ceph_crc32c_func for data == nullptr,
  * but faster than the optimized assembly on certain architectures.
- * This is faster than intel optimized assembly, but not as fast as 
- * ppc64le optimized assembly.  
+ * This is faster than intel optimized assembly, but not as fast as
+ * ppc64le optimized assembly.
  *
  * @param crc initial value
  * @param length length of buffer
@@ -40,14 +40,13 @@ uint32_t ceph_crc32c_zeros(uint32_t crc, unsigned length);
  * @param data pointer to data buffer
  * @param length length of buffer
  */
-static inline uint32_t ceph_crc32c(uint32_t crc, unsigned char const *data, unsigned length)
+static inline uint32_t ceph_crc32c(uint32_t crc, unsigned char const* data, unsigned length)
 {
 #ifndef HAVE_POWER8
-  if (!data && length > 16)
-    return ceph_crc32c_zeros(crc, length);
+    if (!data && length > 16) return ceph_crc32c_zeros(crc, length);
 #endif /* HAVE_POWER8 */
 
-  return ceph_crc32c_func(crc, data, length);
+    return ceph_crc32c_func(crc, data, length);
 }
 
 #ifdef __cplusplus

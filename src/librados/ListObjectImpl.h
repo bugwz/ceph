@@ -15,45 +15,50 @@
 #ifndef CEPH_LIBRADOS_LISTOBJECTIMPL_H
 #define CEPH_LIBRADOS_LISTOBJECTIMPL_H
 
-#include <string>
 #include <include/rados/librados.hpp>
+#include <string>
 
 namespace librados {
-struct ListObjectImpl {
-  std::string nspace;
-  std::string oid;
-  std::string locator;
+struct ListObjectImpl
+{
+    std::string nspace;
+    std::string oid;
+    std::string locator;
 
-  ListObjectImpl() {}
-  ListObjectImpl(std::string n, std::string o, std::string l):
-      nspace(n), oid(o), locator(l) {}
+    ListObjectImpl() {}
+    ListObjectImpl(std::string n, std::string o, std::string l)
+        : nspace(n)
+        , oid(o)
+        , locator(l)
+    {}
 
-  auto operator<=>(const ListObjectImpl&) const = default;
+    auto operator<=>(const ListObjectImpl&) const = default;
 
-  const std::string& get_nspace() const { return nspace; }
-  const std::string& get_oid() const { return oid; }
-  const std::string& get_locator() const { return locator; }
+    const std::string& get_nspace() const { return nspace; }
+    const std::string& get_oid() const { return oid; }
+    const std::string& get_locator() const { return locator; }
 };
-inline std::ostream& operator<<(std::ostream& out, const struct ListObjectImpl& lop) {
-  out << (lop.nspace.size() ? lop.nspace + "/" : "") << lop.oid
-      << (lop.locator.size() ? "@" + lop.locator : "");
-  return out;
+inline std::ostream& operator<<(std::ostream& out, const struct ListObjectImpl& lop)
+{
+    out << (lop.nspace.size() ? lop.nspace + "/" : "") << lop.oid << (lop.locator.size() ? "@" + lop.locator : "");
+    return out;
 }
 
-class NObjectIteratorImpl {
-  public:
+class NObjectIteratorImpl
+{
+public:
     NObjectIteratorImpl() {}
     ~NObjectIteratorImpl();
-    NObjectIteratorImpl(const NObjectIteratorImpl &rhs);
+    NObjectIteratorImpl(const NObjectIteratorImpl& rhs);
     NObjectIteratorImpl& operator=(const NObjectIteratorImpl& rhs);
 
     bool operator==(const NObjectIteratorImpl& rhs) const;
     bool operator!=(const NObjectIteratorImpl& rhs) const;
     const ListObject& operator*() const;
     const ListObject* operator->() const;
-    NObjectIteratorImpl &operator++(); // Preincrement
-    NObjectIteratorImpl operator++(int); // Postincrement
-    const ListObject *get_listobjectp() { return &cur_obj; }
+    NObjectIteratorImpl& operator++();     // Preincrement
+    NObjectIteratorImpl operator++(int);   // Postincrement
+    const ListObject* get_listobjectp() { return &cur_obj; }
 
     /// get current hash position of the iterator, rounded to the current pg
     uint32_t get_pg_hash_position() const;
@@ -67,13 +72,13 @@ class NObjectIteratorImpl {
     /// get current cursor position
     librados::ObjectCursor get_cursor();
 
-    void set_filter(const bufferlist &bl);
+    void set_filter(const bufferlist& bl);
 
-    NObjectIteratorImpl(ObjListCtx *ctx_);
+    NObjectIteratorImpl(ObjListCtx* ctx_);
     void get_next();
-    std::shared_ptr < ObjListCtx > ctx;
+    std::shared_ptr<ObjListCtx> ctx;
     ListObject cur_obj;
 };
 
-}
+}   // namespace librados
 #endif

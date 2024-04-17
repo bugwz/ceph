@@ -9,18 +9,18 @@ namespace immutable_obj_cache {
 
 class CacheClient;
 
-} // namespace immutable_obj_cache
-} // namespace ceph
+}   // namespace immutable_obj_cache
+}   // namespace ceph
 
 namespace librbd {
 namespace cache {
 
-template <typename ImageCtxT>
-struct TypeTraits {
-  typedef ceph::immutable_obj_cache::CacheClient CacheClient;    
+template<typename ImageCtxT> struct TypeTraits
+{
+    typedef ceph::immutable_obj_cache::CacheClient CacheClient;
 };
 
-} // namespace librbd
-} // namespace cache
+}   // namespace cache
+}   // namespace librbd
 
 #endif

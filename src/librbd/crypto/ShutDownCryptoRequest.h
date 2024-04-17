@@ -14,11 +14,12 @@ class ImageCtx;
 
 namespace crypto {
 
-template <typename I>
-class ShutDownCryptoRequest {
+template<typename I> class ShutDownCryptoRequest
+{
 public:
-    static ShutDownCryptoRequest* create(I* image_ctx, Context* on_finish) {
-      return new ShutDownCryptoRequest(image_ctx, on_finish);
+    static ShutDownCryptoRequest* create(I* image_ctx, Context* on_finish)
+    {
+        return new ShutDownCryptoRequest(image_ctx, on_finish);
     }
 
     ShutDownCryptoRequest(I* image_ctx, Context* on_finish);
@@ -35,9 +36,9 @@ private:
     Context* m_on_finish;
 };
 
-} // namespace crypto
-} // namespace librbd
+}   // namespace crypto
+}   // namespace librbd
 
 extern template class librbd::crypto::ShutDownCryptoRequest<librbd::ImageCtx>;
 
-#endif // CEPH_LIBRBD_CRYPTO_SHUT_DOWN_CRYPTO_REQUEST_H
+#endif   // CEPH_LIBRBD_CRYPTO_SHUT_DOWN_CRYPTO_REQUEST_H

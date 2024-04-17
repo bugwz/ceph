@@ -43,132 +43,144 @@
  * 2) you called immediate(stage) and it is returning true.
  */
 
-class Continuation {
-  std::set<int> stages_in_flight;
-  std::set<int> stages_processing;
-  int rval;
-  Context *on_finish;
-  bool reported_done;
+class Continuation
+{
+    std::set<int> stages_in_flight;
+    std::set<int> stages_processing;
+    int rval;
+    Context* on_finish;
+    bool reported_done;
 
-  class Callback : public Context {
-    Continuation *continuation;
-    int stage_to_activate;
-  public:
-    Callback(Continuation *c, int stage) :
-      continuation(c),
-      stage_to_activate(stage) {}
-    void finish(int r) override {
-      continuation->continue_function(r, stage_to_activate);
-    }
-  };
+    class Callback : public Context
+    {
+        Continuation* continuation;
+        int stage_to_activate;
+
+    public:
+        Callback(Continuation* c, int stage)
+            : continuation(c)
+            , stage_to_activate(stage)
+        {}
+        void finish(int r) override { continuation->continue_function(r, stage_to_activate); }
+    };
 
 protected:
-  typedef bool (Continuation::*stagePtr)(int r);
-  /**
-   * Continue immediately to the given stage. It will be executed
-   * immediately, in the given thread.
-   * @pre You are in a callback function.
-   * @param stage The stage to execute
-   * @param r The return code that will be provided to the next stage
-   */
-  bool immediate(int stage, int r) {
-    ceph_assert(!stages_in_flight.count(stage));
-    ceph_assert(!stages_processing.count(stage));
-    stages_in_flight.insert(stage);
-    stages_processing.insert(stage);
-    return _continue_function(r, stage);
-  }
+    typedef bool (Continuation::*stagePtr)(int r);
+    /**
+     * Continue immediately to the given stage. It will be executed
+     * immediately, in the given thread.
+     * @pre You are in a callback function.
+     * @param stage The stage to execute
+     * @param r The return code that will be provided to the next stage
+     */
+    bool immediate(int stage, int r)
+    {
+        ceph_assert(!stages_in_flight.count(stage));
+        ceph_assert(!stages_processing.count(stage));
+        stages_in_flight.insert(stage);
+        stages_processing.insert(stage);
+        return _continue_function(r, stage);
+    }
 
-  /**
-   * Obtain a Context * that when complete()ed calls back into the given stage.
-   * @pre You are in a callback function.
-   * @param stage The stage this Context should activate
-   */
-  Context *get_callback(int stage) {
-    stages_in_flight.insert(stage);
-    return new Callback(this, stage);
-  }
+    /**
+     * Obtain a Context * that when complete()ed calls back into the given stage.
+     * @pre You are in a callback function.
+     * @param stage The stage this Context should activate
+     */
+    Context* get_callback(int stage)
+    {
+        stages_in_flight.insert(stage);
+        return new Callback(this, stage);
+    }
 
-  /**
-   * Set the return code that is passed to the finally-activated Context.
-   * @param new_rval The return code to use.
-   */
-  void set_rval(int new_rval) { rval = new_rval; }
-  int get_rval() { return rval; }
+    /**
+     * Set the return code that is passed to the finally-activated Context.
+     * @param new_rval The return code to use.
+     */
+    void set_rval(int new_rval) { rval = new_rval; }
+    int get_rval() { return rval; }
 
-  /**
-   * Register member functions as associated with a given stage. Start
-   * your stage IDs at 0 and make that one the setup phase.
-   * @pre There are no other functions associated with the stage.
-   * @param stage The stage to associate this function with
-   * @param func The function to use
-   */
-  void set_callback(int stage, stagePtr func) {
-    ceph_assert(callbacks.find(stage) == callbacks.end());
-    callbacks[stage] = func;
-  }
-  
-  /**
-   * Called when the Continuation is done, as determined by a stage returning
-   * true and us having finished all the currently-processing ones.
-   */
-   virtual void _done() {
-     on_finish->complete(rval);
-     on_finish = NULL;
-     return;
-   }
+    /**
+     * Register member functions as associated with a given stage. Start
+     * your stage IDs at 0 and make that one the setup phase.
+     * @pre There are no other functions associated with the stage.
+     * @param stage The stage to associate this function with
+     * @param func The function to use
+     */
+    void set_callback(int stage, stagePtr func)
+    {
+        ceph_assert(callbacks.find(stage) == callbacks.end());
+        callbacks[stage] = func;
+    }
+
+    /**
+     * Called when the Continuation is done, as determined by a stage returning
+     * true and us having finished all the currently-processing ones.
+     */
+    virtual void _done()
+    {
+        on_finish->complete(rval);
+        on_finish = NULL;
+        return;
+    }
 
 private:
-  std::map<int, Continuation::stagePtr> callbacks;
+    std::map<int, Continuation::stagePtr> callbacks;
 
-  bool _continue_function(int r, int n) {
-    std::set<int>::iterator in_flight_iter = stages_in_flight.find(n);
-    ceph_assert(in_flight_iter != stages_in_flight.end());
-    ceph_assert(callbacks.count(n));
-    stagePtr p = callbacks[n];
+    bool _continue_function(int r, int n)
+    {
+        std::set<int>::iterator in_flight_iter = stages_in_flight.find(n);
+        ceph_assert(in_flight_iter != stages_in_flight.end());
+        ceph_assert(callbacks.count(n));
+        stagePtr p = callbacks[n];
 
-    [[maybe_unused]] auto [processing_iter, inserted] =
-      stages_processing.insert(n);
+        [[maybe_unused]] auto [processing_iter, inserted] = stages_processing.insert(n);
 
-    bool done = (this->*p)(r);
-    if (done)
-      reported_done = true;
+        bool done = (this->*p)(r);
+        if (done) reported_done = true;
 
-    stages_processing.erase(processing_iter);
-    stages_in_flight.erase(in_flight_iter);
-    return done;
-  }
-
-  void continue_function(int r, int stage) {
-    bool done = _continue_function(r, stage);
-
-    assert (!done ||
-            stages_in_flight.size() == stages_processing.size());
-
-    if ((done || reported_done) && stages_processing.empty()) {
-      _done();
-      delete this;
+        stages_processing.erase(processing_iter);
+        stages_in_flight.erase(in_flight_iter);
+        return done;
     }
-  }
+
+    void continue_function(int r, int stage)
+    {
+        bool done = _continue_function(r, stage);
+
+        assert(!done || stages_in_flight.size() == stages_processing.size());
+
+        if ((done || reported_done) && stages_processing.empty()) {
+            _done();
+            delete this;
+        }
+    }
 
 
 
 public:
-  /**
-   * Construct a new Continuation object. Call this from your child class,
-   * obviously.
-   *
-   * @Param c The Context which should be complete()ed when this Continuation
-   * is done.
-   */
-  Continuation(Context *c) :
-    rval(0), on_finish(c), reported_done(false) {}
-  /**
-   * Clean up.
-   */
-  virtual ~Continuation() { ceph_assert(on_finish == NULL); }
-  /**
-   * Begin running the Continuation.
-   */
-  void begin() { stages_in_flight.insert(0); continue_function(0, 0); }
+    /**
+     * Construct a new Continuation object. Call this from your child class,
+     * obviously.
+     *
+     * @Param c The Context which should be complete()ed when this Continuation
+     * is done.
+     */
+    Continuation(Context* c)
+        : rval(0)
+        , on_finish(c)
+        , reported_done(false)
+    {}
+    /**
+     * Clean up.
+     */
+    virtual ~Continuation() { ceph_assert(on_finish == NULL); }
+    /**
+     * Begin running the Continuation.
+     */
+    void begin()
+    {
+        stages_in_flight.insert(0);
+        continue_function(0, 0);
+    }
 };

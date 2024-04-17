@@ -6,16 +6,18 @@
 
 namespace librbd {
 
-namespace asio { struct ContextWQ; }
+namespace asio {
+struct ContextWQ;
+}
 
 namespace image {
 
-template <typename ImageCtxT>
-struct TypeTraits {
-  typedef asio::ContextWQ ContextWQ;
+template<typename ImageCtxT> struct TypeTraits
+{
+    typedef asio::ContextWQ ContextWQ;
 };
 
-} // namespace image
-} // namespace librbd
+}   // namespace image
+}   // namespace librbd
 
-#endif // CEPH_LIBRBD_IMAGE_TYPE_TRAITS_H
+#endif   // CEPH_LIBRBD_IMAGE_TYPE_TRAITS_H
