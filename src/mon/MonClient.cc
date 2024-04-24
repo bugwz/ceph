@@ -116,6 +116,7 @@ int MonClient::get_monmap_and_config()
         return r;
     }
 
+    // 创建一个临时的 mon client
     messenger = Messenger::create_client_messenger(cct, "temp_mon_client");
     ceph_assert(messenger);
     messenger->add_dispatcher_head(this);
@@ -138,6 +139,7 @@ int MonClient::get_monmap_and_config()
     });
 
     ceph::ref_t<MConfig> config;
+    // 尝试10次
     while (tries-- > 0) {
         r = init();
         if (r < 0) {
@@ -451,6 +453,7 @@ int MonClient::init()
 
     entity_name = cct->_conf->name;
 
+    // 刷新认证相关的配置
     auth_registry.refresh_config();
 
     std::lock_guard l(monc_lock);
@@ -688,6 +691,7 @@ void MonClient::_send_mon_message(MessageRef m)
     }
 }
 
+// 如果没有参数传入，则 rank 默认为 -1 
 void MonClient::_reopen_session(int rank)
 {
     ceph_assert(ceph_mutex_is_locked(monc_lock));
@@ -728,6 +732,8 @@ void MonClient::_reopen_session(int rank)
 void MonClient::_add_conn(unsigned rank)
 {
     auto peer = monmap.get_addrs(rank);
+
+    // 连接 monitor
     auto conn = messenger->connect_to_mon(peer);
     MonConnection mc(cct, conn, global_id, &auth_registry);
     if (auth) {
@@ -952,6 +958,7 @@ void MonClient::_un_backoff()
 void MonClient::schedule_tick()
 {
     auto do_tick = make_lambda_context([this](int) { tick(); });
+    // 如果还没有连接，则添加一个时间事件
     if (!is_connected()) {
         // start another round of hunting
         const auto hunt_interval = (cct->_conf->mon_client_hunt_interval * reopen_interval_multiplier);
@@ -959,6 +966,7 @@ void MonClient::schedule_tick()
     }
     else {
         // keep in touch
+        // 否则，定期通信保持连接
         timer.add_event_after(std::min(cct->_conf->mon_client_ping_interval, cct->_conf->mon_client_log_interval),
                               do_tick);
     }

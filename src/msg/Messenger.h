@@ -184,6 +184,8 @@ public:
      * @defgroup Accessors
      * @{
      */
+    // 这里的 my_name 对应的是创建 message 时的调用中的 entity_name_t::CLIENT()
+    // Messenger::create(cct, public_msgr_type, entity_name_t::CLIENT(), std::move(lname), nonce)
     int get_mytype() const { return my_name.type(); }
 
     /**

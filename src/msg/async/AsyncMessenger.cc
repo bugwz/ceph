@@ -628,7 +628,10 @@ AsyncConnectionRef AsyncMessenger::create_connect(const entity_addrvec_t& addrs,
     }
 
     // create connection
+    // 获取 worker
     Worker* w = stack->get_worker();
+
+    // 创建异步连接
     auto conn = ceph::make_ref<AsyncConnection>(cct, this, &dispatch_queue, w, target.is_msgr2(), false);
     conn->anon = anon;
     conn->connect(addrs, type, target);
@@ -733,11 +736,13 @@ ConnectionRef AsyncMessenger::connect_to(int type, const entity_addrvec_t& addrs
         return create_connect(av, type, anon);
     }
 
+    // 判断连接是否已经存在
     AsyncConnectionRef conn = _lookup_conn(av);
     if (conn) {
         ldout(cct, 10) << __func__ << " " << av << " existing " << conn << dendl;
     }
     else {
+        // 连接不存在，则创建新连接
         conn = create_connect(av, type, false);
         ldout(cct, 10) << __func__ << " " << av << " new " << conn << dendl;
     }

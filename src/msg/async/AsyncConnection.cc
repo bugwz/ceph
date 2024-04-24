@@ -519,9 +519,13 @@ void AsyncConnection::_connect()
     ldout(async_msgr->cct, 10) << __func__ << dendl;
 
     state = STATE_CONNECTING;
+
+    // 使用预先设置的协议进行连接，v1 和 v2 的操作基本一致，都是初始化连接状态等。
     protocol->connect();
+
     // rescheduler connection in order to avoid lock dep
     // may called by external thread(send_message)
+    // 增加一个外部 event 事件
     center->dispatch_event_external(read_handler);
 }
 
