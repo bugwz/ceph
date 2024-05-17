@@ -109,6 +109,13 @@ void global_pre_init(const std::map<std::string, std::string>* defaults, std::ve
     // ensure environment arguments are included in early processing
     env_to_vec(args);
 
+    // 注意： ceph_argparse_early_args 这个函数的实现位于 src/common 目录中，
+    // 比如在使用 ceph-fuse 命令的时候，会发现 src/common 中的相关代码是被打包
+    // 成动态库的，可以通过 dd cep-fuse 命令来查看，也可以通过 nm -D ceph-fuse 
+    // 命令来过滤 ceph_argparse_early_args 符号验证。所以在使用的时候有可能会
+    // 发生奇怪的现象，比如安装了 16.2.10 版本的 ceph-fuse ，但是本地却安装了
+    // 16.2.14 版本的 ceph-common 相关包，当我们执行 ceph-fuse --version 命令
+    // 查看版本时会发现输出的并不是 16.2.10 ，却是 16.2.14 ，所以这个地方需要注意。
     CephInitParameters iparams = ceph_argparse_early_args(args, module_type, &cluster, &conf_file_list);
 
     CephContext* cct = common_preinit(iparams, code_env, flags);
@@ -172,15 +179,19 @@ void global_pre_init(const std::map<std::string, std::string>* defaults, std::ve
     g_conf().complain_about_parse_error(g_ceph_context);
 }
 
+// 在该函数的定义中， run_pre_init 参数默认值为 true
 boost::intrusive_ptr<CephContext> global_init(const std::map<std::string, std::string>* defaults,
                                               std::vector<const char*>& args, uint32_t module_type,
                                               code_environment_t code_env, int flags, bool run_pre_init)
 {
     // Ensure we're not calling the global init functions multiple times.
+    // 确保我们没有多次调用全局初始化函数。
     static bool first_run = true;
     if (run_pre_init) {
         // We will run pre_init from here (default).
+        // 我们将从这里运行 pre_init （默认）
         ceph_assert(!g_ceph_context && first_run);
+        // 内部会初始化 log 线程
         global_pre_init(defaults, args, module_type, code_env, flags);
     }
     else {

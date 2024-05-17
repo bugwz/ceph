@@ -82,6 +82,7 @@ struct ceph_entity_name
     __le64 num;
 } __attribute__((packed));
 
+// ceph 实体类型
 #define CEPH_ENTITY_TYPE_MON    0x01
 #define CEPH_ENTITY_TYPE_MDS    0x02
 #define CEPH_ENTITY_TYPE_OSD    0x04

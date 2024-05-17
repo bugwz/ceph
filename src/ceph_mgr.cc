@@ -38,18 +38,23 @@ static void usage()
  */
 int main(int argc, const char** argv)
 {
+    // 设置 mgr 线程名
     ceph_pthread_setname(pthread_self(), "ceph-mgr");
 
+    // 将 argv 转换为 std::vector
     auto args = argv_to_vec(argc, argv);
     if (args.empty()) {
         std::cerr << argv[0] << ": -h or --help for usage" << std::endl;
         exit(1);
     }
+
+    // 检测是否含有 -h 或者 --help ，从而输出 usage() 信息
     if (ceph_argparse_need_usage(args)) {
         usage();
         exit(0);
     }
 
+    // 初始化一个默认参数，后续在初始化配置配置的时候会用到
     std::map<std::string, std::string> defaults = {{"keyring", "$mgr_data/keyring"}};
     auto cct = global_init(&defaults, args, CEPH_ENTITY_TYPE_MGR, CODE_ENVIRONMENT_DAEMON, 0);
 
