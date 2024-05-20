@@ -11,10 +11,21 @@
 #  License as published by the Free Software Foundation; either
 #  version 2.1 of the License, or (at your option) any later version.
 #
+# 若指令返回值不为 0 ，则立刻退出 shell
 set -e
+
+# 创建临时的目录
+# $$ 是 shell 本身的 pid (Process ID)
 DIR=/tmp/install-deps.$$
+
+# 当遇到 EXIT 信号后删除临时的目录
+# trap 用于指定在接收到信号后将要采取的行动
+# trap 命令的参数分为两部分，前一部分是接收到指定信号要采取的行动，后一部分是要处理的信号
 trap "rm -fr $DIR" EXIT
 mkdir -p $DIR
+
+# test 命令用于检查某个条件是否成立，它可以进行数值、字符和文件三个方面的测试
+# 如果用户的 id 不是 0 ，则代表用户不是 root ，则需要添加 sudo 参数
 if test $(id -u) != 0; then
     SUDO=sudo
 fi
@@ -22,9 +33,14 @@ fi
 # print more than just ascii chars
 export LC_ALL=C.UTF-8
 
+# 获取机器信息
 ARCH=$(uname -m)
 
+# 检查是否处于 jenkins 环境中运行，如果处于在返回真，否则返回假
 function in_jenkins() {
+    # 这个表达式是一个测试语句，用于检查环境变量 $JENKINS_HOME 是否已经被设置，
+    # 如果该环境变量已经被设置了，即 $JENKINS_HOME 不是一个空字符串，如果被设置了
+    # 则返回真，否则返回假
     test -n "$JENKINS_HOME"
 }
 
@@ -38,6 +54,7 @@ function munge_ceph_spec_in {
     local OUTFILE=$1
     sed -e 's/@//g' <ceph.spec.in >$OUTFILE
     # http://rpm.org/user_doc/conditional_builds.html
+    # 替换一些变量
     if $with_seastar; then
         sed -i -e 's/%bcond_with seastar/%bcond_without seastar/g' $OUTFILE
     fi
@@ -49,6 +66,8 @@ function munge_ceph_spec_in {
     fi
 }
 
+# 调用示例：
+# munge_debian_control $version $with_seastar $for_make_check "debian/control"
 function munge_debian_control {
     local version=$1
     shift
@@ -62,6 +81,9 @@ function munge_debian_control {
     echo $control
 }
 
+# 这个函数是在 ubuntu 的机器上选择安装合适的 g++ 版本
+# 调用示例： 
+# ensure_decent_gcc_on_ubuntu 9 bionic
 function ensure_decent_gcc_on_ubuntu {
     in_jenkins && echo "CI_DEBUG: Start ensure_decent_gcc_on_ubuntu() in install-deps.sh"
     # point gcc to the one offered by g++-7 if the used one is not
@@ -99,12 +121,15 @@ ENDOFKEY
     fi
 }
 
+# 该函数确保 sphinx 能够在 python3 的环境下正常工作，并且指向正确的可执行文件路径
 function ensure_python3_sphinx_on_ubuntu {
     in_jenkins && echo "CI_DEBUG: Running ensure_python3_sphinx_on_ubuntu() in install-deps.sh"
     local sphinx_command=/usr/bin/sphinx-build
     # python-sphinx points $sphinx_command to
     # ../share/sphinx/scripts/python2/sphinx-build when it's installed
     # let's "correct" this
+    # 检查 sphinx_command 是否存在，并且其头部内容是否包含字符串 python 。
+    # 这一步是为了检查 sphinx 是否已经正确的安装了 python3 版本的模块。
     if test -e $sphinx_command && head -n1 $sphinx_command | grep -q python$; then
         $SUDO env DEBIAN_FRONTEND=noninteractive apt-get -y remove python-sphinx
     fi
@@ -175,10 +200,14 @@ function clean_boost_on_ubuntu {
     fi
 }
 
+# 调用示例
+# install_boost_on_ubuntu bionic
+# bionic 是 ubuntu 18.04 的英文代号
 function install_boost_on_ubuntu {
     in_jenkins && echo "CI_DEBUG: Running install_boost_on_ubuntu() in install-deps.sh"
     # Once we get to this point, clean_boost_on_ubuntu() should ensure
     # that there is no more than one installed version.
+    # 安装 ceph 的 libboost 的依赖
     local installed_ver=$(apt -qq list --installed ceph-libboost*-dev 2>/dev/null |
         grep -e 'libboost[0-9].[0-9]\+-dev' |
         cut -d' ' -f2 |
@@ -191,6 +220,7 @@ function install_boost_on_ubuntu {
     local codename=$1
     local project=libboost
     local sha1=892ab89e76b91b505ffbf083f6fb7f2a666d4132
+    # 安装特定版本的依赖软件
     install_pkg_on_ubuntu \
         $project \
         $sha1 \
@@ -214,6 +244,7 @@ function install_boost_on_ubuntu {
         ceph-libboost-timer${boost_ver}-dev
 }
 
+# 在 ubuntu 上安装特定版本的 libzbd 依赖
 function install_libzbd_on_ubuntu {
     in_jenkins && echo "CI_DEBUG: Running install_libzbd_on_ubuntu() in install-deps.sh"
     local codename=$1
@@ -287,15 +318,23 @@ EOF
 }
 
 for_make_check=false
+# tty -s 并不显示任何信息，只回传状态代码
+# tty -s 是一个 linux 命令，用于检查终端设备（如键盘）是否已经连接并准备好进行交互。
+# 如果终端已经准备好，则 tty -s 会返回非零的退出状态，并且标准输出将包括终端设备名称。
+# 如果没有准备好，该命令将返回零退出状态。
 if tty -s; then
     # interactive
     for_make_check=true
 elif [ $FOR_MAKE_CHECK ]; then
+    # 如果调用来自于 run-make-check.sh 脚本，则会设置 for_make_check 为 true ，
+    # 当然在一些场景下，我们也可以手动设置 FOR_MAKE_CHECK 变量，促使将 for_make_check
+    # 设置为 true
     for_make_check=true
 else
     for_make_check=false
 fi
 
+# xFreeBSDx 环境中需要安装的依赖
 if [ x$(uname)x = xFreeBSDx ]; then
     $SUDO pkg install -yq \
         devel/babeltrace \
@@ -354,10 +393,13 @@ if [ x$(uname)x = xFreeBSDx ]; then
 
     exit
 else
+    # 非 xFreeBSDx 环境中需要安装的依赖
     [ $WITH_SEASTAR ] && with_seastar=true || with_seastar=false
     [ $WITH_ZBD ] && with_zbd=true || with_zbd=false
     [ $WITH_PMEM ] && with_pmem=true || with_pmem=false
     [ $WITH_RADOSGW_MOTR ] && with_rgw_motr=true || with_rgw_motr=false
+
+    # 判断系统类型
     source /etc/os-release
     case "$ID" in
     debian | ubuntu | devuan | elementary | softiron)
@@ -370,8 +412,11 @@ else
         ensure_python3_sphinx_on_ubuntu
         case "$VERSION" in
         *Bionic*)
+            # 在 ubuntu 机器上选择安装合适的 g++ 版本
             ensure_decent_gcc_on_ubuntu 9 bionic
+            # 在 ubuntu 机器上选择安装合适的 boost 依赖
             [ ! $NO_BOOST_PKGS ] && install_boost_on_ubuntu bionic
+            # 在 ubuntu 机器上选择安装合适的 libzbd 依赖
             $with_zbd && install_libzbd_on_ubuntu bionic
             ;;
         *Focal*)
@@ -445,14 +490,17 @@ EOF
             $SUDO dnf install -y dnf-utils
             ;;
         rocky | centos | rhel | ol | virtuozzo)
+            # 获取主版本
             MAJOR_VERSION="$(echo $VERSION_ID | cut -d. -f1)"
             $SUDO dnf install -y dnf-utils selinux-policy-targeted
             rpm --quiet --query epel-release ||
                 $SUDO dnf -y install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-$MAJOR_VERSION.noarch.rpm
             $SUDO rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-$MAJOR_VERSION
             $SUDO rm -f /etc/yum.repos.d/dl.fedoraproject.org*
+            # 当系统版本为 centos 8 时
             if test $ID = centos -a $MAJOR_VERSION = 8; then
                 # Enable 'powertools' or 'PowerTools' repo
+                # 启用 powertools 仓库
                 $SUDO dnf config-manager --set-enabled $(dnf repolist --all 2>/dev/null | gawk 'tolower($0) ~ /^powertools\s/{print $1}')
                 dts_ver=11
                 # before EPEL8 and PowerTools provide all dependencies, we use sepia for the dependencies
@@ -516,14 +564,19 @@ function populate_wheelhouse() {
     fi
 }
 
+# 激活虚拟环境
 function activate_virtualenv() {
     in_jenkins && echo "CI_DEBUG: Running activate_virtualenv() in install-deps.sh"
     local top_srcdir=$1
     local env_dir=$top_srcdir/install-deps-python3
 
+    # 如果还没有虚拟环境目录
     if ! test -d $env_dir; then
+        # 创建虚拟环境目录
         python3 -m venv ${env_dir}
+        # 激活虚拟环境
         . $env_dir/bin/activate
+        # 尝试安装依赖包
         if ! populate_wheelhouse install; then
             rm -rf $env_dir
             return 1
@@ -549,7 +602,10 @@ function preload_wheels_for_tox() {
         fi
     fi
     if test "$require" && ! test -d wheelhouse; then
+        # 检查系统是否安装了 python3 ， 如果没有安装则跳过后续的安装逻辑
         type python3 >/dev/null 2>&1 || continue
+
+        # 激活虚拟环境
         activate_virtualenv $top_srcdir || exit 1
         python3 -m pip install --upgrade pip
         populate_wheelhouse "wheel -w $wip_wheelhouse" $require $constraint || exit 1
@@ -570,6 +626,7 @@ if $for_make_check; then
     #
     # preload python modules so that tox can run without network access
     #
+    # 获取本地目录中的所有的 tox.ini 文件
     find . -name tox.ini | while read ini; do
         preload_wheels_for_tox $ini
     done
