@@ -25,6 +25,9 @@ MetricValue = Dict[LabelValues, Number]
 # Defaults for the Prometheus HTTP server.  Can also set in config-key
 # see https://github.com/prometheus/prometheus/wiki/Default-port-allocations
 # for Prometheus exporter port registry
+# Prometheus HTTP 服务器的默认设置。也可以在配置键中设置。
+# 参见 https://github.com/prometheus/prometheus/wiki/Default-port-allocations
+# 获取 Prometheus 导出器端口注册表
 
 DEFAULT_PORT = 9283
 
@@ -33,6 +36,10 @@ DEFAULT_PORT = 9283
 # "::" it tries both ipv4 and ipv6, and in some environments (e.g. kubernetes)
 # ipv6 isn't yet configured / supported and CherryPy throws an uncaught
 # exception.
+# 当 CherryPy 服务器在 3.2.2 及更高版本启动时，它会尝试验证
+# 它监听的端口是否实际绑定。当使用通配地址 "::" 时，它会同时
+# 尝试 ipv4 和 ipv6，而在某些环境中（例如 kubernetes）ipv6 尚未
+# 配置/支持，CherryPy 会抛出一个未捕获的异常。
 if cherrypy is not None:
     Version = packaging.version.Version
     v = Version(cherrypy.__version__)
@@ -556,6 +563,7 @@ class Module(MgrModule, OrchestratorClientMixin):
             default=get_default_addr(),
             desc='the IPv4 or IPv6 address on which the module listens for HTTP requests',
         ),
+        # 默认端口为 9283
         Option(
             'server_port',
             type='int',
@@ -1336,6 +1344,11 @@ class Module(MgrModule, OrchestratorClientMixin):
 
     @profile_method()
     def get_rbd_stats(self) -> None:
+        # 下面介绍了在获取 rbd 的监控数据的时候处理的执行逻辑，由于 rbd 的对象数据在 rados 中
+        # 存储的时候使用了前缀标识，这个前缀是每个 image 不同的，所以在实际的 pg 中执行后，我们
+        # 可以通过匹配每个 object 的前缀来整体统计每个 image 的读写监控数据。从而实现 image 
+        # 粒度的监控数据的采集。
+        # 
         # Per RBD image stats is collected by registering a dynamic osd perf
         # stats query that tells OSDs to group stats for requests associated
         # with RBD objects by pool, namespace, and image id, which are
@@ -1348,11 +1361,29 @@ class Module(MgrModule, OrchestratorClientMixin):
         # metdata, and should be used in the image spec. If there is no pool_id
         # in the object name, the image pool is the pool where the object is
         # located.
+        # 每个 RBD 图像的统计数据是通过注册一个动态的 OSD 性能统计查询来收集的，
+        # 该查询指示 OSD 根据池、命名空间和图像 ID 对与 RBD 对象相关的请求统计数据进行分组，
+        # 这些信息是从请求对象名称或其他属性中提取的。
+        # RBD 对象名称具有以下前缀：
+        #   - rbd_data.{image_id}. （数据存储在与元数据相同的池中）
+        #   - rbd_data.{pool_id}.{image_id}. （数据存储在专用的数据池中）
+        #   - journal_data.{pool_id}.{image_id}. （如果启用了日志记录，则为日志）
+        # 对象名称中的 pool_id 是包含图像元数据的池的 ID，应在图像规范中使用。
+        # 如果对象名称中没有 pool_id，则图像池是对象所在的池。
 
         # Parse rbd_stats_pools option, which is a comma or space separated
         # list of pool[/namespace] entries. If no namespace is specifed the
         # stats are collected for every namespace in the pool. The wildcard
         # '*' can be used to indicate all pools or namespaces
+        # 解析 rbd_stats_pools 选项，该选项是一个以逗号或空格分隔的池[/命名空间]列表。
+        # 如果没有指定命名空间，则会为池中的每个命名空间收集统计信息。
+        # 通配符 '*' 可以用来表示所有池或命名空间。
+        # 
+        # 我们可以通过 ceph config get mgr mgr/prometheus/rbd_stats_pools $pool 命令
+        # 来开启指定 rbd 的监控，$pool 的格式可以是：
+        # 1. * : 开启所有 rbd pool 的所有监控；
+        # 2. pool : 开启指定 rdb pool 的所有监控；
+        # 3. pool/namespace : 开启指定 rbd pool 中的指定 namespace 的监控；
         pools_string = cast(str, self.get_localized_module_option('rbd_stats_pools'))
         pool_keys = set()
         osd_map = self.get('osd_map')
@@ -1406,6 +1437,7 @@ class Module(MgrModule, OrchestratorClientMixin):
                 self.get_localized_module_option(
                 'rbd_stats_pools_refresh_interval', 300)
             if rbd_stats_pools != pools or time.time() >= next_refresh:
+                # 更新需要监控的 rbd pool 列表
                 self.refresh_rbd_stats_pools(pools)
                 pools_refreshed = True
 
@@ -1449,6 +1481,8 @@ class Module(MgrModule, OrchestratorClientMixin):
                 ],
                 'performance_counter_descriptors': list(counters_info),
             }
+
+            # 给 osd 下发 perf query 查询命令
             query_id = self.add_osd_perf_query(query)
             if query_id is None:
                 self.log.error('failed to add query %s' % query)
@@ -1456,6 +1490,7 @@ class Module(MgrModule, OrchestratorClientMixin):
             self.rbd_stats['query'] = query
             self.rbd_stats['query_id'] = query_id
 
+        # 获取指定查询命令的结果
         res = self.get_osd_perf_counters(self.rbd_stats['query_id'])
         assert res
         for c in res['counters']:
@@ -1466,6 +1501,7 @@ class Module(MgrModule, OrchestratorClientMixin):
             else:
                 pool_id = int(c['k'][0][0])
             if pool_id not in self.rbd_stats['pools'] and not pools_refreshed:
+                # 更新需要监控的 rbd pool 列表
                 self.refresh_rbd_stats_pools(pools)
                 pools_refreshed = True
             if pool_id not in self.rbd_stats['pools']:
@@ -1477,6 +1513,7 @@ class Module(MgrModule, OrchestratorClientMixin):
             image_id = c['k'][2][1]
             if image_id not in pool['images'][nspace_name] and \
                not pools_refreshed:
+                # 更新需要监控的 rbd pool 列表
                 self.refresh_rbd_stats_pools(pools)
                 pool = self.rbd_stats['pools'][pool_id]
                 pools_refreshed = True
@@ -1530,6 +1567,7 @@ class Module(MgrModule, OrchestratorClientMixin):
                             self.metrics[path].set(counters[i][1], labels)
                         i += 1
 
+    # 该函数的作用是更新需要监控的 rbd pool 列表
     def refresh_rbd_stats_pools(self, pools: Dict[str, Set[str]]) -> None:
         self.log.debug('refreshing rbd pools %s' % (pools))
 
@@ -1702,12 +1740,15 @@ class Module(MgrModule, OrchestratorClientMixin):
                     self.metrics[path].set(value, labels)
         self.add_fixed_name_metrics()
 
+    # 开始采集 metrics 数据
     @profile_method(True)
     def collect(self) -> str:
         # Clear the metrics before scraping
+        # 在抓取数据之前清除指标
         for k in self.metrics.keys():
             self.metrics[k].clear()
 
+        # 获取 metrics 信息列表
         self.get_health()
         self.get_df()
         self.get_osd_blocklisted_entries()
@@ -1724,6 +1765,15 @@ class Module(MgrModule, OrchestratorClientMixin):
 
         if not self.get_module_option('exclude_perf_counters'):
             self.get_perf_counters()
+
+        # 获取 rbd 相关的 metrics 信息
+        # 线上默认没有开启 rbd 的监控数据，我们可以通过手动开启 rbd 的监控数据
+        # 
+        # 注意 rbd 的监控采集方式是通过 mgr 给 osd/pg 下发的 perf query 来采集的，
+        # 并且采集过程中由于需要区分不同 rbd ，不同 namespace ，以及不同 image 的读写量，
+        # 所以 pg 内部在处理 perf query 的规则的时候需要使用正则匹配表达式的方式来区分具体
+        # 的流量信息，所以这里可能会存在增加耗时的问题，可能会影响 rbd 的读写性能，这可能就是
+        # rbd 的监控数据默认是关闭的原因。 
         self.get_rbd_stats()
 
         self.get_collect_time_metrics()
@@ -1797,6 +1847,9 @@ class Module(MgrModule, OrchestratorClientMixin):
         # object to not be cleaned up in order to have those temp files not
         # be cleaned up, so making it an attribute of the module instead
         # of just a standalone object
+        # ssl证书工具使用 NamedTemporaryFile 为通过 generate_cert_files 函数生成的证书文件创建临时文件。
+        # 我们需要 SSLCerts 对象不被清理，以确保这些临时文件不会被清理，
+        # 因此将其作为模块的属性，而不是单独的对象。
         self.cephadm_monitoring_tls_ssl_certs = SSLCerts()
         host = self.get_mgr_ip()
         try:
@@ -1845,11 +1898,14 @@ class Module(MgrModule, OrchestratorClientMixin):
     </body>
 </html>'''
 
+            # 点击 /metrics 之后的操作
             @cherrypy.expose
             def metrics(self) -> Optional[str]:
                 # Lock the function execution
                 assert isinstance(_global_instance, Module)
+                # 使用一把全局锁
                 with _global_instance.collect_lock:
+                    # 返回 metrics 信息
                     return self._metrics(_global_instance)
 
             @staticmethod
@@ -1857,9 +1913,11 @@ class Module(MgrModule, OrchestratorClientMixin):
                 if not self.cache:
                     self.log.debug('Cache disabled, collecting and returning without cache')
                     cherrypy.response.headers['Content-Type'] = 'text/plain'
+                    # 返回 collect 的 metrics 信息
                     return self.collect()
 
                 # Return cached data if available
+                # 如果缓存数据可用，则返回缓存数据
                 if not instance.collect_cache:
                     raise cherrypy.HTTPError(503, 'No cached data available yet')
 
@@ -1905,7 +1963,9 @@ class Module(MgrModule, OrchestratorClientMixin):
                                              self.STALE_CACHE_RETURN]:
             self.stale_cache_strategy = self.STALE_CACHE_FAIL
 
+        # 默认的监听地址，可能是 0.0.0.0
         server_addr = cast(str, self.get_localized_module_option('server_addr', get_default_addr()))
+        # 默认的端口地址是 9283
         server_port = cast(int, self.get_localized_module_option('server_port', DEFAULT_PORT))
         self.log.info(
             "server_addr: %s server_port: %s" %
@@ -2016,11 +2076,13 @@ class StandbyModule(MgrStandbyModule):
                     status = module.get_module_option('standby_error_status_code')
                     raise cherrypy.HTTPError(status, message="Keep on looking")
 
+            # 点击触发了 metrics 的 a 标签
             @cherrypy.expose
             def metrics(self) -> str:
                 cherrypy.response.headers['Content-Type'] = 'text/plain'
                 return ''
 
+        # 设置路由为首页的页面内容
         cherrypy.tree.mount(Root(), '/', {})
         self.log.info('Starting engine...')
         cherrypy.engine.start()

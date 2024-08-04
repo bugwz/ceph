@@ -4148,6 +4148,7 @@ void PrimaryLogPG::log_op_stats(const OpRequest& op, const uint64_t inb, const u
 
     dout(15) << "log_op_stats " << *m << " inb " << inb << " outb " << outb << " lat " << latency << dendl;
 
+    // rbd image 的监控数据采集就是在这里实现的
     if (m_dynamic_perf_stats.is_enabled()) {
         m_dynamic_perf_stats.add(osd, info, op, inb, outb, latency);
     }

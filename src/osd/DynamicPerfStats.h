@@ -52,10 +52,12 @@ public:
 
     bool is_enabled() { return !data.empty(); }
 
+    // 下面的操作采集了 rbd 的监控数据
     void add(const OSDService* osd, const pg_info_t& pg_info, const OpRequest& op, uint64_t inb, uint64_t outb,
              const utime_t& latency)
     {
 
+        // 下面是根据对应的监控类型，来操作对应的监控指标
         auto update_counter_fnc = [&op, inb, outb, &latency](const PerformanceCounterDescriptor& d,
                                                              PerformanceCounter* c) {
             ceph_assert(d.is_supported());
@@ -103,6 +105,7 @@ public:
             }
         };
 
+        // 下面这里会根据 query 的特征来判断当前的 op 是否匹配
         auto get_subkey_fnc = [&osd, &pg_info, &op](const OSDPerfMetricSubKeyDescriptor& d,
                                                     OSDPerfMetricSubKey* sub_key) {
             ceph_assert(d.is_supported());
@@ -123,6 +126,7 @@ public:
             default: ceph_abort_msg("unknown counter type");
             }
 
+            // 判断是否匹配
             std::smatch match;
             if (!std::regex_search(match_string, match, d.regex)) {
                 return false;
@@ -140,6 +144,9 @@ public:
             auto& query = it.first;
             OSDPerfMetricKey key;
             if (query.get_key(get_subkey_fnc, &key)) {
+                // 下面的实现有两种：
+                //  1. mds ： 
+                //  2. osd ： 比如 rbd 的监控数据采集
                 query.update_counters(update_counter_fnc, &it.second[key]);
             }
         }

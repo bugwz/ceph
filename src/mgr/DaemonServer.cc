@@ -681,6 +681,7 @@ bool DaemonServer::handle_report(const ref_t<MMgrReport>& m)
     }
     */
 
+    // 如果 peer 是 osd ，则执行这里的逻辑
     if (m->get_connection()->peer_is_osd()) {
         osd_perf_metric_collector.process_reports(m->osd_perf_metric_reports);
     }

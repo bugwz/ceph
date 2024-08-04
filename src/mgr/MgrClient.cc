@@ -287,10 +287,12 @@ bool MgrClient::ms_handle_refused(Connection* con)
     return false;
 }
 
+// 该函数会定期向 mgr 发送数据
 void MgrClient::_send_stats()
 {
     _send_report();
     _send_pgstats();
+    // 定期的时间间隔为 stats_period
     if (stats_period != 0) {
         report_callback = timer.add_event_after(stats_period, new LambdaContext([this](int) { _send_stats(); }));
     }

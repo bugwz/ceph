@@ -18,6 +18,7 @@ MetricCollector<Query, Limit, Key, Report>::MetricCollector(MetricListener& list
     : listener(listener)
 {}
 
+// 添加对应的 perf query
 template<typename Query, typename Limit, typename Key, typename Report>
 MetricQueryID MetricCollector<Query, Limit, Key, Report>::add_query(const Query& query,
                                                                     const std::optional<Limit>& limit)
@@ -40,6 +41,7 @@ MetricQueryID MetricCollector<Query, Limit, Key, Report>::add_query(const Query&
         }
 
         it->second.emplace(query_id, limit);
+        // 添加到 counters 中
         counters.emplace(query_id, std::map<Key, PerformanceCounters>{});
     }
 

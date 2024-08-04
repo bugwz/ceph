@@ -59,6 +59,7 @@ std::string read_file_to_string(std::string path)
 }
 
 // Must be kept in sync with promethize() in src/pybind/mgr/prometheus/module.py
+// 必须与 src/pybind/mgr/prometheus/module.py 中的 promethize() 保持同步
 void promethize(std::string& name)
 {
     if (name[name.size() - 1] == '-') {

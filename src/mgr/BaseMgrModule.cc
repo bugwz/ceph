@@ -741,6 +741,7 @@ static PyObject* ceph_dispatch_remote(BaseMgrModule* self, PyObject* args)
     return result;
 }
 
+// 给 osd 添加 perf query 命令
 static PyObject* ceph_add_osd_perf_query(BaseMgrModule* self, PyObject* args)
 {
     static const std::string NAME_KEY_DESCRIPTOR = "key_descriptor";
@@ -966,6 +967,7 @@ static PyObject* ceph_add_osd_perf_query(BaseMgrModule* self, PyObject* args)
         }
     }
 
+    // 给 osd 下发 perf query 命令
     auto query_id = self->py_modules->add_osd_perf_query(query, limit);
     return PyLong_FromLong(query_id);
 }

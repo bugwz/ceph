@@ -66,6 +66,9 @@ int main(int argc, char** argv)
     }
     common_init_finish(g_ceph_context);
 
+    // http server 线程， 用于响应 http 请求的 exporter 数据请求
+    // 注意： 这里导出的数据是 ceph 组件粒度的数据信息，资源 exporter 的端口为 9926 ，
+    //       这个数据不同于 prometheus 模块中导出来的数据，那么模块的 exporter 的端口为 9283
     boost::thread server_thread(http_server_thread_entrypoint);
     DaemonMetricCollector& collector = collector_instance();
     collector.main();
