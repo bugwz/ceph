@@ -850,6 +850,9 @@ def profile_method(skip_attribute: bool = False) -> Callable[[Callable[..., T]],
     Decorator for methods of the Module class. Logs the name of the given
     function f with the time it takes to execute it.
     """
+    """
+    用于 Module 类方法的装饰器。记录给定函数 f 的名称及其执行所需的时间。
+    """
     def outer(f: Callable[..., T]) -> Callable[..., T]:
         @wraps(f)
         def wrapper(*args: Any, **kwargs: Any) -> T:

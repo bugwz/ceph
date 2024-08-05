@@ -53,6 +53,8 @@ protected:
 
     PyModuleRegistry* py_module_registry;
     DaemonStateIndex daemon_state;
+    // 在 mgr 类中有一个 ClusterState 对象
+    // cluster_state 这个变量中存储 prometheus 导出的大部分的 metrics 数据信息
     ClusterState cluster_state;
 
     DaemonServer server;

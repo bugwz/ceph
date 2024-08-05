@@ -61,6 +61,13 @@ class MgrMonitor : public PaxosService
      * the daemon's metadata, for example if you're dropping
      * it as a standby before reinstating it as the active daemon.
      */
+    /**
+     * 从后备列表中移除此 gid。默认情况下，
+     * 也会移除元数据（即完全忘记该守护进程）。
+     *
+     * 如果你希望保留该守护进程的元数据，请将 `drop_meta` 设置为 false，
+     * 例如，如果你在将其重新设为活动守护进程之前将其从后备中删除。
+     */
     void drop_standby(uint64_t gid, bool drop_meta = true);
 
     Context* digest_event = nullptr;

@@ -176,11 +176,20 @@ void ActivePyModules::update_cache_metrics()
 
 PyObject* ActivePyModules::cacheable_get_python(const std::string& what)
 {
+    // 获取 cache 的失效时间
+    // 从 src/common/options 中可以看出 mgr_ttl_cache_expire_seconds 参数的默认值为 0
+    // 
+    // 该参数的相关命令为：
+    // ceph config get mgr mgr_ttl_cache_expire_seconds
+    // ceph config set mgr mgr_ttl_cache_expire_seconds <seconds>
     uint64_t ttl_seconds = g_conf().get_val<uint64_t>("mgr_ttl_cache_expire_seconds");
     if (ttl_seconds > 0) {
+        // 设置 ttl_cache 的有效期
         ttl_cache.set_ttl(ttl_seconds);
         try {
+            // 尝试获取 cache 中的指定数据
             PyObject* cached = ttl_cache.get(what);
+            // 更新 cache 的 hit 和 miss 的 metrics 数据
             update_cache_metrics();
             return cached;
         }
@@ -188,28 +197,42 @@ PyObject* ActivePyModules::cacheable_get_python(const std::string& what)
         }
     }
 
+    // 获取指定的数据内容
+    // 下面这个获取数据的函数十分重要
     PyObject* obj = get_python(what);
+
+    // 如果存在 ttl_seconds 并且该参数可以被缓存，则将获取的数据加入到 ttl_cache 中
     if (ttl_seconds && ttl_cache.is_cacheable(what)) {
         ttl_cache.insert(what, obj);
         Py_INCREF(obj);
     }
+
+    // 更新 cache 的 hit 和 miss 的 metrics 数据
     update_cache_metrics();
     return obj;
 }
 
 PyObject* ActivePyModules::get_python(const std::string& what)
 {
+    // 获取 cache 的失效时间
+    // 从 src/common/options 中可以看出 mgr_ttl_cache_expire_seconds 参数的默认值为 0
     uint64_t ttl_seconds = g_conf().get_val<uint64_t>("mgr_ttl_cache_expire_seconds");
 
     PyFormatter pf;
     PyJSONFormatter jf;
     // Use PyJSONFormatter if TTL cache is enabled.
+    // 如果启用了 TTL 缓存，请使用 PyJSONFormatter。
     Formatter& f = ttl_seconds ? (Formatter&)jf : (Formatter&)pf;
 
+    // 下面会根据请求数据的不同，执行不同的逻辑
     if (what == "fs_map") {
+        // 创建一个不持有 GIL（Global Interpreter Lock） 的上下文对象 without_gil_t no_gil
         without_gil_t no_gil;
+        // 调用 cluster_state.with_fsmap() 方法，并传递一个 lambda 函数作为回调
         cluster_state.with_fsmap([&](const FSMap& fsmap) {
+            // 重新获取 GIL ，因为在调用 Python API 时需要持有 GIL
             no_gil.acquire_gil();
+            // 调用文件系统映射对象 (FSMap) 的 dump 方法，将其内容输出到选定的格式化器 (f) 中
             fsmap.dump(&f);
         });
     }
@@ -455,6 +478,8 @@ PyObject* ActivePyModules::get_python(const std::string& what)
             f.close_section();
         });
     }
+    // 对应的是 src/pybind/mgr/prometheus/module.py 文件中的 self.get_health() 函数调用中的
+    // self.get('health') 调用
     else if (what == "health") {
         without_gil_t no_gil;
         cluster_state.with_health([&](const ceph::bufferlist& health_json) {
@@ -1131,6 +1156,8 @@ PyObject* ActivePyModules::get_foreign_config(const std::string& who, const std:
 
     // FIXME: this is super inefficient, since we generate the entire daemon
     // config just to extract one value from it!
+    // 待修复: 这非常低效，因为我们生成了整个守护进程配置
+    // 只是为了从中提取一个值！
 
     std::map<std::string, std::string, std::less<>> config;
     cluster_state.with_osdmap([&](const OSDMap& osdmap) {

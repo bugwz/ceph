@@ -118,6 +118,7 @@ private:
             response_.body() = body;
         }
         // 如果请求的地址为 /metrics ， 即直接请求的监控数据
+        // 这个服务的默认 http 端口为 9926
         else if (request_.target() == "/metrics") {
             response_.set(http::field::content_type, "text/plain; charset=utf-8");
             // 获取对应的 metrics 实例， 然后采集数据，返回采集后的监控数据

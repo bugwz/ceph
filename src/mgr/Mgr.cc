@@ -499,6 +499,7 @@ void Mgr::shutdown()
     finisher.stop();
 }
 
+// 处理 mgr 收到的 osd map 消息
 void Mgr::handle_osd_map()
 {
     ceph_assert(ceph_mutex_is_locked_by_me(lock));
@@ -548,9 +549,11 @@ void Mgr::handle_osd_map()
     });
 
     // TODO: same culling for MonMap
+    // 待办事项：为 MonMap 实现相同的剔除操作
     daemon_state.cull("osd", names_exist);
 }
 
+// 处理 mgr 收到的 log 消息
 void Mgr::handle_log(ref_t<MLog> m)
 {
     for (const auto& e : m->entries) {
@@ -558,6 +561,7 @@ void Mgr::handle_log(ref_t<MLog> m)
     }
 }
 
+// 处理 mgr 收到的 service map 消息
 void Mgr::handle_service_map(ref_t<MServiceMap> m)
 {
     dout(10) << "e" << m->service_map.epoch << dendl;
@@ -566,6 +570,7 @@ void Mgr::handle_service_map(ref_t<MServiceMap> m)
     server.got_service_map();
 }
 
+// 处理 mgr 收到的 mon map 消息
 void Mgr::handle_mon_map()
 {
     dout(20) << __func__ << dendl;
@@ -594,28 +599,37 @@ bool Mgr::ms_dispatch2(const ref_t<Message>& m)
     std::lock_guard l(lock);
 
     switch (m->get_type()) {
+    // 处理 mgr 收到的 mgr digest 消息
+    // 其中包括 health_json 和 mon_status_json 消息
     case MSG_MGR_DIGEST: handle_mgr_digest(ref_cast<MMgrDigest>(m)); break;
     case CEPH_MSG_MON_MAP:
         py_module_registry->notify_all("mon_map", "");
+        // 处理 mgr 收到的 mon map 消息
         handle_mon_map();
         break;
     case CEPH_MSG_FS_MAP:
+        // 处理 mgr 收到的 fs map 消息
         py_module_registry->notify_all("fs_map", "");
         handle_fs_map(ref_cast<MFSMap>(m));
         return false;   // I shall let this pass through for Client
     case CEPH_MSG_OSD_MAP:
+        // 处理 mgr 收到的 osd map 消息
         handle_osd_map();
 
         py_module_registry->notify_all("osd_map", "");
 
         // Continuous subscribe, so that we can generate notifications
         // for our MgrPyModules
+        // 持续订阅，以便我们可以为我们的 MgrPyModules 生成通知
         objecter->maybe_request_map();
         break;
     case MSG_SERVICE_MAP:
+        // 处理 mgr 收到的 service map 消息
         handle_service_map(ref_cast<MServiceMap>(m));
         // no users: py_module_registry->notify_all("service_map", "");
+        // 没有用户：py_module_registry->notify_all("service_map", "");
         break;
+    // 处理 mgr 收到的 log 消息
     case MSG_LOG: handle_log(ref_cast<MLog>(m)); break;
     case MSG_KV_DATA:
     {
@@ -628,6 +642,7 @@ bool Mgr::ms_dispatch2(const ref_t<Message>& m)
             else {
                 // before we have created the ActivePyModules, we need to
                 // track the store regions we're monitoring
+                // 在我们创建 ActivePyModules 之前，我们需要跟踪我们正在监控的存储区域
                 if (!msg->incremental) {
                     dout(10) << "full update on " << msg->prefix << dendl;
                     auto p = pre_init_store.lower_bound(msg->prefix);
@@ -659,6 +674,7 @@ bool Mgr::ms_dispatch2(const ref_t<Message>& m)
 }
 
 
+// 处理 mgr 收到的 fs map 消息
 void Mgr::handle_fs_map(ref_t<MFSMap> m)
 {
     ceph_assert(ceph_mutex_is_locked_by_me(lock));
@@ -674,6 +690,9 @@ void Mgr::handle_fs_map(ref_t<MFSMap> m)
     // the new fsmap before we've bothered populating all the resulting
     // daemon_state.  Maybe we should block python land while we're making
     // this kind of update?
+    // 待办事项：调用者（例如来自 Python 端）可能会在我们填充所有生成的
+    // daemon_state 之前看到新的 fsmap。也许我们应该在进行此类更新时
+    // 阻塞 Python 端？
 
     cluster_state.set_fsmap(new_fsmap);
 
@@ -747,16 +766,20 @@ bool Mgr::got_mgr_map(const MgrMap& m)
     return false;
 }
 
+// 处理 mgr 收到的 mgr digest 消息
+// 其中包括 health_json 和 mon_status_json 消息
 void Mgr::handle_mgr_digest(ref_t<MMgrDigest> m)
 {
     dout(10) << m->mon_status_json.length() << dendl;
     dout(10) << m->health_json.length() << dendl;
     cluster_state.load_digest(m.get());
     // no users: py_module_registry->notify_all("mon_status", "");
+    // 没有用户：py_module_registry->notify_all("mon_status", "");
     py_module_registry->notify_all("health", "");
 
     // Hack: use this as a tick/opportunity to prompt python-land that
     // the pgmap might have changed since last time we were here.
+    // 变通方法：利用这个时机/机会来提示 Python 端 pgmap 可能自我们上次到这里以来已经发生了变化。
     py_module_registry->notify_all("pg_summary", "");
     dout(10) << "done." << dendl;
     m.reset();

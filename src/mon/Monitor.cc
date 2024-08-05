@@ -971,6 +971,8 @@ void Monitor::refresh_from_paxos(bool* need_bootstrap)
     for (auto& svc : paxos_service) {
         svc->refresh(need_bootstrap);
     }
+
+    // monitor 中依次调用所有的 paxos service
     for (auto& svc : paxos_service) {
         svc->post_refresh();
     }
@@ -2761,11 +2763,14 @@ void Monitor::log_health(const health_check_map_t& updated, const health_check_m
     const utime_t now = ceph_clock_now();
 
     // FIXME: log atomically as part of @t instead of using clog.
+    // FIXME: 将日志作为 @t 的一部分原子性地记录，而不是使用 clog。
     dout(10) << __func__ << " updated " << updated.checks.size() << " previous " << previous.checks.size() << dendl;
+    // src/common/options 中的 mon_health_log_update_period 的默认值为 5s
     const auto min_log_period = g_conf().get_val<int64_t>("mon_health_log_update_period");
     for (auto& p : updated.checks) {
         auto q = previous.checks.find(p.first);
         bool logged = false;
+        // 如果对应的信息在 previous 中不存在
         if (q == previous.checks.end()) {
             // new
             ostringstream ss;
@@ -2785,6 +2790,9 @@ void Monitor::log_health(const health_check_map_t& updated, const health_check_m
                         // so skip emitting an update of the summary string.
                         // We'll get an update out of tick() later if the check
                         // is still failing.
+                        // 我们最近已经记录了这个日志且严重性未发生变化，
+                        // 因此跳过更新摘要字符串。
+                        // 如果检查仍然失败，我们稍后会从 tick() 中获取更新。
                         continue;
                     }
                 }
@@ -2799,6 +2807,7 @@ void Monitor::log_health(const health_check_map_t& updated, const health_check_m
         }
         // Record the time at which we last logged, so that we can check this
         // when considering whether/when to print update messages.
+        // 记录我们上次记录日志的时间，以便在考虑是否/何时打印更新消息时进行检查。
         if (logged) {
             auto iter = health_check_log_times.find(p.first);
             if (iter == health_check_log_times.end()) {
@@ -2809,7 +2818,10 @@ void Monitor::log_health(const health_check_map_t& updated, const health_check_m
             }
         }
     }
+
+    // 遍历之前检查的信息项目
     for (auto& p : previous.checks) {
+        // 如果 updated 中不存在该项目
         if (!updated.checks.count(p.first)) {
             // cleared
             ostringstream ss;
@@ -2823,6 +2835,7 @@ void Monitor::log_health(const health_check_map_t& updated, const health_check_m
                 clog->info() << "Health check cleared: " << p.first << " (was: " << p.second.summary << ")";
             }
 
+            // 则从 health_check_log_times 中移除对应项目
             if (health_check_log_times.count(p.first)) {
                 health_check_log_times.erase(p.first);
             }
@@ -2832,10 +2845,12 @@ void Monitor::log_health(const health_check_map_t& updated, const health_check_m
     if (previous.checks.size() && updated.checks.size() == 0) {
         // We might be going into a fully healthy state, check
         // other subsystems
+        // 我们可能会进入一个完全健康的状态，检查其他子系统
         bool any_checks = false;
         for (auto& svc : paxos_service) {
             if (&(svc->get_health_checks()) == &(previous)) {
                 // Ignore the ones we're clearing right now
+                // 忽略我们现在正在清除的那些
                 continue;
             }
 

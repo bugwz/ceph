@@ -22,9 +22,13 @@
  * The mgr digest is a way for the mgr to subscribe to things
  * other than the cluster maps, which are needed by
  */
+/**
+ * mgr 摘要是一种让 mgr 订阅集群地图之外的其他事物的方法，这些事物是需要的
+ */
 class MMgrDigest final : public Message
 {
 public:
+    // 包括 mon_status_json 和 health_json 消息
     ceph::buffer::list mon_status_json;
     ceph::buffer::list health_json;
 

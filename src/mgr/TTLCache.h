@@ -22,6 +22,8 @@ protected:
         , misses{0}
         , capacity{size} {};
     std::map<Key, Value> content;
+    // 可以加入 ttl_cache 中的数据类别
+    // 感觉这些数据应该变动比较少，其它的数据可能变动比较大，不应该被加入到 ttl_cache 中
     std::vector<std::string> allowed_keys = {"osd_map", "pg_dump", "pg_stats"};
 
     void mark_miss() { misses++; }

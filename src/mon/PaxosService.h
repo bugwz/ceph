@@ -80,6 +80,11 @@ private:
      *
      * Child must populate this during encode_pending() by calling encode_health().
      */
+    /**
+     * 该服务的健康检查
+     *
+     * 子类必须在 encode_pending() 期间通过调用 encode_health() 来填充此内容。
+     */
     health_check_map_t health_checks;
 
 protected:
@@ -450,6 +455,7 @@ public:
      */
     virtual void tick() {}
 
+    // 编码 health 信息
     void encode_health(const health_check_map_t& next, MonitorDBStore::TransactionRef t)
     {
         using ceph::encode;

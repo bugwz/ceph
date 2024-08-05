@@ -359,9 +359,12 @@ static PyObject* ceph_set_health_checks(BaseMgrModule* self, PyObject* args)
 }
 
 
+// 这个函数的目的是从一个名为 BaseMgrModule 的结构体实例中获取某种状态信息。
 static PyObject* ceph_state_get(BaseMgrModule* self, PyObject* args)
 {
     char* what = NULL;
+    // "s:ceph_state_get" 表示期望从参数元组中解析出一个字符串并将其存储在 what 中。
+    // "s" 表示一个 C 字符串 （char*）， "ceph_state_get" 是错误信息的标签。
     if (!PyArg_ParseTuple(args, "s:ceph_state_get", &what)) {
         return NULL;
     }

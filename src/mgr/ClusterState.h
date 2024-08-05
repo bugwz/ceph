@@ -31,6 +31,9 @@ class MPGStats;
  * Cluster-scope state (things like cluster maps) as opposed
  * to daemon-level state (things like perf counters and smart)
  */
+/**
+ * 集群范围的状态（如集群映射），与守护进程级别的状态（如性能计数器和智能）相对
+ */
 class ClusterState
 {
 protected:

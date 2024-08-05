@@ -315,20 +315,27 @@ health_status_t MgrMonitor::should_warn_about_mgr_down()
 void MgrMonitor::post_paxos_update()
 {
     // are we handling digest subscribers?
+    // 我们在处理摘要订阅者吗？
     if (digest_event) {
         bool send = false;
+        // 如果没有执行过监控检查
         if (prev_health_checks.empty()) {
+            // 初始化监控检查 vector 的大小为 monitor 的 paxos server 数量 
             prev_health_checks.resize(mon.paxos_service.size());
             send = true;
         }
         ceph_assert(prev_health_checks.size() == mon.paxos_service.size());
         for (auto i = 0u; i < prev_health_checks.size(); i++) {
+            // 如果当前的 health 中的信息和上次的不一致，则需要发送该信息给 manager
             const auto& curr = mon.paxos_service[i]->get_health_checks();
             if (!send && curr != prev_health_checks[i]) {
                 send = true;
             }
+            // 更新对应的 health 信息
             prev_health_checks[i] = curr;
         }
+
+        // 如果需要发送最新的数据，则发送给 manager
         if (send) {
             if (is_active()) {
                 send_digests();
@@ -663,6 +670,7 @@ void MgrMonitor::check_sub(Subscription* sub)
         ceph_assert(sub->type == "mgrdigest");
         if (sub->next == 0) {
             // new registration; cancel previous timer
+            // 新注册；取消之前的计时器
             cancel_timer();
         }
         if (digest_event == nullptr) {
@@ -675,6 +683,10 @@ void MgrMonitor::check_sub(Subscription* sub)
  * Handle digest subscriptions separately (outside of check_sub) because
  * they are going to be periodic rather than version-driven.
  */
+/**
+ * 单独处理摘要订阅（在 check_sub 之外），因为它们将是周期性的而不是版本驱动的。
+ */
+// 用于给 manager 发送摘要信息
 void MgrMonitor::send_digests()
 {
     cancel_timer();
@@ -687,10 +699,12 @@ void MgrMonitor::send_digests()
 
     if (!is_active()) {
         // if paxos is currently not active, don't send a digest but reenable timer
+        // 如果 Paxos 当前没有激活，不要发送摘要，而是重新启用计时器
         goto timer;
     }
     dout(10) << __func__ << dendl;
 
+    // 遍历 monitor 中的 mgrdigest 类型的 session ，并向其发送 mgrdigest 信息
     for (auto sub : *(mon.session_map.subs[type])) {
         dout(10) << __func__ << " sending digest to subscriber " << sub->session->con << " "
                  << sub->session->con->get_peer_addr() << dendl;
@@ -1317,7 +1331,9 @@ out:
 void MgrMonitor::init()
 {
     if (digest_event == nullptr) {
-        send_digests();   // To get it to schedule its own event
+        // To get it to schedule its own event
+        // 使其调度自己的事件
+        send_digests();
     }
 }
 

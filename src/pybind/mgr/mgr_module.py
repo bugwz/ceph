@@ -1396,6 +1396,20 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
             All these structures have their own JSON representations: experiment
             or look at the C++ ``dump()`` methods to learn about them.
         """
+        """
+        插件调用此方法从 ceph-mgr 获取集群范围内的命名对象。
+
+        :param str data_name: 有效的获取内容包括 osdmap_crush_map_text、osd_map、osd_map_tree、
+                            osd_map_crush、config、mon_map、fs_map、osd_metadata、pg_summary、
+                            io_rate、pg_dump、df、osd_stats、health、mon_status、devices、
+                            device <devid>、pg_stats、pool_stats、pg_ready、osd_ping_times、
+                            mgr_map、mgr_ips、modified_config_options、service_map、mds_metadata、
+                            have_local_config_map、osd_pool_stats、pg_status。
+
+        注意：
+            所有这些结构都有各自的 JSON 表示形式：可以进行实验或查看 C++ 中的 ``dump()`` 方法来了解它们。
+        """
+        # 这里的调用会走到 static PyObject* ceph_state_get(BaseMgrModule* self, PyObject* args) 函数中
         obj =  self._ceph_get(data_name)
         if isinstance(obj, bytes):
             obj = json.loads(obj)

@@ -656,6 +656,9 @@ public:
     /**
      * Vector holding the Services serviced by this Monitor.
      */
+    /**
+     * 保存由该监视器服务的服务的向量。
+     */
     std::array<std::unique_ptr<PaxosService>, PAXOS_NUM> paxos_service;
 
     class MDSMonitor* mdsmon() { return (class MDSMonitor*)paxos_service[PAXOS_MDSMAP].get(); }

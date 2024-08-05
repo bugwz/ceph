@@ -44,6 +44,7 @@ void ClusterState::set_objecter(Objecter* objecter_)
     objecter = objecter_;
 }
 
+// 更新 mgr 中 fs map 信息
 void ClusterState::set_fsmap(FSMap const& new_fsmap)
 {
     std::lock_guard l(lock);
@@ -51,22 +52,27 @@ void ClusterState::set_fsmap(FSMap const& new_fsmap)
     fsmap = new_fsmap;
 }
 
+// 更新 mgr 中 mgr map 信息
 void ClusterState::set_mgr_map(MgrMap const& new_mgrmap)
 {
     std::lock_guard l(lock);
     mgr_map = new_mgrmap;
 }
 
+// 更新 mgr 中 service map 信息
 void ClusterState::set_service_map(ServiceMap const& new_service_map)
 {
     std::lock_guard l(lock);
     servicemap = new_service_map;
 }
 
+// 更新 mgr 中 mgr digest 信息
 void ClusterState::load_digest(MMgrDigest* m)
 {
     std::lock_guard l(lock);
+    // 更新 health_json 信息
     health_json = std::move(m->health_json);
+    // 更新 mon_status_json 信息
     mon_status_json = std::move(m->mon_status_json);
 }
 

@@ -230,6 +230,7 @@
 #define MSG_MGR_MAP 0x704
 
 // *** ceph-mon(MgrMonitor) -> ceph-mgr
+// monitoe 发送给 manager 的消息
 #define MSG_MGR_DIGEST 0x705
 // *** cephmgr -> ceph-mon
 #define MSG_MON_MGR_REPORT 0x706

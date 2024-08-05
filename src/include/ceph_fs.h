@@ -181,6 +181,7 @@ extern const char* ceph_con_mode_name(int con_mode);
 #define CEPH_MSG_OSD_BACKOFF  61
 
 /* FSMap subscribers (see all MDS clusters at once) */
+/* FSMap 订阅者（查看所有 MDS 集群） */
 #define CEPH_MSG_FS_MAP 45
 /* FSMapUser subscribers (get MDS clusters name->ID mapping) */
 #define CEPH_MSG_FS_MAP_USER 103

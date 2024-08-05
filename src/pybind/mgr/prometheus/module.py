@@ -619,6 +619,9 @@ class Module(MgrModule, OrchestratorClientMixin):
         )
     ]
 
+    # 针对于缓存失效的处理策略
+    # STALE_CACHE_FAIL : 返回报错
+    # STALE_CACHE_RETURN : 返回已经过期或者失效的缓存信息
     STALE_CACHE_FAIL = 'fail'
     STALE_CACHE_RETURN = 'return'
 
@@ -627,10 +630,15 @@ class Module(MgrModule, OrchestratorClientMixin):
         self.metrics = self._setup_static_metrics()
         self.shutdown_event = threading.Event()
         self.collect_lock = threading.Lock()
+        # 这个采集时间是时间间隔的含义
         self.collect_time = 0.0
+        # 收集缓存的默认时间间隔，默认为 15秒
         self.scrape_interval: float = 15.0
+        # 默认是期望启用 cache 的
         self.cache = True
+        # 针对于已经过期或者已经失效的缓存的处理策略，默认是返回报错
         self.stale_cache_strategy: str = self.STALE_CACHE_FAIL
+        # 初始化 cache 的采集的数据为 None
         self.collect_cache: Optional[str] = None
         self.rbd_stats = {
             'pools': {},
@@ -903,28 +911,39 @@ class Module(MgrModule, OrchestratorClientMixin):
         cherrypy.engine.start()
         self.log.info('Engine started.')
 
+    # @profile_method() 语法表明 profile_method 是一个装饰器函数，并且它被应用于 get_health 方法
+    # 装饰器通常用于日志记录、性能分析、权限验证等场景
     @profile_method()
     def get_health(self) -> None:
 
+        # 定义一个获取值的函数
         def _get_value(message: str, delim: str = ' ', word_pos: int = 0) -> Tuple[int, int]:
             """Extract value from message (default is 1st field)"""
+            """从消息中提取值（默认是第一个字段）"""
             v_str = message.split(delim)[word_pos]
             if v_str.isdigit():
                 return int(v_str), 0
             return 0, 1
 
+        # 从 ceph 中获取 json 数据格式的 health 信息
+        # 下面的函数调用十分重要
         health = json.loads(self.get('health')['json'])
         # set overall health
+        # 设置整体健康状态
         self.metrics['health_status'].set(
             health_status_to_number(health['status'])
         )
 
         # Examine the health to see if any health checks triggered need to
         # become a specific metric with a value from the health detail
+        # 检查健康状况，查看是否有任何健康检查触发需要成为
+        # 具有来自健康细节的值的特定指标
         active_healthchecks = health.get('checks', {})
         active_names = active_healthchecks.keys()
 
+        # 遍历 HEALTH_CHECKS 中的 metrics 指标
         for check in HEALTH_CHECKS:
+            # 拼接字符串
             path = 'healthcheck_{}'.format(check.name.lower())
 
             if path in self.metrics:
@@ -937,6 +956,7 @@ class Module(MgrModule, OrchestratorClientMixin):
                     if check.name == "SLOW_OPS":
                         # 42 slow ops, oldest one blocked for 12 sec, daemons [osd.0, osd.3] have
                         # slow ops.
+                        # 42 个慢操作，最老的一个阻塞了 12 秒，守护进程 [osd.0, osd.3] 有慢操作。
                         v, err = _get_value(message)
 
                     if err:
@@ -944,6 +964,7 @@ class Module(MgrModule, OrchestratorClientMixin):
                             "healthcheck %s message format is incompatible and has been dropped",
                             check.name)
                         # drop the metric, so it's no longer emitted
+                        # 删除该指标，因此不再发出
                         del self.metrics[path]
                         continue
                     else:
@@ -955,6 +976,7 @@ class Module(MgrModule, OrchestratorClientMixin):
         self.health_history.check(health)
         for name, info in self.health_history.healthcheck.items():
             v = 1 if info.active else 0
+            # 设置 metrics
             self.metrics['health_detail'].set(
                 v, (
                     name,
@@ -1749,7 +1771,9 @@ class Module(MgrModule, OrchestratorClientMixin):
             self.metrics[k].clear()
 
         # 获取 metrics 信息列表
+        # 获取集群监控信息
         self.get_health()
+        # 
         self.get_df()
         self.get_osd_blocklisted_entries()
         self.get_pool_stats()
@@ -1910,6 +1934,7 @@ class Module(MgrModule, OrchestratorClientMixin):
 
             @staticmethod
             def _metrics(instance: 'Module') -> Optional[str]:
+                # 如果没有启用 cache
                 if not self.cache:
                     self.log.debug('Cache disabled, collecting and returning without cache')
                     cherrypy.response.headers['Content-Type'] = 'text/plain'
@@ -1918,20 +1943,27 @@ class Module(MgrModule, OrchestratorClientMixin):
 
                 # Return cached data if available
                 # 如果缓存数据可用，则返回缓存数据
+                # 如果还没有缓存数据，则返回 503 报错
                 if not instance.collect_cache:
                     raise cherrypy.HTTPError(503, 'No cached data available yet')
 
+                # 定义一个返回缓存中采集数据的函数，以便下面调用，看样子会被调用好几次
                 def respond() -> Optional[str]:
                     assert isinstance(instance, Module)
                     cherrypy.response.headers['Content-Type'] = 'text/plain'
                     return instance.collect_cache
 
+                # 如果采集的时间还没有过期，则返回缓存中存储的采集数据
                 if instance.collect_time < instance.scrape_interval:
                     # Respond if cache isn't stale
+                    # 如果缓存没有过期，则进行响应
                     return respond()
 
+                # 如果配置的缓存过期的策略是 STALE_CACHE_RETURN ， 则即使缓存已经过期了也要返回
                 if instance.stale_cache_strategy == instance.STALE_CACHE_RETURN:
                     # Respond even if cache is stale
+                    # 即使缓存已过期也要响应
+                    # 打印对应的日志， 日志级别是 info
                     instance.log.info(
                         'Gathering data took {:.2f} seconds, metrics are stale for {:.2f} seconds, '
                         'returning metrics from stale cache.'.format(
@@ -1939,10 +1971,14 @@ class Module(MgrModule, OrchestratorClientMixin):
                             instance.collect_time - instance.scrape_interval
                         )
                     )
+                    # 返回已经过期的缓存数据
                     return respond()
 
+                # 如果配置的缓存过期的策略是 STALE_CACHE_FAIL ， 则返回报错信息
                 if instance.stale_cache_strategy == instance.STALE_CACHE_FAIL:
                     # Fail if cache is stale
+                    # 如果缓存是陈旧的，则失败
+                    # 下面的含义是，如果采集
                     msg = (
                         'Gathering data took {:.2f} seconds, metrics are stale for {:.2f} seconds, '
                         'returning "service unavailable".'.format(
@@ -1950,11 +1986,15 @@ class Module(MgrModule, OrchestratorClientMixin):
                             instance.collect_time - instance.scrape_interval,
                         )
                     )
+                    # 打印对应的错误日志， 日志级别是 error
                     instance.log.error(msg)
+                    # 返回报错信息
                     raise cherrypy.HTTPError(503, msg)
                 return None
 
         # Make the cache timeout for collecting configurable
+        # 使收集缓存的超时时间可配置
+        # 获取 module 中关于搜集缓存的时间间隔
         self.scrape_interval = cast(float, self.get_localized_module_option('scrape_interval'))
 
         self.stale_cache_strategy = cast(
@@ -1972,6 +2012,7 @@ class Module(MgrModule, OrchestratorClientMixin):
             (server_addr, server_port)
         )
 
+        # 获取 module 中配置的 cache 配置，默认为 True
         self.cache = cast(bool, self.get_localized_module_option('cache', True))
         if self.cache:
             self.log.info('Cache enabled')
