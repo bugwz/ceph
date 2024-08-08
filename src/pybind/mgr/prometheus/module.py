@@ -926,7 +926,9 @@ class Module(MgrModule, OrchestratorClientMixin):
             return 0, 1
 
         # 从 ceph 中获取 json 数据格式的 health 信息
-        # 下面的函数调用十分重要
+        # 
+        # 获取 'health' 信息的调用链路最终会执行到 src/mgr/ActivePyModules.cc 文件中的
+        # PyObject* ActivePyModules::get_python(const std::string& what) 函数中
         health = json.loads(self.get('health')['json'])
         # set overall health
         # 设置整体健康状态

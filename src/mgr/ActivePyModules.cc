@@ -482,6 +482,7 @@ PyObject* ActivePyModules::get_python(const std::string& what)
     // self.get('health') 调用
     else if (what == "health") {
         without_gil_t no_gil;
+        // health_json 是在 mgr 接收到来自 monitor 的 MSG_MGR_DIGEST 类型的消息后更新的
         cluster_state.with_health([&](const ceph::bufferlist& health_json) {
             no_gil.acquire_gil();
             f.dump_string("json", health_json.to_str());
