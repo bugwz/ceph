@@ -70,7 +70,9 @@ enum
     l_bluestore_first = 732430,
     // space utilization stats
     //****************************************
+    // ceph_bluestore_bluestore_allocated
     l_bluestore_allocated,
+    // ceph_bluestore_bluestore_stored
     l_bluestore_stored,
     l_bluestore_fragmentation,
     l_bluestore_alloc_unit,
@@ -78,61 +80,119 @@ enum
 
     // Update op processing state latencies
     //****************************************
+    // ceph_bluestore_state_prepare_lat_sum
+    // ceph_bluestore_state_prepare_lat_count
     l_bluestore_state_prepare_lat,
+    // ceph_bluestore_state_aio_wait_lat_sum
+    // ceph_bluestore_state_aio_wait_lat_count
     l_bluestore_state_aio_wait_lat,
+    // ceph_bluestore_state_io_done_lat_sum
+    // ceph_bluestore_state_io_done_lat_count
     l_bluestore_state_io_done_lat,
+    // ceph_bluestore_state_kv_queued_lat_sum
+    // ceph_bluestore_state_kv_queued_lat_count
     l_bluestore_state_kv_queued_lat,
+    // ceph_bluestore_state_kv_commiting_lat_sum
+    // ceph_bluestore_state_kv_commiting_lat_count
     l_bluestore_state_kv_committing_lat,
+    // ceph_bluestore_state_kv_done_lat_sum
+    // ceph_bluestore_state_kv_done_lat_count
     l_bluestore_state_kv_done_lat,
+    // ceph_bluestore_state_finishing_lat_sum
+    // ceph_bluestore_state_finishing_lat_count
     l_bluestore_state_finishing_lat,
+    // ceph_bluestore_state_done_lat_sum
+    // ceph_bluestore_state_done_lat_count
     l_bluestore_state_done_lat,
 
+    // ceph_bluestore_state_deferred_queued_lat_sum
+    // ceph_bluestore_state_deferred_queued_lat_count
     l_bluestore_state_deferred_queued_lat,
+    // ceph_bluestore_state_deferred_aio_wait_lat_sum
+    // ceph_bluestore_state_deferred_aio_wait_lat_count
     l_bluestore_state_deferred_aio_wait_lat,
+    // ceph_bluestore_state_deferred_cleanup_lat_sum
+    // ceph_bluestore_state_deferred_cleanup_lat_count
     l_bluestore_state_deferred_cleanup_lat,
 
+    // ceph_bluestore_commit_lat_sum
+    // ceph_bluestore_commit_lat_count
     l_bluestore_commit_lat,
     //****************************************
 
     // Update Transaction stats
     //****************************************
+    // ceph_bluestore_throttle_lat_sum
+    // ceph_bluestore_throttle_lat_count
     l_bluestore_throttle_lat,
+    // ceph_bluestore_submit_lat_sum
+    // ceph_bluestore_submit_lat_count
     l_bluestore_submit_lat,
+    // ceph_bluestore_bluestore_txc
     l_bluestore_txc,
     //****************************************
 
     // Read op stats
     //****************************************
+    // ceph_bluestore_read_onode_meta_lat_sum
+    // ceph_bluestore_read_onode_meta_lat_count
     l_bluestore_read_onode_meta_lat,
+    // ceph_bluestore_read_wait_aio_lat_sum
+    // ceph_bluestore_read_wait_aio_lat_count
     l_bluestore_read_wait_aio_lat,
+    // ceph_bluestore_csum_lat_sum
+    // ceph_bluestore_csum_lat_count
     l_bluestore_csum_lat,
+    // ceph_bluestore_bluestore_read_eio
     l_bluestore_read_eio,
+    // ceph_bluestore_bluestore_reads_with_retries
     l_bluestore_reads_with_retries,
+    // ceph_bluestore_read_lat_sum
+    // ceph_bluestore_read_lat_count
     l_bluestore_read_lat,
     //****************************************
 
     // kv_thread latencies
     //****************************************
+    // ceph_bluestore_kv_flush_lat_sum
+    // ceph_bluestore_kv_flush_lat_count
     l_bluestore_kv_flush_lat,
+    // ceph_bluestore_kv_commit_lat_sum
+    // ceph_bluestore_kv_commit_lat_count
     l_bluestore_kv_commit_lat,
+    // ceph_bluestore_kv_sync_lat_sum
+    // ceph_bluestore_kv_sync_lat_count
     l_bluestore_kv_sync_lat,
+    // ceph_bluestore_kv_final_lat_sum
+    // ceph_bluestore_kv_final_lat_count
     l_bluestore_kv_final_lat,
     //****************************************
 
     // write op stats
     //****************************************
+    // ceph_bluestore_bluestore_write_big
     l_bluestore_write_big,
+    // ceph_bluestore_bluestore_write_big_bytes
     l_bluestore_write_big_bytes,
+    // ceph_bluestore_bluestore_write_big_blobs
     l_bluestore_write_big_blobs,
+    // ceph_bluestore_bluestore_write_big_deferred
     l_bluestore_write_big_deferred,
 
+    // ceph_bluestore_bluestore_write_small
     l_bluestore_write_small,
+    // ceph_bluestore_bluestore_write_small_bytes
     l_bluestore_write_small_bytes,
+    // ceph_bluestore_bluestore_write_small_unused
     l_bluestore_write_small_unused,
+    // ceph_bluestore_bluestore_write_small_pre_read
     l_bluestore_write_small_pre_read,
 
+    // ceph_bluestore_write_pad_bytes
     l_bluestore_write_pad_bytes,
+    // ceph_bluestore_write_penalty_read_ops
     l_bluestore_write_penalty_read_ops,
+    // ceph_bluestore_bluestore_write_new
     l_bluestore_write_new,
 
     l_bluestore_issued_deferred_writes,
@@ -148,40 +208,65 @@ enum
 
     // compressions stats
     //****************************************
+    // ceph_bluestore_bluestore_compressed
     l_bluestore_compressed,
+    // ceph_bluestore_bluestore_compressed_allocated
     l_bluestore_compressed_allocated,
+    // ceph_bluestore_bluestore_compressed_original
     l_bluestore_compressed_original,
+    // ceph_bluestore_compress_lat_sum
+    // ceph_bluestore_compress_lat_count
     l_bluestore_compress_lat,
+    // ceph_bluestore_decompress_lat_sum
+    // ceph_bluestore_decompress_lat_count
     l_bluestore_decompress_lat,
+    // ceph_bluestore_compress_success_count
     l_bluestore_compress_success_count,
+    // ceph_bluestore_compress_rejected_count
     l_bluestore_compress_rejected_count,
     //****************************************
 
     // onode cache stats
     //****************************************
+    // ceph_bluestore_bluestore_onodes
     l_bluestore_onodes,
+    // ceph_bluestore_bluestore_pinned_onodes
     l_bluestore_pinned_onodes,
+    // ceph_bluestore_onode_hits
     l_bluestore_onode_hits,
+    // ceph_bluestore_onode_misses
     l_bluestore_onode_misses,
+    // ceph_bluestore_onode_shard_hits
     l_bluestore_onode_shard_hits,
+    // ceph_bluestore_bluestore_onode_shard_misses
     l_bluestore_onode_shard_misses,
+    // ceph_bluestore_bluestore_extents
     l_bluestore_extents,
+    // ceph_bluestore_bluestore_blobs
     l_bluestore_blobs,
     //****************************************
 
     // buffer cache stats
     //****************************************
+    // ceph_bluestore_bluestore_buffers
     l_bluestore_buffers,
+    // ceph_bluestore_bluestore_buffer_bytes
     l_bluestore_buffer_bytes,
+    // ceph_bluestore_bluestore_buffer_hit_bytes
     l_bluestore_buffer_hit_bytes,
+    // ceph_bluestore_bluestore_buffer_miss_bytes
     l_bluestore_buffer_miss_bytes,
     //****************************************
 
     // internal stats
     //****************************************
+    // ceph_bluestore_bluestore_onode_reshard
     l_bluestore_onode_reshard,
+    // ceph_bluestore_bluestore_blob_split
     l_bluestore_blob_split,
+    // ceph_bluestore_bluestore_extent_compress
     l_bluestore_extent_compress,
+    // ceph_bluestore_bluestore_gc_merged
     l_bluestore_gc_merged,
     //****************************************
 
@@ -194,14 +279,30 @@ enum
 
     // other client ops latencies
     //****************************************
+    // ceph_bluestore_omap_seek_to_first_lat_sum
+    // ceph_bluestore_omap_seek_to_first_lat_count
     l_bluestore_omap_seek_to_first_lat,
+    // ceph_bluestore_omap_upper_bound_lat_sum
+    // ceph_bluestore_omap_upper_bound_lat_count
     l_bluestore_omap_upper_bound_lat,
+    // ceph_bluestore_omap_lower_bound_lat_sum
+    // ceph_bluestore_omap_lower_bound_lat_count
     l_bluestore_omap_lower_bound_lat,
+    // ceph_bluestore_omap_next_lat_sum
+    // ceph_bluestore_omap_next_lat_count
     l_bluestore_omap_next_lat,
+    // ceph_bluestore_omap_get_keys_lat_sum
+    // ceph_bluestore_omap_get_keys_lat_count
     l_bluestore_omap_get_keys_lat,
+    // ceph_bluestore_omap_get_values_lat_sum
+    // ceph_bluestore_omap_get_values_lat_count
     l_bluestore_omap_get_values_lat,
     l_bluestore_omap_clear_lat,
+    // ceph_bluestore_clist_lat_sum
+    // ceph_bluestore_clist_lat_count
     l_bluestore_clist_lat,
+    // ceph_bluestore_remove_lat_sum
+    // ceph_bluestore_remove_lat_count
     l_bluestore_remove_lat,
     l_bluestore_truncate_lat,
     //****************************************

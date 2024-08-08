@@ -352,7 +352,9 @@ private:
     enum
     {
         l_cct_first,
+        // ceph_cct_total_workers
         l_cct_total_workers,
+        // ceph_cct_unhealthy_workers
         l_cct_unhealthy_workers,
         l_cct_last
     };

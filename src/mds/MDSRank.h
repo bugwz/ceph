@@ -47,22 +47,37 @@
 enum
 {
     l_mds_first = 2000,
+    // ceph_mds_request
     l_mds_request,
+    // ceph_mds_reply
     l_mds_reply,
+    // ceph_mds_reply_latency_sum
+    // ceph_mds_reply_latency_count
     l_mds_reply_latency,
     l_mds_slow_reply,
+    // ceph_mds_forward
     l_mds_forward,
     l_mds_dir_fetch_complete,
     l_mds_dir_fetch_keys,
+    // ceph_mds_dir_commit
     l_mds_dir_commit,
+    // ceph_mds_dir_split
     l_mds_dir_split,
+    // ceph_mds_dir_merge
     l_mds_dir_merge,
+    // ceph_mds_inodes
     l_mds_inodes,
+    // ceph_mds_inodes_top
     l_mds_inodes_top,
+    // ceph_mds_inodes_bottom
     l_mds_inodes_bottom,
+    // ceph_mds_inodes_pin_tail
     l_mds_inodes_pin_tail,
+    // ceph_mds_inodes_pinned
     l_mds_inodes_pinned,
+    // ceph_mds_inodes_expired
     l_mds_inodes_expired,
+    // ceph_mds_inodes_with_caps
     l_mds_inodes_with_caps,
     l_mds_caps,
     l_mds_subtrees,
@@ -73,35 +88,64 @@ enum
     l_mds_traverse_dir_fetch,
     l_mds_traverse_remote_ino,
     l_mds_traverse_lock,
+    // ceph_mds_load_cent
     l_mds_load_cent,
     l_mds_dispatch_queue_len,
+    // ceph_mds_exported
     l_mds_exported,
+    // ceph_mds_exported_inodes
     l_mds_exported_inodes,
+    // ceph_mds_imported
     l_mds_imported,
+    // ceph_mds_imported_inodes
     l_mds_imported_inodes,
+    // ceph_mds_openino_dir_fetch
     l_mds_openino_dir_fetch,
+    // ceph_mds_openino_backtrace_fetch
     l_mds_openino_backtrace_fetch,
+    // ceph_mds_openino_peer_discover
     l_mds_openino_peer_discover,
+    // ceph_mds_root_rfiles
     l_mds_root_rfiles,
+    // ceph_mds_root_rbytes
     l_mds_root_rbytes,
+    // ceph_mds_root_rsnaps
     l_mds_root_rsnaps,
+    // ceph_mds_scrub_backtrace_fetch
     l_mds_scrub_backtrace_fetch,
+    // ceph_mds_scrub_set_tag
     l_mds_scrub_set_tag,
+    // ceph_mds_scrub_backtrace_repaired
     l_mds_scrub_backtrace_repaired,
+    // ceph_mds_scrub_inotable_repaired
     l_mds_scrub_inotable_repaired,
+    // ceph_mds_scrub_dir_inodes
     l_mds_scrub_dir_inodes,
+    // ceph_mds_scrub_dir_base_inodes
     l_mds_scrub_dir_base_inodes,
+    // ceph_mds_scrub_dirfrag_rstats
     l_mds_scrub_dirfrag_rstats,
+    // ceph_mds_scrub_file_inodes
     l_mds_scrub_file_inodes,
+    // ceph_mds_handle_inode_file_caps
     l_mdss_handle_inode_file_caps,
+    // ceph_mds_ceph_cap_op_revoke
     l_mdss_ceph_cap_op_revoke,
+    // ceph_mds_ceph_cap_op_grant
     l_mdss_ceph_cap_op_grant,
+    // ceph_mds_ceph_cap_op_trunc
     l_mdss_ceph_cap_op_trunc,
+    // ceph_mds_ceph_cap_op_flushsnap_ack
     l_mdss_ceph_cap_op_flushsnap_ack,
+    // ceph_mds_ceph_cap_op_flush_ack
     l_mdss_ceph_cap_op_flush_ack,
+    // ceph_mds_handle_client_caps
     l_mdss_handle_client_caps,
+    // ceph_mds_handle_client_caps_dirty
     l_mdss_handle_client_caps_dirty,
+    // ceph_mds_handle_client_cap_release
     l_mdss_handle_client_cap_release,
+    // ceph_mds_process_request_cap_release
     l_mdss_process_request_cap_release,
     l_mds_last,
 };

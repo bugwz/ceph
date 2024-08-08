@@ -80,37 +80,55 @@ enum
     l_mdc_dir_handle_discover,
 
     // How many inodes currently in stray dentries
+    // ceph_mds_cache_num_strays
     l_mdc_num_strays,
     // How many stray dentries are currently delayed for purge due to refs
+    // ceph_mds_cache_num_strays_delayed
     l_mdc_num_strays_delayed,
     // How many stray dentries are currently being enqueued for purge
+    // ceph_mds_cache_num_strays_enqueuing
     l_mdc_num_strays_enqueuing,
 
     // How many dentries have ever been added to stray dir
+    // ceph_mds_cache_strays_created
     l_mdc_strays_created,
     // How many dentries have been passed on to PurgeQueue
+    // ceph_mds_cache_strays_enqueued
     l_mdc_strays_enqueued,
     // How many strays have been reintegrated?
+    // ceph_mds_cache_strays_reintegrated
     l_mdc_strays_reintegrated,
     // How many strays have been migrated?
+    // ceph_mds_cache_strays_migrated
     l_mdc_strays_migrated,
 
     // How many inode sizes currently being recovered
+    // ceph_mds_cache_num_recovering_processing
     l_mdc_num_recovering_processing,
     // How many inodes currently waiting to have size recovered
+    // ceph_mds_cache_num_recovering_enqueued
     l_mdc_num_recovering_enqueued,
     // How many inodes waiting with elevated priority for recovery
+    // ceph_mds_cache_num_recovering_prioritized
     l_mdc_num_recovering_prioritized,
     // How many inodes ever started size recovery
+    // ceph_mds_cache_recovery_started
     l_mdc_recovery_started,
     // How many inodes ever completed size recovery
+    // ceph_mds_cache_recovery_completed
     l_mdc_recovery_completed,
 
+    // ceph_mds_cache_ireq_enqueue_scrub
     l_mdss_ireq_enqueue_scrub,
+    // ceph_mds_cache_ireq_exportdir
     l_mdss_ireq_exportdir,
+    // ceph_mds_cache_ireq_flush
     l_mdss_ireq_flush,
+    // ceph_mds_cache_ireq_fragmentdir
     l_mdss_ireq_fragmentdir,
+    // ceph_mds_cache_ireq_fragstats
     l_mdss_ireq_fragstats,
+    // ceph_mds_cache_ireq_inodestats
     l_mdss_ireq_inodestats,
 
     l_mdc_last,

@@ -21,47 +21,75 @@ class Allocator;
 enum
 {
     l_bluefs_first = 732600,
+    // ceph_bluefs_db_total_bytes
     l_bluefs_db_total_bytes,
+    // ceph_bluefs_db_used_bytes
     l_bluefs_db_used_bytes,
+    // ceph_bluefs_wal_total_bytes
     l_bluefs_wal_total_bytes,
+    // ceph_bluefs_wal_used_bytes
     l_bluefs_wal_used_bytes,
+    // ceph_bluefs_slow_total_bytes
     l_bluefs_slow_total_bytes,
+    // ceph_bluefs_slow_used_bytes
     l_bluefs_slow_used_bytes,
+    // ceph_bluefs_num_files
     l_bluefs_num_files,
+    // ceph_bluefs_log_bytes
     l_bluefs_log_bytes,
+    // ceph_bluefs_log_compactions
     l_bluefs_log_compactions,
     l_bluefs_log_write_count,
+    // ceph_bluefs_logged_bytes
     l_bluefs_logged_bytes,
+    // ceph_bluefs_files_written_wal
     l_bluefs_files_written_wal,
+    // ceph_bluefs_files_written_sst
     l_bluefs_files_written_sst,
     l_bluefs_write_count_wal,
     l_bluefs_write_count_sst,
+    // ceph_bluefs_bytes_written_wal
     l_bluefs_bytes_written_wal,
+    // ceph_bluefs_bytes_written_sst
     l_bluefs_bytes_written_sst,
+    // ceph_bluefs_bytes_written_slow
     l_bluefs_bytes_written_slow,
+    // ceph_bluefs_max_bytes_wal
     l_bluefs_max_bytes_wal,
+    // ceph_bluefs_max_bytes_db
     l_bluefs_max_bytes_db,
+    // ceph_bluefs_max_bytes_slow
     l_bluefs_max_bytes_slow,
     l_bluefs_main_alloc_unit,
     l_bluefs_db_alloc_unit,
     l_bluefs_wal_alloc_unit,
+    // ceph_bluefs_read_random_count
     l_bluefs_read_random_count,
+    // ceph_bluefs_read_random_bytes
     l_bluefs_read_random_bytes,
+    // ceph_bluefs_read_random_disk_count
     l_bluefs_read_random_disk_count,
+    // ceph_bluefs_read_random_disk_bytes
     l_bluefs_read_random_disk_bytes,
     l_bluefs_read_random_disk_bytes_wal,
     l_bluefs_read_random_disk_bytes_db,
     l_bluefs_read_random_disk_bytes_slow,
+    // ceph_bluefs_read_random_buffer_count
     l_bluefs_read_random_buffer_count,
+    // ceph_bluefs_read_random_buffer_bytes
     l_bluefs_read_random_buffer_bytes,
+    // ceph_bluefs_read_count
     l_bluefs_read_count,
+    // ceph_bluefs_read_bytes
     l_bluefs_read_bytes,
     l_bluefs_read_disk_count,
     l_bluefs_read_disk_bytes,
     l_bluefs_read_disk_bytes_wal,
     l_bluefs_read_disk_bytes_db,
     l_bluefs_read_disk_bytes_slow,
+    // ceph_bluefs_read_prefetch_count
     l_bluefs_read_prefetch_count,
+    // ceph_bluefs_read_prefetch_bytes
     l_bluefs_read_prefetch_bytes,
     l_bluefs_write_count,
     l_bluefs_write_disk_count,
@@ -70,7 +98,9 @@ enum
     l_bluefs_compaction_lock_lat,
     l_bluefs_alloc_shared_dev_fallbacks,
     l_bluefs_alloc_shared_size_fallbacks,
+    // ceph_bluefs_read_zeros_candidate
     l_bluefs_read_zeros_candidate,
+    // ceph_bluefs_read_zeros_errors
     l_bluefs_read_zeros_errors,
     l_bluefs_last,
 };

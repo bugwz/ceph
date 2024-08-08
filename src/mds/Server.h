@@ -43,41 +43,104 @@ class MetricsHandler;
 enum
 {
     l_mdss_first = 1000,
+    // ceph_mds_server_dispatch_client_request
     l_mdss_dispatch_client_request,
+    // ceph_mds_server_dispatch_server_request
     l_mdss_dispatch_peer_request,
+    // ceph_mds_server_handle_client_request
     l_mdss_handle_client_request,
+    // ceph_mds_server_handle_client_session
     l_mdss_handle_client_session,
+    // ceph_mds_server_handle_peer_request
     l_mdss_handle_peer_request,
+    // ceph_mds_server_req_create_latency_sum
+    // ceph_mds_server_req_create_latency_count
     l_mdss_req_create_latency,
+    // ceph_mds_server_req_getattr_latency_sum
+    // ceph_mds_server_req_getattr_latency_count
     l_mdss_req_getattr_latency,
+    // ceph_mds_server_req_getfilelock_latency_sum
+    // ceph_mds_server_req_getfilelock_latency_count
     l_mdss_req_getfilelock_latency,
+    // ceph_mds_server_req_link_latency_sum
+    // ceph_mds_server_req_link_latency_count
     l_mdss_req_link_latency,
+    // ceph_mds_server_req_lookup_latency_sum
+    // ceph_mds_server_req_lookup_latency_count
     l_mdss_req_lookup_latency,
+    // ceph_mds_server_req_lookuphash_latency_sum
+    // ceph_mds_server_req_lookuphash_latency_count
     l_mdss_req_lookuphash_latency,
+    // ceph_mds_server_req_lookupino_latency_sum
+    // ceph_mds_server_req_lookupino_latency_count
     l_mdss_req_lookupino_latency,
+    // ceph_mds_server_req_lookupname_latency_sum
+    // ceph_mds_server_req_lookupname_latency_count
     l_mdss_req_lookupname_latency,
+    // ceph_mds_server_req_lookupparent_latency_sum
+    // ceph_mds_server_req_lookupparent_latency_count
     l_mdss_req_lookupparent_latency,
+    // ceph_mds_server_req_lookupsnap_latency_sum
+    // ceph_mds_server_req_lookupsnap_latency_count
     l_mdss_req_lookupsnap_latency,
+    // ceph_mds_server_req_lssnap_latency_sum
+    // ceph_mds_server_req_lssnap_latency_count
     l_mdss_req_lssnap_latency,
+    // ceph_mds_server_req_mkdir_latency_sum
+    // ceph_mds_server_req_mkdir_latency_count
     l_mdss_req_mkdir_latency,
+    // ceph_mds_server_req_mknod_latency_sum
+    // ceph_mds_server_req_mknod_latency_count
     l_mdss_req_mknod_latency,
+    // ceph_mds_server_req_mksnap_latency_sum
+    // ceph_mds_server_req_mksnap_latency_count
     l_mdss_req_mksnap_latency,
+    // ceph_mds_server_req_open_latency_sum
+    // ceph_mds_server_req_open_latency_count
     l_mdss_req_open_latency,
+    // ceph_mds_server_req_readdir_latency_sum
+    // ceph_mds_server_req_readdir_latency_count
     l_mdss_req_readdir_latency,
+    // ceph_mds_server_req_rename_latency_sum
+    // ceph_mds_server_req_rename_latency_count
     l_mdss_req_rename_latency,
+    // ceph_mds_server_req_renamesnap_latency_sum
+    // ceph_mds_server_req_renamesnap_latency_count
     l_mdss_req_renamesnap_latency,
     l_mdss_req_snapdiff_latency,
+    // ceph_mds_server_req_rmdir_latency_sum
+    // ceph_mds_server_req_rmdir_latency_count
     l_mdss_req_rmdir_latency,
+    // ceph_mds_server_req_rmsnap_latency_sum
+    // ceph_mds_server_req_rmsnap_latency_count
     l_mdss_req_rmsnap_latency,
+    // ceph_mds_server_req_rmxattr_latency_sum
+    // ceph_mds_server_req_rmxattr_latency_count
     l_mdss_req_rmxattr_latency,
+    // ceph_mds_server_req_setattr_latency_sum
+    // ceph_mds_server_req_setattr_latency_count
     l_mdss_req_setattr_latency,
+    // ceph_mds_server_req_setdirlayout_latency_sum
+    // ceph_mds_server_req_setdirlayout_latency_count
     l_mdss_req_setdirlayout_latency,
+    // ceph_mds_server_req_setfilelock_latency_sum
+    // ceph_mds_server_req_setfilelock_latency_count
     l_mdss_req_setfilelock_latency,
+    // ceph_mds_server_req_setlayout_latency_sum
+    // ceph_mds_server_req_setlayout_latency_count
     l_mdss_req_setlayout_latency,
+    // ceph_mds_server_req_setxattr_latency_sum
+    // ceph_mds_server_req_setxattr_latency_count
     l_mdss_req_setxattr_latency,
+    // ceph_mds_server_req_symlink_latency_sum
+    // ceph_mds_server_req_symlink_latency_count
     l_mdss_req_symlink_latency,
+    // ceph_mds_server_req_unlink_latency_sum
+    // ceph_mds_server_req_unlink_latency_count
     l_mdss_req_unlink_latency,
+    // ceph_mds_server_cap_revoke_eviction
     l_mdss_cap_revoke_eviction,
+    // ceph_mds_server_cap_acquisition_throttle
     l_mdss_cap_acquisition_throttle,
     l_mdss_req_getvxattr_latency,
     l_mdss_last,

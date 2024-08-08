@@ -60,24 +60,43 @@ using namespace TOPNSPC::common;
 enum
 {
     l_cluster_first = 555000,
+    // ceph_cluster_num_mon
     l_cluster_num_mon,
+    // ceph_cluster_num_mon_quorum
     l_cluster_num_mon_quorum,
+    // ceph_cluster_num_osd
     l_cluster_num_osd,
+    // ceph_cluster_num_osd_up
     l_cluster_num_osd_up,
+    // ceph_cluster_num_osd_in
     l_cluster_num_osd_in,
+    // ceph_cluster_osd_epoch
     l_cluster_osd_epoch,
+    // ceph_cluster_osd_bytes
     l_cluster_osd_bytes,
+    // ceph_cluster_osd_bytes_used
     l_cluster_osd_bytes_used,
+    // ceph_cluster_osd_bytes_avail
     l_cluster_osd_bytes_avail,
+    // ceph_cluster_num_pool
     l_cluster_num_pool,
+    // ceph_cluster_num_pg
     l_cluster_num_pg,
+    // ceph_cluster_num_pg_active_clean
     l_cluster_num_pg_active_clean,
+    // ceph_cluster_num_pg_active
     l_cluster_num_pg_active,
+    // ceph_cluster_num_pg_peering
     l_cluster_num_pg_peering,
+    // ceph_cluster_num_object
     l_cluster_num_object,
+    // ceph_cluster_num_object_degraded
     l_cluster_num_object_degraded,
+    // ceph_cluster_num_object_misplaced
     l_cluster_num_object_misplaced,
+    // ceph_cluster_num_object_unfound
     l_cluster_num_object_unfound,
+    // ceph_cluster_num_bytes
     l_cluster_num_bytes,
     l_cluster_last,
 };

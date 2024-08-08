@@ -190,19 +190,61 @@ class NetworkStack;
 enum
 {
     l_msgr_first = 94000,
+    // ceph_AsyncMessenger_Worker_0_msgr_recv_messages
+    // ceph_AsyncMessenger_Worker_1_msgr_recv_messages
+    // ceph_AsyncMessenger_Worker_2_msgr_recv_messages
     l_msgr_recv_messages,
+    // ceph_AsyncMessenger_Worker_0_msgr_send_messages
+    // ceph_AsyncMessenger_Worker_1_msgr_send_messages
+    // ceph_AsyncMessenger_Worker_2_msgr_send_messages
     l_msgr_send_messages,
+    // ceph_AsyncMessenger_Worker_0_msgr_recv_bytes
+    // ceph_AsyncMessenger_Worker_1_msgr_recv_bytes
+    // ceph_AsyncMessenger_Worker_2_msgr_recv_bytes
     l_msgr_recv_bytes,
+    // ceph_AsyncMessenger_Worker_0_msgr_send_bytes
+    // ceph_AsyncMessenger_Worker_1_msgr_send_bytes
+    // ceph_AsyncMessenger_Worker_2_msgr_send_bytes
     l_msgr_send_bytes,
+    // ceph_AsyncMessenger_Worker_0_msgr_created_connections
+    // ceph_AsyncMessenger_Worker_1_msgr_created_connections
+    // ceph_AsyncMessenger_Worker_2_msgr_created_connections
     l_msgr_created_connections,
+    // ceph_AsyncMessenger_Worker_0_msgr_active_connections
+    // ceph_AsyncMessenger_Worker_1_msgr_active_connections
+    // ceph_AsyncMessenger_Worker_2_msgr_active_connections
     l_msgr_active_connections,
 
+    // ceph_AsyncMessenger_Worker_0_msgr_running_total_time
+    // ceph_AsyncMessenger_Worker_1_msgr_running_total_time
+    // ceph_AsyncMessenger_Worker_2_msgr_running_total_time
     l_msgr_running_total_time,
+    // ceph_AsyncMessenger_Worker_0_msgr_running_send_time
+    // ceph_AsyncMessenger_Worker_1_msgr_running_send_time
+    // ceph_AsyncMessenger_Worker_2_msgr_running_send_time
     l_msgr_running_send_time,
+    // ceph_AsyncMessenger_Worker_0_msgr_running_recv_time
+    // ceph_AsyncMessenger_Worker_1_msgr_running_recv_time
+    // ceph_AsyncMessenger_Worker_2_msgr_running_recv_time
     l_msgr_running_recv_time,
+    // ceph_AsyncMessenger_Worker_0_msgr_running_fast_dispatch_time
+    // ceph_AsyncMessenger_Worker_1_msgr_running_fast_dispatch_time
+    // ceph_AsyncMessenger_Worker_2_msgr_running_fast_dispatch_time
     l_msgr_running_fast_dispatch_time,
 
+    // ceph_AsyncMessenger_Worker_0_msgr_send_messages_queue_lat_sum
+    // ceph_AsyncMessenger_Worker_1_msgr_send_messages_queue_lat_sum
+    // ceph_AsyncMessenger_Worker_2_msgr_send_messages_queue_lat_sum
+    // ceph_AsyncMessenger_Worker_0_msgr_send_messages_queue_lat_count
+    // ceph_AsyncMessenger_Worker_1_msgr_send_messages_queue_lat_count
+    // ceph_AsyncMessenger_Worker_2_msgr_send_messages_queue_lat_count
     l_msgr_send_messages_queue_lat,
+    // ceph_AsyncMessenger_Worker_0_msgr_handle_ack_lat_sum
+    // ceph_AsyncMessenger_Worker_1_msgr_handle_ack_lat_sum
+    // ceph_AsyncMessenger_Worker_2_msgr_handle_ack_lat_sum
+    // ceph_AsyncMessenger_Worker_0_msgr_handle_ack_lat_count
+    // ceph_AsyncMessenger_Worker_1_msgr_handle_ack_lat_count
+    // ceph_AsyncMessenger_Worker_2_msgr_handle_ack_lat_count
     l_msgr_handle_ack_lat,
 
     l_msgr_recv_encrypted_bytes,
