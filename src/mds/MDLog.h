@@ -20,22 +20,40 @@
 enum
 {
     l_mdl_first = 5000,
+    // ceph_mds_log_evadd
     l_mdl_evadd,
+    // ceph_mds_log_evex
     l_mdl_evex,
+    // ceph_mds_log_evtrm
     l_mdl_evtrm,
+    // ceph_mds_log_ev
     l_mdl_ev,
+    // ceph_mds_log_evexg
     l_mdl_evexg,
+    // ceph_mds_log_evexd
     l_mdl_evexd,
+    // ceph_mds_log_segadd
     l_mdl_segadd,
+    // ceph_mds_log_segex
     l_mdl_segex,
+    // ceph_mds_log_segtrm
     l_mdl_segtrm,
+    // ceph_mds_log_seg
     l_mdl_seg,
+    // ceph_mds_log_segexg
     l_mdl_segexg,
+    // ceph_mds_log_segexd
     l_mdl_segexd,
+    // ceph_mds_log_expos
     l_mdl_expos,
+    // ceph_mds_log_wrpos
     l_mdl_wrpos,
+    // ceph_mds_log_rdpos
     l_mdl_rdpos,
+    // ceph_mds_log_jlat_sum
+    // ceph_mds_log_jlat_count
     l_mdl_jlat,
+    // ceph_mds_log_replayed
     l_mdl_replayed,
     l_mdl_last,
 };

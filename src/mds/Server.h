@@ -142,6 +142,8 @@ enum
     l_mdss_cap_revoke_eviction,
     // ceph_mds_server_cap_acquisition_throttle
     l_mdss_cap_acquisition_throttle,
+    // ceph_mds_server_req_getvxattr_latency_sum
+    // ceph_mds_server_req_getvxattr_latency_count
     l_mdss_req_getvxattr_latency,
     l_mdss_last,
 };
