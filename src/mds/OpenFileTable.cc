@@ -26,9 +26,13 @@
 enum
 {
     l_oft_first = 1000000,
+    // ceph_oft_omap_total_objs
     l_oft_omap_total_objs,
+    // ceph_oft_omap_total_kv_pairs
     l_oft_omap_total_kv_pairs,
+    // ceph_oft_omap_total_updates
     l_oft_omap_total_updates,
+    // ceph_oft_omap_total_removes
     l_oft_omap_total_removes,
     l_oft_last
 };

@@ -11,6 +11,8 @@ typedef std::map<std::string, std::string> labels_t;
 // 17.2.6's memento mori:
 // This data was gathered from the python implementation of the promethize method
 // where we transform the path of a counter to a valid prometheus name.
+// 这些数据是从 promethize 方法的 Python 实现中收集的
+// 在该方法中，我们将计数器的路径转换为有效的 Prometheus 名称。
 static std::vector<std::pair<std::string, std::string>> promethize_data = {
     {"bluefs.alloc_slow_fallback", "ceph_bluefs_alloc_slow_fallback"},
     {"bluefs.alloc_slow_size_fallback", "ceph_bluefs_alloc_slow_size_fallback"},
@@ -54,66 +56,127 @@ static std::vector<std::pair<std::string, std::string>> promethize_data = {
     {"bluefs.slow_used_bytes", "ceph_bluefs_slow_used_bytes"},
     {"bluefs.wal_total_bytes", "ceph_bluefs_wal_total_bytes"},
     {"bluefs.wal_used_bytes", "ceph_bluefs_wal_used_bytes"},
+    // ceph_bluestore_pricache_cache_bytes
     {"bluestore-pricache.cache_bytes", "ceph_bluestore_pricache_cache_bytes"},
+    // ceph_bluestore_pricache_heap_bytes
     {"bluestore-pricache.heap_bytes", "ceph_bluestore_pricache_heap_bytes"},
+    // ceph_bluestore_pricache_mapped_bytes
     {"bluestore-pricache.mapped_bytes", "ceph_bluestore_pricache_mapped_bytes"},
+    // ceph_bluestore_pricache_target_bytes
     {"bluestore-pricache.target_bytes", "ceph_bluestore_pricache_target_bytes"},
+    // ceph_bluestore_pricache_unmapped_bytes
     {"bluestore-pricache.unmapped_bytes", "ceph_bluestore_pricache_unmapped_bytes"},
+    // ceph_bluestore_pricache:data_committed_bytes
     {"bluestore-pricache:data.committed_bytes", "ceph_bluestore_pricache:data_committed_bytes"},
+    // ceph_bluestore_pricache:data_pri0_bytes
     {"bluestore-pricache:data.pri0_bytes", "ceph_bluestore_pricache:data_pri0_bytes"},
+    // ceph_bluestore_pricache:data_pri10_bytes
     {"bluestore-pricache:data.pri10_bytes", "ceph_bluestore_pricache:data_pri10_bytes"},
+    // ceph_bluestore_pricache:data_pri11_bytes
     {"bluestore-pricache:data.pri11_bytes", "ceph_bluestore_pricache:data_pri11_bytes"},
+    // ceph_bluestore_pricache:data_pri1_bytes
     {"bluestore-pricache:data.pri1_bytes", "ceph_bluestore_pricache:data_pri1_bytes"},
+    // ceph_bluestore_pricache:data_pri2_bytes
     {"bluestore-pricache:data.pri2_bytes", "ceph_bluestore_pricache:data_pri2_bytes"},
+    // ceph_bluestore_pricache:data_pri3_bytes
     {"bluestore-pricache:data.pri3_bytes", "ceph_bluestore_pricache:data_pri3_bytes"},
+    // ceph_bluestore_pricache:data_pri4_bytes
     {"bluestore-pricache:data.pri4_bytes", "ceph_bluestore_pricache:data_pri4_bytes"},
+    // ceph_bluestore_pricache:data_pri5_bytes
     {"bluestore-pricache:data.pri5_bytes", "ceph_bluestore_pricache:data_pri5_bytes"},
+    // ceph_bluestore_pricache:data_pri6_bytes
     {"bluestore-pricache:data.pri6_bytes", "ceph_bluestore_pricache:data_pri6_bytes"},
+    // ceph_bluestore_pricache:data_pri7_bytes
     {"bluestore-pricache:data.pri7_bytes", "ceph_bluestore_pricache:data_pri7_bytes"},
+    // ceph_bluestore_pricache:data_pri8_bytes
     {"bluestore-pricache:data.pri8_bytes", "ceph_bluestore_pricache:data_pri8_bytes"},
+    // ceph_bluestore_pricache:data_pri9_bytes
     {"bluestore-pricache:data.pri9_bytes", "ceph_bluestore_pricache:data_pri9_bytes"},
+    // ceph_bluestore_pricache:data_reserved_bytes
     {"bluestore-pricache:data.reserved_bytes", "ceph_bluestore_pricache:data_reserved_bytes"},
+    // ceph_bluestore_pricache:kv_committed_bytes
     {"bluestore-pricache:kv.committed_bytes", "ceph_bluestore_pricache:kv_committed_bytes"},
+    // ceph_bluestore_pricache:kv_pri0_bytes
     {"bluestore-pricache:kv.pri0_bytes", "ceph_bluestore_pricache:kv_pri0_bytes"},
+    // ceph_bluestore_pricache:kv_pri10_bytes
     {"bluestore-pricache:kv.pri10_bytes", "ceph_bluestore_pricache:kv_pri10_bytes"},
+    // ceph_bluestore_pricache:kv_pri11_bytes
     {"bluestore-pricache:kv.pri11_bytes", "ceph_bluestore_pricache:kv_pri11_bytes"},
+    // ceph_bluestore_pricache:kv_pri1_bytes
     {"bluestore-pricache:kv.pri1_bytes", "ceph_bluestore_pricache:kv_pri1_bytes"},
+    // ceph_bluestore_pricache:kv_pri2_bytes
     {"bluestore-pricache:kv.pri2_bytes", "ceph_bluestore_pricache:kv_pri2_bytes"},
+    // ceph_bluestore_pricache:kv_pri3_bytes
     {"bluestore-pricache:kv.pri3_bytes", "ceph_bluestore_pricache:kv_pri3_bytes"},
+    // ceph_bluestore_pricache:kv_pri4_bytes
     {"bluestore-pricache:kv.pri4_bytes", "ceph_bluestore_pricache:kv_pri4_bytes"},
+    // ceph_bluestore_pricache:kv_pri5_bytes
     {"bluestore-pricache:kv.pri5_bytes", "ceph_bluestore_pricache:kv_pri5_bytes"},
+    // ceph_bluestore_pricache:kv_pri6_bytes
     {"bluestore-pricache:kv.pri6_bytes", "ceph_bluestore_pricache:kv_pri6_bytes"},
+    // ceph_bluestore_pricache:kv_pri7_bytes
     {"bluestore-pricache:kv.pri7_bytes", "ceph_bluestore_pricache:kv_pri7_bytes"},
+    // ceph_bluestore_pricache:kv_pri8_bytes
     {"bluestore-pricache:kv.pri8_bytes", "ceph_bluestore_pricache:kv_pri8_bytes"},
+    // ceph_bluestore_pricache:kv_pri9_bytes
     {"bluestore-pricache:kv.pri9_bytes", "ceph_bluestore_pricache:kv_pri9_bytes"},
+    // ceph_bluestore_pricache:kv_reserved_bytes
     {"bluestore-pricache:kv.reserved_bytes", "ceph_bluestore_pricache:kv_reserved_bytes"},
+    // ceph_bluestore_pricache:kv_onode_committed_bytes
     {"bluestore-pricache:kv_onode.committed_bytes", "ceph_bluestore_pricache:kv_onode_committed_bytes"},
+    // ceph_bluestore_pricache:kv_onode_pri0_bytes
     {"bluestore-pricache:kv_onode.pri0_bytes", "ceph_bluestore_pricache:kv_onode_pri0_bytes"},
+    // ceph_bluestore_pricache:kv_onode_pri10_bytes
     {"bluestore-pricache:kv_onode.pri10_bytes", "ceph_bluestore_pricache:kv_onode_pri10_bytes"},
+    // ceph_bluestore_pricache:kv_onode_pri11_bytes
     {"bluestore-pricache:kv_onode.pri11_bytes", "ceph_bluestore_pricache:kv_onode_pri11_bytes"},
+    // ceph_bluestore_pricache:kv_onode_pri1_bytes
     {"bluestore-pricache:kv_onode.pri1_bytes", "ceph_bluestore_pricache:kv_onode_pri1_bytes"},
+    // ceph_bluestore_pricache:kv_onode_pri2_bytes
     {"bluestore-pricache:kv_onode.pri2_bytes", "ceph_bluestore_pricache:kv_onode_pri2_bytes"},
+    // ceph_bluestore_pricache:kv_onode_pri3_bytes
     {"bluestore-pricache:kv_onode.pri3_bytes", "ceph_bluestore_pricache:kv_onode_pri3_bytes"},
+    // ceph_bluestore_pricache:kv_onode_pri4_bytes
     {"bluestore-pricache:kv_onode.pri4_bytes", "ceph_bluestore_pricache:kv_onode_pri4_bytes"},
+    // ceph_bluestore_pricache:kv_onode_pri5_bytes
     {"bluestore-pricache:kv_onode.pri5_bytes", "ceph_bluestore_pricache:kv_onode_pri5_bytes"},
+    // ceph_bluestore_pricache:kv_onode_pri6_bytes
     {"bluestore-pricache:kv_onode.pri6_bytes", "ceph_bluestore_pricache:kv_onode_pri6_bytes"},
+    // ceph_bluestore_pricache:kv_onode_pri7_bytes
     {"bluestore-pricache:kv_onode.pri7_bytes", "ceph_bluestore_pricache:kv_onode_pri7_bytes"},
+    // ceph_bluestore_pricache:kv_onode_pri8_bytes
     {"bluestore-pricache:kv_onode.pri8_bytes", "ceph_bluestore_pricache:kv_onode_pri8_bytes"},
+    // ceph_bluestore_pricache:kv_onode_pri9_bytes
     {"bluestore-pricache:kv_onode.pri9_bytes", "ceph_bluestore_pricache:kv_onode_pri9_bytes"},
+    // ceph_bluestore_pricache:kv_onode_reserved_bytes
     {"bluestore-pricache:kv_onode.reserved_bytes", "ceph_bluestore_pricache:kv_onode_reserved_bytes"},
+    // ceph_bluestore_pricache:meta_committed_bytes
     {"bluestore-pricache:meta.committed_bytes", "ceph_bluestore_pricache:meta_committed_bytes"},
+    // ceph_bluestore_pricache:meta_pri0_bytes
     {"bluestore-pricache:meta.pri0_bytes", "ceph_bluestore_pricache:meta_pri0_bytes"},
+    // ceph_bluestore_pricache:meta_pri10_bytes
     {"bluestore-pricache:meta.pri10_bytes", "ceph_bluestore_pricache:meta_pri10_bytes"},
+    // ceph_bluestore_pricache:meta_pri11_bytes
     {"bluestore-pricache:meta.pri11_bytes", "ceph_bluestore_pricache:meta_pri11_bytes"},
+    // ceph_bluestore_pricache:meta_pri1_bytes
     {"bluestore-pricache:meta.pri1_bytes", "ceph_bluestore_pricache:meta_pri1_bytes"},
+    // ceph_bluestore_pricache:meta_pri2_bytes
     {"bluestore-pricache:meta.pri2_bytes", "ceph_bluestore_pricache:meta_pri2_bytes"},
+    // ceph_bluestore_pricache:meta_pri3_bytes
     {"bluestore-pricache:meta.pri3_bytes", "ceph_bluestore_pricache:meta_pri3_bytes"},
+    // ceph_bluestore_pricache:meta_pri4_bytes
     {"bluestore-pricache:meta.pri4_bytes", "ceph_bluestore_pricache:meta_pri4_bytes"},
+    // ceph_bluestore_pricache:meta_pri5_bytes
     {"bluestore-pricache:meta.pri5_bytes", "ceph_bluestore_pricache:meta_pri5_bytes"},
+    // ceph_bluestore_pricache:meta_pri6_bytes
     {"bluestore-pricache:meta.pri6_bytes", "ceph_bluestore_pricache:meta_pri6_bytes"},
+    // ceph_bluestore_pricache:meta_pri7_bytes
     {"bluestore-pricache:meta.pri7_bytes", "ceph_bluestore_pricache:meta_pri7_bytes"},
+    // ceph_bluestore_pricache:meta_pri8_bytes
     {"bluestore-pricache:meta.pri8_bytes", "ceph_bluestore_pricache:meta_pri8_bytes"},
+    // ceph_bluestore_pricache:meta_pri9_bytes
     {"bluestore-pricache:meta.pri9_bytes", "ceph_bluestore_pricache:meta_pri9_bytes"},
+    // ceph_bluestore_pricache:meta_reserved_bytes
     {"bluestore-pricache:meta.reserved_bytes", "ceph_bluestore_pricache:meta_reserved_bytes"},
     {"bluestore.alloc_unit", "ceph_bluestore_alloc_unit"},
     {"bluestore.allocated", "ceph_bluestore_allocated"},
@@ -194,16 +257,26 @@ static std::vector<std::pair<std::string, std::string>> promethize_data = {
     {"cluster_by_class_total_used_bytes", "ceph_cluster_by_class_total_used_bytes"},
     {"cluster_by_class_total_used_raw_bytes", "ceph_cluster_by_class_total_used_raw_bytes"},
     {"cluster_osd_blocklist_count", "ceph_cluster_osd_blocklist_count"},
+    // ceph_cluster_total_bytes
     {"cluster_total_bytes", "ceph_cluster_total_bytes"},
+    // ceph_cluster_total_used_bytes
     {"cluster_total_used_bytes", "ceph_cluster_total_used_bytes"},
+    // ceph_cluster_total_used_raw_bytes
     {"cluster_total_used_raw_bytes", "ceph_cluster_total_used_raw_bytes"},
     {"daemon_health_metrics", "ceph_daemon_health_metrics"},
+    // ceph_disk_occupation
     {"disk_occupation", "ceph_disk_occupation"},
+    // ceph_disk_occupation_human
     {"disk_occupation_human", "ceph_disk_occupation_human"},
+    // ceph_fs_metadata
     {"fs_metadata", "ceph_fs_metadata"},
+    // ceph_health_detail
     {"health_detail", "ceph_health_detail"},
+    // ceph_health_status
     {"health_status", "ceph_health_status"},
+    // ceph_healthcheck_slow_ops
     {"healthcheck_slow_ops", "ceph_healthcheck_slow_ops"},
+    // ceph_mds_caps
     {"mds.caps", "ceph_mds_caps"},
     {"mds.ceph_cap_op_flush_ack", "ceph_mds_ceph_cap_op_flush_ack"},
     {"mds.ceph_cap_op_flushsnap_ack", "ceph_mds_ceph_cap_op_flushsnap_ack"},
@@ -255,34 +328,63 @@ static std::vector<std::pair<std::string, std::string>> promethize_data = {
     {"mds_cache.strays_enqueued", "ceph_mds_cache_strays_enqueued"},
     {"mds_cache.strays_migrated", "ceph_mds_cache_strays_migrated"},
     {"mds_cache.strays_reintegrated", "ceph_mds_cache_strays_reintegrated"},
+    // ceph_mds_log_ev
     {"mds_log.ev", "ceph_mds_log_ev"},
+    // ceph_mds_log_evadd
     {"mds_log.evadd", "ceph_mds_log_evadd"},
+    // ceph_mds_log_evex
     {"mds_log.evex", "ceph_mds_log_evex"},
+    // ceph_mds_log_evexd
     {"mds_log.evexd", "ceph_mds_log_evexd"},
+    // ceph_mds_log_evexg
     {"mds_log.evexg", "ceph_mds_log_evexg"},
+    // ceph_mds_log_evtrm
     {"mds_log.evtrm", "ceph_mds_log_evtrm"},
+    // ceph_mds_log_jlat_count
     {"mds_log.jlat_count", "ceph_mds_log_jlat_count"},
+    // ceph_mds_log_jlat_sum
     {"mds_log.jlat_sum", "ceph_mds_log_jlat_sum"},
+    // ceph_mds_log_replayed
     {"mds_log.replayed", "ceph_mds_log_replayed"},
+    // ceph_mds_log_seg
     {"mds_log.seg", "ceph_mds_log_seg"},
+    // ceph_mds_log_segadd
     {"mds_log.segadd", "ceph_mds_log_segadd"},
+    // ceph_mds_log_segex
     {"mds_log.segex", "ceph_mds_log_segex"},
+    // ceph_mds_log_segexd
     {"mds_log.segexd", "ceph_mds_log_segexd"},
+    // ceph_mds_log_segexg
     {"mds_log.segexg", "ceph_mds_log_segexg"},
+    // ceph_mds_log_segtrm
     {"mds_log.segtrm", "ceph_mds_log_segtrm"},
+    // ceph_mds_mem_cap
     {"mds_mem.cap", "ceph_mds_mem_cap"},
+    // ceph_mds_mem_cap_plus
     {"mds_mem.cap+", "ceph_mds_mem_cap_plus"},
+    // ceph_mds_mem_cap_minus
     {"mds_mem.cap-", "ceph_mds_mem_cap_minus"},
+    // ceph_mds_mem_dir
     {"mds_mem.dir", "ceph_mds_mem_dir"},
+    // ceph_mds_mem_dir_plus
     {"mds_mem.dir+", "ceph_mds_mem_dir_plus"},
+    // ceph_mds_mem_dir_minus
     {"mds_mem.dir-", "ceph_mds_mem_dir_minus"},
+    // ceph_mds_mem_dn
     {"mds_mem.dn", "ceph_mds_mem_dn"},
+    // ceph_mds_mem_dn_plus
     {"mds_mem.dn+", "ceph_mds_mem_dn_plus"},
+    // ceph_mds_mem_dn_minus
     {"mds_mem.dn-", "ceph_mds_mem_dn_minus"},
+    // ceph_mds_mem_heap
     {"mds_mem.heap", "ceph_mds_mem_heap"},
+    // ceph_mds_mem_ino
     {"mds_mem.ino", "ceph_mds_mem_ino"},
+    // ceph_mds_mem_ino_plus
     {"mds_mem.ino+", "ceph_mds_mem_ino_plus"},
+    // ceph_mds_mem_ino_minus
     {"mds_mem.ino-", "ceph_mds_mem_ino_minus"},
+    // ceph_mds_metadata
     {"mds_metadata", "ceph_mds_metadata"},
     {"mds_server.cap_acquisition_throttle", "ceph_mds_server_cap_acquisition_throttle"},
     {"mds_server.cap_revoke_eviction", "ceph_mds_server_cap_revoke_eviction"},
@@ -545,60 +647,115 @@ static std::vector<std::pair<std::string, std::string>> promethize_data = {
     {"pool_stored_raw", "ceph_pool_stored_raw"},
     {"pool_wr", "ceph_pool_wr"},
     {"pool_wr_bytes", "ceph_pool_wr_bytes"},
+    // ceph_prioritycache_cache_bytes
     {"prioritycache.cache_bytes", "ceph_prioritycache_cache_bytes"},
+    // ceph_prioritycache_heap_bytes
     {"prioritycache.heap_bytes", "ceph_prioritycache_heap_bytes"},
+    // ceph_prioritycache_mapped_bytes
     {"prioritycache.mapped_bytes", "ceph_prioritycache_mapped_bytes"},
+    // ceph_prioritycache_target_bytes
     {"prioritycache.target_bytes", "ceph_prioritycache_target_bytes"},
+    // ceph_prioritycache_unmapped_bytes
     {"prioritycache.unmapped_bytes", "ceph_prioritycache_unmapped_bytes"},
+    // ceph_prioritycache:full_committed_bytes
     {"prioritycache:full.committed_bytes", "ceph_prioritycache:full_committed_bytes"},
+    // ceph_prioritycache:full_pri0_bytes
     {"prioritycache:full.pri0_bytes", "ceph_prioritycache:full_pri0_bytes"},
+    // ceph_prioritycache:full_pri10_bytes
     {"prioritycache:full.pri10_bytes", "ceph_prioritycache:full_pri10_bytes"},
+    // ceph_prioritycache:full_pri11_bytes
     {"prioritycache:full.pri11_bytes", "ceph_prioritycache:full_pri11_bytes"},
+    // ceph_prioritycache:full_pri1_bytes
     {"prioritycache:full.pri1_bytes", "ceph_prioritycache:full_pri1_bytes"},
+    // ceph_prioritycache:full_pri2_bytes
     {"prioritycache:full.pri2_bytes", "ceph_prioritycache:full_pri2_bytes"},
+    // ceph_prioritycache:full_pri3_bytes
     {"prioritycache:full.pri3_bytes", "ceph_prioritycache:full_pri3_bytes"},
+    // ceph_prioritycache:full_pri4_bytes
     {"prioritycache:full.pri4_bytes", "ceph_prioritycache:full_pri4_bytes"},
+    // ceph_prioritycache:full_pri5_bytes
     {"prioritycache:full.pri5_bytes", "ceph_prioritycache:full_pri5_bytes"},
+    // ceph_prioritycache:full_pri6_bytes
     {"prioritycache:full.pri6_bytes", "ceph_prioritycache:full_pri6_bytes"},
+    // ceph_prioritycache:full_pri7_bytes
     {"prioritycache:full.pri7_bytes", "ceph_prioritycache:full_pri7_bytes"},
+    // ceph_prioritycache:full_pri8_bytes
     {"prioritycache:full.pri8_bytes", "ceph_prioritycache:full_pri8_bytes"},
+    // ceph_prioritycache:full_pri9_bytes
     {"prioritycache:full.pri9_bytes", "ceph_prioritycache:full_pri9_bytes"},
+    // ceph_prioritycache:full_reserved_bytes
     {"prioritycache:full.reserved_bytes", "ceph_prioritycache:full_reserved_bytes"},
+    // ceph_prioritycache:inc_committed_bytes
     {"prioritycache:inc.committed_bytes", "ceph_prioritycache:inc_committed_bytes"},
+    // ceph_prioritycache:inc_pri0_bytes
     {"prioritycache:inc.pri0_bytes", "ceph_prioritycache:inc_pri0_bytes"},
+    // ceph_prioritycache:inc_pri10_bytes
     {"prioritycache:inc.pri10_bytes", "ceph_prioritycache:inc_pri10_bytes"},
+    // ceph_prioritycache:inc_pri11_bytes
     {"prioritycache:inc.pri11_bytes", "ceph_prioritycache:inc_pri11_bytes"},
+    // ceph_prioritycache:inc_pri1_bytes
     {"prioritycache:inc.pri1_bytes", "ceph_prioritycache:inc_pri1_bytes"},
+    // ceph_prioritycache:inc_pri2_bytes
     {"prioritycache:inc.pri2_bytes", "ceph_prioritycache:inc_pri2_bytes"},
+    // ceph_prioritycache:inc_pri3_bytes
     {"prioritycache:inc.pri3_bytes", "ceph_prioritycache:inc_pri3_bytes"},
+    // ceph_prioritycache:inc_pri4_bytes
     {"prioritycache:inc.pri4_bytes", "ceph_prioritycache:inc_pri4_bytes"},
+    // ceph_prioritycache:inc_pri5_bytes
     {"prioritycache:inc.pri5_bytes", "ceph_prioritycache:inc_pri5_bytes"},
+    // ceph_prioritycache:inc_pri6_bytes
     {"prioritycache:inc.pri6_bytes", "ceph_prioritycache:inc_pri6_bytes"},
+    // ceph_prioritycache:inc_pri7_bytes
     {"prioritycache:inc.pri7_bytes", "ceph_prioritycache:inc_pri7_bytes"},
+    // ceph_prioritycache:inc_pri8_bytes
     {"prioritycache:inc.pri8_bytes", "ceph_prioritycache:inc_pri8_bytes"},
+    // ceph_prioritycache:inc_pri9_bytes
     {"prioritycache:inc.pri9_bytes", "ceph_prioritycache:inc_pri9_bytes"},
+    // ceph_prioritycache:inc_reserved_bytes
     {"prioritycache:inc.reserved_bytes", "ceph_prioritycache:inc_reserved_bytes"},
+    // ceph_prioritycache:kv_committed_bytes
     {"prioritycache:kv.committed_bytes", "ceph_prioritycache:kv_committed_bytes"},
+    // ceph_prioritycache:kv_pri0_bytes
     {"prioritycache:kv.pri0_bytes", "ceph_prioritycache:kv_pri0_bytes"},
+    // ceph_prioritycache:kv_pri10_bytes
     {"prioritycache:kv.pri10_bytes", "ceph_prioritycache:kv_pri10_bytes"},
+    // ceph_prioritycache:kv_pri11_bytes
     {"prioritycache:kv.pri11_bytes", "ceph_prioritycache:kv_pri11_bytes"},
+    // ceph_prioritycache:kv_pri1_bytes
     {"prioritycache:kv.pri1_bytes", "ceph_prioritycache:kv_pri1_bytes"},
+    // ceph_prioritycache:kv_pri2_bytes
     {"prioritycache:kv.pri2_bytes", "ceph_prioritycache:kv_pri2_bytes"},
+    // ceph_prioritycache:kv_pri3_bytes
     {"prioritycache:kv.pri3_bytes", "ceph_prioritycache:kv_pri3_bytes"},
+    // ceph_prioritycache:kv_pri4_bytes
     {"prioritycache:kv.pri4_bytes", "ceph_prioritycache:kv_pri4_bytes"},
+    // ceph_prioritycache:kv_pri5_bytes
     {"prioritycache:kv.pri5_bytes", "ceph_prioritycache:kv_pri5_bytes"},
+    // ceph_prioritycache:kv_pri6_bytes
     {"prioritycache:kv.pri6_bytes", "ceph_prioritycache:kv_pri6_bytes"},
+    // ceph_prioritycache:kv_pri7_bytes
     {"prioritycache:kv.pri7_bytes", "ceph_prioritycache:kv_pri7_bytes"},
+    // ceph_prioritycache:kv_pri8_bytes
     {"prioritycache:kv.pri8_bytes", "ceph_prioritycache:kv_pri8_bytes"},
+    // ceph_prioritycache:kv_pri9_bytes
     {"prioritycache:kv.pri9_bytes", "ceph_prioritycache:kv_pri9_bytes"},
+    // ceph_prioritycache:kv_reserved_bytes
     {"prioritycache:kv.reserved_bytes", "ceph_prioritycache:kv_reserved_bytes"},
+    // ceph_prometheus_collect_duration_seconds_count
     {"prometheus_collect_duration_seconds_count", "ceph_prometheus_collect_duration_seconds_count"},
+    // ceph_prometheus_collect_duration_seconds_sum
     {"prometheus_collect_duration_seconds_sum", "ceph_prometheus_collect_duration_seconds_sum"},
+    // ceph_purge_queue_pq_executed
     {"purge_queue.pq_executed", "ceph_purge_queue_pq_executed"},
+    // ceph_purge_queue_pq_executing
     {"purge_queue.pq_executing", "ceph_purge_queue_pq_executing"},
+    // ceph_purge_queue_pq_executing_high_water
     {"purge_queue.pq_executing_high_water", "ceph_purge_queue_pq_executing_high_water"},
+    // ceph_purge_queue_pq_executing_ops
     {"purge_queue.pq_executing_ops", "ceph_purge_queue_pq_executing_ops"},
+    // ceph_purge_queue_pq_executing_ops_high_water
     {"purge_queue.pq_executing_ops_high_water", "ceph_purge_queue_pq_executing_ops_high_water"},
+    // ceph_purge_queue_pq_item_in_journal
     {"purge_queue.pq_item_in_journal", "ceph_purge_queue_pq_item_in_journal"},
     {"rbd_mirror_metadata", "ceph_rbd_mirror_metadata"},
     {"rgw.cache_hit", "ceph_rgw_cache_hit"},

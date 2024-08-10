@@ -36,13 +36,21 @@ struct MDRequestImpl;
 enum
 {
     l_mdssm_first = 5500,
+    // ceph_mds_sessions_session_count
     l_mdssm_session_count,
+    // ceph_mds_sessions_session_add
     l_mdssm_session_add,
+    // ceph_mds_sessions_session_remove
     l_mdssm_session_remove,
+    // ceph_mds_sessions_sessions_open
     l_mdssm_session_open,
+    // ceph_mds_sessions_sessions_stale
     l_mdssm_session_stale,
+    // ceph_mds_sessions_total_load
     l_mdssm_total_load,
+    // ceph_mds_sessions_average_load
     l_mdssm_avg_load,
+    // ceph_mds_sessions_avg_session_uptime
     l_mdssm_avg_session_uptime,
     l_mdssm_metadata_threshold_sessions_evicted,
     l_mdssm_last,

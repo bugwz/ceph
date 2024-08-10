@@ -126,36 +126,83 @@ class MMonPaxos;
 enum
 {
     l_paxos_first = 45800,
+    // ceph_paxos_start_leader
     l_paxos_start_leader,
+    // ceph_paxos_start_peon
     l_paxos_start_peon,
+    // ceph_paxos_restart
     l_paxos_restart,
+    // ceph_paxos_refresh
     l_paxos_refresh,
+    // ceph_paxos_refresh_latency_sum
+    // ceph_paxos_refresh_latency_count
     l_paxos_refresh_latency,
+    // ceph_paxos_begin
     l_paxos_begin,
+    // ceph_paxos_begin_keys_sum
+    // ceph_paxos_begin_keys_count
     l_paxos_begin_keys,
+    // ceph_paxos_begin_bytes_sum
+    // ceph_paxos_begin_bytes_count
     l_paxos_begin_bytes,
+    // ceph_paxos_begin_latency_sum
+    // ceph_paxos_begin_latency_count
     l_paxos_begin_latency,
+    // ceph_paxos_commit
     l_paxos_commit,
+    // ceph_paxos_commit_keys_sum
+    // ceph_paxos_commit_keys_count
     l_paxos_commit_keys,
+    // ceph_paxos_commit_bytes_sum
+    // ceph_paxos_commit_bytes_count
     l_paxos_commit_bytes,
+    // ceph_paxos_commit_latency_sum
+    // ceph_paxos_commit_latency_count
     l_paxos_commit_latency,
+    // ceph_paxos_collect
     l_paxos_collect,
+    // ceph_paxos_collect_keys_sum
+    // ceph_paxos_collect_keys_count
     l_paxos_collect_keys,
+    // ceph_paxos_collect_bytes_sum
+    // ceph_paxos_collect_bytes_count
     l_paxos_collect_bytes,
+    // ceph_paxos_collect_latency_sum
+    // ceph_paxos_collect_latency_count
     l_paxos_collect_latency,
+    // ceph_paxos_collect_uncommitted
     l_paxos_collect_uncommitted,
+    // ceph_paxos_collect_timeout
     l_paxos_collect_timeout,
+    // ceph_paxos_accept_timeout
     l_paxos_accept_timeout,
+    // ceph_paxos_lease_ack_timeout
     l_paxos_lease_ack_timeout,
+    // ceph_paxos_lease_timeout
     l_paxos_lease_timeout,
+    // ceph_paxos_store_state
     l_paxos_store_state,
+    // ceph_paxos_store_state_keys_sum
+    // ceph_paxos_store_state_keys_count
     l_paxos_store_state_keys,
+    // ceph_paxos_store_state_bytes_sum
+    // ceph_paxos_store_state_bytes_count
     l_paxos_store_state_bytes,
+    // ceph_paxos_store_state_latency_sum
+    // ceph_paxos_store_state_latency_count
     l_paxos_store_state_latency,
+    // ceph_paxos_share_state
     l_paxos_share_state,
+    // ceph_paxos_share_state_keys_sum
+    // ceph_paxos_share_state_keys_count
     l_paxos_share_state_keys,
+    // ceph_paxos_share_state_bytes_sum
+    // ceph_paxos_share_state_bytes_count
     l_paxos_share_state_bytes,
+    // ceph_paxos_new_pn
     l_paxos_new_pn,
+    // ceph_paxos_new_pn_latency_sum
+    // ceph_paxos_new_pn_latency_count
     l_paxos_new_pn_latency,
     l_paxos_last,
 };

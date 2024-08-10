@@ -803,12 +803,38 @@ int main(int argc, const char** argv)
     msgr->set_policy(entity_name_t::TYPE_MDS, Messenger::Policy::stateless_server(0));
 
     // throttle client traffic
+    // ceph_throttle_mon_client_bytes_get
+    // ceph_throttle_mon_client_bytes_get_or_fail_fail
+    // ceph_throttle_mon_client_bytes_get_or_fail_success
+    // ceph_throttle_mon_client_bytes_get_started
+    // ceph_throttle_mon_client_bytes_get_sum
+    // ceph_throttle_mon_client_bytes_max
+    // ceph_throttle_mon_client_bytes_put
+    // ceph_throttle_mon_client_bytes_put_sum
+    // ceph_throttle_mon_client_bytes_take
+    // ceph_throttle_mon_client_bytes_take_sum
+    // ceph_throttle_mon_client_bytes_val
+    // ceph_throttle_mon_client_bytes_wait_sum
+    // ceph_throttle_mon_client_bytes_wait_count
     Throttle* client_throttler = new Throttle(g_ceph_context, "mon_client_bytes", g_conf()->mon_client_bytes);
     msgr->set_policy_throttlers(entity_name_t::TYPE_CLIENT, client_throttler, NULL);
 
     // throttle daemon traffic
     // NOTE: actual usage on the leader may multiply by the number of
     // monitors if they forward large update messages from daemons.
+    // ceph_throttle_mon_daemon_bytes_get
+    // ceph_throttle_mon_daemon_bytes_get_or_fail_fail
+    // ceph_throttle_mon_daemon_bytes_get_or_fail_success
+    // ceph_throttle_mon_daemon_bytes_get_started
+    // ceph_throttle_mon_daemon_bytes_get_sum
+    // ceph_throttle_mon_daemon_bytes_max
+    // ceph_throttle_mon_daemon_bytes_put
+    // ceph_throttle_mon_daemon_bytes_put_sum
+    // ceph_throttle_mon_daemon_bytes_take
+    // ceph_throttle_mon_daemon_bytes_take_sum
+    // ceph_throttle_mon_daemon_bytes_val
+    // ceph_throttle_mon_daemon_bytes_wait_sum
+    // ceph_throttle_mon_daemon_bytes_wait_count
     Throttle* daemon_throttler = new Throttle(g_ceph_context, "mon_daemon_bytes", g_conf()->mon_daemon_bytes);
     msgr->set_policy_throttlers(entity_name_t::TYPE_OSD, daemon_throttler, NULL);
     msgr->set_policy_throttlers(entity_name_t::TYPE_MDS, daemon_throttler, NULL);

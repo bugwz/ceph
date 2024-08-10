@@ -104,13 +104,21 @@ enum
 enum
 {
     l_mon_first = 456000,
+    // ceph_mon_num_sessions
     l_mon_num_sessions,
+    // ceph_mon_session_add
     l_mon_session_add,
+    // ceph_mon_session_rm
     l_mon_session_rm,
+    // ceph_mon_session_trim
     l_mon_session_trim,
+    // ceph_mon_num_elections
     l_mon_num_elections,
+    // ceph_mon_election_call
     l_mon_election_call,
+    // ceph_mon_election_win
     l_mon_election_win,
+    // ceph_mon_election_lose
     l_mon_election_lose,
     l_mon_last,
 };

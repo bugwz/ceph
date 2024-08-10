@@ -74,6 +74,7 @@ enum
     l_bluestore_allocated,
     // ceph_bluestore_bluestore_stored
     l_bluestore_stored,
+    // ceph_bluestore_bluestore_fragmentation_micros
     l_bluestore_fragmentation,
     l_bluestore_alloc_unit,
     //****************************************
@@ -1903,7 +1904,33 @@ public:
         void emit_initial_tracepoint(KeyValueDB& db, TransContext& txc, ceph::mono_clock::time_point) {}
 #endif
 
+        // ceph_throttle_bluestore_throttle_bytes_get
+        // ceph_throttle_bluestore_throttle_bytes_get_or_fail_fail
+        // ceph_throttle_bluestore_throttle_bytes_get_or_fail_success
+        // ceph_throttle_bluestore_throttle_bytes_get_started
+        // ceph_throttle_bluestore_throttle_bytes_get_sum
+        // ceph_throttle_bluestore_throttle_bytes_max
+        // ceph_throttle_bluestore_throttle_bytes_put
+        // ceph_throttle_bluestore_throttle_bytes_put_sum
+        // ceph_throttle_bluestore_throttle_bytes_take
+        // ceph_throttle_bluestore_throttle_bytes_take_sum
+        // ceph_throttle_bluestore_throttle_bytes_val
+        // ceph_throttle_bluestore_throttle_bytes_wait_sum
+        // ceph_throttle_bluestore_throttle_bytes_wait_count
         Throttle throttle_bytes;            ///< submit to commit
+        // ceph_throttle_bluestore_throttle_deferred_bytes_get
+        // ceph_throttle_bluestore_throttle_deferred_bytes_get_or_fail_fail
+        // ceph_throttle_bluestore_throttle_deferred_bytes_get_or_fail_success
+        // ceph_throttle_bluestore_throttle_deferred_bytes_get_started
+        // ceph_throttle_bluestore_throttle_deferred_bytes_get_sum
+        // ceph_throttle_bluestore_throttle_deferred_bytes_max
+        // ceph_throttle_bluestore_throttle_deferred_bytes_put
+        // ceph_throttle_bluestore_throttle_deferred_bytes_put_sum
+        // ceph_throttle_bluestore_throttle_deferred_bytes_take
+        // ceph_throttle_bluestore_throttle_deferred_bytes_take_sum
+        // ceph_throttle_bluestore_throttle_deferred_bytes_val
+        // ceph_throttle_bluestore_throttle_deferred_bytes_wait_sum
+        // ceph_throttle_bluestore_throttle_deferred_bytes_wait_count
         Throttle throttle_deferred_bytes;   ///< submit to deferred complete
 
     public:

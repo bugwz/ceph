@@ -95,80 +95,144 @@ namespace cb = ceph::buffer;
 enum
 {
     l_osdc_first = 123200,
+    // ceph_objecter_op_active
     l_osdc_op_active,
+    // ceph_objecter_op_laggy
     l_osdc_op_laggy,
+    // ceph_objecter_op_send
     l_osdc_op_send,
+    // ceph_objecter_op_send_bytes
     l_osdc_op_send_bytes,
+    // ceph_objecter_op_resend
     l_osdc_op_resend,
+    // ceph_objecter_op_reply
     l_osdc_op_reply,
     l_osdc_op_latency,
     l_osdc_op_inflight,
+    // ceph_objecter_oplen_avg_sum
+    // ceph_objecter_oplen_avg_count
     l_osdc_oplen_avg,
 
+    // ceph_objecter_op
     l_osdc_op,
+    // ceph_objecter_op_r
     l_osdc_op_r,
+    // ceph_objecter_op_w
     l_osdc_op_w,
+    // ceph_objecter_op_rmw
     l_osdc_op_rmw,
+    // ceph_objecter_op_pg
     l_osdc_op_pg,
 
+    // ceph_objecter_osdop_stat
     l_osdc_osdop_stat,
+    // ceph_objecter_osdop_create
     l_osdc_osdop_create,
+    // ceph_objecter_osdop_read
     l_osdc_osdop_read,
+    // ceph_objecter_osdop_write
     l_osdc_osdop_write,
+    // ceph_objecter_osdop_writefull
     l_osdc_osdop_writefull,
+    // ceph_objecter_osdop_writesame
     l_osdc_osdop_writesame,
+    // ceph_objecter_osdop_append
     l_osdc_osdop_append,
+    // ceph_objecter_osdop_zero
     l_osdc_osdop_zero,
+    // ceph_objecter_osdop_truncate
     l_osdc_osdop_truncate,
+    // ceph_objecter_osdop_delete
     l_osdc_osdop_delete,
+    // ceph_objecter_osdop_mapext
     l_osdc_osdop_mapext,
+    // ceph_objecter_osdop_sparse_read
     l_osdc_osdop_sparse_read,
+    // ceph_objecter_osdop_clonerange
     l_osdc_osdop_clonerange,
+    // ceph_objecter_osdop_getxattr
     l_osdc_osdop_getxattr,
+    // ceph_objecter_osdop_setxattr
     l_osdc_osdop_setxattr,
+    // ceph_objecter_osdop_cmpxattr
     l_osdc_osdop_cmpxattr,
+    // ceph_objecter_osdop_rmxattr
     l_osdc_osdop_rmxattr,
+    // ceph_objecter_osdop_resetxattrs
     l_osdc_osdop_resetxattrs,
+    // ceph_objecter_osdop_call
     l_osdc_osdop_call,
+    // ceph_objecter_osdop_watch
     l_osdc_osdop_watch,
+    // ceph_objecter_osdop_notify
     l_osdc_osdop_notify,
+    // ceph_objecter_osdop_src_cmpxattr
     l_osdc_osdop_src_cmpxattr,
+    // ceph_objecter_osdop_pgls
     l_osdc_osdop_pgls,
+    // ceph_objecter_osdop_pgls_filter
     l_osdc_osdop_pgls_filter,
+    // ceph_objecter_osdop_other
     l_osdc_osdop_other,
 
+    // ceph_objecter_linger_active
     l_osdc_linger_active,
+    // ceph_objecter_linger_send
     l_osdc_linger_send,
+    // ceph_objecter_linger_resend
     l_osdc_linger_resend,
+    // ceph_objecter_linger_ping
     l_osdc_linger_ping,
 
+    // ceph_objecter_poolop_active
     l_osdc_poolop_active,
+    // ceph_objecter_poolop_send
     l_osdc_poolop_send,
+    // ceph_objecter_poolop_resend
     l_osdc_poolop_resend,
 
+    // ceph_objecter_poolstat_active
     l_osdc_poolstat_active,
+    // ceph_objecter_poolstat_send
     l_osdc_poolstat_send,
+    // ceph_objecter_poolstat_resend
     l_osdc_poolstat_resend,
 
+    // ceph_objecter_statfs_active
     l_osdc_statfs_active,
+    // ceph_objecter_statfs_send
     l_osdc_statfs_send,
+    // ceph_objecter_statfs_resend
     l_osdc_statfs_resend,
 
+    // ceph_objecter_command_active
     l_osdc_command_active,
+    // ceph_objecter_command_send
     l_osdc_command_send,
+    // ceph_objecter_command_resend
     l_osdc_command_resend,
 
+    // ceph_objecter_map_epoch
     l_osdc_map_epoch,
+    // ceph_objecter_map_full
     l_osdc_map_full,
+    // ceph_objecter_map_inc
     l_osdc_map_inc,
 
+    // ceph_objecter_osd_sessions
     l_osdc_osd_sessions,
+    // ceph_objecter_osd_session_open
     l_osdc_osd_session_open,
+    // ceph_objecter_osd_session_close
     l_osdc_osd_session_close,
+    // ceph_objecter_osd_laggy
     l_osdc_osd_laggy,
 
+    // ceph_objecter_omap_wr
     l_osdc_osdop_omap_wr,
+    // ceph_objecter_omap_rd
     l_osdc_osdop_omap_rd,
+    // ceph_objecter_omap_del
     l_osdc_osdop_omap_del,
 
     l_osdc_last,

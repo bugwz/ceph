@@ -2525,7 +2525,33 @@ private:
         op_throttle_ops.put(1);
     }
     void put_nlist_context_budget(NListContext* list_context);
+    // ceph_throttle_objecter_bytes_get
+    // ceph_throttle_objecter_bytes_get_or_fail_fail
+    // ceph_throttle_objecter_bytes_get_or_fail_success
+    // ceph_throttle_objecter_bytes_get_started
+    // ceph_throttle_objecter_bytes_get_sum
+    // ceph_throttle_objecter_bytes_max
+    // ceph_throttle_objecter_bytes_put
+    // ceph_throttle_objecter_bytes_put_sum
+    // ceph_throttle_objecter_bytes_take
+    // ceph_throttle_objecter_bytes_take_sum
+    // ceph_throttle_objecter_bytes_val
+    // ceph_throttle_objecter_bytes_wait_sum
+    // ceph_throttle_objecter_bytes_wait_count
     Throttle op_throttle_bytes{cct, "objecter_bytes", static_cast<int64_t>(cct->_conf->objecter_inflight_op_bytes)};
+    // ceph_throttle_objecter_ops_get
+    // ceph_throttle_objecter_ops_get_or_fail_fail
+    // ceph_throttle_objecter_ops_get_or_fail_success
+    // ceph_throttle_objecter_ops_get_started
+    // ceph_throttle_objecter_ops_get_sum
+    // ceph_throttle_objecter_ops_max
+    // ceph_throttle_objecter_ops_put
+    // ceph_throttle_objecter_ops_put_sum
+    // ceph_throttle_objecter_ops_take
+    // ceph_throttle_objecter_ops_take_sum
+    // ceph_throttle_objecter_ops_val
+    // ceph_throttle_objecter_ops_wait_sum
+    // ceph_throttle_objecter_ops_wait_count
     Throttle op_throttle_ops{cct, "objecter_ops", static_cast<int64_t>(cct->_conf->objecter_inflight_ops)};
 
 public:

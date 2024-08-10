@@ -54,6 +54,7 @@ enum
     // ceph_mds_reply_latency_sum
     // ceph_mds_reply_latency_count
     l_mds_reply_latency,
+    // ceph_mds_slow_reply
     l_mds_slow_reply,
     // ceph_mds_forward
     l_mds_forward,
@@ -80,13 +81,21 @@ enum
     // ceph_mds_inodes_with_caps
     l_mds_inodes_with_caps,
     l_mds_caps,
+    // ceph_mds_subtrees
     l_mds_subtrees,
+    // ceph_mds_traverse
     l_mds_traverse,
+    // ceph_mds_traverse_hit
     l_mds_traverse_hit,
+    // ceph_mds_traverse_forward
     l_mds_traverse_forward,
+    // ceph_mds_traverse_discover
     l_mds_traverse_discover,
+    // ceph_mds_traverse_dir_fetch
     l_mds_traverse_dir_fetch,
+    // ceph_mds_traverse_remote_ino
     l_mds_traverse_remote_ino,
+    // ceph_mds_traverse_lock
     l_mds_traverse_lock,
     // ceph_mds_load_cent
     l_mds_load_cent,
@@ -154,19 +163,33 @@ enum
 enum
 {
     l_mdm_first = 2500,
+    // ceph_mds_mem_ino
     l_mdm_ino,
+    // ceph_mds_mem_ino_plus
     l_mdm_inoa,
+    // ceph_mds_mem_ino_minus
     l_mdm_inos,
+    // ceph_mds_mem_dir
     l_mdm_dir,
+    // ceph_mds_mem_dir_plus
     l_mdm_dira,
+    // ceph_mds_mem_dir_minus
     l_mdm_dirs,
+    // ceph_mds_mem_dn
     l_mdm_dn,
+    // ceph_mds_mem_dn_plus
     l_mdm_dna,
+    // ceph_mds_mem_dn_minus
     l_mdm_dns,
+    // ceph_mds_mem_cap
     l_mdm_cap,
+    // ceph_mds_mem_cap_plus
     l_mdm_capa,
+    // ceph_mds_mem_cap_minus
     l_mdm_caps,
+    // ceph_mds_mem_rss
     l_mdm_rss,
+    // ceph_mds_mem_heap
     l_mdm_heap,
     l_mdm_last,
 };

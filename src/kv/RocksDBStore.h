@@ -33,16 +33,34 @@
 enum
 {
     l_rocksdb_first = 34300,
+    // ceph_rocksdb_get_latency_sum
+    // ceph_rocksdb_get_latency_count
     l_rocksdb_get_latency,
+    // ceph_rocksdb_submit_latency_sum
+    // ceph_rocksdb_submit_latency_count
     l_rocksdb_submit_latency,
+    // ceph_rocksdb_submit_sync_latency_sum
+    // ceph_rocksdb_submit_sync_latency_count
     l_rocksdb_submit_sync_latency,
+    // ceph_rocksdb_compact
     l_rocksdb_compact,
+    // ceph_rocksdb_compact_range
     l_rocksdb_compact_range,
+    // ceph_rocksdb_compact_queue_merge
     l_rocksdb_compact_queue_merge,
+    // ceph_rocksdb_compact_queue_len
     l_rocksdb_compact_queue_len,
+    // ceph_rocksdb_rocksdb_write_wal_time_sum
+    // ceph_rocksdb_rocksdb_write_wal_time_count
     l_rocksdb_write_wal_time,
+    // ceph_rocksdb_rocksdb_write_memtable_time_sum
+    // ceph_rocksdb_rocksdb_write_memtable_time_count
     l_rocksdb_write_memtable_time,
+    // ceph_rocksdb_rocksdb_write_delay_time_sum
+    // ceph_rocksdb_rocksdb_write_delay_time_count
     l_rocksdb_write_delay_time,
+    // ceph_rocksdb_rocksdb_write_pre_and_post_time_sum
+    // ceph_rocksdb_rocksdb_write_pre_and_post_time_count
     l_rocksdb_write_pre_and_post_process_time,
     l_rocksdb_last,
 };

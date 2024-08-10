@@ -525,18 +525,116 @@ int main(int argc, const char** argv)
     public_msg_type = public_msg_type.empty() ? msg_type : public_msg_type;
     cluster_msg_type = cluster_msg_type.empty() ? msg_type : cluster_msg_type;
     uint64_t nonce = Messenger::get_pid_nonce();
+    // 根据传入的 client 字符串，内部的逐步调用会构建下面的监控数据
+    // ceph_throttle_msgr_dispatch_throttler_client_get
+    // ceph_throttle_msgr_dispatch_throttler_client_get_or_fail_fail
+    // ceph_throttle_msgr_dispatch_throttler_client_get_or_fail_success
+    // ceph_throttle_msgr_dispatch_throttler_client_get_started
+    // ceph_throttle_msgr_dispatch_throttler_client_get_sum
+    // ceph_throttle_msgr_dispatch_throttler_client_max
+    // ceph_throttle_msgr_dispatch_throttler_client_put
+    // ceph_throttle_msgr_dispatch_throttler_client_put_sum
+    // ceph_throttle_msgr_dispatch_throttler_client_take
+    // ceph_throttle_msgr_dispatch_throttler_client_take_sum
+    // ceph_throttle_msgr_dispatch_throttler_client_val
+    // ceph_throttle_msgr_dispatch_throttler_client_wait_sum
+    // ceph_throttle_msgr_dispatch_throttler_client_wait_count
     Messenger* ms_public =
         Messenger::create(g_ceph_context, public_msg_type, entity_name_t::OSD(whoami), "client", nonce);
+    // 根据传入的 cluster 字符串，内部的逐步调用会构建下面的监控数据
+    // ceph_throttle_msgr_dispatch_throttler_cluster_get
+    // ceph_throttle_msgr_dispatch_throttler_cluster_get_or_fail_fail
+    // ceph_throttle_msgr_dispatch_throttler_cluster_get_or_fail_success
+    // ceph_throttle_msgr_dispatch_throttler_cluster_get_started
+    // ceph_throttle_msgr_dispatch_throttler_cluster_get_sum
+    // ceph_throttle_msgr_dispatch_throttler_cluster_max
+    // ceph_throttle_msgr_dispatch_throttler_cluster_put
+    // ceph_throttle_msgr_dispatch_throttler_cluster_put_sum
+    // ceph_throttle_msgr_dispatch_throttler_cluster_take
+    // ceph_throttle_msgr_dispatch_throttler_cluster_take_sum
+    // ceph_throttle_msgr_dispatch_throttler_cluster_val
+    // ceph_throttle_msgr_dispatch_throttler_cluster_wait_sum
+    // ceph_throttle_msgr_dispatch_throttler_cluster_wait_count
     Messenger* ms_cluster =
         Messenger::create(g_ceph_context, cluster_msg_type, entity_name_t::OSD(whoami), "cluster", nonce);
+    // 根据传入的 hb_back_client 字符串，内部的逐步调用会构建下面的监控数据
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_client_get
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_client_get_or_fail_fail
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_client_get_or_fail_success
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_client_get_started
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_client_get_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_client_max
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_client_put
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_client_put_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_client_take
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_client_take_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_client_val
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_client_wait_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_client_wait_count
     Messenger* ms_hb_back_client =
         Messenger::create(g_ceph_context, cluster_msg_type, entity_name_t::OSD(whoami), "hb_back_client", nonce);
+    // 根据传入的 hb_front_client 字符串，内部的逐步调用会构建下面的监控数据
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_client_get
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_client_get_or_fail_fail
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_client_get_or_fail_success
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_client_get_started
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_client_get_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_client_max
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_client_put
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_client_put_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_client_take
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_client_take_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_client_val
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_client_wait_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_client_wait_count
     Messenger* ms_hb_front_client =
         Messenger::create(g_ceph_context, public_msg_type, entity_name_t::OSD(whoami), "hb_front_client", nonce);
+    // 根据传入的 hb_back_server 字符串，内部的逐步调用会构建下面的监控数据
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_server_get
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_server_get_or_fail_fail
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_server_get_or_fail_success
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_server_get_started
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_server_get_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_server_max
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_server_put
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_server_put_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_server_take
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_server_take_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_server_val
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_server_wait_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_back_server_wait_count
     Messenger* ms_hb_back_server =
         Messenger::create(g_ceph_context, cluster_msg_type, entity_name_t::OSD(whoami), "hb_back_server", nonce);
+    // 根据传入的 hb_front_server 字符串，内部的逐步调用会构建下面的监控数据
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_server_get
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_server_get_or_fail_fail
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_server_get_or_fail_success
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_server_get_started
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_server_get_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_server_max
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_server_put
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_server_put_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_server_take
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_server_take_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_server_val
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_server_wait_sum
+    // ceph_throttle_msgr_dispatch_throttler_hb_front_server_wait_count
     Messenger* ms_hb_front_server =
         Messenger::create(g_ceph_context, public_msg_type, entity_name_t::OSD(whoami), "hb_front_server", nonce);
+    // 根据传入的 ms_objecter 字符串，内部的逐步调用会构建下面的监控数据
+    // ceph_throttle_msgr_dispatch_throttler_ms_objecter_get
+    // ceph_throttle_msgr_dispatch_throttler_ms_objecter_get_or_fail_fail
+    // ceph_throttle_msgr_dispatch_throttler_ms_objecter_get_or_fail_success
+    // ceph_throttle_msgr_dispatch_throttler_ms_objecter_get_started
+    // ceph_throttle_msgr_dispatch_throttler_ms_objecter_get_sum
+    // ceph_throttle_msgr_dispatch_throttler_ms_objecter_max
+    // ceph_throttle_msgr_dispatch_throttler_ms_objecter_put
+    // ceph_throttle_msgr_dispatch_throttler_ms_objecter_put_sum
+    // ceph_throttle_msgr_dispatch_throttler_ms_objecter_take
+    // ceph_throttle_msgr_dispatch_throttler_ms_objecter_take_sum
+    // ceph_throttle_msgr_dispatch_throttler_ms_objecter_val
+    // ceph_throttle_msgr_dispatch_throttler_ms_objecter_wait_sum
+    // ceph_throttle_msgr_dispatch_throttler_ms_objecter_wait_count
     Messenger* ms_objecter =
         Messenger::create(g_ceph_context, public_msg_type, entity_name_t::OSD(whoami), "ms_objecter", nonce);
     if (!ms_public || !ms_cluster || !ms_hb_front_client || !ms_hb_back_client || !ms_hb_back_server ||
@@ -552,8 +650,34 @@ int main(int argc, const char** argv)
             << ((journal_path.empty()) ? "(no journal)" : journal_path) << dendl;
 
     uint64_t message_size = g_conf().get_val<Option::size_t>("osd_client_message_size_cap");
+    // ceph_throttle_osd_client_bytes_get
+    // ceph_throttle_osd_client_bytes_get_or_fail_fail
+    // ceph_throttle_osd_client_bytes_get_or_fail_success
+    // ceph_throttle_osd_client_bytes_get_started
+    // ceph_throttle_osd_client_bytes_get_sum
+    // ceph_throttle_osd_client_bytes_max
+    // ceph_throttle_osd_client_bytes_put
+    // ceph_throttle_osd_client_bytes_put_sum
+    // ceph_throttle_osd_client_bytes_take
+    // ceph_throttle_osd_client_bytes_take_sum
+    // ceph_throttle_osd_client_bytes_val
+    // ceph_throttle_osd_client_bytes_wait_sum
+    // ceph_throttle_osd_client_bytes_wait_count
     boost::scoped_ptr<Throttle> client_byte_throttler(new Throttle(g_ceph_context, "osd_client_bytes", message_size));
     uint64_t message_cap = g_conf().get_val<uint64_t>("osd_client_message_cap");
+    // ceph_throttle_osd_client_messages_get
+    // ceph_throttle_osd_client_messages_get_or_fail_fail
+    // ceph_throttle_osd_client_messages_get_or_fail_success
+    // ceph_throttle_osd_client_messages_get_started
+    // ceph_throttle_osd_client_messages_get_sum
+    // ceph_throttle_osd_client_messages_max
+    // ceph_throttle_osd_client_messages_put
+    // ceph_throttle_osd_client_messages_put_sum
+    // ceph_throttle_osd_client_messages_take
+    // ceph_throttle_osd_client_messages_take_sum
+    // ceph_throttle_osd_client_messages_val
+    // ceph_throttle_osd_client_messages_wait_sum
+    // ceph_throttle_osd_client_messages_wait_count
     boost::scoped_ptr<Throttle> client_msg_throttler(new Throttle(g_ceph_context, "osd_client_messages", message_cap));
 
     // All feature bits 0 - 34 should be present from dumpling v0.67 forward

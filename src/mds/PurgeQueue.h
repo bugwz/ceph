@@ -86,11 +86,17 @@ enum
     l_pq_first = 3500,
 
     // How many items have been finished by PurgeQueue
+    // ceph_purge_queue_pq_executing_ops
     l_pq_executing_ops,
+    // ceph_purge_queue_pq_executing_high_water
     l_pq_executing_ops_high_water,
+    // ceph_purge_queue_pq_executing
     l_pq_executing,
+    // ceph_purge_queue_pq_executing_ops_high_water
     l_pq_executing_high_water,
+    // ceph_purge_queue_pq_executed
     l_pq_executed,
+    // ceph_purge_queue_pq_item_in_journal
     l_pq_item_in_journal,
     l_pq_last
 };

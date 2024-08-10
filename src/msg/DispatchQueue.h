@@ -149,6 +149,19 @@ class DispatchQueue
 
 public:
     /// Throttle preventing us from building up a big backlog waiting for dispatch
+    // ceph_throttle_msgr_dispatch_throttler_client_get
+    // ceph_throttle_msgr_dispatch_throttler_client_get_or_fail_fail
+    // ceph_throttle_msgr_dispatch_throttler_client_get_or_fail_success
+    // ceph_throttle_msgr_dispatch_throttler_client_get_started
+    // ceph_throttle_msgr_dispatch_throttler_client_get_sum
+    // ceph_throttle_msgr_dispatch_throttler_client_max
+    // ceph_throttle_msgr_dispatch_throttler_client_put
+    // ceph_throttle_msgr_dispatch_throttler_client_put_sum
+    // ceph_throttle_msgr_dispatch_throttler_client_take
+    // ceph_throttle_msgr_dispatch_throttler_client_take_sum
+    // ceph_throttle_msgr_dispatch_throttler_client_val
+    // ceph_throttle_msgr_dispatch_throttler_client_wait_sum
+    // ceph_throttle_msgr_dispatch_throttler_client_wait_count
     Throttle dispatch_throttler;
 
     bool stop;

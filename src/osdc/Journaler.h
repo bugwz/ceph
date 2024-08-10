@@ -431,6 +431,32 @@ public:
         , flush_pos(0)
         , safe_pos(0)
         , next_safe_pos(0)
+        // ceph_throttle_write_buf_throttle_0x55b4ba6e1f40_get
+        // ceph_throttle_write_buf_throttle_0x55b4ba6e1f40_get_or_fail_fail
+        // ceph_throttle_write_buf_throttle_0x55b4ba6e1f40_get_or_fail_success
+        // ceph_throttle_write_buf_throttle_0x55b4ba6e1f40_get_started
+        // ceph_throttle_write_buf_throttle_0x55b4ba6e1f40_get_sum
+        // ceph_throttle_write_buf_throttle_0x55b4ba6e1f40_max
+        // ceph_throttle_write_buf_throttle_0x55b4ba6e1f40_put
+        // ceph_throttle_write_buf_throttle_0x55b4ba6e1f40_put_sum
+        // ceph_throttle_write_buf_throttle_0x55b4ba6e1f40_take
+        // ceph_throttle_write_buf_throttle_0x55b4ba6e1f40_take_sum
+        // ceph_throttle_write_buf_throttle_0x55b4ba6e1f40_val
+        // ceph_throttle_write_buf_throttle_0x55b4ba6e1f40_wait_sum
+        // ceph_throttle_write_buf_throttle_0x55b4ba6e1f40_wait_count
+        // ceph_throttle_write_buf_throttle_get
+        // ceph_throttle_write_buf_throttle_get_or_fail_fail
+        // ceph_throttle_write_buf_throttle_get_or_fail_success
+        // ceph_throttle_write_buf_throttle_get_started
+        // ceph_throttle_write_buf_throttle_get_sum
+        // ceph_throttle_write_buf_throttle_max
+        // ceph_throttle_write_buf_throttle_put
+        // ceph_throttle_write_buf_throttle_put_sum
+        // ceph_throttle_write_buf_throttle_take
+        // ceph_throttle_write_buf_throttle_take_sum
+        // ceph_throttle_write_buf_throttle_val
+        // ceph_throttle_write_buf_throttle_wait_sum
+        // ceph_throttle_write_buf_throttle_wait_count
         , write_buf_throttle(cct, "write_buf_throttle", UINT_MAX - (UINT_MAX >> 3))
         , waiting_for_zero_pos(0)
         , read_pos(0)
