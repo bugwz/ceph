@@ -3,7 +3,7 @@
 set -ex
 
 if [ -d "$1" ]; then
-  mkdir -p -- "$1" && cd "$1"
+	mkdir -p -- "$1" && cd "$1"
 fi
 
 [ "$VERIFY" != verify ] && mkdir 1

@@ -1,7 +1,7 @@
 #!/bin/sh -ex
 
-cwd=`pwd`
-cat > conf <<EOF
+cwd=$(pwd)
+cat >conf <<EOF
 [global]
 mon host = 127.0.0.1:6789
 
@@ -13,7 +13,7 @@ debug ms = 1
 EOF
 
 rm -f mm
-fsid=`uuidgen`
+fsid=$(uuidgen)
 
 rm -f keyring
 ceph-authtool --create-keyring keyring --gen-key -n client.admin

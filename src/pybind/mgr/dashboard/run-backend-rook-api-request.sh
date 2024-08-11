@@ -4,7 +4,7 @@
 # Query k8s to determine where the mgr is running and how to reach the
 # dashboard from the local machine. This assumes that the dashboard is being
 # exposed via a nodePort service
-CURR_DIR=`pwd`
+CURR_DIR=$(pwd)
 K8S_NAMESPACE='rook-ceph'
 
 HOST=$(kubectl get pods -n $K8S_NAMESPACE -l "app=rook-ceph-mgr" -o json | jq .items[0].spec.nodeName | sed s/\"//g)
@@ -26,9 +26,9 @@ if [ "$API_URL" = "null" ]; then
 fi
 cd $CURR_DIR
 
-TOKEN=`curl --insecure -s -H "Content-Type: application/json" -X POST \
-            -d "{\"username\":\"admin\",\"password\":\"${PASSWD}\"}"  $API_URL/api/auth \
-			| jq .token | sed -e 's/"//g'`
+TOKEN=$(curl --insecure -s -H "Content-Type: application/json" -X POST \
+	-d "{\"username\":\"admin\",\"password\":\"${PASSWD}\"}" $API_URL/api/auth |
+	jq .token | sed -e 's/"//g')
 
 echo "METHOD: $1"
 echo "URL: ${API_URL}${2}"
@@ -36,5 +36,4 @@ echo "DATA: $3"
 echo ""
 
 curl --insecure -s -b /tmp/cd-cookie.txt -H "Authorization: Bearer $TOKEN " \
-	 -H "Content-Type: application/json" -X $1 -d "$3" ${API_URL}$2 | jq
-
+	-H "Content-Type: application/json" -X $1 -d "$3" ${API_URL}$2 | jq

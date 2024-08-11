@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:nil -*- 
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:nil -*-
 // vim: ts=8 sw=2 smarttab
 
 #pragma once
@@ -10,27 +10,25 @@ namespace crimson::net {
 
 class Dispatcher;
 
-class ChainedDispatchers {
+class ChainedDispatchers
+{
 public:
-  void assign(const dispatchers_t& _dispatchers) {
-    assert(empty());
-    assert(!_dispatchers.empty());
-    dispatchers = _dispatchers;
-  }
-  void clear() {
-    dispatchers.clear();
-  }
-  bool empty() const {
-    return dispatchers.empty();
-  }
-  seastar::future<> ms_dispatch(crimson::net::ConnectionRef, MessageRef);
-  void ms_handle_accept(crimson::net::ConnectionRef conn);
-  void ms_handle_connect(crimson::net::ConnectionRef conn);
-  void ms_handle_reset(crimson::net::ConnectionRef conn, bool is_replace);
-  void ms_handle_remote_reset(crimson::net::ConnectionRef conn);
+    void assign(const dispatchers_t& _dispatchers)
+    {
+        assert(empty());
+        assert(!_dispatchers.empty());
+        dispatchers = _dispatchers;
+    }
+    void clear() { dispatchers.clear(); }
+    bool empty() const { return dispatchers.empty(); }
+    seastar::future<> ms_dispatch(crimson::net::ConnectionRef, MessageRef);
+    void ms_handle_accept(crimson::net::ConnectionRef conn);
+    void ms_handle_connect(crimson::net::ConnectionRef conn);
+    void ms_handle_reset(crimson::net::ConnectionRef conn, bool is_replace);
+    void ms_handle_remote_reset(crimson::net::ConnectionRef conn);
 
- private:
-  dispatchers_t dispatchers;
+private:
+    dispatchers_t dispatchers;
 };
 
-}
+}   // namespace crimson::net

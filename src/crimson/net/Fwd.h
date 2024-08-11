@@ -14,17 +14,16 @@
 
 #pragma once
 
-#include <boost/container/small_vector.hpp>
-#include <seastar/core/future.hh>
-#include <seastar/core/future-util.hh>
-#include <seastar/core/shared_ptr.hh>
-#include <seastar/core/sharded.hh>
-
+#include "crimson/common/errorator.h"
 #include "msg/Connection.h"
 #include "msg/MessageRef.h"
 #include "msg/msg_types.h"
 
-#include "crimson/common/errorator.h"
+#include <boost/container/small_vector.hpp>
+#include <seastar/core/future-util.hh>
+#include <seastar/core/future.hh>
+#include <seastar/core/sharded.hh>
+#include <seastar/core/shared_ptr.hh>
 
 using auth_proto_t = int;
 
@@ -47,4 +46,4 @@ using dispatchers_t = boost::container::small_vector<Dispatcher*, NUM_DISPATCHER
 class Messenger;
 using MessengerRef = seastar::shared_ptr<Messenger>;
 
-} // namespace crimson::net
+}   // namespace crimson::net

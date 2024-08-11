@@ -12,54 +12,51 @@
  *
  */
 
-#include "include/scope_guard.h"
 #include "common/dns_resolve.h"
+
 #include "common/debug.h"
+#include "include/scope_guard.h"
 
 #define dout_subsys ceph_subsys_
 
 
 namespace ceph {
 
-int ResolvHWrapper::res_query(const char *hostname, int cls,
-    int type, u_char *buf, int bufsz) {
-  return -1;
+int ResolvHWrapper::res_query(const char* hostname, int cls, int type, u_char* buf, int bufsz)
+{
+    return -1;
 }
 
-int ResolvHWrapper::res_search(const char *hostname, int cls,
-    int type, u_char *buf, int bufsz) {
-  return -1;
+int ResolvHWrapper::res_search(const char* hostname, int cls, int type, u_char* buf, int bufsz)
+{
+    return -1;
 }
 
 DNSResolver::~DNSResolver()
 {
-  delete resolv_h;
+    delete resolv_h;
 }
 
-int DNSResolver::resolve_cname(CephContext *cct, const string& hostname,
-    string *cname, bool *found)
+int DNSResolver::resolve_cname(CephContext* cct, const string& hostname, string* cname, bool* found)
 {
-  return -ENOTSUP;
+    return -ENOTSUP;
 }
 
-int DNSResolver::resolve_ip_addr(CephContext *cct, const string& hostname,
-    entity_addr_t *addr)
+int DNSResolver::resolve_ip_addr(CephContext* cct, const string& hostname, entity_addr_t* addr)
 {
-  return -ENOTSUP;
+    return -ENOTSUP;
 }
 
-int DNSResolver::resolve_srv_hosts(CephContext *cct, const string& service_name,
-    const SRV_Protocol trans_protocol,
-    map<string, DNSResolver::Record> *srv_hosts)
+int DNSResolver::resolve_srv_hosts(CephContext* cct, const string& service_name, const SRV_Protocol trans_protocol,
+                                   map<string, DNSResolver::Record>* srv_hosts)
 {
-  return this->resolve_srv_hosts(cct, service_name, trans_protocol, "", srv_hosts);
+    return this->resolve_srv_hosts(cct, service_name, trans_protocol, "", srv_hosts);
 }
 
-int DNSResolver::resolve_srv_hosts(CephContext *cct, const string& service_name,
-    const SRV_Protocol trans_protocol, const string& domain,
-    map<string, DNSResolver::Record> *srv_hosts)
+int DNSResolver::resolve_srv_hosts(CephContext* cct, const string& service_name, const SRV_Protocol trans_protocol,
+                                   const string& domain, map<string, DNSResolver::Record>* srv_hosts)
 {
-  return -ENOTSUP;
+    return -ENOTSUP;
 }
 
-}
+}   // namespace ceph

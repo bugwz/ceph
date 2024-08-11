@@ -2,105 +2,91 @@
 
 set -ex
 
-function expect_false()
-{
+function expect_false() {
 	set -x
 	if "$@"; then return 1; else return 0; fi
 }
 
-function make_files()
-{
-  set +x
-  temp_dir=`mktemp -d mkfile_test_XXXXXX`
-  for i in $(seq 1 $1)
-  do
-    echo -n | dd of="${temp_dir}/file_$i" conv=fsync || return 1
-    sync "${temp_dir}" || return 1
-  done
-  set -x
-  return 0
+function make_files() {
+	set +x
+	temp_dir=$(mktemp -d mkfile_test_XXXXXX)
+	for i in $(seq 1 $1); do
+		echo -n | dd of="${temp_dir}/file_$i" conv=fsync || return 1
+		sync "${temp_dir}" || return 1
+	done
+	set -x
+	return 0
 }
 
-function make_dirs()
-{
-  set +x
-  temp_dir=`mktemp -d mkdir_test_XXXXXX`
-  for i in $(seq 1 $1)
-  do
-    mkdir -p ${temp_dir}/dir_${i} || return 1
-    sync "${temp_dir}" || return 1
-  done
-  set -x
-  return 0
+function make_dirs() {
+	set +x
+	temp_dir=$(mktemp -d mkdir_test_XXXXXX)
+	for i in $(seq 1 $1); do
+		mkdir -p ${temp_dir}/dir_${i} || return 1
+		sync "${temp_dir}" || return 1
+	done
+	set -x
+	return 0
 }
 
-function make_nodes()
-{
-  set +x
-  temp_dir=`mktemp -d mknod_test_XXXXXX`
-  for i in $(seq 1 $1)
-  do
-    mknod ${temp_dir}/fifo_${i} p || return 1
-    sync "${temp_dir}" || return 1
-  done
-  set -x
-  return 0
+function make_nodes() {
+	set +x
+	temp_dir=$(mktemp -d mknod_test_XXXXXX)
+	for i in $(seq 1 $1); do
+		mknod ${temp_dir}/fifo_${i} p || return 1
+		sync "${temp_dir}" || return 1
+	done
+	set -x
+	return 0
 }
 
-function rename_files()
-{
-  set +x
-  temp_dir=`mktemp -d rename_test_XXXXXX`
-  mkdir -p ${temp_dir}/rename
+function rename_files() {
+	set +x
+	temp_dir=$(mktemp -d rename_test_XXXXXX)
+	mkdir -p ${temp_dir}/rename
 
-  for i in $(seq 1 $1)
-  do
-    touch ${temp_dir}/file_${i} || return 1
+	for i in $(seq 1 $1); do
+		touch ${temp_dir}/file_${i} || return 1
 
-    mv ${temp_dir}/file_${i} ${temp_dir}/rename/ || return 1
-    sync "${temp_dir}" || return 1
-  done
-  set -x
-  return 0
+		mv ${temp_dir}/file_${i} ${temp_dir}/rename/ || return 1
+		sync "${temp_dir}" || return 1
+	done
+	set -x
+	return 0
 }
 
-function make_symlinks()
-{
-  set +x
-  temp_dir=`mktemp -d symlink_test_XXXXXX`
-  mkdir -p ${temp_dir}/symlink 
+function make_symlinks() {
+	set +x
+	temp_dir=$(mktemp -d symlink_test_XXXXXX)
+	mkdir -p ${temp_dir}/symlink
 
-  touch ${temp_dir}/file
+	touch ${temp_dir}/file
 
-  for i in $(seq 1 $1)
-  do
-    ln -s ../file ${temp_dir}/symlink/sym_${i} || return 1
-    sync "${temp_dir}" || return 1
-  done
-  set -x
-  return 0
+	for i in $(seq 1 $1); do
+		ln -s ../file ${temp_dir}/symlink/sym_${i} || return 1
+		sync "${temp_dir}" || return 1
+	done
+	set -x
+	return 0
 }
 
-function make_links()
-{
-  set +x
-  temp_dir=`mktemp -d link_test_XXXXXX`
-  mkdir -p ${temp_dir}/link 
+function make_links() {
+	set +x
+	temp_dir=$(mktemp -d link_test_XXXXXX)
+	mkdir -p ${temp_dir}/link
 
-  touch ${temp_dir}/file
+	touch ${temp_dir}/file
 
-  for i in $(seq 1 $1)
-  do
-    ln ${temp_dir}/file ${temp_dir}/link/link_${i} || return 1
-    sync "${temp_dir}" || return 1
-  done
-  set -x
-  return 0
+	for i in $(seq 1 $1); do
+		ln ${temp_dir}/file ${temp_dir}/link/link_${i} || return 1
+		sync "${temp_dir}" || return 1
+	done
+	set -x
+	return 0
 }
 
-function cleanup()
-{
-  rm -rf *
+function cleanup() {
+	rm -rf *
 }
 
 test_dir="max_entries"
@@ -111,7 +97,7 @@ dir_max_entries=100
 ceph config set mds mds_dir_max_entries $dir_max_entries
 
 ok_dir_max_entries=$dir_max_entries
-fail_dir_max_entries=$((dir_max_entries+1))
+fail_dir_max_entries=$((dir_max_entries + 1))
 
 # make files test
 make_files $ok_dir_max_entries

@@ -8,36 +8,34 @@
 
 namespace librbd {
 class ImageCtx;
-namespace asio { struct ContextWQ; }
-} // namespace librbd
+namespace asio {
+struct ContextWQ;
+}
+}   // namespace librbd
 
 namespace rbd {
 namespace mirror {
 
-template <typename ImageCtxT = librbd::ImageCtx>
-class MirrorStatusWatcher : protected librbd::Watcher {
+template<typename ImageCtxT = librbd::ImageCtx> class MirrorStatusWatcher : protected librbd::Watcher
+{
 public:
-  static MirrorStatusWatcher *create(librados::IoCtx &io_ctx,
-                                     librbd::asio::ContextWQ *work_queue) {
-    return new MirrorStatusWatcher(io_ctx, work_queue);
-  }
-  void destroy() {
-    delete this;
-  }
+    static MirrorStatusWatcher* create(librados::IoCtx& io_ctx, librbd::asio::ContextWQ* work_queue)
+    {
+        return new MirrorStatusWatcher(io_ctx, work_queue);
+    }
+    void destroy() { delete this; }
 
-  MirrorStatusWatcher(librados::IoCtx &io_ctx,
-                      librbd::asio::ContextWQ *work_queue);
-  ~MirrorStatusWatcher() override;
+    MirrorStatusWatcher(librados::IoCtx& io_ctx, librbd::asio::ContextWQ* work_queue);
+    ~MirrorStatusWatcher() override;
 
-  void init(Context *on_finish);
-  void shut_down(Context *on_finish);
+    void init(Context* on_finish);
+    void shut_down(Context* on_finish);
 
 protected:
-  void handle_notify(uint64_t notify_id, uint64_t handle,
-                     uint64_t notifier_id, bufferlist &bl) override;
+    void handle_notify(uint64_t notify_id, uint64_t handle, uint64_t notifier_id, bufferlist& bl) override;
 };
 
-} // namespace mirror
-} // namespace rbd
+}   // namespace mirror
+}   // namespace rbd
 
-#endif // CEPH_RBD_MIRROR_MIRROR_STATUS_WATCHER_H
+#endif   // CEPH_RBD_MIRROR_MIRROR_STATUS_WATCHER_H

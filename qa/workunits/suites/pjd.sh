@@ -14,4 +14,3 @@ cd tmp
 sudo prove -r -v --exec 'bash -x' ../pjd*/tests
 cd ..
 rm -rf tmp pjd*
-

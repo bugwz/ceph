@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-BDIR=`pwd`
+BDIR=$(pwd)
 
 p=$1
 echo path $p
@@ -9,7 +9,7 @@ test ! -d $p
 mkdir $p
 strings bin/ceph-osd | grep "^$p/%s__%d.%x"
 
-v=`git describe | cut -c 2-`
+v=$(git describe | cut -c 2-)
 echo version $v
 
 echo 'binaries look ok, vstarting'
@@ -33,7 +33,7 @@ echo 'waiting a bit'
 sleep 10
 echo 'triggering some recovery'
 
-kill -9 `cat out/osd.0.pid`
+kill -9 $(cat out/osd.0.pid)
 sleep 10
 ceph osd out 0
 sleep 10
@@ -50,10 +50,9 @@ wait || true
 echo 'importing'
 ../src/test/encoding/import.sh $p $v ../ceph-object-corpus/archive
 
-for d in ../ceph-object-corpus/archive/$v/objects/*
-do
-    echo prune $d
-    ../ceph-object-corpus/bin/prune.sh $d 25
+for d in ../ceph-object-corpus/archive/$v/objects/*; do
+	echo prune $d
+	../ceph-object-corpus/bin/prune.sh $d 25
 done
 
 echo 'done'

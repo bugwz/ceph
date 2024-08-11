@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -x
 
-basedir=`echo $0 | sed 's/[^/]*$//g'`.
+basedir=$(echo $0 | sed 's/[^/]*$//g').
 . $basedir/common.sh
 
 client_mount
 mkdir -p $mnt/sub
-echo sub > $mnt/sub/file
+echo sub >$mnt/sub/file
 client_umount
 
 mkdir -p $mnt/1

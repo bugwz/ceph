@@ -5,7 +5,7 @@
  *
  * Copyright (c) 2018 SUSE LLC.
  * Author: Daniel Oliveira <doliveira@suse.com>
- * 
+ *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License version 2.1, as published by the Free Software
@@ -18,29 +18,16 @@
 
 #include "auth/AuthAuthorizeHandler.h"
 
-class KrbAuthorizeHandler : public AuthAuthorizeHandler {
-  bool verify_authorizer(
-    CephContext*,
-    const KeyStore&,
-    const bufferlist&,
-    size_t,
-    bufferlist *,
-    EntityName *,
-    uint64_t *,
-    AuthCapsInfo *,
-    CryptoKey *,
-    std::string *connection_secret,
-    std::unique_ptr<
-    AuthAuthorizerChallenge>* = nullptr) override;
+class KrbAuthorizeHandler : public AuthAuthorizeHandler
+{
+    bool verify_authorizer(CephContext*, const KeyStore&, const bufferlist&, size_t, bufferlist*, EntityName*,
+                           uint64_t*, AuthCapsInfo*, CryptoKey*, std::string* connection_secret,
+                           std::unique_ptr<AuthAuthorizerChallenge>* = nullptr) override;
 
-  int authorizer_session_crypto() override { 
-    return SESSION_SYMMETRIC_AUTHENTICATE; 
-  };
+    int authorizer_session_crypto() override { return SESSION_SYMMETRIC_AUTHENTICATE; };
 
-  ~KrbAuthorizeHandler() override = default;
-
+    ~KrbAuthorizeHandler() override = default;
 };
 
 
-#endif    //-- KRB_AUTHORIZE_HANDLER_HPP
-
+#endif   //-- KRB_AUTHORIZE_HANDLER_HPP

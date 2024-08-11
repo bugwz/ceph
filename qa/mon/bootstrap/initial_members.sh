@@ -1,7 +1,7 @@
 #!/bin/sh -ex
 
-cwd=`pwd`
-cat > conf <<EOF
+cwd=$(pwd)
+cat >conf <<EOF
 [mon]
 admin socket = 
 log file = $cwd/\$name.log
@@ -12,9 +12,9 @@ EOF
 
 rm -f mm
 monmaptool --create mm \
-    --add a 127.0.0.1:6789 \
-    --add b 127.0.0.1:6790 \
-    --add c 127.0.0.1:6791
+	--add a 127.0.0.1:6789 \
+	--add b 127.0.0.1:6790 \
+	--add c 127.0.0.1:6791
 
 rm -f keyring
 ceph-authtool --create-keyring keyring --gen-key -n client.admin
@@ -31,8 +31,8 @@ ceph-mon -c conf -i b --mon-data $cwd/mon.c
 ceph -c conf -k keyring --monmap mm health
 
 ceph -c conf -k keyring --monmap mm health
-if ceph -c conf -k keyring --monmap mm mon stat | grep a= | grep b= | grep c= ; then
-    break
+if ceph -c conf -k keyring --monmap mm mon stat | grep a= | grep b= | grep c=; then
+	break
 fi
 
 killall ceph-mon

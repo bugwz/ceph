@@ -13,47 +13,54 @@
  */
 
 #include "common/mutex_debug.h"
-#include "common/perf_counters.h"
+
 #include "common/ceph_context.h"
 #include "common/config.h"
+#include "common/perf_counters.h"
 
 namespace ceph {
 namespace mutex_debug_detail {
-enum {
-  l_mutex_first = 999082,
-  l_mutex_wait,
-  l_mutex_last
+enum
+{
+    l_mutex_first = 999082,
+    l_mutex_wait,
+    l_mutex_last
 };
 
 mutex_debugging_base::mutex_debugging_base(std::string group, bool ld, bool bt)
-  : group(std::move(group)),
-    lockdep(ld),
-    backtrace(bt)
+    : group(std::move(group))
+    , lockdep(ld)
+    , backtrace(bt)
 {
-  if (_enable_lockdep()) {
-    _register();
-  }
+    if (_enable_lockdep()) {
+        _register();
+    }
 }
 
-mutex_debugging_base::~mutex_debugging_base() {
-  ceph_assert(nlock == 0);
-  if (_enable_lockdep()) {
-    lockdep_unregister(id);
-  }
+mutex_debugging_base::~mutex_debugging_base()
+{
+    ceph_assert(nlock == 0);
+    if (_enable_lockdep()) {
+        lockdep_unregister(id);
+    }
 }
 
-void mutex_debugging_base::_register() {
-  id = lockdep_register(group.c_str());
+void mutex_debugging_base::_register()
+{
+    id = lockdep_register(group.c_str());
 }
-void mutex_debugging_base::_will_lock(bool recursive) { // about to lock
-  id = lockdep_will_lock(group.c_str(), id, backtrace, recursive);
+void mutex_debugging_base::_will_lock(bool recursive)
+{   // about to lock
+    id = lockdep_will_lock(group.c_str(), id, backtrace, recursive);
 }
-void mutex_debugging_base::_locked() {    // just locked
-  id = lockdep_locked(group.c_str(), id, backtrace);
+void mutex_debugging_base::_locked()
+{   // just locked
+    id = lockdep_locked(group.c_str(), id, backtrace);
 }
-void mutex_debugging_base::_will_unlock() {  // about to unlock
-  id = lockdep_will_unlock(group.c_str(), id);
+void mutex_debugging_base::_will_unlock()
+{   // about to unlock
+    id = lockdep_will_unlock(group.c_str(), id);
 }
 
-} // namespace mutex_debug_detail
-} // namespace ceph
+}   // namespace mutex_debug_detail
+}   // namespace ceph

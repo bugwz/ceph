@@ -9,9 +9,9 @@ set -x
 ./bin/ceph osd crush move osd.2 host=host2-1 datacenter=site2 root=default
 ./bin/ceph osd crush move osd.3 host=host2-2 datacenter=site2 root=default
 
-./bin/ceph osd getcrushmap > crush.map.bin
+./bin/ceph osd getcrushmap >crush.map.bin
 ./bin/crushtool -d crush.map.bin -o crush.map.txt
-cat <<EOF >> crush.map.txt
+cat <<EOF >>crush.map.txt
 rule stretch_rule {
         id 1
         type replicated

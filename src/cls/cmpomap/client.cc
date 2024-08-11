@@ -12,65 +12,63 @@
  * Foundation.  See file COPYING.
  */
 
-#include "include/rados/librados.hpp"
 #include "client.h"
+
+#include "include/rados/librados.hpp"
 #include "ops.h"
 
 namespace cls::cmpomap {
 
-int cmp_vals(librados::ObjectReadOperation& op,
-             Mode mode, Op comparison, ComparisonMap values,
+int cmp_vals(librados::ObjectReadOperation& op, Mode mode, Op comparison, ComparisonMap values,
              std::optional<ceph::bufferlist> default_value)
 {
-  if (values.size() > max_keys) {
-    return -E2BIG;
-  }
-  cmp_vals_op call;
-  call.mode = mode;
-  call.comparison = comparison;
-  call.values = std::move(values);
-  call.default_value = std::move(default_value);
+    if (values.size() > max_keys) {
+        return -E2BIG;
+    }
+    cmp_vals_op call;
+    call.mode = mode;
+    call.comparison = comparison;
+    call.values = std::move(values);
+    call.default_value = std::move(default_value);
 
-  bufferlist in;
-  encode(call, in);
-  op.exec("cmpomap", "cmp_vals", in);
-  return 0;
+    bufferlist in;
+    encode(call, in);
+    op.exec("cmpomap", "cmp_vals", in);
+    return 0;
 }
 
-int cmp_set_vals(librados::ObjectWriteOperation& op,
-                 Mode mode, Op comparison, ComparisonMap values,
+int cmp_set_vals(librados::ObjectWriteOperation& op, Mode mode, Op comparison, ComparisonMap values,
                  std::optional<ceph::bufferlist> default_value)
 {
-  if (values.size() > max_keys) {
-    return -E2BIG;
-  }
-  cmp_set_vals_op call;
-  call.mode = mode;
-  call.comparison = comparison;
-  call.values = std::move(values);
-  call.default_value = std::move(default_value);
+    if (values.size() > max_keys) {
+        return -E2BIG;
+    }
+    cmp_set_vals_op call;
+    call.mode = mode;
+    call.comparison = comparison;
+    call.values = std::move(values);
+    call.default_value = std::move(default_value);
 
-  bufferlist in;
-  encode(call, in);
-  op.exec("cmpomap", "cmp_set_vals", in);
-  return 0;
+    bufferlist in;
+    encode(call, in);
+    op.exec("cmpomap", "cmp_set_vals", in);
+    return 0;
 }
 
-int cmp_rm_keys(librados::ObjectWriteOperation& op,
-                Mode mode, Op comparison, ComparisonMap values)
+int cmp_rm_keys(librados::ObjectWriteOperation& op, Mode mode, Op comparison, ComparisonMap values)
 {
-  if (values.size() > max_keys) {
-    return -E2BIG;
-  }
-  cmp_rm_keys_op call;
-  call.mode = mode;
-  call.comparison = comparison;
-  call.values = std::move(values);
+    if (values.size() > max_keys) {
+        return -E2BIG;
+    }
+    cmp_rm_keys_op call;
+    call.mode = mode;
+    call.comparison = comparison;
+    call.values = std::move(values);
 
-  bufferlist in;
-  encode(call, in);
-  op.exec("cmpomap", "cmp_rm_keys", in);
-  return 0;
+    bufferlist in;
+    encode(call, in);
+    op.exec("cmpomap", "cmp_rm_keys", in);
+    return 0;
 }
 
-} // namespace cls::cmpomap
+}   // namespace cls::cmpomap

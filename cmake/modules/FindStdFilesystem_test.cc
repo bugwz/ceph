@@ -8,7 +8,8 @@ namespace fs = std::experimental::filesystem;
 #error std::filesystem not available!
 #endif
 
-int main() {
+int main()
+{
     fs::create_directory("sandbox");
     fs::remove_all("sandbox");
 }

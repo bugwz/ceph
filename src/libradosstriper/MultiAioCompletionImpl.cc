@@ -12,49 +12,46 @@
  *
  */
 
-#include "common/dout.h"
-
 #include "libradosstriper/MultiAioCompletionImpl.h"
+
+#include "common/dout.h"
 
 void libradosstriper::MultiAioCompletionImpl::complete_request(ssize_t r)
 {
-  lock.lock();
-  if (rval >= 0) {
-    if (r < 0 && r != -EEXIST)
-      rval = r;
-    else if (r > 0)
-      rval += r;
-  }
-  ceph_assert(pending_complete);
-  int count = --pending_complete;
-  if (!count && !building) {
-    complete();
-  }
-  put_unlock();
+    lock.lock();
+    if (rval >= 0) {
+        if (r < 0 && r != -EEXIST)
+            rval = r;
+        else if (r > 0)
+            rval += r;
+    }
+    ceph_assert(pending_complete);
+    int count = --pending_complete;
+    if (!count && !building) {
+        complete();
+    }
+    put_unlock();
 }
 
 void libradosstriper::MultiAioCompletionImpl::safe_request(ssize_t r)
 {
-  lock.lock();
-  if (rval >= 0) {
-    if (r < 0 && r != -EEXIST)
-      rval = r;
-  }
-  ceph_assert(pending_safe);
-  int count = --pending_safe;
-  if (!count && !building) {
-    safe();
-  }
-  put_unlock();
+    lock.lock();
+    if (rval >= 0) {
+        if (r < 0 && r != -EEXIST) rval = r;
+    }
+    ceph_assert(pending_safe);
+    int count = --pending_safe;
+    if (!count && !building) {
+        safe();
+    }
+    put_unlock();
 }
 
 void libradosstriper::MultiAioCompletionImpl::finish_adding_requests()
 {
-  std::scoped_lock l{lock};
-  ceph_assert(building);
-  building = false;
-  if (!pending_complete)
-    complete();
-  if (!pending_safe)
-    safe();
+    std::scoped_lock l{lock};
+    ceph_assert(building);
+    building = false;
+    if (!pending_complete) complete();
+    if (!pending_safe) safe();
 }

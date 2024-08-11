@@ -60,7 +60,7 @@ dvers="$vers-1"
 cd ceph-$vers
 chvers=$(head -1 debian/changelog | perl -ne 's/.*\(//; s/\).*//; print')
 if [ "$chvers" != "$dvers" ]; then
-   DEBEMAIL="contact@ceph.com" dch -D $VERSION_CODENAME --force-distribution -b -v "$dvers" "new version"
+	DEBEMAIL="contact@ceph.com" dch -D $VERSION_CODENAME --force-distribution -b -v "$dvers" "new version"
 fi
 #
 # create the packages
@@ -69,23 +69,23 @@ fi
 # c) use half of the available processors
 #
 : ${NPROC:=$(($(nproc) / 2))}
-if test $NPROC -gt 1 ; then
-    j=-j${NPROC}
+if test $NPROC -gt 1; then
+	j=-j${NPROC}
 fi
 PATH=/usr/lib/ccache:$PATH dpkg-buildpackage $j -uc -us
 cd ../..
 mkdir -p $VERSION_CODENAME/conf
-cat > $VERSION_CODENAME/conf/distributions <<EOF
+cat >$VERSION_CODENAME/conf/distributions <<EOF
 Codename: $VERSION_CODENAME
 Suite: stable
 Components: main
 Architectures: $(dpkg --print-architecture) source
 EOF
 if [ ! -e conf ]; then
-    ln -s $VERSION_CODENAME/conf conf
+	ln -s $VERSION_CODENAME/conf conf
 fi
 reprepro --basedir $(pwd) include $VERSION_CODENAME WORKDIR/*.changes
 #
 # teuthology needs the version in the version file
 #
-echo $dvers > $VERSION_CODENAME/version
+echo $dvers >$VERSION_CODENAME/version

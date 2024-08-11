@@ -29,13 +29,13 @@
  * include/buffer.h (and implemented in common/buffer.cc).
  */
 
-#include <algorithm>
-#include <string>
-#include <sstream>
-#include <cerrno>
-
 #include "objclass/objclass.h"
 #include "osd/osd_types.h"
+
+#include <algorithm>
+#include <cerrno>
+#include <sstream>
+#include <string>
 
 using std::string;
 using std::ostringstream;
@@ -44,7 +44,7 @@ using ceph::bufferlist;
 using ceph::decode;
 using ceph::encode;
 
-CLS_VER(1,0)
+CLS_VER(1, 0)
 CLS_NAME(hello)
 
 /**
@@ -54,24 +54,23 @@ CLS_NAME(hello)
  * returns data to the caller, without depending on the local object
  * content.
  */
-static int say_hello(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
+static int say_hello(cls_method_context_t hctx, bufferlist* in, bufferlist* out)
 {
-  // see if the input data from the client matches what this method
-  // expects to receive.  your class can fill this buffer with what it
-  // wants.
-  if (in->length() > 100)
-    return -EINVAL;
+    // see if the input data from the client matches what this method
+    // expects to receive.  your class can fill this buffer with what it
+    // wants.
+    if (in->length() > 100) return -EINVAL;
 
-  // we generate our reply
-  out->append("Hello, ");
-  if (in->length() == 0)
-    out->append("world");
-  else
-    out->append(*in);
-  out->append("!");
+    // we generate our reply
+    out->append("Hello, ");
+    if (in->length() == 0)
+        out->append("world");
+    else
+        out->append(*in);
+    out->append("!");
 
-  // this return value will be returned back to the librados caller
-  return 0;
+    // this return value will be returned back to the librados caller
+    return 0;
 }
 
 /**
@@ -82,109 +81,103 @@ static int say_hello(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
  * setxattr) which are accumulated and applied as an atomic
  * transaction.
  */
-static int record_hello(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
+static int record_hello(cls_method_context_t hctx, bufferlist* in, bufferlist* out)
 {
-  // we can write arbitrary stuff to the ceph-osd debug log.  each log
-  // message is accompanied by an integer log level.  smaller is
-  // "louder".  how much of this makes it into the log is controlled
-  // by the debug_cls option on the ceph-osd, similar to how other log
-  // levels are controlled.  this message, at level 20, will generally
-  // not be seen by anyone unless debug_cls is set at 20 or higher.
-  CLS_LOG(20, "in record_hello");
+    // we can write arbitrary stuff to the ceph-osd debug log.  each log
+    // message is accompanied by an integer log level.  smaller is
+    // "louder".  how much of this makes it into the log is controlled
+    // by the debug_cls option on the ceph-osd, similar to how other log
+    // levels are controlled.  this message, at level 20, will generally
+    // not be seen by anyone unless debug_cls is set at 20 or higher.
+    CLS_LOG(20, "in record_hello");
 
-  // see if the input data from the client matches what this method
-  // expects to receive.  your class can fill this buffer with what it
-  // wants.
-  if (in->length() > 100)
-    return -EINVAL;
+    // see if the input data from the client matches what this method
+    // expects to receive.  your class can fill this buffer with what it
+    // wants.
+    if (in->length() > 100) return -EINVAL;
 
-  // only say hello to non-existent objects
-  if (cls_cxx_stat(hctx, NULL, NULL) == 0)
-    return -EEXIST;
+    // only say hello to non-existent objects
+    if (cls_cxx_stat(hctx, NULL, NULL) == 0) return -EEXIST;
 
-  bufferlist content;
-  content.append("Hello, ");
-  if (in->length() == 0)
-    content.append("world");
-  else
-    content.append(*in);
-  content.append("!");
+    bufferlist content;
+    content.append("Hello, ");
+    if (in->length() == 0)
+        content.append("world");
+    else
+        content.append(*in);
+    content.append("!");
 
-  // create/write the object
-  int r = cls_cxx_write_full(hctx, &content);
-  if (r < 0)
-    return r;
+    // create/write the object
+    int r = cls_cxx_write_full(hctx, &content);
+    if (r < 0) return r;
 
-  // also make note of who said it
-  entity_inst_t origin;
-  cls_get_request_origin(hctx, &origin);
-  ostringstream ss;
-  ss << origin;
-  bufferlist attrbl;
-  attrbl.append(ss.str());
-  r = cls_cxx_setxattr(hctx, "said_by", &attrbl);
-  if (r < 0)
-    return r;
+    // also make note of who said it
+    entity_inst_t origin;
+    cls_get_request_origin(hctx, &origin);
+    ostringstream ss;
+    ss << origin;
+    bufferlist attrbl;
+    attrbl.append(ss.str());
+    r = cls_cxx_setxattr(hctx, "said_by", &attrbl);
+    if (r < 0) return r;
 
-  // For write operations, there are two possible outcomes:
-  //
-  //  * For a failure, we return a negative error code.  The out
-  //    buffer can contain any data that we want, and that data will
-  //    be returned to the caller.  No change is made to the object.
-  //
-  //  * For a success, we must return 0 and *no* data in the out
-  //    buffer.  This is becaues the OSD does not log write result
-  //    codes or output buffers and we need a replayed/resent
-  //    operation (e.g., after a TCP disconnect) to be idempotent.
-  //
-  //    If a class returns a positive value or puts data in the out
-  //    buffer, the OSD code will ignore it and return 0 to the
-  //    client.
-  return 0;
+    // For write operations, there are two possible outcomes:
+    //
+    //  * For a failure, we return a negative error code.  The out
+    //    buffer can contain any data that we want, and that data will
+    //    be returned to the caller.  No change is made to the object.
+    //
+    //  * For a success, we must return 0 and *no* data in the out
+    //    buffer.  This is becaues the OSD does not log write result
+    //    codes or output buffers and we need a replayed/resent
+    //    operation (e.g., after a TCP disconnect) to be idempotent.
+    //
+    //    If a class returns a positive value or puts data in the out
+    //    buffer, the OSD code will ignore it and return 0 to the
+    //    client.
+    return 0;
 }
 
-static int write_return_data(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
+static int write_return_data(cls_method_context_t hctx, bufferlist* in, bufferlist* out)
 {
-  // make some change to the object
-  bufferlist attrbl;
-  attrbl.append("bar");
-  int r = cls_cxx_setxattr(hctx, "foo", &attrbl);
-  if (r < 0)
-    return r;
+    // make some change to the object
+    bufferlist attrbl;
+    attrbl.append("bar");
+    int r = cls_cxx_setxattr(hctx, "foo", &attrbl);
+    if (r < 0) return r;
 
-  if (in->length() > 0) {
-    // note that if we return anything < 0 (an error), this
-    // operation/transaction will abort, and the setattr above will
-    // never happen.  however, we *can* return data on error.
-    out->append("too much input data!");
-    return -EINVAL;
-  }
+    if (in->length() > 0) {
+        // note that if we return anything < 0 (an error), this
+        // operation/transaction will abort, and the setattr above will
+        // never happen.  however, we *can* return data on error.
+        out->append("too much input data!");
+        return -EINVAL;
+    }
 
-  // try to return some data.  note that this will only reach the client
-  // if the client has set the CEPH_OSD_FLAG_RETURNVEC flag on the op.
-  out->append("you might see this");
+    // try to return some data.  note that this will only reach the client
+    // if the client has set the CEPH_OSD_FLAG_RETURNVEC flag on the op.
+    out->append("you might see this");
 
-  // client will only see a >0 value with the RETURNVEC flag is set; otherwise
-  // they will see 0.
-  return 42;
+    // client will only see a >0 value with the RETURNVEC flag is set; otherwise
+    // they will see 0.
+    return 42;
 }
 
-static int write_too_much_return_data(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
+static int write_too_much_return_data(cls_method_context_t hctx, bufferlist* in, bufferlist* out)
 {
-  // make some change to the object
-  bufferlist attrbl;
-  attrbl.append("bar");
-  int r = cls_cxx_setxattr(hctx, "foo", &attrbl);
-  if (r < 0)
-    return r;
+    // make some change to the object
+    bufferlist attrbl;
+    attrbl.append("bar");
+    int r = cls_cxx_setxattr(hctx, "foo", &attrbl);
+    if (r < 0) return r;
 
-  // try to return too much data.  this should be enough to exceed
-  // osd_max_write_op_reply_len, which defaults to a pretty small number.
-  for (unsigned i=0; i < 10; ++i) {
-    out->append("you should not see this because it is toooooo long. ");
-  }
+    // try to return too much data.  this should be enough to exceed
+    // osd_max_write_op_reply_len, which defaults to a pretty small number.
+    for (unsigned i = 0; i < 10; ++i) {
+        out->append("you should not see this because it is toooooo long. ");
+    }
 
-  return 42;
+    return 42;
 }
 
 /**
@@ -193,20 +186,19 @@ static int write_too_much_return_data(cls_method_context_t hctx, bufferlist *in,
  * This is a read method that will retrieve a previously recorded
  * hello statement.
  */
-static int replay(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
+static int replay(cls_method_context_t hctx, bufferlist* in, bufferlist* out)
 {
-  // read contents out of the on-disk object.  our behavior can be a
-  // function of either the request alone, or the request and the
-  // on-disk state, depending on whether the RD flag is specified when
-  // registering the method (see the __cls__init function below).
-  int r = cls_cxx_read(hctx, 0, 1100, out);
-  if (r < 0)
-    return r;
+    // read contents out of the on-disk object.  our behavior can be a
+    // function of either the request alone, or the request and the
+    // on-disk state, depending on whether the RD flag is specified when
+    // registering the method (see the __cls__init function below).
+    int r = cls_cxx_read(hctx, 0, 1100, out);
+    if (r < 0) return r;
 
-  // note that our return value need not be the length of the returned
-  // data; it can be whatever value we want: positive, zero or
-  // negative (this is a read).
-  return 0;
+    // note that our return value need not be the length of the returned
+    // data; it can be whatever value we want: positive, zero or
+    // negative (this is a read).
+    return 0;
 }
 
 /**
@@ -216,42 +208,38 @@ static int replay(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
  * a read/modify/write operation).  This atomically transitions the
  * object state from the old content to the new content.
  */
-static int turn_it_to_11(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
+static int turn_it_to_11(cls_method_context_t hctx, bufferlist* in, bufferlist* out)
 {
-  // see if the input data from the client matches what this method
-  // expects to receive.  your class can fill this buffer with what it
-  // wants.
-  if (in->length() != 0)
-    return -EINVAL;
+    // see if the input data from the client matches what this method
+    // expects to receive.  your class can fill this buffer with what it
+    // wants.
+    if (in->length() != 0) return -EINVAL;
 
-  bufferlist previous;
-  int r = cls_cxx_read(hctx, 0, 1100, &previous);
-  if (r < 0)
-    return r;
+    bufferlist previous;
+    int r = cls_cxx_read(hctx, 0, 1100, &previous);
+    if (r < 0) return r;
 
-  std::string str(previous.c_str(), previous.length());
-  std::transform(str.begin(), str.end(), str.begin(), ::toupper);
-  previous.clear();
-  previous.append(str);
+    std::string str(previous.c_str(), previous.length());
+    std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+    previous.clear();
+    previous.append(str);
 
-  // replace previous byte data content (write_full == truncate(0) + write)
-  r = cls_cxx_write_full(hctx, &previous);
-  if (r < 0)
-    return r;
+    // replace previous byte data content (write_full == truncate(0) + write)
+    r = cls_cxx_write_full(hctx, &previous);
+    if (r < 0) return r;
 
-  // record who did it
-  entity_inst_t origin;
-  cls_get_request_origin(hctx, &origin);
-  ostringstream ss;
-  ss << origin;
-  bufferlist attrbl;
-  attrbl.append(ss.str());
-  r = cls_cxx_setxattr(hctx, "amplified_by", &attrbl);
-  if (r < 0)
-    return r;
+    // record who did it
+    entity_inst_t origin;
+    cls_get_request_origin(hctx, &origin);
+    ostringstream ss;
+    ss << origin;
+    bufferlist attrbl;
+    attrbl.append(ss.str());
+    r = cls_cxx_setxattr(hctx, "amplified_by", &attrbl);
+    if (r < 0) return r;
 
-  // return value is 0 for success; out buffer is empty.
-  return 0;
+    // return value is 0 for success; out buffer is empty.
+    return 0;
 }
 
 /**
@@ -259,9 +247,9 @@ static int turn_it_to_11(cls_method_context_t hctx, bufferlist *in, bufferlist *
  *
  * This method is registered as WR but tries to read
  */
-static int bad_reader(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
+static int bad_reader(cls_method_context_t hctx, bufferlist* in, bufferlist* out)
 {
-  return cls_cxx_read(hctx, 0, 100, out);
+    return cls_cxx_read(hctx, 0, 100, out);
 }
 
 /**
@@ -269,37 +257,40 @@ static int bad_reader(cls_method_context_t hctx, bufferlist *in, bufferlist *out
  *
  * This method is registered as RD but tries to write
  */
-static int bad_writer(cls_method_context_t hctx, bufferlist *in, bufferlist *out)
+static int bad_writer(cls_method_context_t hctx, bufferlist* in, bufferlist* out)
 {
-  return cls_cxx_write_full(hctx, in);
+    return cls_cxx_write_full(hctx, in);
 }
 
 
-class PGLSHelloFilter : public PGLSFilter {
-  string val;
-public:
-  int init(bufferlist::const_iterator& params) override {
-    try {
-      decode(xattr, params);
-      decode(val, params);
-    } catch (ceph::buffer::error &e) {
-      return -EINVAL;
-    }
-    return 0;
-  }
+class PGLSHelloFilter : public PGLSFilter
+{
+    string val;
 
-  ~PGLSHelloFilter() override {}
-  bool filter(const hobject_t& obj,
-              const bufferlist&  xattr_data) const override
-  {
-    return xattr_data.contents_equal(val.c_str(), val.size());
-  }
+public:
+    int init(bufferlist::const_iterator& params) override
+    {
+        try {
+            decode(xattr, params);
+            decode(val, params);
+        }
+        catch (ceph::buffer::error& e) {
+            return -EINVAL;
+        }
+        return 0;
+    }
+
+    ~PGLSHelloFilter() override {}
+    bool filter(const hobject_t& obj, const bufferlist& xattr_data) const override
+    {
+        return xattr_data.contents_equal(val.c_str(), val.size());
+    }
 };
 
 
-PGLSFilter *hello_filter()
+PGLSFilter* hello_filter()
 {
-  return new PGLSHelloFilter();
+    return new PGLSHelloFilter();
 }
 
 
@@ -311,63 +302,53 @@ PGLSFilter *hello_filter()
  */
 CLS_INIT(hello)
 {
-  // this log message, at level 0, will always appear in the ceph-osd
-  // log file.
-  CLS_LOG(0, "loading cls_hello");
+    // this log message, at level 0, will always appear in the ceph-osd
+    // log file.
+    CLS_LOG(0, "loading cls_hello");
 
-  cls_handle_t h_class;
-  cls_method_handle_t h_say_hello;
-  cls_method_handle_t h_record_hello;
-  cls_method_handle_t h_replay;
-  cls_method_handle_t h_write_return_data;
-  cls_method_handle_t h_writes_dont_return_data;
-  cls_method_handle_t h_write_too_much_return_data;
-  cls_method_handle_t h_turn_it_to_11;
-  cls_method_handle_t h_bad_reader;
-  cls_method_handle_t h_bad_writer;
+    cls_handle_t h_class;
+    cls_method_handle_t h_say_hello;
+    cls_method_handle_t h_record_hello;
+    cls_method_handle_t h_replay;
+    cls_method_handle_t h_write_return_data;
+    cls_method_handle_t h_writes_dont_return_data;
+    cls_method_handle_t h_write_too_much_return_data;
+    cls_method_handle_t h_turn_it_to_11;
+    cls_method_handle_t h_bad_reader;
+    cls_method_handle_t h_bad_writer;
 
-  cls_register("hello", &h_class);
+    cls_register("hello", &h_class);
 
-  // There are two flags we specify for methods:
-  //
-  //    RD : whether this method (may) read prior object state
-  //    WR : whether this method (may) write or update the object
-  //
-  // A method can be RD, WR, neither, or both.  If a method does
-  // neither, the data it returns to the caller is a function of the
-  // request and not the object contents.
+    // There are two flags we specify for methods:
+    //
+    //    RD : whether this method (may) read prior object state
+    //    WR : whether this method (may) write or update the object
+    //
+    // A method can be RD, WR, neither, or both.  If a method does
+    // neither, the data it returns to the caller is a function of the
+    // request and not the object contents.
 
-  cls_register_cxx_method(h_class, "say_hello",
-			  CLS_METHOD_RD,
-			  say_hello, &h_say_hello);
-  cls_register_cxx_method(h_class, "record_hello",
-			  CLS_METHOD_WR | CLS_METHOD_PROMOTE,
-			  record_hello, &h_record_hello);
-  cls_register_cxx_method(h_class, "write_return_data",
-			  CLS_METHOD_WR,
-			  write_return_data, &h_write_return_data);
-  // legacy alias for this method for pre-octopus clients
-  cls_register_cxx_method(h_class, "writes_dont_return_data",
-			  CLS_METHOD_WR,
-			  write_return_data, &h_writes_dont_return_data);
-  cls_register_cxx_method(h_class, "write_too_much_return_data",
-			  CLS_METHOD_WR,
-			  write_too_much_return_data, &h_write_too_much_return_data);
-  cls_register_cxx_method(h_class, "replay",
-			  CLS_METHOD_RD,
-			  replay, &h_replay);
+    cls_register_cxx_method(h_class, "say_hello", CLS_METHOD_RD, say_hello, &h_say_hello);
+    cls_register_cxx_method(h_class, "record_hello", CLS_METHOD_WR | CLS_METHOD_PROMOTE, record_hello, &h_record_hello);
+    cls_register_cxx_method(h_class, "write_return_data", CLS_METHOD_WR, write_return_data, &h_write_return_data);
+    // legacy alias for this method for pre-octopus clients
+    cls_register_cxx_method(
+        h_class, "writes_dont_return_data", CLS_METHOD_WR, write_return_data, &h_writes_dont_return_data);
+    cls_register_cxx_method(h_class,
+                            "write_too_much_return_data",
+                            CLS_METHOD_WR,
+                            write_too_much_return_data,
+                            &h_write_too_much_return_data);
+    cls_register_cxx_method(h_class, "replay", CLS_METHOD_RD, replay, &h_replay);
 
-  // RD | WR is a read-modify-write method.
-  cls_register_cxx_method(h_class, "turn_it_to_11",
-			  CLS_METHOD_RD | CLS_METHOD_WR | CLS_METHOD_PROMOTE,
-			  turn_it_to_11, &h_turn_it_to_11);
+    // RD | WR is a read-modify-write method.
+    cls_register_cxx_method(
+        h_class, "turn_it_to_11", CLS_METHOD_RD | CLS_METHOD_WR | CLS_METHOD_PROMOTE, turn_it_to_11, &h_turn_it_to_11);
 
-  // counter-examples
-  cls_register_cxx_method(h_class, "bad_reader", CLS_METHOD_WR,
-			  bad_reader, &h_bad_reader);
-  cls_register_cxx_method(h_class, "bad_writer", CLS_METHOD_RD,
-			  bad_writer, &h_bad_writer);
+    // counter-examples
+    cls_register_cxx_method(h_class, "bad_reader", CLS_METHOD_WR, bad_reader, &h_bad_reader);
+    cls_register_cxx_method(h_class, "bad_writer", CLS_METHOD_RD, bad_writer, &h_bad_writer);
 
-  // A PGLS filter
-  cls_register_cxx_filter(h_class, "hello", hello_filter);
+    // A PGLS filter
+    cls_register_cxx_filter(h_class, "hello", hello_filter);
 }

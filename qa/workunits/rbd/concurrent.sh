@@ -57,7 +57,7 @@ set -ex
 #        RBD_CONCURRENT_DELAY: 3
 ITER_DEFAULT=${RBD_CONCURRENT_ITER:-100}
 COUNT_DEFAULT=${RBD_CONCURRENT_COUNT:-5}
-DELAY_DEFAULT=${RBD_CONCURRENT_DELAY:-5}		# seconds
+DELAY_DEFAULT=${RBD_CONCURRENT_DELAY:-5} # seconds
 
 CEPH_SECRET_FILE=${CEPH_SECRET_FILE:-}
 CEPH_ID=${CEPH_ID:-admin}
@@ -75,8 +75,8 @@ function setup() {
 	SOURCE_DATA=$(mktemp /tmp/source_data.XXXXXX)
 
 	# Use urandom to generate SOURCE_DATA
-        dd if=/dev/urandom of=${SOURCE_DATA} bs=2048 count=66 \
-               >/dev/null 2>&1
+	dd if=/dev/urandom of=${SOURCE_DATA} bs=2048 count=66 \
+		>/dev/null 2>&1
 
 	# List of rbd id's *not* created by this script
 	export INITIAL_RBD_IDS=$(ls /sys/bus/rbd/devices)
@@ -152,7 +152,7 @@ function usage() {
 
 	[ $# -gt 0 ] && exit 1
 
-	exit 0		# This is used for a --help
+	exit 0 # This is used for a --help
 }
 
 # parse command line arguments
@@ -183,28 +183,28 @@ function parseargs() {
 
 	while [ "$1" != "--" ]; do
 		case "$1" in
-			-h|--help)
-				usage
-				;;
-			-i|--iterations)
-				ITER="$2"
-				[ "${ITER}" -lt 1 ] &&
-					usage "bad iterations value"
-				shift
-				;;
-			-c|--count)
-				COUNT="$2"
-				[ "${COUNT}" -lt 1 ] &&
-					usage "bad count value"
-				shift
-				;;
-			-d|--delay)
-				DELAY="$2"
-				shift
-				;;
-			*)
-				exit 100	# Internal error
-				;;
+		-h | --help)
+			usage
+			;;
+		-i | --iterations)
+			ITER="$2"
+			[ "${ITER}" -lt 1 ] &&
+				usage "bad iterations value"
+			shift
+			;;
+		-c | --count)
+			COUNT="$2"
+			[ "${COUNT}" -lt 1 ] &&
+				usage "bad count value"
+			shift
+			;;
+		-d | --delay)
+			DELAY="$2"
+			shift
+			;;
+		*)
+			exit 100 # Internal error
+			;;
 		esac
 		shift
 	done
@@ -258,7 +258,7 @@ function rbd_map_image() {
 	local id
 
 	sudo rbd map "${image}" --user "${CEPH_ID}" ${SECRET_ARGS} \
-		> /dev/null 2>&1
+		>/dev/null 2>&1
 
 	id=$(rbd_image_id "${image}")
 	echo "${id}"
@@ -272,7 +272,7 @@ function rbd_write_image() {
 	# cross both (4K or 64K) page and (4MB) rbd object boundaries.
 	# It assumes the SOURCE_DATA file has size 66 * 2048 bytes
 	dd if="${SOURCE_DATA}" of="/dev/rbd${id}" bs=2048 seek=2015 \
-		> /dev/null 2>&1
+		>/dev/null 2>&1
 }
 
 # All starting and ending offsets here are selected so they are not
@@ -286,13 +286,13 @@ function rbd_read_image() {
 	# existing rbd object, but before any previously-written
 	# data.
 	dd if="/dev/rbd${id}" of=/dev/null bs=2048 count=34 skip=3 \
-		> /dev/null 2>&1
+		>/dev/null 2>&1
 	# Next read starting at an offset before any written data,
 	# but ending at an offset that includes data that's been
 	# written.  The osd zero-fills unwritten data at the
 	# beginning of a read.
 	dd if="/dev/rbd${id}" of=/dev/null bs=2048 count=34 skip=1983 \
-		> /dev/null 2>&1
+		>/dev/null 2>&1
 	# Read the data at offset 2015 * 2048 bytes (where it was
 	# written) and make sure it matches the original data.
 	cmp --quiet "${SOURCE_DATA}" "/dev/rbd${id}" 0 4126720 ||
@@ -301,17 +301,17 @@ function rbd_read_image() {
 	# beyond it.  The rbd client zero-fills the unwritten
 	# portion at the end of a read.
 	dd if="/dev/rbd${id}" of=/dev/null bs=2048 count=34 skip=2079 \
-		> /dev/null 2>&1
+		>/dev/null 2>&1
 	# Now read starting from an unwritten range within a written
 	# rbd object.  The rbd client zero-fills this.
 	dd if="/dev/rbd${id}" of=/dev/null bs=2048 count=34 skip=2115 \
-		> /dev/null 2>&1
+		>/dev/null 2>&1
 	# Finally read from an unwritten region which would reside
 	# in a different (non-existent) osd object.  The osd client
 	# zero-fills unwritten data when the target object doesn't
 	# exist.
 	dd if="/dev/rbd${id}" of=/dev/null bs=2048 count=34 skip=4098 \
-		> /dev/null 2>&1
+		>/dev/null 2>&1
 }
 
 function rbd_unmap_image() {

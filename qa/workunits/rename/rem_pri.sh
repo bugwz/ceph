@@ -1,16 +1,16 @@
 #!/bin/sh -ex
 
 dotest() {
-    srci=$1
-    srcdn=$2
-    dest=$3
-    n=$4
+	srci=$1
+	srcdn=$2
+	dest=$3
+	n=$4
 
-    touch ./$srci/srci$n
-    ln ./$srci/srci$n ./$srcdn/srcdn$n
-    touch ./$dest/dest$n
+	touch ./$srci/srci$n
+	ln ./$srci/srci$n ./$srcdn/srcdn$n
+	touch ./$dest/dest$n
 
-    mv ./$srcdn/srcdn$n ./$dest/dest$n
+	mv ./$srcdn/srcdn$n ./$dest/dest$n
 }
 
 # srci=srcdn=destdn

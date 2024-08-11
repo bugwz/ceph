@@ -17,33 +17,33 @@
 source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
 
 function run() {
-    local dir=$1
-    shift
+	local dir=$1
+	shift
 
-    export CEPH_MON="127.0.0.1:7123" # git grep '\<7123\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+	export CEPH_MON="127.0.0.1:7123" # git grep '\<7123\>' : there must be only one
+	export CEPH_ARGS
+	CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+	CEPH_ARGS+="--mon-host=$CEPH_MON "
 
-    local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
-        setup $dir || return 1
-        $func $dir || return 1
-        teardown $dir || return 1
-    done
+	local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
+	for func in $funcs; do
+		setup $dir || return 1
+		$func $dir || return 1
+		teardown $dir || return 1
+	done
 }
 
 function TEST_reuse_id() {
-    local dir=$1
+	local dir=$1
 
-    run_mon $dir a --osd_pool_default_size=1 --mon_allow_pool_size_one=true || return 1
-    run_mgr $dir x || return 1
-    run_osd $dir 0 || return 1
-    run_osd $dir 1 || return 1
-    create_rbd_pool || return 1
-    wait_for_clean || return 1
-    destroy_osd $dir 1 || return 1
-    run_osd $dir 1 || return 1
+	run_mon $dir a --osd_pool_default_size=1 --mon_allow_pool_size_one=true || return 1
+	run_mgr $dir x || return 1
+	run_osd $dir 0 || return 1
+	run_osd $dir 1 || return 1
+	create_rbd_pool || return 1
+	wait_for_clean || return 1
+	destroy_osd $dir 1 || return 1
+	run_osd $dir 1 || return 1
 }
 
 main osd-reuse-id "$@"

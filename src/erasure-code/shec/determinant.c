@@ -15,80 +15,80 @@
  *
  */
 
+#include "jerasure/include/galois.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "jerasure/include/galois.h"
-
-void print_matrix(int *mat, int dim)
+void print_matrix(int* mat, int dim)
 {
-  int i, j;
+    int i, j;
 
-  for (i=0; i<dim; i++) {
-    for (j=0; j<dim; j++) {
-      printf("%d ", mat[i*dim+j]);
+    for (i = 0; i < dim; i++) {
+        for (j = 0; j < dim; j++) {
+            printf("%d ", mat[i * dim + j]);
+        }
+        printf("\n");
     }
-    printf("\n");
-  }
 }
 
-int calc_determinant(int *matrix, int dim)
+int calc_determinant(int* matrix, int dim)
 {
-  int i, j, k, *mat, det = 1, coeff_1, coeff_2, *row;
+    int i, j, k, *mat, det = 1, coeff_1, coeff_2, *row;
 
-//  print_matrix(matrix, dim);
+    //  print_matrix(matrix, dim);
 
-  mat = (int *)malloc(sizeof(int)*dim*dim);
-  if (mat == NULL) {
-    printf("mat malloc err\n");
-    goto out0;
-  }
-  memcpy((int *)mat, (int *)matrix, sizeof(int)*dim*dim);
-
-  row = (int *)malloc(sizeof(int)*dim);
-  if (row == NULL) {
-    printf("row malloc err\n");
-    goto out1;
-  }
-
-  for (i=0; i<dim; i++) {
-    if (mat[i*dim+i] == 0) {
-      for (k=i+1; k<dim; k++) {
-	if (mat[k*dim+i] != 0) {
-	  memcpy((int *)row, (int *)&mat[k*dim], sizeof(int)*dim);
-	  memcpy((int *)&mat[k*dim], (int *)&mat[i*dim], sizeof(int)*dim);
-	  memcpy((int *)&mat[i*dim], (int *)row, sizeof(int)*dim);
-	  break;
-	}
-      }
-      if (k == dim) {
-	det = 0;
-	goto out2;
-      }
+    mat = (int*)malloc(sizeof(int) * dim * dim);
+    if (mat == NULL) {
+        printf("mat malloc err\n");
+        goto out0;
     }
-    coeff_1 = mat[i*dim+i];
-    for (j=i; j<dim; j++) {
-      mat[i*dim+j] = galois_single_divide(mat[i*dim+j], coeff_1, 8);
+    memcpy((int*)mat, (int*)matrix, sizeof(int) * dim * dim);
+
+    row = (int*)malloc(sizeof(int) * dim);
+    if (row == NULL) {
+        printf("row malloc err\n");
+        goto out1;
     }
-    for (k=i+1; k<dim; k++) {
-      if (mat[k*dim+i] != 0) {
-	coeff_2 = mat[k*dim+i];
-	for (j=i; j<dim; j++) {
-	  mat[k*dim+j] = mat[k*dim+j] ^ galois_single_multiply(mat[i*dim+j], coeff_2, 8);
-	}
-      }
+
+    for (i = 0; i < dim; i++) {
+        if (mat[i * dim + i] == 0) {
+            for (k = i + 1; k < dim; k++) {
+                if (mat[k * dim + i] != 0) {
+                    memcpy((int*)row, (int*)&mat[k * dim], sizeof(int) * dim);
+                    memcpy((int*)&mat[k * dim], (int*)&mat[i * dim], sizeof(int) * dim);
+                    memcpy((int*)&mat[i * dim], (int*)row, sizeof(int) * dim);
+                    break;
+                }
+            }
+            if (k == dim) {
+                det = 0;
+                goto out2;
+            }
+        }
+        coeff_1 = mat[i * dim + i];
+        for (j = i; j < dim; j++) {
+            mat[i * dim + j] = galois_single_divide(mat[i * dim + j], coeff_1, 8);
+        }
+        for (k = i + 1; k < dim; k++) {
+            if (mat[k * dim + i] != 0) {
+                coeff_2 = mat[k * dim + i];
+                for (j = i; j < dim; j++) {
+                    mat[k * dim + j] = mat[k * dim + j] ^ galois_single_multiply(mat[i * dim + j], coeff_2, 8);
+                }
+            }
+        }
+        det = galois_single_multiply(det, coeff_1, 8);
     }
-    det = galois_single_multiply(det, coeff_1, 8);
-  }
-//  print_matrix(mat, dim);
+    //  print_matrix(mat, dim);
 
 out2:
-  free(row);
+    free(row);
 
 out1:
-  free(mat);
+    free(mat);
 
 out0:
-  return det;
+    return det;
 }

@@ -13,13 +13,12 @@
  *
  */
 
+#include "rgw_sal.h"
+
 #include <errno.h>
+#include <sstream>
 #include <stdlib.h>
 #include <system_error>
 #include <unistd.h>
-#include <sstream>
-
-#include "rgw_sal.h"
 
 #define dout_subsys ceph_subsys_rgw
-

@@ -6,32 +6,32 @@ IMAGE_SIZE=1G
 TOLERANCE_PRCNT=10
 
 rbd_bench() {
-    local image=$1
-    local type=$2
-    local total=$3
-    local qos_type=$4
-    local qos_limit=$5
-    local iops_var_name=$6
-    local bps_var_name=$7
-    local timeout=$8
-    local timeout_cmd=""
+	local image=$1
+	local type=$2
+	local total=$3
+	local qos_type=$4
+	local qos_limit=$5
+	local iops_var_name=$6
+	local bps_var_name=$7
+	local timeout=$8
+	local timeout_cmd=""
 
-    if [ -n "${timeout}" ]; then
-        timeout_cmd="timeout --preserve-status ${timeout}"
-    fi
+	if [ -n "${timeout}" ]; then
+		timeout_cmd="timeout --preserve-status ${timeout}"
+	fi
 
-    # parse `rbd bench` output for string like this:
-    # elapsed:    25  ops:     2560  ops/sec:   100.08  bytes/sec: 409.13 MiB
-    iops_bps=$(${timeout_cmd} rbd bench "${image}" \
-                              --io-type ${type} --io-size 4K \
-                              --io-total ${total} --rbd-cache=false \
-                              --rbd_qos_${qos_type}_limit ${qos_limit} |
-                   awk '/elapsed:.* GiB/ {print int($6) ":" int($8) * 1024 * 1024 * 1024}
+	# parse `rbd bench` output for string like this:
+	# elapsed:    25  ops:     2560  ops/sec:   100.08  bytes/sec: 409.13 MiB
+	iops_bps=$(${timeout_cmd} rbd bench "${image}" \
+		--io-type ${type} --io-size 4K \
+		--io-total ${total} --rbd-cache=false \
+		--rbd_qos_${qos_type}_limit ${qos_limit} |
+		awk '/elapsed:.* GiB/ {print int($6) ":" int($8) * 1024 * 1024 * 1024}
                         /elapsed:.* MiB/ {print int($6) ":" int($8) * 1024 * 1024}
                         /elapsed:.* KiB/ {print int($6) ":" int($8) * 1024}
                         /elapsed:.* B/   {print int($6) ":" int($8)}')
-    eval ${iops_var_name}=${iops_bps%:*}
-    eval ${bps_var_name}=${iops_bps#*:}
+	eval ${iops_var_name}=${iops_bps%:*}
+	eval ${bps_var_name}=${iops_bps#*:}
 }
 
 rbd create "${POOL}/${IMAGE}" -s ${IMAGE_SIZE}

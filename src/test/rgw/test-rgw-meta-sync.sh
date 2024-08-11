@@ -1,65 +1,64 @@
 #!/usr/bin/env bash
 
-. "`dirname $0`/test-rgw-common.sh"
+. "$(dirname $0)/test-rgw-common.sh"
 
 set -e
 
 function get_metadata_sync_status {
-  cid=$1
-  realm=$2
+	cid=$1
+	realm=$2
 
-  meta_sync_status_json=`$(rgw_admin $cid) --rgw-realm=$realm metadata sync status`
+	meta_sync_status_json=$($(rgw_admin $cid) --rgw-realm=$realm metadata sync status)
 
-  global_sync_status=$(json_extract sync_status.info.status $meta_sync_status_json)
-  num_shards=$(json_extract sync_status.info.num_shards $meta_sync_status_json)
+	global_sync_status=$(json_extract sync_status.info.status $meta_sync_status_json)
+	num_shards=$(json_extract sync_status.info.num_shards $meta_sync_status_json)
 
-  echo "sync_status: $global_sync_status"
+	echo "sync_status: $global_sync_status"
 
-  sync_markers=$(json_extract sync_status.markers $meta_sync_status_json)
+	sync_markers=$(json_extract sync_status.markers $meta_sync_status_json)
 
-  num_shards2=$(python_array_len $sync_markers)
+	num_shards2=$(python_array_len $sync_markers)
 
-  [ "$global_sync_status" == "sync" ] && $assert $num_shards2 -eq $num_shards
+	[ "$global_sync_status" == "sync" ] && $assert $num_shards2 -eq $num_shards
 
-  sync_states=$(project_python_array_field val.state $sync_markers)
-  eval secondary_status=$(project_python_array_field val.marker $sync_markers)
+	sync_states=$(project_python_array_field val.state $sync_markers)
+	eval secondary_status=$(project_python_array_field val.marker $sync_markers)
 }
 
 function get_metadata_log_status {
-  cid=$1
-  realm=$2
+	cid=$1
+	realm=$2
 
-  master_mdlog_status_json=`$(rgw_admin $cid) --rgw-realm=$realm mdlog status`
-  master_meta_status=$(json_extract "" $master_mdlog_status_json)
+	master_mdlog_status_json=$($(rgw_admin $cid) --rgw-realm=$realm mdlog status)
+	master_meta_status=$(json_extract "" $master_mdlog_status_json)
 
-  eval master_status=$(project_python_array_field marker $master_meta_status)
+	eval master_status=$(project_python_array_field marker $master_meta_status)
 }
 
 function wait_for_meta_sync {
-  master_id=$1
-  cid=$2
-  realm=$3
+	master_id=$1
+	cid=$2
+	realm=$3
 
-  get_metadata_log_status $master_id $realm
-  echo "master_status=${master_status[*]}"
+	get_metadata_log_status $master_id $realm
+	echo "master_status=${master_status[*]}"
 
-  while true; do
-    get_metadata_sync_status $cid $realm
+	while true; do
+		get_metadata_sync_status $cid $realm
 
-    echo "secondary_status=${secondary_status[*]}"
+		echo "secondary_status=${secondary_status[*]}"
 
-    fail=0
-    for i in `seq 0 $((num_shards-1))`; do
-      if [ "${master_status[$i]}" \> "${secondary_status[$i]}" ]; then
-        echo "shard $i not done syncing (${master_status[$i]} > ${secondary_status[$i]})"
-        fail=1
-        break
-      fi
-    done
+		fail=0
+		for i in $(seq 0 $((num_shards - 1))); do
+			if [ "${master_status[$i]}" \> "${secondary_status[$i]}" ]; then
+				echo "shard $i not done syncing (${master_status[$i]} > ${secondary_status[$i]})"
+				fail=1
+				break
+			fi
+		done
 
-    [ $fail -eq 0 ] && echo "Success" && return || echo "Sync not complete"
+		[ $fail -eq 0 ] && echo "Success" && return || echo "Sync not complete"
 
-    sleep 5
-  done
+		sleep 5
+	done
 }
-

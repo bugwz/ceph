@@ -18,31 +18,28 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-
 case "$1" in
-    remove)
+remove) ;;
+
+purge)
+    [ -f "/etc/default/ceph" ] && . /etc/default/ceph
+    [ -z "$SERVER_USER" ] && SERVER_USER=ceph
+
+    rm -rf /var/log/ceph
+    rm -rf /etc/ceph
+
+    if [ -f /etc/shadow ]; then
+        usermod -L -e 1 $SERVER_USER
+    else
+        usermod -L $SERVER_USER
+    fi
     ;;
 
-    purge)
-        [ -f "/etc/default/ceph" ] && . /etc/default/ceph
-        [ -z "$SERVER_USER" ] && SERVER_USER=ceph
+upgrade | failed-upgrade | abort-install | abort-upgrade | disappear) ;;
 
-        rm -rf /var/log/ceph
-        rm -rf /etc/ceph
-
-        if [ -f /etc/shadow ]; then
-            usermod -L -e 1 $SERVER_USER
-        else
-            usermod -L $SERVER_USER
-        fi
-    ;;
-
-    upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
-    ;;
-
-    *)
-        echo "postrm called with unknown argument \`$1'" >&2
-        exit 1
+*)
+    echo "postrm called with unknown argument \`$1'" >&2
+    exit 1
     ;;
 esac
 
@@ -52,5 +49,3 @@ esac
 #DEBHELPER#
 
 exit 0
-
-

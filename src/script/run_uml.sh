@@ -78,19 +78,20 @@ TAP_IFUPDOWN_CONFIG="/tmp/interface-${TAP}"
 # Also compute BITS, which is the network prefix length used.
 # The NETMASK is then computed using that BITS value.
 eval $(
-ip addr show virbr0 | awk '
+	ip addr show virbr0 | awk '
 /inet/ {
 	split($2, a, "/")
 	printf("HOST_IP=%s\n", a[1]);
 	printf("BROADCAST=%s\n", $4);
 	printf("BITS=%s\n", a[2]);
 	exit(0);
-}')
+}'
+)
 
 # Use bc to avoid 32-bit wrap when computing netmask
 eval $(
-echo -n "NETMASK="
-bc <<! | fmt | sed 's/ /./g'
+	echo -n "NETMASK="
+	bc <<! | fmt | sed 's/ /./g'
 m = 2 ^ 32 - 2 ^ (32 - ${BITS})
 for (p = 24; p >= 0; p = p - 8)
     m / (2 ^ p) % 256
@@ -100,7 +101,7 @@ for (p = 24; p >= 0; p = p - 8)
 # Now use the netmask and the host IP to compute the subnet address
 # and from that the guest IP address to use.
 eval $(
-awk '
+	awk '
 function from_quad(addr,  a, val, i) {
 	if (split(addr, a, ".") != 4)
 		exit(1);	# address not in dotted quad format
@@ -133,7 +134,7 @@ BEGIN {
 	printf("SUBNET=%s\n", to_quad(subnet));
 	printf("GUEST_IP=%s\n", to_quad(guest_ip));
 }
-' < /dev/null
+' </dev/null
 )
 
 ############## OK, we now know all our network parameters...

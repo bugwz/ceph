@@ -12,18 +12,18 @@
  *
  */
 
-#include <stdlib.h>
-
 #include "RadosXattrIter.h"
 
+#include <stdlib.h>
+
 librados::RadosXattrsIter::RadosXattrsIter()
-  : val(NULL)
+    : val(NULL)
 {
-  i = attrset.end();
+    i = attrset.end();
 }
 
 librados::RadosXattrsIter::~RadosXattrsIter()
 {
-  free(val);
-  val = NULL;
+    free(val);
+    val = NULL;
 }

@@ -2,21 +2,21 @@
 set -x
 
 delay_mon() {
-    MSGTYPE=$1
-    shift
-    $@ --rados-mon-op-timeout 1 --ms-inject-delay-type mon --ms-inject-delay-max 10000000 --ms-inject-delay-probability 1 --ms-inject-delay-msg-type $MSGTYPE
-    if [ $? -eq 0 ]; then
-        exit 1
-    fi
+	MSGTYPE=$1
+	shift
+	$@ --rados-mon-op-timeout 1 --ms-inject-delay-type mon --ms-inject-delay-max 10000000 --ms-inject-delay-probability 1 --ms-inject-delay-msg-type $MSGTYPE
+	if [ $? -eq 0 ]; then
+		exit 1
+	fi
 }
 
 delay_osd() {
-    MSGTYPE=$1
-    shift
-    $@ --rados-osd-op-timeout 1 --ms-inject-delay-type osd --ms-inject-delay-max 10000000 --ms-inject-delay-probability 1 --ms-inject-delay-msg-type $MSGTYPE
-    if [ $? -eq 0 ]; then
-        exit 2
-    fi
+	MSGTYPE=$1
+	shift
+	$@ --rados-osd-op-timeout 1 --ms-inject-delay-type osd --ms-inject-delay-max 10000000 --ms-inject-delay-probability 1 --ms-inject-delay-msg-type $MSGTYPE
+	if [ $? -eq 0 ]; then
+		exit 2
+	fi
 }
 
 # pool ops

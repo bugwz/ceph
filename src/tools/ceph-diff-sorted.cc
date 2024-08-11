@@ -52,122 +52,122 @@
  */
 
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 
-struct FileOfLines {
-  const char* filename;
-  std::ifstream input;
-  std::string this_line, prev_line;
-  bool next_eof;
-  bool is_eof;
+struct FileOfLines
+{
+    const char* filename;
+    std::ifstream input;
+    std::string this_line, prev_line;
+    bool next_eof;
+    bool is_eof;
 
-  FileOfLines(const char* _filename) :
-    filename(_filename),
-    input(filename),
-    next_eof(false),
-    is_eof(false)
-  { }
+    FileOfLines(const char* _filename)
+        : filename(_filename)
+        , input(filename)
+        , next_eof(false)
+        , is_eof(false)
+    {}
 
-  void dump(const std::string& prefix) {
-    do {
-      std::cout << prefix << this_line << std::endl;
-      advance();
-    } while (!eof());
-  }
-
-  bool eof() const {
-    return is_eof;
-  }
-
-  bool good() const {
-    return input.good();
-  }
-
-  void advance() {
-    if (next_eof) {
-      is_eof = true;
-      return;
+    void dump(const std::string& prefix)
+    {
+        do {
+            std::cout << prefix << this_line << std::endl;
+            advance();
+        } while (!eof());
     }
 
-    prev_line = this_line;
-    std::getline(input, this_line);
-    if (this_line.empty()) {
-      if (!input.eof()) {
-	std::cerr << "Error: " << filename << " has an empty line." <<
-	  std::endl;
-	exit(4);
-      }
-      is_eof = true;
-      return;
-    } else if (input.eof()) {
-      next_eof = true;
+    bool eof() const { return is_eof; }
+
+    bool good() const { return input.good(); }
+
+    void advance()
+    {
+        if (next_eof) {
+            is_eof = true;
+            return;
+        }
+
+        prev_line = this_line;
+        std::getline(input, this_line);
+        if (this_line.empty()) {
+            if (!input.eof()) {
+                std::cerr << "Error: " << filename << " has an empty line." << std::endl;
+                exit(4);
+            }
+            is_eof = true;
+            return;
+        }
+        else if (input.eof()) {
+            next_eof = true;
+        }
+
+        if (this_line < prev_line) {
+            std::cerr << "Error: " << filename << " is not in sorted order; \"" << this_line << "\" follows \""
+                      << prev_line << "\"." << std::endl;
+            exit(4);
+        }
     }
 
-    if (this_line < prev_line) {
-      std::cerr << "Error: " << filename << " is not in sorted order; \"" <<
-	this_line << "\" follows \"" << prev_line << "\"." << std::endl;
-      exit(4);
-    }
-  }
-
-  const std::string line() const {
-    return this_line;
-  }
+    const std::string line() const { return this_line; }
 };
 
-int main(int argc, const char* argv[]) {
-  if (argc != 3) {
-    std::cerr << "Usage: " << argv[0] << " <file1> <file2>" << std::endl;
-    exit(2);
-  }
-
-  FileOfLines input1(argv[1]);
-  if (!input1.good()) {
-    std::cerr << "Error opening " << argv[1] <<
-      "." << std::endl;
-    exit(3);
-  }
-
-  FileOfLines input2(argv[2]);
-  if (!input2.good()) {
-    std::cerr << "Error opening " << argv[2] <<
-      "." << std::endl;
-    exit(3);
-  }
-
-  bool files_same = true;
-
-  input1.advance();
-  input2.advance();
-
-  while (!input1.eof() && !input2.eof()) {
-    if (input1.line() == input2.line()) {
-      input1.advance();
-      input2.advance();
-    } else if (input1.line() < input2.line()) {
-      files_same = false;
-      std::cout << "< " << input1.line() << std::endl;
-      input1.advance();
-    } else {
-      files_same = false;
-      std::cout << "> " << input2.line() << std::endl;
-      input2.advance();
+int main(int argc, const char* argv[])
+{
+    if (argc != 3) {
+        std::cerr << "Usage: " << argv[0] << " <file1> <file2>" << std::endl;
+        exit(2);
     }
-  }
 
-  if (!input1.eof()) {
-    files_same = false;
-    input1.dump("< ");
-  } else if (!input2.eof()) {
-    files_same = false;
-    input2.dump("> ");
-  }
+    FileOfLines input1(argv[1]);
+    if (!input1.good()) {
+        std::cerr << "Error opening " << argv[1] << "." << std::endl;
+        exit(3);
+    }
 
-  if (files_same) {
-    exit(0);
-  } else {
-    exit(1);
-  }
+    FileOfLines input2(argv[2]);
+    if (!input2.good()) {
+        std::cerr << "Error opening " << argv[2] << "." << std::endl;
+        exit(3);
+    }
+
+    bool files_same = true;
+
+    input1.advance();
+    input2.advance();
+
+    while (!input1.eof() && !input2.eof()) {
+        if (input1.line() == input2.line()) {
+            input1.advance();
+            input2.advance();
+        }
+        else if (input1.line() < input2.line()) {
+            files_same = false;
+            std::cout << "< " << input1.line() << std::endl;
+            input1.advance();
+        }
+        else {
+            files_same = false;
+            std::cout << "> " << input2.line() << std::endl;
+            input2.advance();
+        }
+    }
+
+    if (!input1.eof()) {
+        files_same = false;
+        input1.dump("< ");
+    }
+    else if (!input2.eof()) {
+        files_same = false;
+        input2.dump("> ");
+    }
+
+    if (files_same) {
+        exit(0);
+    }
+    else {
+        exit(1);
+    }
 }

@@ -17,8 +17,9 @@
 
 #include "include/cephfs/libcephfs.h"
 #include "osd/osd_types.h"
-#include <set>
 #include "osdc/Objecter.h"
+
+#include <set>
 
 /**
  * This utility scans the files (via an online MDS) and works out
@@ -29,23 +30,22 @@
 class PgFiles
 {
 private:
-  Objecter *objecter;
-  struct ceph_mount_info *cmount = nullptr;
+    Objecter* objecter;
+    struct ceph_mount_info* cmount = nullptr;
 
-  std::set<pg_t> pgs;
-  std::set<uint64_t> pools;
+    std::set<pg_t> pgs;
+    std::set<uint64_t> pools;
 
-  void hit_file(std::string const &path, const struct ceph_statx &stx);
-  void hit_dir(std::string const &path);
+    void hit_file(std::string const& path, const struct ceph_statx& stx);
+    void hit_dir(std::string const& path);
 
 
 public:
-  PgFiles(Objecter *o, const std::set<pg_t> &pgs_);
-  ~PgFiles();
+    PgFiles(Objecter* o, const std::set<pg_t>& pgs_);
+    ~PgFiles();
 
-  int init();
-  int scan_path(std::string const &path);
+    int init();
+    int scan_path(std::string const& path);
 };
 
 #endif
-

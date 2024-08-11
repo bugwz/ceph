@@ -14,101 +14,102 @@
 
 
 #include "Python.h"
-
 #include "common/debug.h"
 
 #define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_mgr
+#define dout_subsys  ceph_subsys_mgr
 #undef dout_prefix
 #define dout_prefix *_dout << "mgr " << __func__ << " "
 
 #include "Gil.h"
 
-SafeThreadState::SafeThreadState(PyThreadState *ts_)
+SafeThreadState::SafeThreadState(PyThreadState* ts_)
     : ts(ts_)
 {
-  ceph_assert(ts != nullptr);
-  thread = pthread_self();
+    ceph_assert(ts != nullptr);
+    thread = pthread_self();
 }
 
-Gil::Gil(SafeThreadState &ts, bool new_thread) : pThreadState(ts)
+Gil::Gil(SafeThreadState& ts, bool new_thread)
+    : pThreadState(ts)
 {
-  // Acquire the GIL, set the current thread state
-  PyEval_RestoreThread(pThreadState.ts);
-  dout(25) << "GIL acquired for thread state " << pThreadState.ts << dendl;
+    // Acquire the GIL, set the current thread state
+    PyEval_RestoreThread(pThreadState.ts);
+    dout(25) << "GIL acquired for thread state " << pThreadState.ts << dendl;
 
-  //
-  // If called from a separate OS thread (i.e. a thread not created
-  // by Python, that does't already have a python thread state that
-  // was created when that thread was active), we need to manually
-  // create and switch to a python thread state specifically for this
-  // OS thread.
-  //
-  // Note that instead of requring the caller to set new_thread == true
-  // when calling this from a separate OS thread, we could figure out
-  // if this was necessary automatically, as follows:
-  //
-  //   if (pThreadState->thread_id != PyThread_get_thread_ident()) {
-  //
-  // However, this means we're accessing pThreadState->thread_id, but
-  // the Python C API docs say that "The only public data member is
-  // PyInterpreterState *interp", i.e. doing this would violate
-  // something that's meant to be a black box.
-  //
-  if (new_thread) {
-    pNewThreadState = PyThreadState_New(pThreadState.ts->interp);
-    PyThreadState_Swap(pNewThreadState);
-    dout(20) << "Switched to new thread state " << pNewThreadState << dendl;
-  } else {
-    ceph_assert(pthread_self() == pThreadState.thread);
-  }
+    //
+    // If called from a separate OS thread (i.e. a thread not created
+    // by Python, that does't already have a python thread state that
+    // was created when that thread was active), we need to manually
+    // create and switch to a python thread state specifically for this
+    // OS thread.
+    //
+    // Note that instead of requring the caller to set new_thread == true
+    // when calling this from a separate OS thread, we could figure out
+    // if this was necessary automatically, as follows:
+    //
+    //   if (pThreadState->thread_id != PyThread_get_thread_ident()) {
+    //
+    // However, this means we're accessing pThreadState->thread_id, but
+    // the Python C API docs say that "The only public data member is
+    // PyInterpreterState *interp", i.e. doing this would violate
+    // something that's meant to be a black box.
+    //
+    if (new_thread) {
+        pNewThreadState = PyThreadState_New(pThreadState.ts->interp);
+        PyThreadState_Swap(pNewThreadState);
+        dout(20) << "Switched to new thread state " << pNewThreadState << dendl;
+    }
+    else {
+        ceph_assert(pthread_self() == pThreadState.thread);
+    }
 }
 
 Gil::~Gil()
 {
-  if (pNewThreadState != nullptr) {
-    dout(20) << "Destroying new thread state " << pNewThreadState << dendl;
-    PyThreadState_Swap(pThreadState.ts);
-    PyThreadState_Clear(pNewThreadState);
-    PyThreadState_Delete(pNewThreadState);
-  }
-  // Release the GIL, reset the thread state to NULL
-  PyEval_SaveThread();
-  dout(25) << "GIL released for thread state " << pThreadState.ts << dendl;
+    if (pNewThreadState != nullptr) {
+        dout(20) << "Destroying new thread state " << pNewThreadState << dendl;
+        PyThreadState_Swap(pThreadState.ts);
+        PyThreadState_Clear(pNewThreadState);
+        PyThreadState_Delete(pNewThreadState);
+    }
+    // Release the GIL, reset the thread state to NULL
+    PyEval_SaveThread();
+    dout(25) << "GIL released for thread state " << pThreadState.ts << dendl;
 }
 
 without_gil_t::without_gil_t()
 {
-  assert(PyGILState_Check());
-  release_gil();
+    assert(PyGILState_Check());
+    release_gil();
 }
 
 without_gil_t::~without_gil_t()
 {
-  if (save) {
-    acquire_gil();
-  }
+    if (save) {
+        acquire_gil();
+    }
 }
 
 void without_gil_t::release_gil()
 {
-  save = PyEval_SaveThread();
+    save = PyEval_SaveThread();
 }
 
 void without_gil_t::acquire_gil()
 {
-  assert(save);
-  PyEval_RestoreThread(save);
-  save = nullptr;
+    assert(save);
+    PyEval_RestoreThread(save);
+    save = nullptr;
 }
 
 with_gil_t::with_gil_t(without_gil_t& allow_threads)
-  : allow_threads{allow_threads}
+    : allow_threads{allow_threads}
 {
-  allow_threads.acquire_gil();
+    allow_threads.acquire_gil();
 }
 
 with_gil_t::~with_gil_t()
 {
-  allow_threads.release_gil();
+    allow_threads.release_gil();
 }

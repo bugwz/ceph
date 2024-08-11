@@ -12,42 +12,38 @@
  *
  */
 
-#include <errno.h>
-#include <stdlib.h>
-#include "arch/probe.h"
 #include "arch/intel.h"
+#include "arch/probe.h"
+#include "common/config_proxy.h"
 #include "erasure-code/ErasureCodePlugin.h"
 #include "global/global_context.h"
-#include "common/config_proxy.h"
+
 #include "gtest/gtest.h"
+#include <errno.h>
+#include <stdlib.h>
 
 TEST(ErasureCodePlugin, factory)
 {
-  ErasureCodePluginRegistry &instance = ErasureCodePluginRegistry::instance();
-  ErasureCodeProfile profile;
-  {
-    ErasureCodeInterfaceRef erasure_code;
-    EXPECT_FALSE(erasure_code);
-    EXPECT_EQ(-EIO, instance.factory("no-isa",
-				     g_conf().get_val<std::string>("erasure_code_dir"),
-				     profile,
-				     &erasure_code, &cerr));
-    EXPECT_FALSE(erasure_code);
-  }
-  const char *techniques[] = {
-    "reed_sol_van",
-    0
-  };
-  for(const char **technique = techniques; *technique; technique++) {
-    ErasureCodeInterfaceRef erasure_code;
-    profile["technique"] = *technique;
-    EXPECT_FALSE(erasure_code);
-    EXPECT_EQ(0, instance.factory("isa",
-				  g_conf().get_val<std::string>("erasure_code_dir"),
-				  profile,
-                                  &erasure_code, &cerr));
-    EXPECT_TRUE(erasure_code.get());
-  }
+    ErasureCodePluginRegistry& instance = ErasureCodePluginRegistry::instance();
+    ErasureCodeProfile profile;
+    {
+        ErasureCodeInterfaceRef erasure_code;
+        EXPECT_FALSE(erasure_code);
+        EXPECT_EQ(-EIO,
+                  instance.factory(
+                      "no-isa", g_conf().get_val<std::string>("erasure_code_dir"), profile, &erasure_code, &cerr));
+        EXPECT_FALSE(erasure_code);
+    }
+    const char* techniques[] = {"reed_sol_van", 0};
+    for (const char** technique = techniques; *technique; technique++) {
+        ErasureCodeInterfaceRef erasure_code;
+        profile["technique"] = *technique;
+        EXPECT_FALSE(erasure_code);
+        EXPECT_EQ(
+            0,
+            instance.factory("isa", g_conf().get_val<std::string>("erasure_code_dir"), profile, &erasure_code, &cerr));
+        EXPECT_TRUE(erasure_code.get());
+    }
 }
 
 /*

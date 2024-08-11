@@ -13,7 +13,7 @@ source ./fix_conf_file.sh
 openstack_node=${1}
 ceph_node=${2}
 
-copy_file execs/openstack-preinstall.sh $openstack_node . 0777 
+copy_file execs/openstack-preinstall.sh $openstack_node . 0777
 fix_conf_file $openstack_node kilo .
 ssh $openstack_node sudo ./openstack-preinstall.sh
 sleep 240

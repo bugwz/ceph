@@ -10,7 +10,10 @@ DATA_INPUT=$(mktemp -d)
 echo "starting hadoop-wordcount test"
 
 # bail if $TESTDIR is not set as this test will fail in that scenario
-[ -z $TESTDIR ] && { echo "\$TESTDIR needs to be set, but is not. Exiting."; exit 1; }
+[ -z $TESTDIR ] && {
+	echo "\$TESTDIR needs to be set, but is not. Exiting."
+	exit 1
+}
 
 # if HADOOP_PREFIX is not set, use default
 [ -z $HADOOP_PREFIX ] && { HADOOP_PREFIX=$TESTDIR/hadoop; }
@@ -25,8 +28,8 @@ rm -rf $DATA_INPUT
 
 # Run the job
 $HADOOP_PREFIX/bin/hadoop jar \
-  $HADOOP_PREFIX/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
-  wordcount $WC_INPUT $WC_OUTPUT
+	$HADOOP_PREFIX/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
+	wordcount $WC_INPUT $WC_OUTPUT
 
 # Cleanup
 $HADOOP_PREFIX/bin/hadoop fs -rm -r $WC_INPUT $WC_OUTPUT || true

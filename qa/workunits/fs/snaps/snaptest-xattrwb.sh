@@ -19,8 +19,8 @@ setfattr -n user.foo a/b
 mkdir a/.snap/s
 mkdir a/b/cc
 # b now has been cowed on the server, but we still have dirty xattr caps
-getfattr -n user.foo a/b          # there they are...
-getfattr -n user.foo a/.snap/s/b | grep user.foo  # should be there, too!
+getfattr -n user.foo a/b                         # there they are...
+getfattr -n user.foo a/.snap/s/b | grep user.foo # should be there, too!
 
 # ok, clean up
 rmdir a/.snap/s

@@ -17,16 +17,15 @@
 
 #include "crypto/crypto_accel.h"
 
-class OpenSSLCryptoAccel : public CryptoAccel {
- public:
-  OpenSSLCryptoAccel() {}
-  virtual ~OpenSSLCryptoAccel() {}
+class OpenSSLCryptoAccel : public CryptoAccel
+{
+public:
+    OpenSSLCryptoAccel() {}
+    virtual ~OpenSSLCryptoAccel() {}
 
-  bool cbc_encrypt(unsigned char* out, const unsigned char* in, size_t size,
-                   const unsigned char (&iv)[AES_256_IVSIZE],
-                   const unsigned char (&key)[AES_256_KEYSIZE]) override;
-  bool cbc_decrypt(unsigned char* out, const unsigned char* in, size_t size,
-                   const unsigned char (&iv)[AES_256_IVSIZE],
-                   const unsigned char (&key)[AES_256_KEYSIZE]) override;
+    bool cbc_encrypt(unsigned char* out, const unsigned char* in, size_t size,
+                     const unsigned char (&iv)[AES_256_IVSIZE], const unsigned char (&key)[AES_256_KEYSIZE]) override;
+    bool cbc_decrypt(unsigned char* out, const unsigned char* in, size_t size,
+                     const unsigned char (&iv)[AES_256_IVSIZE], const unsigned char (&key)[AES_256_KEYSIZE]) override;
 };
 #endif

@@ -25,29 +25,29 @@
 ## /28 for 4 weeks
 
 echo "Scheduling " $2 " branch"
-if [ $2 = "master" ] ; then
-        # run master branch with --newest option looking for good sha1 7 builds back with /100000 jobs
-        # using '-p 80 --force-priority' as an execption ATM
-        teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/100000 --newest 7 -e $5 $7 -p 80 --force-priority
-elif [ $2 = "jewel" ] ; then
-        # run jewel branch with /40 jobs
-        teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/40 -e $5 $7
-elif [ $2 = "kraken" ] ; then
-        # run kraken branch with /999 jobs
-        teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/999 -e $5 $7
-elif [ $2 = "luminous" ] ; then
-        # run luminous branch with /999 jobs
-        teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/999 -e $5 $7
-elif [ $2 = "mimic" ] ; then
-        # run mimic branch with /999 jobs
-        teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/999 -e $5 $7
-elif [ $2 = "nautilus" ] ; then
-        # run nautilus branch with /2999 jobs == ~ 250 jobs
-        teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/2999 -e $5 $7
-elif [ $2 = "octopus" ] ; then
-        teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/9999 -e $5 $7
-        # run nautilus branch with /100000 jobs fir rados == ~ 300 job
+if [ $2 = "master" ]; then
+	# run master branch with --newest option looking for good sha1 7 builds back with /100000 jobs
+	# using '-p 80 --force-priority' as an execption ATM
+	teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/100000 --newest 7 -e $5 $7 -p 80 --force-priority
+elif [ $2 = "jewel" ]; then
+	# run jewel branch with /40 jobs
+	teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/40 -e $5 $7
+elif [ $2 = "kraken" ]; then
+	# run kraken branch with /999 jobs
+	teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/999 -e $5 $7
+elif [ $2 = "luminous" ]; then
+	# run luminous branch with /999 jobs
+	teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/999 -e $5 $7
+elif [ $2 = "mimic" ]; then
+	# run mimic branch with /999 jobs
+	teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/999 -e $5 $7
+elif [ $2 = "nautilus" ]; then
+	# run nautilus branch with /2999 jobs == ~ 250 jobs
+	teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/2999 -e $5 $7
+elif [ $2 = "octopus" ]; then
+	teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/9999 -e $5 $7
+	# run nautilus branch with /100000 jobs fir rados == ~ 300 job
 else
-        # run NON master branches without --newest
-        teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/999 -e $5 $7
+	# run NON master branches without --newest
+	teuthology-suite -v -c $2 -m $3 -k $6 -s $4 --subset $(echo "(($(date +%U) % 4) * 7) + $1" | bc)/999 -e $5 $7
 fi

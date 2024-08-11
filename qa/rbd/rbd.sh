@@ -1,29 +1,28 @@
 #!/usr/bin/env bash
 set -x
 
-basedir=`echo $0 | sed 's/[^/]*$//g'`.
+basedir=$(echo $0 | sed 's/[^/]*$//g').
 . $basedir/common.sh
 
 rbd_test_init
 
-
 create_multiple() {
-	for i in `seq 1 10`; do
+	for i in $(seq 1 10); do
 		rbd_create_image $i
 	done
 
-	for i in `seq 1 10`; do
+	for i in $(seq 1 10); do
 		rbd_add $i
 	done
-	for i in `seq 1 10`; do
-		devname=/dev/rbd`eval echo \\$rbd$i`
+	for i in $(seq 1 10); do
+		devname=/dev/rbd$(eval echo \$rbd$i)
 		echo $devname
 	done
-	for i in `seq 1 10`; do
-		devid=`eval echo \\$rbd$i`
+	for i in $(seq 1 10); do
+		devid=$(eval echo \$rbd$i)
 		rbd_remove $devid
 	done
-	for i in `seq 1 10`; do
+	for i in $(seq 1 10); do
 		rbd_rm_image $i
 	done
 }
@@ -47,4 +46,3 @@ test_dbench() {
 
 create_multiple
 test_dbench
-

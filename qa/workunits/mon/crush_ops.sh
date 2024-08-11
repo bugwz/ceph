@@ -2,8 +2,7 @@
 
 set -ex
 
-function expect_false()
-{
+function expect_false() {
 	set -x
 	if "$@"; then return 1; else return 0; fi
 }
@@ -48,7 +47,7 @@ ceph osd crush rule rename bar-asdf bar
 ceph osd crush rule ls | expect_false grep 'foo-asdf'
 ceph osd crush rule ls | expect_false grep 'bar-asdf'
 ceph osd crush rule rm foo
-ceph osd crush rule rm foo  # idempotent
+ceph osd crush rule rm foo # idempotent
 ceph osd crush rule rm bar
 
 # can't delete in-use rules, tho:
@@ -59,32 +58,32 @@ ceph osd pool rm pinning_pool pinning_pool --yes-i-really-really-mean-it
 # build a simple map
 expect_false ceph osd crush add-bucket foo osd
 ceph osd crush add-bucket foo root
-o1=`ceph osd create`
-o2=`ceph osd create`
+o1=$(ceph osd create)
+o2=$(ceph osd create)
 ceph osd crush add $o1 1 host=host1 root=foo
-ceph osd crush add $o1 1 host=host1 root=foo  # idemptoent
+ceph osd crush add $o1 1 host=host1 root=foo # idemptoent
 ceph osd crush add $o2 1 host=host2 root=foo
-ceph osd crush add $o2 1 host=host2 root=foo  # idempotent
+ceph osd crush add $o2 1 host=host2 root=foo # idempotent
 ceph osd crush add-bucket bar root
-ceph osd crush add-bucket bar root  # idempotent
+ceph osd crush add-bucket bar root # idempotent
 ceph osd crush link host1 root=bar
-ceph osd crush link host1 root=bar  # idempotent
+ceph osd crush link host1 root=bar # idempotent
 ceph osd crush link host2 root=bar
-ceph osd crush link host2 root=bar  # idempotent
+ceph osd crush link host2 root=bar # idempotent
 
 ceph osd tree | grep -c osd.$o1 | grep -q 2
 ceph osd tree | grep -c host1 | grep -q 2
 ceph osd tree | grep -c osd.$o2 | grep -q 2
 ceph osd tree | grep -c host2 | grep -q 2
-expect_false ceph osd crush rm host1 foo   # not empty
+expect_false ceph osd crush rm host1 foo # not empty
 ceph osd crush unlink host1 foo
 ceph osd crush unlink host1 foo
 ceph osd tree | grep -c host1 | grep -q 1
 
-expect_false ceph osd crush rm foo  # not empty
-expect_false ceph osd crush rm bar  # not empty
+expect_false ceph osd crush rm foo # not empty
+expect_false ceph osd crush rm bar # not empty
 ceph osd crush unlink host1 bar
-ceph osd tree | grep -c host1 | grep -q 1   # now an orphan
+ceph osd tree | grep -c host1 | grep -q 1 # now an orphan
 ceph osd crush rm osd.$o1 host1
 ceph osd crush rm host1
 ceph osd tree | grep -c host1 | grep -q 0
@@ -92,7 +91,7 @@ expect_false ceph osd tree-from host1
 ceph osd tree-from host2
 expect_false ceph osd tree-from osd.$o2
 
-expect_false ceph osd crush rm bar   # not empty
+expect_false ceph osd crush rm bar # not empty
 ceph osd crush unlink host2
 
 ceph osd crush add-bucket host-for-test host root=root-for-test rack=rack-for-test
@@ -126,7 +125,7 @@ ceph osd crush rm osd.$o2
 ceph osd crush rm foo
 
 # test reweight
-o3=`ceph osd create`
+o3=$(ceph osd create)
 ceph osd crush add $o3 123 root=default
 ceph osd tree | grep osd.$o3 | grep 123
 ceph osd crush reweight osd.$o3 113
@@ -136,8 +135,8 @@ ceph osd crush rm osd.$o3
 ceph osd rm osd.$o3
 
 # test reweight-subtree
-o4=`ceph osd create`
-o5=`ceph osd create`
+o4=$(ceph osd create)
+o5=$(ceph osd create)
 ceph osd crush add $o4 123 root=default host=foobaz
 ceph osd crush add $o5 123 root=default host=foobaz
 ceph osd tree | grep osd.$o4 | grep 123
@@ -225,11 +224,11 @@ ceph osd crush weight-set rm-compat
 # this sequence would crash at one point
 ceph osd crush weight-set create-compat
 ceph osd crush add-bucket r1 rack root=default
-for f in `seq 1 32`; do
-    ceph osd crush add-bucket h$f host rack=r1
+for f in $(seq 1 32); do
+	ceph osd crush add-bucket h$f host rack=r1
 done
-for f in `seq 1 32`; do
-    ceph osd crush rm h$f
+for f in $(seq 1 32); do
+	ceph osd crush rm h$f
 done
 ceph osd crush rm r1
 ceph osd crush weight-set rm-compat

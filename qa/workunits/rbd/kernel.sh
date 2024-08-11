@@ -19,7 +19,7 @@ function get_device_dir {
 	local IMAGE=$2
 	local SNAP=$3
 	rbd device list | tail -n +2 | egrep "\s+$POOL\s+$IMAGE\s+$SNAP\s+" |
-	    awk '{print $1;}'
+		awk '{print $1;}'
 }
 
 function clean_up {
@@ -29,7 +29,7 @@ function clean_up {
 		sudo rbd device unmap /dev/rbd/rbd/testimg1
 		rbd snap purge testimg1 || true
 	fi
-	rbd ls | grep testimg1 > /dev/null && rbd rm testimg1 || true
+	rbd ls | grep testimg1 >/dev/null && rbd rm testimg1 || true
 	sudo rm -f $TMP_FILES
 }
 

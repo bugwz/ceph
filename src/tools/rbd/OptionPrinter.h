@@ -5,39 +5,39 @@
 #define CEPH_RBD_OPTION_PRINTER_H
 
 #include "include/int_types.h"
-#include <string>
-#include <vector>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
+#include <string>
+#include <vector>
 
 namespace rbd {
 
-class OptionPrinter {
+class OptionPrinter
+{
 public:
-  typedef boost::program_options::options_description OptionsDescription;
+    typedef boost::program_options::options_description OptionsDescription;
 
-  static const std::string POSITIONAL_ARGUMENTS;
-  static const std::string OPTIONAL_ARGUMENTS;
+    static const std::string POSITIONAL_ARGUMENTS;
+    static const std::string OPTIONAL_ARGUMENTS;
 
-  static const size_t LINE_WIDTH = 80;
-  static const size_t MIN_NAME_WIDTH = 20;
-  static const size_t MAX_DESCRIPTION_OFFSET = 37;
+    static const size_t LINE_WIDTH = 80;
+    static const size_t MIN_NAME_WIDTH = 20;
+    static const size_t MAX_DESCRIPTION_OFFSET = 37;
 
-  OptionPrinter(const OptionsDescription &positional,
-                const OptionsDescription &optional);
+    OptionPrinter(const OptionsDescription& positional, const OptionsDescription& optional);
 
-  void print_short(std::ostream &os, size_t initial_offset);
-  void print_detailed(std::ostream &os);
-  static void print_optional(const OptionsDescription &global_opts,
-                             size_t &name_width, std::ostream &os);
+    void print_short(std::ostream& os, size_t initial_offset);
+    void print_detailed(std::ostream& os);
+    static void print_optional(const OptionsDescription& global_opts, size_t& name_width, std::ostream& os);
 
 private:
-  const OptionsDescription &m_positional;
-  const OptionsDescription &m_optional;
+    const OptionsDescription& m_positional;
+    const OptionsDescription& m_optional;
 
-  size_t compute_name_width(size_t indent);
+    size_t compute_name_width(size_t indent);
 };
 
-} // namespace rbd
+}   // namespace rbd
 
-#endif // CEPH_RBD_OPTION_PRINTER_H
+#endif   // CEPH_RBD_OPTION_PRINTER_H

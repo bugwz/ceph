@@ -51,7 +51,7 @@ DEFAULT_DOUBLE_ORDER=true
 DEFAULT_HALF_ORDER=false
 DEFAULT_PAGE_SIZE=4096
 DEFAULT_OBJECT_ORDER=22
-MIN_OBJECT_ORDER=12	# technically 9, but the rbd CLI enforces 12
+MIN_OBJECT_ORDER=12 # technically 9, but the rbd CLI enforces 12
 MAX_OBJECT_ORDER=32
 
 RBD_FORCE_ALLOW_V1=1
@@ -104,11 +104,11 @@ function usage() {
 
 function verbose() {
 	[ "${VERBOSE}" = true ] && echo "$@"
-	true	# Don't let the verbose test spoil our return value
+	true # Don't let the verbose test spoil our return value
 }
 
 function quiet() {
-	"$@" 2> /dev/null
+	"$@" 2>/dev/null
 }
 
 function boolean_toggle() {
@@ -137,26 +137,39 @@ function parseargs() {
 	eval set -- "${parsed}"
 	while true; do
 		case "$1" in
-		-v|--verbose)
-			VERBOSE=$(boolean_toggle "${VERBOSE}");;
-		-c|--clone)
-			TEST_CLONES=$(boolean_toggle "${TEST_CLONES}");;
-		-d|--double)
-			DOUBLE_ORDER=$(boolean_toggle "${DOUBLE_ORDER}");;
-		-h|--half)
-			HALF_ORDER=$(boolean_toggle "${HALF_ORDER}");;
-		-l|--local)
-			LOCAL_FILES=$(boolean_toggle "${LOCAL_FILES}");;
-		-1|-2)
-			FORMAT="${1:1}";;
-		-p|--page_size)
-			PAGE_SIZE="$2"; shift;;
-		-o|--order)
-			OBJECT_ORDER="$2"; shift;;
+		-v | --verbose)
+			VERBOSE=$(boolean_toggle "${VERBOSE}")
+			;;
+		-c | --clone)
+			TEST_CLONES=$(boolean_toggle "${TEST_CLONES}")
+			;;
+		-d | --double)
+			DOUBLE_ORDER=$(boolean_toggle "${DOUBLE_ORDER}")
+			;;
+		-h | --half)
+			HALF_ORDER=$(boolean_toggle "${HALF_ORDER}")
+			;;
+		-l | --local)
+			LOCAL_FILES=$(boolean_toggle "${LOCAL_FILES}")
+			;;
+		-1 | -2)
+			FORMAT="${1:1}"
+			;;
+		-p | --page_size)
+			PAGE_SIZE="$2"
+			shift
+			;;
+		-o | --order)
+			OBJECT_ORDER="$2"
+			shift
+			;;
 		--)
-			shift; break;;
+			shift
+			break
+			;;
 		*)
 			err "getopt internal error"
+			;;
 		esac
 		shift
 	done
@@ -228,7 +241,7 @@ function parseargs() {
 		echo "        the object size of its parent image"
 	fi
 
-	true	# Don't let the clones test spoil our return value
+	true # Don't let the clones test spoil our return value
 }
 
 function image_dev_path() {
@@ -290,19 +303,19 @@ function setup() {
 function teardown() {
 	verbose "===== cleaning up ====="
 	if [ "${TEST_CLONES}" = true ]; then
-		unmap_image "${CLONE2}"					|| true
-		destroy_snap_clone "${CLONE1}" "${SNAP2}" "${CLONE2}"	|| true
+		unmap_image "${CLONE2}" || true
+		destroy_snap_clone "${CLONE1}" "${SNAP2}" "${CLONE2}" || true
 
-		unmap_image_snap "${CLONE1}" "${SNAP2}"			|| true
-		destroy_image_snap "${CLONE1}" "${SNAP2}"		|| true
+		unmap_image_snap "${CLONE1}" "${SNAP2}" || true
+		destroy_image_snap "${CLONE1}" "${SNAP2}" || true
 
-		unmap_image "${CLONE1}"					|| true
-		destroy_snap_clone "${ORIGINAL}" "${SNAP1}" "${CLONE1}"	|| true
+		unmap_image "${CLONE1}" || true
+		destroy_snap_clone "${ORIGINAL}" "${SNAP1}" "${CLONE1}" || true
 	fi
-	unmap_image_snap "${ORIGINAL}" "${SNAP1}"			|| true
-	destroy_image_snap "${ORIGINAL}" "${SNAP1}"			|| true
-	unmap_image "${ORIGINAL}"					|| true
-	destroy_image "${ORIGINAL}"					|| true
+	unmap_image_snap "${ORIGINAL}" "${SNAP1}" || true
+	destroy_image_snap "${ORIGINAL}" "${SNAP1}" || true
+	unmap_image "${ORIGINAL}" || true
+	destroy_image "${ORIGINAL}" || true
 
 	rm -rf $(out_data_dir)
 	rmdir "${TEMP}"
@@ -345,7 +358,7 @@ function destroy_image() {
 
 function map_image() {
 	[ $# -eq 1 ] || exit 99
-	local image_name="$1"		# can be image@snap too
+	local image_name="$1" # can be image@snap too
 
 	if [ "${LOCAL_FILES}" = true ]; then
 		return
@@ -356,7 +369,7 @@ function map_image() {
 
 function unmap_image() {
 	[ $# -eq 1 ] || exit 99
-	local image_name="$1"		# can be image@snap too
+	local image_name="$1" # can be image@snap too
 	local image_path
 
 	if [ "${LOCAL_FILES}" = true ]; then
@@ -484,7 +497,7 @@ function destroy_snap_clone() {
 # function that produces "random" data with which to fill the image
 function source_data() {
 	while quiet dd if=/bin/bash skip=$(($$ % 199)) bs="${PAGE_SIZE}"; do
-		:	# Just do the dd
+		: # Just do the dd
 	done
 }
 
@@ -494,8 +507,8 @@ function fill_original() {
 	verbose "filling original image"
 	# Fill 16 objects worth of "random" data
 	source_data |
-	quiet dd bs="${PAGE_SIZE}" count=$((16 * OBJECT_PAGES)) \
-		of="${image_path}"
+		quiet dd bs="${PAGE_SIZE}" count=$((16 * OBJECT_PAGES)) \
+			of="${image_path}"
 }
 
 function do_read() {
@@ -571,7 +584,7 @@ function one_pass() {
 	do_read "${image_name}" "${offset}" "${length}" ${extended}
 	offset=$((offset + length))
 
-	offset=$((offset + 1))		# skip 1
+	offset=$((offset + 1)) # skip 1
 
 	# ---+-----------+---
 	#  : | :X:X...X:X| :
@@ -608,7 +621,7 @@ function one_pass() {
 	do_read "${image_name}" "${offset}" "${length}" ${extended}
 	offset=$((offset + length))
 
-	offset=$((offset + 1))		# skip 1
+	offset=$((offset + 1)) # skip 1
 
 	# ---+-----------+-----------+-----
 	#  : | :X:X...X:X|X:X:X...X:X|X: :

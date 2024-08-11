@@ -19,51 +19,55 @@ using namespace std;
 using namespace rbd_replay;
 
 
-bool ImageNameMap::parse_mapping(string mapping_string, Mapping *mapping) const {
-  string fields[2];
-  int field = 0;
-  for (size_t i = 0, n = mapping_string.length(); i < n; i++) {
-    char c = mapping_string[i];
-    switch (c) {
-    case '\\':
-      if (i != n - 1 && mapping_string[i + 1] == '=') {
-	i++;
-	fields[field].push_back('=');
-      } else {
-	fields[field].push_back('\\');
-      }
-      break;
-    case '=':
-      if (field == 1) {
-	return false;
-      }
-      field = 1;
-      break;
-    default:
-      fields[field].push_back(c);
+bool ImageNameMap::parse_mapping(string mapping_string, Mapping* mapping) const
+{
+    string fields[2];
+    int field = 0;
+    for (size_t i = 0, n = mapping_string.length(); i < n; i++) {
+        char c = mapping_string[i];
+        switch (c) {
+        case '\\':
+            if (i != n - 1 && mapping_string[i + 1] == '=') {
+                i++;
+                fields[field].push_back('=');
+            }
+            else {
+                fields[field].push_back('\\');
+            }
+            break;
+        case '=':
+            if (field == 1) {
+                return false;
+            }
+            field = 1;
+            break;
+        default: fields[field].push_back(c);
+        }
     }
-  }
-  if (field == 0) {
-    return false;
-  }
-  if (!mapping->first.parse(fields[0])) {
-    return false;
-  }
-  if (!mapping->second.parse(fields[1])) {
-    return false;
-  }
-  return true;
+    if (field == 0) {
+        return false;
+    }
+    if (!mapping->first.parse(fields[0])) {
+        return false;
+    }
+    if (!mapping->second.parse(fields[1])) {
+        return false;
+    }
+    return true;
 }
 
-void ImageNameMap::add_mapping(const Mapping& mapping) {
-  m_map.insert(mapping);
+void ImageNameMap::add_mapping(const Mapping& mapping)
+{
+    m_map.insert(mapping);
 }
 
-rbd_loc ImageNameMap::map(const rbd_loc& name) const {
-  std::map<rbd_loc, rbd_loc>::const_iterator p(m_map.find(name));
-  if (p == m_map.end()) {
-    return name;
-  } else {
-    return p->second;
-  }
+rbd_loc ImageNameMap::map(const rbd_loc& name) const
+{
+    std::map<rbd_loc, rbd_loc>::const_iterator p(m_map.find(name));
+    if (p == m_map.end()) {
+        return name;
+    }
+    else {
+        return p->second;
+    }
 }

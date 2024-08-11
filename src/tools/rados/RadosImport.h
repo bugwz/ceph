@@ -15,12 +15,11 @@
 #ifndef RADOS_IMPORT_H_
 #define RADOS_IMPORT_H_
 
-#include <string>
-
-#include "include/rados/librados.hpp"
 #include "include/buffer_fwd.h"
-
+#include "include/rados/librados.hpp"
 #include "tools/RadosDump.h"
+
+#include <string>
 
 /**
  * Specialization of RadosDump that adds
@@ -29,17 +28,18 @@
  */
 class RadosImport : public RadosDump
 {
-  protected:
+protected:
     uint64_t align;
-    int get_object_rados(librados::IoCtx &ioctx, bufferlist &bl, bool no_overwrite);
+    int get_object_rados(librados::IoCtx& ioctx, bufferlist& bl, bool no_overwrite);
 
-  public:
+public:
     RadosImport(int file_fd_, uint64_t align_, bool dry_run_)
-      : RadosDump(file_fd_, dry_run_), align(align_)
+        : RadosDump(file_fd_, dry_run_)
+        , align(align_)
     {}
 
     int import(std::string pool, bool no_overwrite);
-    int import(librados::IoCtx &io_ctx, bool no_overwrite);
+    int import(librados::IoCtx& io_ctx, bool no_overwrite);
 };
 
-#endif // RADOS_IMPORT_H_
+#endif   // RADOS_IMPORT_H_

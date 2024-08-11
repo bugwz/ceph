@@ -20,45 +20,45 @@
 source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
 
 function run() {
-    local dir=$1
-    shift
+	local dir=$1
+	shift
 
-    export CEPH_MON="127.0.0.1:7111" # git grep '\<7111\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+	export CEPH_MON="127.0.0.1:7111" # git grep '\<7111\>' : there must be only one
+	export CEPH_ARGS
+	CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+	CEPH_ARGS+="--mon-host=$CEPH_MON "
 
-    local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
-        setup $dir || return 1
-        $func $dir || return 1
-        teardown $dir || return 1
-    done
+	local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
+	for func in $funcs; do
+		setup $dir || return 1
+		$func $dir || return 1
+		teardown $dir || return 1
+	done
 }
 
 function TEST_copy_from() {
-    local dir=$1
+	local dir=$1
 
-    run_mon $dir a || return 1
-    run_mgr $dir x || return 1
-    run_osd $dir 0 || return 1
-    run_osd $dir 1 || return 1
-    create_rbd_pool || return 1
+	run_mon $dir a || return 1
+	run_mgr $dir x || return 1
+	run_osd $dir 0 || return 1
+	run_osd $dir 1 || return 1
+	create_rbd_pool || return 1
 
-    # success
-    rados -p rbd put foo $(which rados)
-    rados -p rbd cp foo foo2
-    rados -p rbd stat foo2
+	# success
+	rados -p rbd put foo $(which rados)
+	rados -p rbd cp foo foo2
+	rados -p rbd stat foo2
 
-    # failure
-    ceph tell osd.\* injectargs -- --osd-debug-inject-copyfrom-error
-    ! rados -p rbd cp foo foo3
-    ! rados -p rbd stat foo3
+	# failure
+	ceph tell osd.\* injectargs -- --osd-debug-inject-copyfrom-error
+	! rados -p rbd cp foo foo3
+	! rados -p rbd stat foo3
 
-    # success again
-    ceph tell osd.\* injectargs -- --no-osd-debug-inject-copyfrom-error
-    ! rados -p rbd cp foo foo3
-    rados -p rbd stat foo3
+	# success again
+	ceph tell osd.\* injectargs -- --no-osd-debug-inject-copyfrom-error
+	! rados -p rbd cp foo foo3
+	rados -p rbd stat foo3
 }
 
 main osd-copy-from "$@"

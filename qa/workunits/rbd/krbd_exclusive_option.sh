@@ -3,31 +3,32 @@
 set -ex
 
 function expect_false() {
-    if "$@"; then return 1; else return 0; fi
+	if "$@"; then return 1; else return 0; fi
 }
 
 function assert_locked() {
-    local dev_id="${1#/dev/rbd}"
+	local dev_id="${1#/dev/rbd}"
 
-    local client_addr
-    client_addr="$(< $SYSFS_DIR/$dev_id/client_addr)"
+	local client_addr
+	client_addr="$(<$SYSFS_DIR/$dev_id/client_addr)"
 
-    local client_id
-    client_id="$(< $SYSFS_DIR/$dev_id/client_id)"
-    # client4324 -> client.4324
-    client_id="client.${client_id#client}"
+	local client_id
+	client_id="$(<$SYSFS_DIR/$dev_id/client_id)"
+	# client4324 -> client.4324
+	client_id="client.${client_id#client}"
 
-    local watch_cookie
-    watch_cookie="$(rados -p rbd listwatchers rbd_header.$IMAGE_ID |
-        grep $client_id | cut -d ' ' -f 3 | cut -d '=' -f 2)"
-    [[ $(echo -n "$watch_cookie" | grep -c '^') -eq 1 ]]
+	local watch_cookie
+	watch_cookie="$(rados -p rbd listwatchers rbd_header.$IMAGE_ID |
+		grep $client_id | cut -d ' ' -f 3 | cut -d '=' -f 2)"
+	[[ $(echo -n "$watch_cookie" | grep -c '^') -eq 1 ]]
 
-    local actual
-    actual="$(rados -p rbd --format=json lock info rbd_header.$IMAGE_ID rbd_lock |
-        python3 -m json.tool --sort-keys)"
+	local actual
+	actual="$(rados -p rbd --format=json lock info rbd_header.$IMAGE_ID rbd_lock |
+		python3 -m json.tool --sort-keys)"
 
-    local expected
-    expected="$(cat <<EOF | python3 -m json.tool --sort-keys
+	local expected
+	expected="$(
+		cat <<EOF | python3 -m json.tool --sort-keys
 {
     "lockers": [
         {
@@ -43,23 +44,23 @@ function assert_locked() {
     "type": "exclusive"
 }
 EOF
-    )"
+	)"
 
-    [ "$actual" = "$expected" ]
+	[ "$actual" = "$expected" ]
 }
 
 function assert_unlocked() {
-    rados -p rbd --format=json lock info rbd_header.$IMAGE_ID rbd_lock |
-        grep '"lockers":\[\]'
+	rados -p rbd --format=json lock info rbd_header.$IMAGE_ID rbd_lock |
+		grep '"lockers":\[\]'
 }
 
 function blocklist_add() {
-    local dev_id="${1#/dev/rbd}"
+	local dev_id="${1#/dev/rbd}"
 
-    local client_addr
-    client_addr="$(< $SYSFS_DIR/$dev_id/client_addr)"
+	local client_addr
+	client_addr="$(<$SYSFS_DIR/$dev_id/client_addr)"
 
-    ceph osd blocklist add $client_addr
+	ceph osd blocklist add $client_addr
 }
 
 SYSFS_DIR="/sys/bus/rbd/devices"
@@ -68,7 +69,7 @@ IMAGE_NAME="exclusive-option-test"
 rbd create --size 1 --image-feature '' $IMAGE_NAME
 
 IMAGE_ID="$(rbd info --format=json $IMAGE_NAME |
-    python3 -c "import sys, json; print(json.load(sys.stdin)['block_name_prefix'].split('.')[1])")"
+	python3 -c "import sys, json; print(json.load(sys.stdin)['block_name_prefix'].split('.')[1])")"
 
 DEV=$(sudo rbd map $IMAGE_NAME)
 assert_unlocked
@@ -203,7 +204,10 @@ assert_unlocked
 DEV=$(sudo rbd map $IMAGE_NAME)
 assert_locked $DEV
 dd if=/dev/urandom of=$DEV bs=4k count=10 oflag=direct
-{ sleep 10; blocklist_add $DEV; } &
+{
+	sleep 10
+	blocklist_add $DEV
+} &
 PID=$!
 expect_false dd if=/dev/urandom of=$DEV bs=4k count=200000 oflag=direct
 wait $PID
@@ -224,9 +228,8 @@ assert_locked $DEV
 NEW_WATCHER="$(rados -p rbd listwatchers rbd_header.$IMAGE_ID)"
 # same client_id, old cookie < new cookie
 [ "$(echo "$OLD_WATCHER" | cut -d ' ' -f 2)" = \
-    "$(echo "$NEW_WATCHER" | cut -d ' ' -f 2)" ]
-[[ $(echo "$OLD_WATCHER" | cut -d ' ' -f 3 | cut -d '=' -f 2) -lt \
-    $(echo "$NEW_WATCHER" | cut -d ' ' -f 3 | cut -d '=' -f 2) ]]
+	"$(echo "$NEW_WATCHER" | cut -d ' ' -f 2)" ]
+[[ $(echo "$OLD_WATCHER" | cut -d ' ' -f 3 | cut -d '=' -f 2) -lt $(echo "$NEW_WATCHER" | cut -d ' ' -f 3 | cut -d '=' -f 2) ]]
 sudo rbd unmap $DEV
 assert_unlocked
 

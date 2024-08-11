@@ -1,7 +1,6 @@
 #!/bin/bash -ex
 
-function expect_false()
-{
+function expect_false() {
 	set -x
 	if "$@"; then return 1; else return 0; fi
 }
@@ -78,36 +77,31 @@ ceph config help debug_asok | grep debug_asok
 
 # show
 ceph config set osd.0 debug_asok 33
-while ! ceph config show osd.0 | grep debug_asok | grep 33 | grep mon
-do
-    sleep 1
+while ! ceph config show osd.0 | grep debug_asok | grep 33 | grep mon; do
+	sleep 1
 done
 ceph config set osd.0 debug_asok 22
-while ! ceph config show osd.0 | grep debug_asok | grep 22 | grep mon
-do
-    sleep 1
+while ! ceph config show osd.0 | grep debug_asok | grep 22 | grep mon; do
+	sleep 1
 done
 
 ceph tell osd.0 config set debug_asok 99
-while ! ceph config show osd.0 | grep debug_asok | grep 99
-do
-    sleep 1
+while ! ceph config show osd.0 | grep debug_asok | grep 99; do
+	sleep 1
 done
 ceph config show osd.0 | grep debug_asok | grep 'override  mon'
 ceph tell osd.0 config unset debug_asok
 ceph tell osd.0 config unset debug_asok
 
 ceph config rm osd.0 debug_asok
-while ceph config show osd.0 | grep debug_asok | grep mon
-do
-    sleep 1
+while ceph config show osd.0 | grep debug_asok | grep mon; do
+	sleep 1
 done
 ceph config show osd.0 | grep -c debug_asok | grep 0
 
 ceph config set osd.0 osd_scrub_cost 123
-while ! ceph config show osd.0 | grep osd_scrub_cost | grep mon
-do
-    sleep 1
+while ! ceph config show osd.0 | grep osd_scrub_cost | grep mon; do
+	sleep 1
 done
 ceph config rm osd.0 osd_scrub_cost
 
@@ -115,9 +109,9 @@ ceph config rm osd.0 osd_scrub_cost
 ceph config show-with-defaults osd.0 | grep debug_asok
 
 # assimilate
-t1=`mktemp`
-t2=`mktemp`
-cat <<EOF > $t1
+t1=$(mktemp)
+t2=$(mktemp)
+cat <<EOF >$t1
 [osd.0]
 keyring = foo
 debug_asok = 66

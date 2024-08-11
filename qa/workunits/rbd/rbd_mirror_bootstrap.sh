@@ -13,8 +13,8 @@ testlog "TEST: bootstrap cluster2 from cluster1"
 # create token on cluster1 and import to cluster2
 TOKEN=${TEMPDIR}/peer-token
 TOKEN_2=${TEMPDIR}/peer-token-2
-CEPH_ARGS='' rbd --cluster ${CLUSTER1} mirror pool peer bootstrap create ${POOL} > ${TOKEN}
-CEPH_ARGS='' rbd --cluster ${CLUSTER1} mirror pool peer bootstrap create ${PARENT_POOL} > ${TOKEN_2}
+CEPH_ARGS='' rbd --cluster ${CLUSTER1} mirror pool peer bootstrap create ${POOL} >${TOKEN}
+CEPH_ARGS='' rbd --cluster ${CLUSTER1} mirror pool peer bootstrap create ${PARENT_POOL} >${TOKEN_2}
 cmp ${TOKEN} ${TOKEN_2}
 
 CEPH_ARGS='' rbd --cluster ${CLUSTER2} --pool ${POOL} mirror pool peer bootstrap import ${TOKEN} --direction rx-only
@@ -28,7 +28,7 @@ testlog "TEST: verify rx-only direction"
 rbd --cluster ${CLUSTER2} --pool ${POOL} mirror pool info --format json | jq -e '.peers[0].direction == "rx-only"'
 # tx-only peer is added asynchronously by mirror_peer_ping class method
 while ! rbd --cluster ${CLUSTER1} --pool ${POOL} mirror pool info --format json | jq -e '.peers | length > 0'; do
-    sleep 1
+	sleep 1
 done
 rbd --cluster ${CLUSTER1} --pool ${POOL} mirror pool info --format json | jq -e '.peers[0].direction == "tx-only"'
 

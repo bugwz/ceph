@@ -1,7 +1,7 @@
 #!/bin/sh -ex
 
-cwd=`pwd`
-cat > conf <<EOF
+cwd=$(pwd)
+cat >conf <<EOF
 [global]
 
 [mon]
@@ -13,7 +13,7 @@ mon host = 127.0.0.1:6789 127.0.0.1:6790 127.0.0.1:6791
 EOF
 
 rm -f mm
-fsid=`uuidgen`
+fsid=$(uuidgen)
 
 rm -f keyring
 ceph-authtool --create-keyring keyring --gen-key -n client.admin
@@ -29,10 +29,10 @@ ceph-mon -c conf -i c --mon-data $cwd/mon.c
 
 ceph -c conf -k keyring health -m 127.0.0.1
 while true; do
-    if ceph -c conf -k keyring -m 127.0.0.1 mon stat | grep 'a,b,c'; then
-	break
-    fi
-    sleep 1
+	if ceph -c conf -k keyring -m 127.0.0.1 mon stat | grep 'a,b,c'; then
+		break
+	fi
+	sleep 1
 done
 
 killall ceph-mon

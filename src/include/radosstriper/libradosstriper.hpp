@@ -1,58 +1,59 @@
 #ifndef __LIBRADOSSTRIPER_HPP
 #define __LIBRADOSSTRIPER_HPP
 
-#include <string.h>
-#include <string>
-#include <map>
 #include "../rados/buffer.h"
 #include "../rados/librados.hpp"
-
 #include "libradosstriper.h"
 
-namespace libradosstriper
-{
-  struct RadosStriperImpl;
-  struct MultiAioCompletionImpl;
+#include <map>
+#include <string.h>
+#include <string>
 
-  /*
-   * Completion object for multiple asynchronous IO
-   * It allows to internally handle several "requests"
-   */
-  struct MultiAioCompletion {
-    MultiAioCompletion(MultiAioCompletionImpl *pc_) : pc(pc_) {}
+namespace libradosstriper {
+struct RadosStriperImpl;
+struct MultiAioCompletionImpl;
+
+/*
+ * Completion object for multiple asynchronous IO
+ * It allows to internally handle several "requests"
+ */
+struct MultiAioCompletion
+{
+    MultiAioCompletion(MultiAioCompletionImpl* pc_)
+        : pc(pc_)
+    {}
     ~MultiAioCompletion();
-    int set_complete_callback(void *cb_arg, librados::callback_t cb);
-    int set_safe_callback(void *cb_arg, librados::callback_t cb) __attribute__ ((deprecated));
+    int set_complete_callback(void* cb_arg, librados::callback_t cb);
+    int set_safe_callback(void* cb_arg, librados::callback_t cb) __attribute__((deprecated));
     void wait_for_complete();
-    void wait_for_safe() __attribute__ ((deprecated));
+    void wait_for_safe() __attribute__((deprecated));
     void wait_for_complete_and_cb();
-    void wait_for_safe_and_cb() __attribute__ ((deprecated));
+    void wait_for_safe_and_cb() __attribute__((deprecated));
     bool is_complete();
-    bool is_safe() __attribute__ ((deprecated));
+    bool is_safe() __attribute__((deprecated));
     bool is_complete_and_cb();
-    bool is_safe_and_cb() __attribute__ ((deprecated));
+    bool is_safe_and_cb() __attribute__((deprecated));
     int get_return_value();
     void release();
-    MultiAioCompletionImpl *pc;
-  };
+    MultiAioCompletionImpl* pc;
+};
 
-  /* RadosStriper : This class allows to perform read/writes on striped objects
-   *
-   * Typical use (error checking omitted):
-   *
-   * RadosStriper rs;
-   * RadosStriper.striper_create("my_cluster", rs);
-   * bufferlist bl;
-   * ... put data in bl ...
-   * rs.write(object_name, bl, len, offset);
-   * bufferlist bl2;
-   * rs.read(object_name, &bl2, len, offset);
-   * ...
-   */
-  class RadosStriper
-  {
-  public:
-
+/* RadosStriper : This class allows to perform read/writes on striped objects
+ *
+ * Typical use (error checking omitted):
+ *
+ * RadosStriper rs;
+ * RadosStriper.striper_create("my_cluster", rs);
+ * bufferlist bl;
+ * ... put data in bl ...
+ * rs.write(object_name, bl, len, offset);
+ * bufferlist bl2;
+ * rs.read(object_name, &bl2, len, offset);
+ * ...
+ */
+class RadosStriper
+{
+public:
     /*
      * constructor
      */
@@ -61,8 +62,7 @@ namespace libradosstriper
     /*
      * builds the C counter part of a RadosStriper
      */
-    static void to_rados_striper_t(RadosStriper &striper,
-                                   rados_striper_t *s);
+    static void to_rados_striper_t(RadosStriper& striper, rados_striper_t* s);
 
     /*
      * copy constructor
@@ -83,8 +83,7 @@ namespace libradosstriper
     /*
      * create method
      */
-    static int striper_create(librados::IoCtx& ioctx,
-                              RadosStriper *striper);
+    static int striper_create(librados::IoCtx& ioctx, RadosStriper* striper);
 
     /*
      * set object layout's stripe unit
@@ -110,24 +109,23 @@ namespace libradosstriper
     /**
      * Get the value of an extended attribute on a striped object
      */
-    int getxattr(const std::string& oid, const char *name, ceph::bufferlist& bl);
+    int getxattr(const std::string& oid, const char* name, ceph::bufferlist& bl);
 
     /**
      * Set the value of an extended attribute on a striped object
      */
-    int setxattr(const std::string& oid, const char *name, ceph::bufferlist& bl);
+    int setxattr(const std::string& oid, const char* name, ceph::bufferlist& bl);
 
     /**
      * Delete an extended attribute from a striped object
      */
-    int rmxattr(const std::string& oid, const char *name);
+    int rmxattr(const std::string& oid, const char* name);
 
     /**
      * Start iterating over xattrs on a striped object.
      */
-    int getxattrs(const std::string& oid,
-                  std::map<std::string, ceph::bufferlist>& attrset); 
-    
+    int getxattrs(const std::string& oid, std::map<std::string, ceph::bufferlist>& attrset);
+
     /**
      * synchronously write to the striped object at the specified offset.
      * NOTE: this call steals the contents of @param bl.
@@ -150,19 +148,20 @@ namespace libradosstriper
      * asynchronously write to the striped object at the specified offset.
      * NOTE: this call steals the contents of @p bl.
      */
-    int aio_write(const std::string& soid, librados::AioCompletion *c, const ceph::bufferlist& bl, size_t len, uint64_t off);
+    int aio_write(const std::string& soid, librados::AioCompletion* c, const ceph::bufferlist& bl, size_t len,
+                  uint64_t off);
 
     /**
      * asynchronously fill the striped object with the specified data
      * NOTE: this call steals the contents of @p bl.
      */
-    int aio_write_full(const std::string& soid, librados::AioCompletion *c, const ceph::bufferlist& bl);
+    int aio_write_full(const std::string& soid, librados::AioCompletion* c, const ceph::bufferlist& bl);
 
     /**
      * asynchronously append data to the striped object
      * NOTE: this call steals the contents of @p bl.
      */
-    int aio_append(const std::string& soid, librados::AioCompletion *c, const ceph::bufferlist& bl, size_t len);
+    int aio_append(const std::string& soid, librados::AioCompletion* c, const ceph::bufferlist& bl, size_t len);
 
     /**
      * synchronously read from the striped object at the specified offset.
@@ -172,21 +171,19 @@ namespace libradosstriper
     /**
      * asynchronously read from the striped object at the specified offset.
      */
-    int aio_read(const std::string& soid, librados::AioCompletion *c, ceph::bufferlist *pbl, size_t len, uint64_t off);
+    int aio_read(const std::string& soid, librados::AioCompletion* c, ceph::bufferlist* pbl, size_t len, uint64_t off);
 
     /**
      * synchronously get striped object stats (size/mtime)
      */
-    int stat(const std::string& soid, uint64_t *psize, time_t *pmtime);
-    int stat2(const std::string& soid, uint64_t *psize, struct timespec *pts);
+    int stat(const std::string& soid, uint64_t* psize, time_t* pmtime);
+    int stat2(const std::string& soid, uint64_t* psize, struct timespec* pts);
 
     /**
      * asynchronously get striped object stats (size/mtime)
      */
-    int aio_stat(const std::string& soid, librados::AioCompletion *c,
-                 uint64_t *psize, time_t *pmtime);
-    int aio_stat2(const std::string& soid, librados::AioCompletion *c,
-                  uint64_t *psize, struct timespec *pts);
+    int aio_stat(const std::string& soid, librados::AioCompletion* c, uint64_t* psize, time_t* pmtime);
+    int aio_stat2(const std::string& soid, librados::AioCompletion* c, uint64_t* psize, struct timespec* pts);
 
     /**
      * deletes a striped object.
@@ -205,8 +202,8 @@ namespace libradosstriper
      * asynchronous remove of striped objects
      * See synchronous version for comments on (lack of) atomicity
      */
-    int aio_remove(const std::string& soid, librados::AioCompletion *c);
-    int aio_remove(const std::string& soid, librados::AioCompletion *c, int flags);
+    int aio_remove(const std::string& soid, librados::AioCompletion* c);
+    int aio_remove(const std::string& soid, librados::AioCompletion* c, int flags);
 
     /**
      * Resizes a striped object
@@ -226,16 +223,14 @@ namespace libradosstriper
     /**
      * creation of multi aio completion objects
      */
-    static MultiAioCompletion *multi_aio_create_completion();
-    static MultiAioCompletion *multi_aio_create_completion(void *cb_arg,
-                                                           librados::callback_t cb_complete,
+    static MultiAioCompletion* multi_aio_create_completion();
+    static MultiAioCompletion* multi_aio_create_completion(void* cb_arg, librados::callback_t cb_complete,
                                                            librados::callback_t cb_safe);
 
-  private:
-    RadosStriperImpl *rados_striper_impl;
+private:
+    RadosStriperImpl* rados_striper_impl;
+};
 
-  };
-
-}
+}   // namespace libradosstriper
 
 #endif

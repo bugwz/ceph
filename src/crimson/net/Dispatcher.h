@@ -20,27 +20,28 @@ class AuthAuthorizer;
 
 namespace crimson::net {
 
-class Dispatcher {
- public:
-  virtual ~Dispatcher() {}
+class Dispatcher
+{
+public:
+    virtual ~Dispatcher() {}
 
-  // Dispatchers are put into a chain as described by chain-of-responsibility
-  // pattern. If any of the dispatchers claims this message, it returns a valid
-  // future to prevent other dispatchers from processing it, and this is also
-  // used to throttle the connection if it's too busy.
-  virtual std::optional<seastar::future<>> ms_dispatch(ConnectionRef, MessageRef) = 0;
+    // Dispatchers are put into a chain as described by chain-of-responsibility
+    // pattern. If any of the dispatchers claims this message, it returns a valid
+    // future to prevent other dispatchers from processing it, and this is also
+    // used to throttle the connection if it's too busy.
+    virtual std::optional<seastar::future<>> ms_dispatch(ConnectionRef, MessageRef) = 0;
 
-  virtual void ms_handle_accept(ConnectionRef conn) {}
+    virtual void ms_handle_accept(ConnectionRef conn) {}
 
-  virtual void ms_handle_connect(ConnectionRef conn) {}
+    virtual void ms_handle_connect(ConnectionRef conn) {}
 
-  // a reset event is dispatched when the connection is closed unexpectedly.
-  // is_replace=true means the reset connection is going to be replaced by
-  // another accepting connection with the same peer_addr, which currently only
-  // happens under lossy policy when both sides wish to connect to each other.
-  virtual void ms_handle_reset(ConnectionRef conn, bool is_replace) {}
+    // a reset event is dispatched when the connection is closed unexpectedly.
+    // is_replace=true means the reset connection is going to be replaced by
+    // another accepting connection with the same peer_addr, which currently only
+    // happens under lossy policy when both sides wish to connect to each other.
+    virtual void ms_handle_reset(ConnectionRef conn, bool is_replace) {}
 
-  virtual void ms_handle_remote_reset(ConnectionRef conn) {}
+    virtual void ms_handle_remote_reset(ConnectionRef conn) {}
 };
 
-} // namespace crimson::net
+}   // namespace crimson::net

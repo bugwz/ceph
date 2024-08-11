@@ -24,11 +24,10 @@ fi
 
 #chunkSize=4096 # in bytes
 chunkSize=1048576 # in bytes
-fileSize=`stat --printf="%s" $srcFile`
+fileSize=$(stat --printf="%s" $srcFile)
 
-numChunksInFile=`echo "$fileSize * (1048576 / $chunkSize)" | bc`
-chunksLeft=$(( $(($writeSize * 1048576)) / $chunkSize))
-
+numChunksInFile=$(echo "$fileSize * (1048576 / $chunkSize)" | bc)
+chunksLeft=$(($(($writeSize * 1048576)) / $chunkSize))
 
 echo "fileSize = $fileSize"
 
@@ -47,7 +46,6 @@ if [ "$fileSize" -lt "$chunkSize" ]; then
 	exit
 fi
 
-
 numFileChunks=$(($fileSize / $chunkSize))
 if [ $verbose == true ]; then
 	echo "numFileChunks = $numFileChunks"
@@ -56,7 +54,7 @@ fi
 smrLBAStart=33554432 # TODO query from SMR Drive
 #smrLBAStart=37224448
 
-offset=$(( $smrLBAStart / $(( $chunkSize / 512)) ))
+offset=$(($smrLBAStart / $(($chunkSize / 512))))
 
 if [ $verbose == true ]; then
 	echo "chunksLeft = $chunksLeft, offset = $offset"
@@ -67,10 +65,10 @@ chunkNum=0
 while [ "$chunksLeft" -gt 0 ]; do
 	chunkNum=$(($chunkNum + 1))
 	if [ $verbose == true ]; then
-		echo "CHUNK $chunkNum `date +%H:%M:%S`" >> time
+		echo "CHUNK $chunkNum $(date +%H:%M:%S)" >>time
 	fi
-	dd if=$srcFile of=$destDisk seek=$offset bs=$chunkSize 2> tmp 
-	cat tmp | grep MB >> time # > /dev/null 2>&1
+	dd if=$srcFile of=$destDisk seek=$offset bs=$chunkSize 2>tmp
+	cat tmp | grep MB >>time # > /dev/null 2>&1
 	if [ $verbose == true ]; then
 		echo "chunksLeft = $chunksLeft, offset = $offset"
 	fi

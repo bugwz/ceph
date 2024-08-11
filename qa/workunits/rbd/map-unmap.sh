@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -ex
 
-RUN_TIME=300		# approximate duration of run (seconds)
+RUN_TIME=300 # approximate duration of run (seconds)
 
 [ $# -eq 1 ] && RUN_TIME="$1"
 
 IMAGE_NAME="image-$$"
-IMAGE_SIZE="1024"	# MB
+IMAGE_SIZE="1024" # MB
 
 function get_time() {
 	date '+%s'

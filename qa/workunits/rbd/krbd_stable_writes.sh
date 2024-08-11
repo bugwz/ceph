@@ -3,23 +3,23 @@
 set -ex
 
 function assert_dm() {
-    local name=$1
-    local val=$2
+	local name=$1
+	local val=$2
 
-    local devno
-    devno=$(sudo dmsetup info -c --noheadings -o Major,Minor $name)
-    grep -q $val /sys/dev/block/$devno/queue/stable_writes
+	local devno
+	devno=$(sudo dmsetup info -c --noheadings -o Major,Minor $name)
+	grep -q $val /sys/dev/block/$devno/queue/stable_writes
 }
 
 function dmsetup_reload() {
-    local name=$1
+	local name=$1
 
-    local table
-    table=$(</dev/stdin)
+	local table
+	table=$(</dev/stdin)
 
-    sudo dmsetup suspend $name
-    echo "$table" | sudo dmsetup reload $name
-    sudo dmsetup resume $name
+	sudo dmsetup suspend $name
+	echo "$table" | sudo dmsetup reload $name
+	sudo dmsetup resume $name
 }
 
 IMAGE_NAME="stable-writes-test"

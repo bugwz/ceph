@@ -9,9 +9,9 @@ set -ex
 
 # no blkdiscard(8) in trusty
 function py_blkdiscard() {
-    local offset=$1
+	local offset=$1
 
-    python3 <<EOF
+	python3 <<EOF
 import fcntl, struct
 BLKDISCARD = 0x1277
 with open('$DEV', 'w') as dev:
@@ -21,10 +21,10 @@ EOF
 
 # fallocate(1) in trusty doesn't support -z/-p
 function py_fallocate() {
-    local mode=$1
-    local offset=$2
+	local mode=$1
+	local offset=$2
 
-    python3 <<EOF
+	python3 <<EOF
 import os, ctypes, ctypes.util
 FALLOC_FL_KEEP_SIZE = 0x01
 FALLOC_FL_PUNCH_HOLE = 0x02
@@ -38,44 +38,44 @@ EOF
 }
 
 function allocate() {
-    xfs_io -c "pwrite -b $OBJECT_SIZE -W 0 $IMAGE_SIZE" $DEV
-    assert_allocated
+	xfs_io -c "pwrite -b $OBJECT_SIZE -W 0 $IMAGE_SIZE" $DEV
+	assert_allocated
 }
 
 function assert_allocated() {
-    cmp <(od -xAx $DEV) - <<EOF
+	cmp <(od -xAx $DEV) - <<EOF
 000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
 *
 $(printf %x $IMAGE_SIZE)
 EOF
-    [[ $(rados -p rbd ls | grep -c rbd_data.$IMAGE_ID) -eq $NUM_OBJECTS ]]
+	[[ $(rados -p rbd ls | grep -c rbd_data.$IMAGE_ID) -eq $NUM_OBJECTS ]]
 }
 
 function assert_zeroes() {
-    local num_objects_expected=$1
+	local num_objects_expected=$1
 
-    cmp <(od -xAx $DEV) - <<EOF
+	cmp <(od -xAx $DEV) - <<EOF
 000000 0000 0000 0000 0000 0000 0000 0000 0000
 *
 $(printf %x $IMAGE_SIZE)
 EOF
-    [[ $(rados -p rbd ls | grep -c rbd_data.$IMAGE_ID) -eq $num_objects_expected ]]
+	[[ $(rados -p rbd ls | grep -c rbd_data.$IMAGE_ID) -eq $num_objects_expected ]]
 }
 
 function assert_zeroes_unaligned() {
-    local num_objects_expected=$1
+	local num_objects_expected=$1
 
-    cmp <(od -xAx $DEV) - <<EOF
+	cmp <(od -xAx $DEV) - <<EOF
 000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
 *
 $(printf %x $((OBJECT_SIZE / 2))) 0000 0000 0000 0000 0000 0000 0000 0000
 *
 $(printf %x $IMAGE_SIZE)
 EOF
-    [[ $(rados -p rbd ls | grep -c rbd_data.$IMAGE_ID) -eq $num_objects_expected ]]
-    for ((i = 0; i < $num_objects_expected; i++)); do
-        rados -p rbd stat rbd_data.$IMAGE_ID.$(printf %016x $i) | egrep "(size $((OBJECT_SIZE / 2)))|(size 0)"
-    done
+	[[ $(rados -p rbd ls | grep -c rbd_data.$IMAGE_ID) -eq $num_objects_expected ]]
+	for ((i = 0; i < $num_objects_expected; i++)); do
+		rados -p rbd stat rbd_data.$IMAGE_ID.$(printf %016x $i) | egrep "(size $((OBJECT_SIZE / 2)))|(size 0)"
+	done
 }
 
 IMAGE_NAME="fallocate-test"
@@ -88,7 +88,7 @@ NUM_OBJECTS=$((IMAGE_SIZE / OBJECT_SIZE))
 [[ $((IMAGE_SIZE % OBJECT_SIZE)) -eq 0 ]]
 
 IMAGE_ID="$(rbd info --format=json $IMAGE_NAME |
-    python3 -c "import sys, json; print(json.load(sys.stdin)['block_name_prefix'].split('.')[1])")"
+	python3 -c "import sys, json; print(json.load(sys.stdin)['block_name_prefix'].split('.')[1])")"
 
 DEV=$(sudo rbd map $IMAGE_NAME)
 

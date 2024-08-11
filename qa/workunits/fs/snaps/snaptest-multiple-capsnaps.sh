@@ -2,15 +2,15 @@
 
 set -e
 
-echo asdf > a
+echo asdf >a
 mkdir .snap/1
 chmod 777 a
 mkdir .snap/2
-echo qwer > a
+echo qwer >a
 mkdir .snap/3
 chmod 666 a
 mkdir .snap/4
-echo zxcv > a
+echo zxcv >a
 mkdir .snap/5
 
 ls -al .snap/?/a
@@ -37,6 +37,3 @@ stat .snap/5/a | grep -- '-rw-rw-rw-'
 rmdir .snap/[12345]
 
 echo "OK"
-
-
-

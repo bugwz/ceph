@@ -8,17 +8,17 @@ set -ex
 branch=$1
 [ -z "$1" ] && branch=master
 port=$2
-[ -z "$2" ] && port=8000   # this is vstart's default
+[ -z "$2" ] && port=8000 # this is vstart's default
 
 ##
 
 [ -z "$BUILD_DIR" ] && BUILD_DIR=build
 
 if [ -e CMakeCache.txt ]; then
-    BIN_PATH=$PWD/bin
+	BIN_PATH=$PWD/bin
 elif [ -e $root_path/../${BUILD_DIR}/CMakeCache.txt ]; then
-    cd $root_path/../${BUILD_DIR}
-    BIN_PATH=$PWD/bin
+	cd $root_path/../${BUILD_DIR}
+	BIN_PATH=$PWD/bin
 fi
 PATH=$PATH:$BIN_PATH
 
@@ -38,4 +38,3 @@ cd ../..
 rm -rf $dir
 
 echo OK.
-

@@ -34,11 +34,11 @@ PROGNAME=$(basename $0)
 # Default command line option values
 COUNT="1"
 EXPUNGE_FILE=""
-DO_RANDOMIZE=""	# false
+DO_RANDOMIZE="" # false
 FSTYP="xfs"
-SCRATCH_DEV=""	# MUST BE SPECIFIED
-TEST_DEV=""	# MUST BE SPECIFIED
-TESTS="-g auto"	# The "auto" group is supposed to be "known good"
+SCRATCH_DEV=""  # MUST BE SPECIFIED
+TEST_DEV=""     # MUST BE SPECIFIED
+TESTS="-g auto" # The "auto" group is supposed to be "known good"
 
 # print an error message and quit with non-zero status
 function err() {
@@ -56,11 +56,11 @@ function arg_count() {
 	local got
 
 	if [ $# -eq 2 ]; then
-		func="${FUNCNAME[1]}"	# calling function
+		func="${FUNCNAME[1]}" # calling function
 		want=$1
 		got=$2
 	else
-		func="${FUNCNAME[0]}"	# i.e., arg_count
+		func="${FUNCNAME[0]}" # i.e., arg_count
 		want=2
 		got=$#
 	fi
@@ -73,7 +73,7 @@ function arg_count() {
 function count_valid() {
 	arg_count 1 $#
 
-	test "$1" -gt 0	# 0 is pointless; negative is wrong
+	test "$1" -gt 0 # 0 is pointless; negative is wrong
 }
 
 # validation function for filesystem type argument
@@ -81,8 +81,8 @@ function fs_type_valid() {
 	arg_count 1 $#
 
 	case "$1" in
-		xfs|ext4|btrfs)	return 0 ;;
-		*)		return 1 ;;
+	xfs | ext4 | btrfs) return 0 ;;
+	*) return 1 ;;
 	esac
 }
 
@@ -140,7 +140,7 @@ function usage() {
 
 	[ $# -gt 0 ] && exit 1
 
-	exit 0		# This is used for a --help
+	exit 0 # This is used for a --help
 }
 
 # parse command line arguments
@@ -173,45 +173,45 @@ function parseargs() {
 
 	while [ "$1" != "--" ]; do
 		case "$1" in
-			-h|--help)
-				usage
-				;;
-			-c|--count)
-				count_valid "$2" ||
-					usage "invalid count '$2'"
-				COUNT="$2"
-				shift
-				;;
-			-f|--fs-type)
-				fs_type_valid "$2" ||
-					usage "invalid fs_type '$2'"
-				FSTYP="$2"
-				shift
-				;;
-			-r|--randomize)
-				DO_RANDOMIZE="t"
-				;;
-			-s|--scratch-dev)
-				device_valid "$2" ||
-					usage "invalid scratch-dev '$2'"
-				SCRATCH_DEV="$2"
-				shift
-				;;
-			-t|--test-dev)
-				device_valid "$2" ||
-					usage "invalid test-dev '$2'"
-				TEST_DEV="$2"
-				shift
-				;;
-			-x|--expunge-file)
-				expunge_file_valid "$2" ||
-					usage "invalid expunge-file '$2'"
-				EXPUNGE_FILE="$2"
-				shift
-				;;
-			*)
-				exit 100	# Internal error
-				;;
+		-h | --help)
+			usage
+			;;
+		-c | --count)
+			count_valid "$2" ||
+				usage "invalid count '$2'"
+			COUNT="$2"
+			shift
+			;;
+		-f | --fs-type)
+			fs_type_valid "$2" ||
+				usage "invalid fs_type '$2'"
+			FSTYP="$2"
+			shift
+			;;
+		-r | --randomize)
+			DO_RANDOMIZE="t"
+			;;
+		-s | --scratch-dev)
+			device_valid "$2" ||
+				usage "invalid scratch-dev '$2'"
+			SCRATCH_DEV="$2"
+			shift
+			;;
+		-t | --test-dev)
+			device_valid "$2" ||
+				usage "invalid test-dev '$2'"
+			TEST_DEV="$2"
+			shift
+			;;
+		-x | --expunge-file)
+			expunge_file_valid "$2" ||
+				usage "invalid expunge-file '$2'"
+			EXPUNGE_FILE="$2"
+			shift
+			;;
+		*)
+			exit 100 # Internal error
+			;;
 		esac
 		shift
 	done
@@ -233,9 +233,9 @@ function do_mkfs() {
 	local options
 
 	case "${FSTYP}" in
-		xfs)	options="-f" ;;
-		ext4)	options="-F" ;;
-		btrfs)	options="-f" ;;
+	xfs) options="-f" ;;
+	ext4) options="-F" ;;
+	btrfs) options="-f" ;;
 	esac
 
 	"mkfs.${FSTYP}" ${options} "${dev}" ||
@@ -276,7 +276,7 @@ parseargs "$@"
 TESTDIR="$(readlink -e "${TESTDIR}")"
 [ -n "${EXPUNGE_FILE}" ] && EXPUNGE_FILE="$(readlink -e "${EXPUNGE_FILE}")"
 
-XFSTESTS_DIR="/var/lib/xfstests"  # hardcoded into dbench binary
+XFSTESTS_DIR="/var/lib/xfstests" # hardcoded into dbench binary
 TEST_DIR="/mnt/test_dir"
 SCRATCH_MNT="/mnt/scratch_mnt"
 MKFS_OPTIONS=""
@@ -294,7 +294,7 @@ export MKFS_OPTIONS
 export EXT_MOUNT_OPTIONS
 
 pushd "${XFSTESTS_DIR}"
-for (( i = 1 ; i <= "${COUNT}" ; i++ )); do
+for ((i = 1; i <= "${COUNT}"; i++)); do
 	[ "${COUNT}" -gt 1 ] && echo "=== Iteration "$i" starting at:  $(date)"
 
 	RESULT_BASE="${TESTDIR}/archive/results-${i}"

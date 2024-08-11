@@ -6,17 +6,15 @@ set -e
 tmp=$(mktemp -d -p /tmp test_mon_config_key_caps.XXXXX)
 entities=()
 
-function cleanup()
-{
+function cleanup() {
 	set +e
 	set +x
 	if [[ -e $tmp/keyring ]] && [[ -e $tmp/keyring.orig ]]; then
-		grep '\[.*\..*\]' $tmp/keyring.orig > $tmp/entities.orig
-		for e in $(grep '\[.*\..*\]' $tmp/keyring | \
-			diff $tmp/entities.orig - | \
-			sed -n 's/^.*\[\(.*\..*\)\]/\1/p');
-		do
-			ceph auth rm $e 2>&1 >& /dev/null
+		grep '\[.*\..*\]' $tmp/keyring.orig >$tmp/entities.orig
+		for e in $(grep '\[.*\..*\]' $tmp/keyring |
+			diff $tmp/entities.orig - |
+			sed -n 's/^.*\[\(.*\..*\)\]/\1/p'); do
+			ceph auth rm $e 2>&1 >&/dev/null
 		done
 	fi
 	#rm -fr $tmp
@@ -24,8 +22,7 @@ function cleanup()
 
 trap cleanup 0 # cleanup on exit
 
-function expect_false()
-{
+function expect_false() {
 	set -x
 	if "$@"; then return 1; else return 0; fi
 }
@@ -161,7 +158,7 @@ ceph -k $k --name $prefix_cc config-key get client/$match_aa/foo
 ceph -k $k --name $prefix_cc config-key get client/$match_bb/foo
 expect_false ceph -k $k --name $prefix_cc config-key set other/prefix
 expect_false ceph -k $k --name $prefix_cc config-key get mgr/test-foo
-ceph -k $k --name $prefix_cc config-key ls >& /dev/null
+ceph -k $k --name $prefix_cc config-key ls >&/dev/null
 
 ceph -k $k --name $match_aa config-key get client/$match_aa/foo
 expect_false ceph -k $k --name $match_aa config-key get client/$match_bb/foo
@@ -172,18 +169,18 @@ expect_false ceph -k $k --name $match_bb config-key get client/$match_aa/foo
 expect_false ceph -k $k --name $match_bb config-key set client/$match_aa/foo
 
 keys=(daemon-private/osd.123/test-foo
-	  mgr/test-foo
-	  device/test-foo
-	  test/foo
-	  client/$prefix_aa/foo
-	  client/$prefix_bb/foo
-	  client/$match_aa/foo
-	  client/$match_bb/foo
+	mgr/test-foo
+	device/test-foo
+	test/foo
+	client/$prefix_aa/foo
+	client/$prefix_bb/foo
+	client/$match_aa/foo
+	client/$match_bb/foo
 )
 # expect these all to fail accessing config-key
 for c in $fail_aa $fail_bb $fail_cc \
-		 $fail_dd $fail_ee $fail_ff \
-		 $fail_gg; do
+	$fail_dd $fail_ee $fail_ff \
+	$fail_gg; do
 	for m in get set; do
 		for key in ${keys[*]} client/$prefix_aa/foo client/$prefix_bb/foo; do
 			expect_false ceph -k $k --name $c config-key $m $key
@@ -195,7 +192,7 @@ done
 expect_false ceph -k $k --name $fail_writes config-key set client/$match_aa/foo
 expect_false ceph -k $k --name $fail_writes config-key set test/foo
 ceph -k $k --name $fail_writes config-key ls
-ceph -k $k --name $fail_writes config-key get client/$match_aa/foo 
+ceph -k $k --name $fail_writes config-key get client/$match_aa/foo
 ceph -k $k --name $fail_writes config-key get daemon-private/osd.123/test-foo
 
 echo "OK"

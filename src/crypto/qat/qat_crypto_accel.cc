@@ -16,27 +16,31 @@
 #include "crypto/qat/qat_crypto_accel.h"
 
 bool QccCryptoAccel::cbc_encrypt(unsigned char* out, const unsigned char* in, size_t size,
-    const unsigned char (&iv)[AES_256_IVSIZE],
-    const unsigned char (&key)[AES_256_KEYSIZE])
+                                 const unsigned char (&iv)[AES_256_IVSIZE], const unsigned char (&key)[AES_256_KEYSIZE])
 {
-  if ((size % AES_256_IVSIZE) != 0) {
-    return false;
-  }
+    if ((size % AES_256_IVSIZE) != 0) {
+        return false;
+    }
 
-  return qcccrypto.perform_op(out, in, size,
-      const_cast<unsigned char *>(&iv[0]),
-      const_cast<unsigned char *>(&key[0]), CPA_CY_SYM_CIPHER_DIRECTION_ENCRYPT);
+    return qcccrypto.perform_op(out,
+                                in,
+                                size,
+                                const_cast<unsigned char*>(&iv[0]),
+                                const_cast<unsigned char*>(&key[0]),
+                                CPA_CY_SYM_CIPHER_DIRECTION_ENCRYPT);
 }
 
 bool QccCryptoAccel::cbc_decrypt(unsigned char* out, const unsigned char* in, size_t size,
-    const unsigned char (&iv)[AES_256_IVSIZE],
-    const unsigned char (&key)[AES_256_KEYSIZE])
+                                 const unsigned char (&iv)[AES_256_IVSIZE], const unsigned char (&key)[AES_256_KEYSIZE])
 {
-  if ((size % AES_256_IVSIZE) != 0) {
-    return false;
-  }
+    if ((size % AES_256_IVSIZE) != 0) {
+        return false;
+    }
 
-  return qcccrypto.perform_op(out, in, size,
-      const_cast<unsigned char *>(&iv[0]),
-      const_cast<unsigned char *>(&key[0]), CPA_CY_SYM_CIPHER_DIRECTION_DECRYPT);
+    return qcccrypto.perform_op(out,
+                                in,
+                                size,
+                                const_cast<unsigned char*>(&iv[0]),
+                                const_cast<unsigned char*>(&key[0]),
+                                CPA_CY_SYM_CIPHER_DIRECTION_DECRYPT);
 }

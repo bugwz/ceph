@@ -6,40 +6,39 @@
 #include "gtest/gtest.h"
 
 // SplitTest is parameterized for list/vector/set
-using Types = ::testing::Types<std::list<std::string>,
-                               std::vector<std::string>>;
+using Types = ::testing::Types<std::list<std::string>, std::vector<std::string>>;
 
-template <typename T>
-struct SplitTest : ::testing::Test {
-  void test(const char* input, const char *delim,
-            const std::list<std::string>& expected) {
-    EXPECT_EQ(expected, get_str_list(input, delim));
-  }
-  void test(const char* input, const char *delim,
-            const std::vector<std::string>& expected) {
-    EXPECT_EQ(expected, get_str_vec(input, delim));
-  }
+template<typename T> struct SplitTest : ::testing::Test
+{
+    void test(const char* input, const char* delim, const std::list<std::string>& expected)
+    {
+        EXPECT_EQ(expected, get_str_list(input, delim));
+    }
+    void test(const char* input, const char* delim, const std::vector<std::string>& expected)
+    {
+        EXPECT_EQ(expected, get_str_vec(input, delim));
+    }
 };
 
 TYPED_TEST_SUITE(SplitTest, Types);
 
 TYPED_TEST(SplitTest, Get)
 {
-  this->test("", " ", TypeParam{});
-  this->test(" ", " ", TypeParam{});
-  this->test("foo", " ", TypeParam{"foo"});
-  this->test("foo bar", " ", TypeParam{"foo","bar"});
-  this->test(" foo bar", " ", TypeParam{"foo","bar"});
-  this->test("foo bar ", " ", TypeParam{"foo","bar"});
-  this->test("foo bar ", " ", TypeParam{"foo","bar"});
+    this->test("", " ", TypeParam{});
+    this->test(" ", " ", TypeParam{});
+    this->test("foo", " ", TypeParam{"foo"});
+    this->test("foo bar", " ", TypeParam{"foo", "bar"});
+    this->test(" foo bar", " ", TypeParam{"foo", "bar"});
+    this->test("foo bar ", " ", TypeParam{"foo", "bar"});
+    this->test("foo bar ", " ", TypeParam{"foo", "bar"});
 
-  // default delimiter
-  const char *delims = ";,= \t";
-  this->test(" ; , = \t ", delims, TypeParam{});
-  this->test(" ; foo = \t ", delims, TypeParam{"foo"});
-  this->test("a,b,c", delims, TypeParam{"a","b","c"});
-  this->test("a\tb\tc\t", delims, TypeParam{"a","b","c"});
-  this->test("a, b, c", delims, TypeParam{"a","b","c"});
-  this->test("a b c", delims, TypeParam{"a","b","c"});
-  this->test("a=b=c", delims, TypeParam{"a","b","c"});
+    // default delimiter
+    const char* delims = ";,= \t";
+    this->test(" ; , = \t ", delims, TypeParam{});
+    this->test(" ; foo = \t ", delims, TypeParam{"foo"});
+    this->test("a,b,c", delims, TypeParam{"a", "b", "c"});
+    this->test("a\tb\tc\t", delims, TypeParam{"a", "b", "c"});
+    this->test("a, b, c", delims, TypeParam{"a", "b", "c"});
+    this->test("a b c", delims, TypeParam{"a", "b", "c"});
+    this->test("a=b=c", delims, TypeParam{"a", "b", "c"});
 }

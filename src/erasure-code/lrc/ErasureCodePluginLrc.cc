@@ -15,34 +15,37 @@
  *
  */
 
+#include "ErasureCodePluginLrc.h"
+
+#include "ErasureCodeLrc.h"
 #include "ceph_ver.h"
 #include "common/debug.h"
-#include "ErasureCodePluginLrc.h"
-#include "ErasureCodeLrc.h"
 
 #define dout_subsys ceph_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout)
 
-int ErasureCodePluginLrc::factory(const std::string &directory,
-				  ceph::ErasureCodeProfile &profile,
-				  ceph::ErasureCodeInterfaceRef *erasure_code,
-				  std::ostream *ss) {
-    ErasureCodeLrc *interface;
+int ErasureCodePluginLrc::factory(const std::string& directory, ceph::ErasureCodeProfile& profile,
+                                  ceph::ErasureCodeInterfaceRef* erasure_code, std::ostream* ss)
+{
+    ErasureCodeLrc* interface;
     interface = new ErasureCodeLrc(directory);
     int r = interface->init(profile, ss);
     if (r) {
-      delete interface;
-      return r;
+        delete interface;
+        return r;
     }
     *erasure_code = ceph::ErasureCodeInterfaceRef(interface);
     return 0;
 };
 
-const char *__erasure_code_version() { return CEPH_GIT_NICE_VER; }
-
-int __erasure_code_init(char *plugin_name, char *directory)
+const char* __erasure_code_version()
 {
-  auto& instance = ceph::ErasureCodePluginRegistry::instance();
-  return instance.add(plugin_name, new ErasureCodePluginLrc());
+    return CEPH_GIT_NICE_VER;
+}
+
+int __erasure_code_init(char* plugin_name, char* directory)
+{
+    auto& instance = ceph::ErasureCodePluginRegistry::instance();
+    return instance.add(plugin_name, new ErasureCodePluginLrc());
 }

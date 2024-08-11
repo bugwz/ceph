@@ -18,38 +18,36 @@
 
 int XFS::set_alloc_hint(int fd, uint64_t val)
 {
-  struct fsxattr fsx;
-  struct stat sb;
-  int ret;
+    struct fsxattr fsx;
+    struct stat sb;
+    int ret;
 
-  if (fstat(fd, &sb) < 0) {
-    ret = -errno;
-    return ret;
-  }
-  if (!S_ISREG(sb.st_mode)) {
-    return -EINVAL;
-  }
+    if (fstat(fd, &sb) < 0) {
+        ret = -errno;
+        return ret;
+    }
+    if (!S_ISREG(sb.st_mode)) {
+        return -EINVAL;
+    }
 
-  if (ioctl(fd, XFS_IOC_FSGETXATTR, &fsx) < 0) {
-    ret = -errno;
-    return ret;
-  }
+    if (ioctl(fd, XFS_IOC_FSGETXATTR, &fsx) < 0) {
+        ret = -errno;
+        return ret;
+    }
 
-  // already set?
-  if ((fsx.fsx_xflags & XFS_XFLAG_EXTSIZE) && fsx.fsx_extsize == val)
+    // already set?
+    if ((fsx.fsx_xflags & XFS_XFLAG_EXTSIZE) && fsx.fsx_extsize == val) return 0;
+
+    // xfs won't change extent size if any extents are allocated
+    if (fsx.fsx_nextents != 0) return 0;
+
+    fsx.fsx_xflags |= XFS_XFLAG_EXTSIZE;
+    fsx.fsx_extsize = val;
+
+    if (ioctl(fd, XFS_IOC_FSSETXATTR, &fsx) < 0) {
+        ret = -errno;
+        return ret;
+    }
+
     return 0;
-
-  // xfs won't change extent size if any extents are allocated
-  if (fsx.fsx_nextents != 0)
-    return 0;
-
-  fsx.fsx_xflags |= XFS_XFLAG_EXTSIZE;
-  fsx.fsx_extsize = val;
-
-  if (ioctl(fd, XFS_IOC_FSSETXATTR, &fsx) < 0) {
-    ret = -errno;
-    return ret;
-  }
-
-  return 0;
 }

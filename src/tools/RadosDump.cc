@@ -16,151 +16,144 @@
 
 int RadosDump::read_super()
 {
-  bufferlist ebl;
-  auto ebliter = ebl.cbegin();
-  ssize_t bytes;
+    bufferlist ebl;
+    auto ebliter = ebl.cbegin();
+    ssize_t bytes;
 
-  bytes = ebl.read_fd(file_fd, super_header::FIXED_LENGTH);
-  if ((size_t)bytes != super_header::FIXED_LENGTH) {
-    cerr << "Unexpected EOF" << std::endl;
-    return -EFAULT;
-  }
-
-  sh.decode(ebliter);
-
-  return 0;
-}
-
-
-int RadosDump::get_header(header *h)
-{
-  assert (h != NULL);
-
-  bufferlist ebl;
-  auto ebliter = ebl.cbegin();
-  ssize_t bytes;
-
-  bytes = ebl.read_fd(file_fd, sh.header_size);
-  if ((size_t)bytes != sh.header_size) {
-    cerr << "Unexpected EOF" << std::endl;
-    return -EFAULT;
-  }
-
-  h->decode(ebliter);
-
-  return 0;
-}
-
-int RadosDump::get_footer(footer *f)
-{
-  ceph_assert(f != NULL);
-
-  bufferlist ebl;
-  auto ebliter = ebl.cbegin();
-  ssize_t bytes;
-
-  bytes = ebl.read_fd(file_fd, sh.footer_size);
-  if ((size_t)bytes != sh.footer_size) {
-    cerr << "Unexpected EOF" << std::endl;
-    return -EFAULT;
-  }
-
-  f->decode(ebliter);
-
-  if (f->magic != endmagic) {
-    cerr << "Bad footer magic" << std::endl;
-    return -EFAULT;
-  }
-
-  return 0;
-}
-
-int RadosDump::read_section(sectiontype_t *type, bufferlist *bl)
-{
-  header hdr;
-  ssize_t bytes;
-
-  int ret = get_header(&hdr);
-  if (ret)
-    return ret;
-
-  *type = hdr.type;
-
-  bl->clear();
-  bytes = bl->read_fd(file_fd, hdr.size);
-  if (bytes != hdr.size) {
-    cerr << "Unexpected EOF" << std::endl;
-    return -EFAULT;
-  }
-
-  if (hdr.size > 0) {
-    footer ft;
-    ret = get_footer(&ft);
-    if (ret)
-      return ret;
-  }
-
-  return 0;
-}
-
-
-int RadosDump::skip_object(bufferlist &bl)
-{
-  bufferlist ebl;
-  bool done = false;
-  while(!done) {
-    sectiontype_t type;
-    int ret = read_section(&type, &ebl);
-    if (ret)
-      return ret;
-
-    if (type >= END_OF_TYPES) {
-      cout << "Skipping unknown object section type" << std::endl;
-      continue;
+    bytes = ebl.read_fd(file_fd, super_header::FIXED_LENGTH);
+    if ((size_t)bytes != super_header::FIXED_LENGTH) {
+        cerr << "Unexpected EOF" << std::endl;
+        return -EFAULT;
     }
-    switch(type) {
-    case TYPE_DATA:
-    case TYPE_ATTRS:
-    case TYPE_OMAP_HDR:
-    case TYPE_OMAP:
+
+    sh.decode(ebliter);
+
+    return 0;
+}
+
+
+int RadosDump::get_header(header* h)
+{
+    assert(h != NULL);
+
+    bufferlist ebl;
+    auto ebliter = ebl.cbegin();
+    ssize_t bytes;
+
+    bytes = ebl.read_fd(file_fd, sh.header_size);
+    if ((size_t)bytes != sh.header_size) {
+        cerr << "Unexpected EOF" << std::endl;
+        return -EFAULT;
+    }
+
+    h->decode(ebliter);
+
+    return 0;
+}
+
+int RadosDump::get_footer(footer* f)
+{
+    ceph_assert(f != NULL);
+
+    bufferlist ebl;
+    auto ebliter = ebl.cbegin();
+    ssize_t bytes;
+
+    bytes = ebl.read_fd(file_fd, sh.footer_size);
+    if ((size_t)bytes != sh.footer_size) {
+        cerr << "Unexpected EOF" << std::endl;
+        return -EFAULT;
+    }
+
+    f->decode(ebliter);
+
+    if (f->magic != endmagic) {
+        cerr << "Bad footer magic" << std::endl;
+        return -EFAULT;
+    }
+
+    return 0;
+}
+
+int RadosDump::read_section(sectiontype_t* type, bufferlist* bl)
+{
+    header hdr;
+    ssize_t bytes;
+
+    int ret = get_header(&hdr);
+    if (ret) return ret;
+
+    *type = hdr.type;
+
+    bl->clear();
+    bytes = bl->read_fd(file_fd, hdr.size);
+    if (bytes != hdr.size) {
+        cerr << "Unexpected EOF" << std::endl;
+        return -EFAULT;
+    }
+
+    if (hdr.size > 0) {
+        footer ft;
+        ret = get_footer(&ft);
+        if (ret) return ret;
+    }
+
+    return 0;
+}
+
+
+int RadosDump::skip_object(bufferlist& bl)
+{
+    bufferlist ebl;
+    bool done = false;
+    while (!done) {
+        sectiontype_t type;
+        int ret = read_section(&type, &ebl);
+        if (ret) return ret;
+
+        if (type >= END_OF_TYPES) {
+            cout << "Skipping unknown object section type" << std::endl;
+            continue;
+        }
+        switch (type) {
+        case TYPE_DATA:
+        case TYPE_ATTRS:
+        case TYPE_OMAP_HDR:
+        case TYPE_OMAP:
 #ifdef DIAGNOSTIC
-      cerr << "Skip type " << (int)type << std::endl;
+            cerr << "Skip type " << (int)type << std::endl;
 #endif
-      break;
-    case TYPE_OBJECT_END:
-      done = true;
-      break;
-    default:
-      cerr << "Can't skip unknown type: " << type << std::endl;
-      return -EFAULT;
+            break;
+        case TYPE_OBJECT_END: done = true; break;
+        default: cerr << "Can't skip unknown type: " << type << std::endl; return -EFAULT;
+        }
     }
-  }
-  return 0;
+    return 0;
 }
 
-//Write super_header with its fixed 16 byte length
+// Write super_header with its fixed 16 byte length
 void RadosDump::write_super()
 {
-  if (dry_run) {
-    return;
-  }
+    if (dry_run) {
+        return;
+    }
 
-  bufferlist superbl;
-  super_header sh;
-  footer ft;
+    bufferlist superbl;
+    super_header sh;
+    footer ft;
 
-  header hdr(TYPE_NONE, 0);
-  hdr.encode(superbl);
+    header hdr(TYPE_NONE, 0);
+    hdr.encode(superbl);
 
-  sh.magic = super_header::super_magic;
-  sh.version = super_header::super_ver;
-  sh.header_size = superbl.length();
-  superbl.clear();
-  ft.encode(superbl);
-  sh.footer_size = superbl.length();
-  superbl.clear();
+    sh.magic = super_header::super_magic;
+    sh.version = super_header::super_ver;
+    sh.header_size = superbl.length();
+    superbl.clear();
+    ft.encode(superbl);
+    sh.footer_size = superbl.length();
+    superbl.clear();
 
-  sh.encode(superbl);
-  ceph_assert(super_header::FIXED_LENGTH == superbl.length());
-  superbl.write_fd(file_fd);
+    sh.encode(superbl);
+    ceph_assert(super_header::FIXED_LENGTH == superbl.length());
+    superbl.write_fd(file_fd);
 }

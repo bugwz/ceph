@@ -40,51 +40,52 @@ namespace rbd_replay {
    Note that the non-canonical forms /vm\@1 and rbd/vm\@ can also be parsed,
    although they will be formatted as vm\@1 and rbd/vm.
  */
-struct rbd_loc {
-  /**
-     Constructs an rbd_loc with the empty string for the pool, image, and snap.
-   */
-  rbd_loc();
+struct rbd_loc
+{
+    /**
+       Constructs an rbd_loc with the empty string for the pool, image, and snap.
+     */
+    rbd_loc();
 
-  /**
-     Constructs an rbd_loc with the given pool, image, and snap.
-   */
-  rbd_loc(const std::string &pool, const std::string &image, const std::string &snap);
+    /**
+       Constructs an rbd_loc with the given pool, image, and snap.
+     */
+    rbd_loc(const std::string& pool, const std::string& image, const std::string& snap);
 
-  /**
-     Parses an rbd_loc from the given string.
-     If parsing fails, the contents are unmodified.
-     @retval true if parsing succeeded
-   */
-  bool parse(std::string name_string);
+    /**
+       Parses an rbd_loc from the given string.
+       If parsing fails, the contents are unmodified.
+       @retval true if parsing succeeded
+     */
+    bool parse(std::string name_string);
 
-  /**
-     Returns the string representation of the locator.
-   */
-  std::string str() const;
+    /**
+       Returns the string representation of the locator.
+     */
+    std::string str() const;
 
-  /**
-     Compares the locators lexicographically by pool, then image, then snap.
-   */
-  int compare(const rbd_loc& rhs) const;
+    /**
+       Compares the locators lexicographically by pool, then image, then snap.
+     */
+    int compare(const rbd_loc& rhs) const;
 
-  /**
-     Returns true if the locators have identical pool, image, and snap.
-   */
-  bool operator==(const rbd_loc& rhs) const;
+    /**
+       Returns true if the locators have identical pool, image, and snap.
+     */
+    bool operator==(const rbd_loc& rhs) const;
 
-  /**
-     Compares the locators lexicographically by pool, then image, then snap.
-   */
-  bool operator<(const rbd_loc& rhs) const;
+    /**
+       Compares the locators lexicographically by pool, then image, then snap.
+     */
+    bool operator<(const rbd_loc& rhs) const;
 
-  std::string pool;
+    std::string pool;
 
-  std::string image;
+    std::string image;
 
-  std::string snap;
+    std::string snap;
 };
 
-}
+}   // namespace rbd_replay
 
 #endif

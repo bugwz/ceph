@@ -27,81 +27,79 @@
 using std::ostringstream;
 
 #ifndef _WIN32
-std::string run_cmd(const char *cmd, ...)
+std::string run_cmd(const char* cmd, ...)
 {
-  std::vector <const char *> arr;
-  va_list ap;
-  va_start(ap, cmd);
-  const char *c = cmd;
-  do {
-    arr.push_back(c);
-    c = va_arg(ap, const char*);
-  } while (c != NULL);
-  va_end(ap);
-  arr.push_back(NULL);
+    std::vector<const char*> arr;
+    va_list ap;
+    va_start(ap, cmd);
+    const char* c = cmd;
+    do {
+        arr.push_back(c);
+        c = va_arg(ap, const char*);
+    } while (c != NULL);
+    va_end(ap);
+    arr.push_back(NULL);
 
-  int fret = fork();
-  if (fret == -1) {
-    int err = errno;
-    ostringstream oss;
-    oss << "run_cmd(" << cmd << "): unable to fork(): " << cpp_strerror(err);
-    return oss.str();
-  }
-  else if (fret == 0) {
-    // execvp doesn't modify its arguments, so the const-cast here is safe.
-    close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
-    execvp(cmd, (char * const*)&arr[0]);
-    _exit(127);
-  }
-  int status;
-  while (waitpid(fret, &status, 0) == -1) {
-    int err = errno;
-    if (err == EINTR)
-      continue;
-    ostringstream oss;
-    oss << "run_cmd(" << cmd << "): waitpid error: "
-	 << cpp_strerror(err);
-    return oss.str();
-  }
-  if (WIFEXITED(status)) {
-    int wexitstatus = WEXITSTATUS(status);
-    if (wexitstatus != 0) {
-      ostringstream oss;
-      oss << "run_cmd(" << cmd << "): exited with status " << wexitstatus;
-      return oss.str();
+    int fret = fork();
+    if (fret == -1) {
+        int err = errno;
+        ostringstream oss;
+        oss << "run_cmd(" << cmd << "): unable to fork(): " << cpp_strerror(err);
+        return oss.str();
     }
-    return "";
-  }
-  else if (WIFSIGNALED(status)) {
+    else if (fret == 0) {
+        // execvp doesn't modify its arguments, so the const-cast here is safe.
+        close(STDIN_FILENO);
+        close(STDOUT_FILENO);
+        close(STDERR_FILENO);
+        execvp(cmd, (char* const*)&arr[0]);
+        _exit(127);
+    }
+    int status;
+    while (waitpid(fret, &status, 0) == -1) {
+        int err = errno;
+        if (err == EINTR) continue;
+        ostringstream oss;
+        oss << "run_cmd(" << cmd << "): waitpid error: " << cpp_strerror(err);
+        return oss.str();
+    }
+    if (WIFEXITED(status)) {
+        int wexitstatus = WEXITSTATUS(status);
+        if (wexitstatus != 0) {
+            ostringstream oss;
+            oss << "run_cmd(" << cmd << "): exited with status " << wexitstatus;
+            return oss.str();
+        }
+        return "";
+    }
+    else if (WIFSIGNALED(status)) {
+        ostringstream oss;
+        oss << "run_cmd(" << cmd << "): terminated by signal";
+        return oss.str();
+    }
     ostringstream oss;
-    oss << "run_cmd(" << cmd << "): terminated by signal";
+    oss << "run_cmd(" << cmd << "): terminated by unknown mechanism";
     return oss.str();
-  }
-  ostringstream oss;
-  oss << "run_cmd(" << cmd << "): terminated by unknown mechanism";
-  return oss.str();
 }
 #else
-std::string run_cmd(const char *cmd, ...)
+std::string run_cmd(const char* cmd, ...)
 {
-  SubProcess p(cmd, SubProcess::CLOSE, SubProcess::PIPE, SubProcess::CLOSE);
+    SubProcess p(cmd, SubProcess::CLOSE, SubProcess::PIPE, SubProcess::CLOSE);
 
-  va_list ap;
-  va_start(ap, cmd);
-  const char *c = cmd;
-  c = va_arg(ap, const char*);
-  while (c != NULL) {
-    p.add_cmd_arg(c);
+    va_list ap;
+    va_start(ap, cmd);
+    const char* c = cmd;
     c = va_arg(ap, const char*);
-  }
-  va_end(ap);
+    while (c != NULL) {
+        p.add_cmd_arg(c);
+        c = va_arg(ap, const char*);
+    }
+    va_end(ap);
 
-  if (p.spawn() == 0) {
-    p.join();
-  }
+    if (p.spawn() == 0) {
+        p.join();
+    }
 
-  return p.err();
+    return p.err();
 }
 #endif /* _WIN32 */

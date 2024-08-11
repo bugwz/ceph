@@ -1,4 +1,5 @@
 #include "acconfig.h"
+
 #include <cstdint>
 using namespace std;
 #include "include/ceph_features.h"
@@ -25,12 +26,11 @@ using namespace std;
 
 #include "denc_plugin.h"
 
-DENC_API void register_dencoders(DencoderPlugin* plugin)
-{
+DENC_API void register_dencoders(DencoderPlugin* plugin){
 #include "common_types.h"
 }
 
 DENC_API void unregister_dencoders(DencoderPlugin* plugin)
 {
-  plugin->unregister_dencoders();
+    plugin->unregister_dencoders();
 }

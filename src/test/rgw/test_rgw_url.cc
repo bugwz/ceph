@@ -2,8 +2,9 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "rgw/rgw_url.h"
-#include <string>
+
 #include <gtest/gtest.h>
+#include <string>
 
 using namespace rgw;
 
@@ -16,7 +17,7 @@ TEST(TestURL, SimpleAuthority)
     ASSERT_TRUE(parse_url_authority(url, host, user, password));
     ASSERT_TRUE(user.empty());
     ASSERT_TRUE(password.empty());
-    EXPECT_STREQ(host.c_str(), "example.com"); 
+    EXPECT_STREQ(host.c_str(), "example.com");
 }
 
 TEST(TestURL, SimpleAuthority_1)
@@ -40,7 +41,7 @@ TEST(TestURL, IPAuthority)
     ASSERT_TRUE(parse_url_authority(url, host, user, password));
     ASSERT_TRUE(user.empty());
     ASSERT_TRUE(password.empty());
-    EXPECT_STREQ(host.c_str(), "1.2.3.4"); 
+    EXPECT_STREQ(host.c_str(), "1.2.3.4");
 }
 
 TEST(TestURL, IPv6Authority)
@@ -52,7 +53,7 @@ TEST(TestURL, IPv6Authority)
     ASSERT_TRUE(parse_url_authority(url, host, user, password));
     ASSERT_TRUE(user.empty());
     ASSERT_TRUE(password.empty());
-    EXPECT_STREQ(host.c_str(), "FE80:CD00:0000:0CDE:1257:0000:211E:729C"); 
+    EXPECT_STREQ(host.c_str(), "FE80:CD00:0000:0CDE:1257:0000:211E:729C");
 }
 
 TEST(TestURL, AuthorityWithUserinfo)
@@ -62,9 +63,9 @@ TEST(TestURL, AuthorityWithUserinfo)
     std::string password;
     const std::string url = "https://user:password@example.com";
     ASSERT_TRUE(parse_url_authority(url, host, user, password));
-    EXPECT_STREQ(host.c_str(), "example.com"); 
-    EXPECT_STREQ(user.c_str(), "user"); 
-    EXPECT_STREQ(password.c_str(), "password"); 
+    EXPECT_STREQ(host.c_str(), "example.com");
+    EXPECT_STREQ(user.c_str(), "user");
+    EXPECT_STREQ(password.c_str(), "password");
 }
 
 TEST(TestURL, AuthorityWithPort)
@@ -74,9 +75,9 @@ TEST(TestURL, AuthorityWithPort)
     std::string password;
     const std::string url = "http://user:password@example.com:1234";
     ASSERT_TRUE(parse_url_authority(url, host, user, password));
-    EXPECT_STREQ(host.c_str(), "example.com:1234"); 
-    EXPECT_STREQ(user.c_str(), "user"); 
-    EXPECT_STREQ(password.c_str(), "password"); 
+    EXPECT_STREQ(host.c_str(), "example.com:1234");
+    EXPECT_STREQ(user.c_str(), "user");
+    EXPECT_STREQ(password.c_str(), "password");
 }
 
 TEST(TestURL, DifferentSchema)
@@ -88,7 +89,7 @@ TEST(TestURL, DifferentSchema)
     ASSERT_TRUE(parse_url_authority(url, host, user, password));
     ASSERT_TRUE(user.empty());
     ASSERT_TRUE(password.empty());
-    EXPECT_STREQ(host.c_str(), "example.com"); 
+    EXPECT_STREQ(host.c_str(), "example.com");
 }
 
 TEST(TestURL, InvalidHost)
@@ -108,4 +109,3 @@ TEST(TestURL, WithPath)
     const std::string url = "amqps://www.example.com:1234/vhost_name";
     ASSERT_TRUE(parse_url_authority(url, host, user, password));
 }
-

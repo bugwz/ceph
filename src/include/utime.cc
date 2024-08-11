@@ -13,19 +13,20 @@
  */
 
 #include "utime.h"
+
 #include "common/Formatter.h"
 
-void utime_t::dump(ceph::Formatter *f) const
+void utime_t::dump(ceph::Formatter* f) const
 {
-  f->dump_int("seconds", tv.tv_sec);
-  f->dump_int("nanoseconds", tv.tv_nsec);
+    f->dump_int("seconds", tv.tv_sec);
+    f->dump_int("nanoseconds", tv.tv_nsec);
 }
 
 void utime_t::generate_test_instances(std::list<utime_t*>& o)
 {
-  o.push_back(new utime_t());
-  o.push_back(new utime_t());
-  o.back()->tv.tv_sec = static_cast<__u32>((1L << 32) - 1);
-  o.push_back(new utime_t());
-  o.back()->tv.tv_nsec = static_cast<__u32>((1L << 32) - 1);
+    o.push_back(new utime_t());
+    o.push_back(new utime_t());
+    o.back()->tv.tv_sec = static_cast<__u32>((1L << 32) - 1);
+    o.push_back(new utime_t());
+    o.back()->tv.tv_nsec = static_cast<__u32>((1L << 32) - 1);
 }

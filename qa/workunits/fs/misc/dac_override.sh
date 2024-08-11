@@ -9,7 +9,7 @@ set -e
 mkdir -p testdir
 file=test_chmod.$$
 
-echo "foo" > testdir/${file}
+echo "foo" >testdir/${file}
 sudo chmod 600 testdir
 
 # only root can read

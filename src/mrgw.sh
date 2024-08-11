@@ -7,10 +7,10 @@ script_root=$(dirname "$0")
 script_root=$(cd "$script_root" && pwd)
 [ -z "$BUILD_DIR" ] && BUILD_DIR=build
 if [ -e CMakeCache.txt ]; then
-    script_root=$PWD
+	script_root=$PWD
 elif [ -e "$script_root"/../${BUILD_DIR}/CMakeCache.txt ]; then
-    cd "$script_root"/../${BUILD_DIR}
-    script_root=$PWD
+	cd "$script_root"/../${BUILD_DIR}
+	script_root=$PWD
 fi
 #ceph_bin=$script_root/bin
 vstart_path=$(dirname "$0")
@@ -24,16 +24,16 @@ cert_param=""
 port_param="port=$port"
 
 if [ "$ssl_port" -gt 0 ]; then
-    cert_param="ssl_certificate=./cert.pem"
-    if [ "$rgw_frontend" = "civetweb" ]; then
-        port_param="port=${port} port=${ssl_port}s"
-    else
-        port_param="port=${port} ssl_port=${ssl_port}"
-    fi
+	cert_param="ssl_certificate=./cert.pem"
+	if [ "$rgw_frontend" = "civetweb" ]; then
+		port_param="port=${port} port=${ssl_port}s"
+	else
+		port_param="port=${port} ssl_port=${ssl_port}"
+	fi
 fi
 
 if [ -n "$RGW_FRONTEND_THREADS" ]; then
-    set_frontend_threads="num_threads=$RGW_FRONTEND_THREADS"
+	set_frontend_threads="num_threads=$RGW_FRONTEND_THREADS"
 fi
 
 shift 3
@@ -47,7 +47,7 @@ logfile=$run_root/out/radosgw.${port}.log
 
 "$vstart_path"/mrun "$name" ceph -c "$run_root"/ceph.conf \
 	-k "$run_root"/keyring auth get-or-create client.rgw."$port" mon \
-	'allow rw' osd 'allow rwx' mgr 'allow rw' >> "$run_root"/keyring
+	'allow rw' osd 'allow rwx' mgr 'allow rw' >>"$run_root"/keyring
 
 "$vstart_path"/mrun "$name" radosgw --rgw-frontends="$rgw_frontend $port_param $set_frontend_threads $cert_param" \
 	-n client.rgw."$port" --pid-file="$pidfile" \

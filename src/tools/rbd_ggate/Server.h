@@ -4,10 +4,10 @@
 #ifndef CEPH_RBD_GGATE_SERVER_H
 #define CEPH_RBD_GGATE_SERVER_H
 
+#include "common/Thread.h"
+#include "common/ceph_mutex.h"
 #include "include/rbd/librbd.hpp"
 #include "include/xlist.h"
-#include "common/ceph_mutex.h"
-#include "common/Thread.h"
 
 namespace rbd {
 namespace ggate {
@@ -15,74 +15,80 @@ namespace ggate {
 class Driver;
 struct Request;
 
-class Server {
+class Server
+{
 public:
-  Server(Driver *drv, librbd::Image& image);
+    Server(Driver* drv, librbd::Image& image);
 
-  void run();
+    void run();
 
 private:
-  struct IOContext {
-    xlist<IOContext*>::item item;
-    Server *server;
-    Request *req = nullptr;
+    struct IOContext
+    {
+        xlist<IOContext*>::item item;
+        Server* server;
+        Request* req = nullptr;
 
-    IOContext(Server *server) : item(this), server(server) {
-    }
-  };
+        IOContext(Server* server)
+            : item(this)
+            , server(server)
+        {}
+    };
 
-  class ThreadHelper : public Thread {
-  public:
-    typedef void (Server::*entry_func)();
+    class ThreadHelper : public Thread
+    {
+    public:
+        typedef void (Server::*entry_func)();
 
-    ThreadHelper(Server *server, entry_func func)
-      : server(server), func(func) {
-    }
+        ThreadHelper(Server* server, entry_func func)
+            : server(server)
+            , func(func)
+        {}
 
-  protected:
-    virtual void* entry() {
-      (server->*func)();
-      return nullptr;
-    }
+    protected:
+        virtual void* entry()
+        {
+            (server->*func)();
+            return nullptr;
+        }
 
-  private:
-    Server *server;
-    entry_func func;
-  };
+    private:
+        Server* server;
+        entry_func func;
+    };
 
-  friend std::ostream &operator<<(std::ostream &os, const IOContext &ctx);
+    friend std::ostream& operator<<(std::ostream& os, const IOContext& ctx);
 
-  Driver *m_drv;
-  librbd::Image &m_image;
+    Driver* m_drv;
+    librbd::Image& m_image;
 
-  mutable ceph::mutex m_lock =
-    ceph::make_mutex("rbd::ggate::Server::m_lock");
-  ceph::condition_variable m_cond;
-  bool m_stopping = false;
-  ThreadHelper m_reader_thread, m_writer_thread;
-  xlist<IOContext*> m_io_pending;
-  xlist<IOContext*> m_io_finished;
+    mutable ceph::mutex m_lock = ceph::make_mutex("rbd::ggate::Server::m_lock");
+    ceph::condition_variable m_cond;
+    bool m_stopping = false;
+    ThreadHelper m_reader_thread, m_writer_thread;
+    xlist<IOContext*> m_io_pending;
+    xlist<IOContext*> m_io_finished;
 
-  static void aio_callback(librbd::completion_t cb, void *arg);
+    static void aio_callback(librbd::completion_t cb, void* arg);
 
-  int start();
-  void stop();
+    int start();
+    void stop();
 
-  void reader_entry();
-  void writer_entry();
+    void reader_entry();
+    void writer_entry();
 
-  void io_start(IOContext *ctx);
-  void io_finish(IOContext *ctx);
+    void io_start(IOContext* ctx);
+    void io_finish(IOContext* ctx);
 
-  IOContext *wait_io_finish();
-  void wait_clean();
+    IOContext* wait_io_finish();
+    void wait_clean();
 
-  void handle_aio(IOContext *ctx, int r);
+    void handle_aio(IOContext* ctx, int r);
 };
 
-std::ostream &operator<<(std::ostream &os, const Server::IOContext &ctx);
+std::ostream& operator<<(std::ostream& os, const Server::IOContext& ctx);
 
-} // namespace ggate
-} // namespace rbd
+}   // namespace ggate
+}   // namespace rbd
 
-#endif // CEPH_RBD_GGATE_SERVER_H
+#endif   // CEPH_RBD_GGATE_SERVER_H

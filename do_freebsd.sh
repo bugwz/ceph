@@ -1,14 +1,14 @@
 #!/bin/sh -xve
-export NPROC=`sysctl -n hw.ncpu`
+export NPROC=$(sysctl -n hw.ncpu)
 
 if [ x"$1"x = x"--deps"x ]; then
-    sudo ./install-deps.sh
+	sudo ./install-deps.sh
 fi
 
 if [ x"$CEPH_DEV"x != xx ]; then
-    BUILDOPTS="$BUILDOPTS V=1 VERBOSE=1"
-    CXX_FLAGS_DEBUG="-DCEPH_DEV"
-    C_FLAGS_DEBUG="-DCEPH_DEV"
+	BUILDOPTS="$BUILDOPTS V=1 VERBOSE=1"
+	CXX_FLAGS_DEBUG="-DCEPH_DEV"
+	C_FLAGS_DEBUG="-DCEPH_DEV"
 fi
 
 #   To test with a new release Clang, use with cmake:
@@ -22,17 +22,16 @@ CMAKE_C_FLAGS_DEBUG="$C_FLAGS_DEBUG $COMPILE_FLAGS"
 #
 #   On FreeBSD we need to preinstall all the tools that are required for building
 #   dashboard, because versions fetched are not working on FreeBSD.
- 
 
 [ -z "$BUILD_DIR" ] && BUILD_DIR=build
 
 echo Keeping the old build
 if [ -d ${BUILD_DIR}.old ]; then
-    sudo mv ${BUILD_DIR}.old ${BUILD_DIR}.del
-    sudo rm -rf ${BUILD_DIR}.del &
+	sudo mv ${BUILD_DIR}.old ${BUILD_DIR}.del
+	sudo rm -rf ${BUILD_DIR}.del &
 fi
 if [ -d ${BUILD_DIR} ]; then
-    sudo mv ${BUILD_DIR} ${BUILD_DIR}.old
+	sudo mv ${BUILD_DIR} ${BUILD_DIR}.old
 fi
 
 mkdir ${BUILD_DIR}
@@ -61,30 +60,32 @@ mkdir ${BUILD_DIR}
 	-D WITH_SPDK=OFF \
 	2>&1 | tee cmake.log
 
-echo -n "start building: "; date
+echo -n "start building: "
+date
 printenv
 
 cd ${BUILD_DIR}
-  gmake -j$CPUS V=1 VERBOSE=1 
-  gmake tests 
-  echo -n "start testing: "; date ;
-  ctest -j $CPUS || RETEST=1
+gmake -j$CPUS V=1 VERBOSE=1
+gmake tests
+echo -n "start testing: "
+date
+ctest -j $CPUS || RETEST=1
 
 echo "Testing result, retest: = " $RETEST
 
 if [ $RETEST -eq 1 ]; then
-    # make sure no leftovers are there
-    killall ceph-osd || true
-    killall ceph-mgr || true
-    killall ceph-mds || true
-    killall ceph-mon || true
-    # clean up after testing
-    rm -rf td/* /tmp/td src/test/td/* || true
-    rm -rf /tmp/ceph-asok.* || true
-    rm -rf /tmp/cores.* || true
-    rm -rf /tmp/*.core || true
+	# make sure no leftovers are there
+	killall ceph-osd || true
+	killall ceph-mgr || true
+	killall ceph-mds || true
+	killall ceph-mon || true
+	# clean up after testing
+	rm -rf td/* /tmp/td src/test/td/* || true
+	rm -rf /tmp/ceph-asok.* || true
+	rm -rf /tmp/cores.* || true
+	rm -rf /tmp/*.core || true
 
-    ctest --output-on-failure --rerun-failed
+	ctest --output-on-failure --rerun-failed
 fi
 
 STATUS=$?
@@ -92,7 +93,7 @@ STATUS=$?
 # cleanup after the fact
 rm -rf /tmp/tmp* /tmp/foo /tmp/pip* /tmp/big* /tmp/pymp* $TMPDIR || true
 
-echo -n "Ended: "; date 
+echo -n "Ended: "
+date
 
 return $STATUS
-
