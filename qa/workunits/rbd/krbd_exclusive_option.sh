@@ -18,13 +18,13 @@ function assert_locked() {
     client_id="client.${client_id#client}"
 
     local watch_cookie
-    watch_cookie="$(rados -p rbd listwatchers rbd_header.$IMAGE_ID |
-        grep $client_id | cut -d ' ' -f 3 | cut -d '=' -f 2)"
+    watch_cookie="$(rados -p rbd listwatchers rbd_header.$IMAGE_ID \
+        | grep $client_id | cut -d ' ' -f 3 | cut -d '=' -f 2)"
     [[ $(echo -n "$watch_cookie" | grep -c '^') -eq 1 ]]
 
     local actual
-    actual="$(rados -p rbd --format=json lock info rbd_header.$IMAGE_ID rbd_lock |
-        python3 -m json.tool --sort-keys)"
+    actual="$(rados -p rbd --format=json lock info rbd_header.$IMAGE_ID rbd_lock \
+        | python3 -m json.tool --sort-keys)"
 
     local expected
     expected="$(
@@ -50,8 +50,8 @@ EOF
 }
 
 function assert_unlocked() {
-    rados -p rbd --format=json lock info rbd_header.$IMAGE_ID rbd_lock |
-        grep '"lockers":\[\]'
+    rados -p rbd --format=json lock info rbd_header.$IMAGE_ID rbd_lock \
+        | grep '"lockers":\[\]'
 }
 
 function blocklist_add() {
@@ -68,8 +68,8 @@ IMAGE_NAME="exclusive-option-test"
 
 rbd create --size 1 --image-feature '' $IMAGE_NAME
 
-IMAGE_ID="$(rbd info --format=json $IMAGE_NAME |
-    python3 -c "import sys, json; print(json.load(sys.stdin)['block_name_prefix'].split('.')[1])")"
+IMAGE_ID="$(rbd info --format=json $IMAGE_NAME \
+    | python3 -c "import sys, json; print(json.load(sys.stdin)['block_name_prefix'].split('.')[1])")"
 
 DEV=$(sudo rbd map $IMAGE_NAME)
 assert_unlocked

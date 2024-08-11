@@ -125,10 +125,10 @@ function TEST_erasure_code_pool() {
     ceph --format json osd dump | tee $dir/osd.json
     grep "$expected" $dir/osd.json >/dev/null || return 1
 
-    ceph osd pool create erasurecodes 12 12 erasure 2>&1 |
-        grep 'already exists' || return 1
-    ceph osd pool create erasurecodes 12 12 2>&1 |
-        grep 'cannot change to type replicated' || return 1
+    ceph osd pool create erasurecodes 12 12 erasure 2>&1 \
+        | grep 'already exists' || return 1
+    ceph osd pool create erasurecodes 12 12 2>&1 \
+        | grep 'cannot change to type replicated' || return 1
 }
 
 function TEST_replicated_pool_with_rule() {
@@ -143,11 +143,11 @@ function TEST_replicated_pool_with_rule() {
     ceph osd crush rule ls | grep $rule
     ceph osd pool create $poolname 12 12 replicated $rule || return 1
     rule_id=$(ceph osd crush rule dump $rule | grep "rule_id" | awk -F[' ':,] '{print $4}')
-    ceph osd pool get $poolname crush_rule 2>&1 |
-        grep "crush_rule: $rule_id" || return 1
+    ceph osd pool get $poolname crush_rule 2>&1 \
+        | grep "crush_rule: $rule_id" || return 1
     #non-existent crush rule
-    ceph osd pool create newpool 12 12 replicated non-existent 2>&1 |
-        grep "doesn't exist" || return 1
+    ceph osd pool create newpool 12 12 replicated non-existent 2>&1 \
+        | grep "doesn't exist" || return 1
 }
 
 function TEST_erasure_code_pool_lrc() {
@@ -173,14 +173,14 @@ function TEST_replicated_pool() {
     local dir=$1
     run_mon $dir a || return 1
     ceph osd pool create replicated 12 12 replicated replicated_rule || return 1
-    ceph osd pool create replicated 12 12 replicated replicated_rule 2>&1 |
-        grep 'already exists' || return 1
+    ceph osd pool create replicated 12 12 replicated replicated_rule 2>&1 \
+        | grep 'already exists' || return 1
     # default is replicated
     ceph osd pool create replicated1 12 12 || return 1
     # default is replicated, pgp_num = pg_num
     ceph osd pool create replicated2 12 || return 1
-    ceph osd pool create replicated 12 12 erasure 2>&1 |
-        grep 'cannot change to type erasure' || return 1
+    ceph osd pool create replicated 12 12 erasure 2>&1 \
+        | grep 'cannot change to type erasure' || return 1
 }
 
 function TEST_no_pool_delete() {
@@ -203,10 +203,10 @@ function TEST_utf8_cli() {
     OLDLANG="$LANG"
     export LANG=en_US.UTF-8
     ceph osd pool create 黄 16 || return 1
-    ceph osd lspools 2>&1 |
-        grep "黄" || return 1
-    ceph -f json-pretty osd dump |
-        python3 -c "import json; import sys; json.load(sys.stdin)" || return 1
+    ceph osd lspools 2>&1 \
+        | grep "黄" || return 1
+    ceph -f json-pretty osd dump \
+        | python3 -c "import json; import sys; json.load(sys.stdin)" || return 1
     ceph osd pool delete 黄 黄 --yes-i-really-really-mean-it
     export LANG="$OLDLANG"
 }

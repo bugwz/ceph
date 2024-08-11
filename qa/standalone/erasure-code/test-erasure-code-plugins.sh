@@ -6,20 +6,20 @@ source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
 arch=$(uname -m)
 
 case $arch in
-i[[3456]]86* | x86_64* | amd64*)
-    legacy_jerasure_plugins=(jerasure_generic jerasure_sse3 jerasure_sse4)
-    legacy_shec_plugins=(shec_generic shec_sse3 shec_sse4)
-    plugins=(jerasure shec lrc isa)
-    ;;
-aarch64* | arm*)
-    legacy_jerasure_plugins=(jerasure_generic jerasure_neon)
-    legacy_shec_plugins=(shec_generic shec_neon)
-    plugins=(jerasure shec lrc)
-    ;;
-*)
-    echo "unsupported platform ${arch}."
-    return 1
-    ;;
+    i[[3456]]86* | x86_64* | amd64*)
+        legacy_jerasure_plugins=(jerasure_generic jerasure_sse3 jerasure_sse4)
+        legacy_shec_plugins=(shec_generic shec_sse3 shec_sse4)
+        plugins=(jerasure shec lrc isa)
+        ;;
+    aarch64* | arm*)
+        legacy_jerasure_plugins=(jerasure_generic jerasure_neon)
+        legacy_shec_plugins=(shec_generic shec_neon)
+        plugins=(jerasure shec lrc)
+        ;;
+    *)
+        echo "unsupported platform ${arch}."
+        return 1
+        ;;
 esac
 
 function run() {

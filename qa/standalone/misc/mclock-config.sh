@@ -48,8 +48,8 @@ function TEST_profile_builtin_to_custom() {
 
     # Verify the running mClock profile
     mclock_profile=$(CEPH_ARGS='' ceph --format=json daemon \
-        $(get_asok_path osd.0) config get osd_mclock_profile |
-        jq .osd_mclock_profile)
+        $(get_asok_path osd.0) config get osd_mclock_profile \
+        | jq .osd_mclock_profile)
     mclock_profile=$(eval echo $mclock_profile)
     test "$mclock_profile" = "high_recovery_ops" || return 1
 
@@ -64,8 +64,8 @@ function TEST_profile_builtin_to_custom() {
 
     # Change a mclock config param and confirm the change
     local client_res=$(CEPH_ARGS='' ceph --format=json daemon $(get_asok_path \
-        osd.0) config get osd_mclock_scheduler_client_res |
-        jq .osd_mclock_scheduler_client_res | bc)
+        osd.0) config get osd_mclock_scheduler_client_res \
+        | jq .osd_mclock_scheduler_client_res | bc)
     echo "client_res = $client_res"
     local client_res_new=$(echo "$client_res + 0.1" | bc -l)
     echo "client_res_new = $client_res_new"
@@ -80,8 +80,8 @@ function TEST_profile_builtin_to_custom() {
     fi
     # Check value in the in-memory 'values' map
     res=$(CEPH_ARGS='' ceph --format=json daemon $(get_asok_path \
-        osd.0) config get osd_mclock_scheduler_client_res |
-        jq .osd_mclock_scheduler_client_res | bc)
+        osd.0) config get osd_mclock_scheduler_client_res \
+        | jq .osd_mclock_scheduler_client_res | bc)
     if (($(echo "$res != $client_res_new" | bc -l))); then
         return 1
     fi
@@ -104,8 +104,8 @@ function TEST_profile_custom_to_builtin() {
 
     # Verify the running mClock profile
     local orig_mclock_profile=$(CEPH_ARGS='' ceph --format=json daemon \
-        $(get_asok_path osd.0) config get osd_mclock_profile |
-        jq .osd_mclock_profile)
+        $(get_asok_path osd.0) config get osd_mclock_profile \
+        | jq .osd_mclock_profile)
     orig_mclock_profile=$(eval echo $orig_mclock_profile)
     test $orig_mclock_profile = "high_recovery_ops" || return 1
 
@@ -114,16 +114,16 @@ function TEST_profile_custom_to_builtin() {
 
     # Verify that the mclock profile is set to 'custom' on the OSDs
     local mclock_profile=$(CEPH_ARGS='' ceph --format=json daemon \
-        $(get_asok_path osd.0) config get osd_mclock_profile |
-        jq .osd_mclock_profile)
+        $(get_asok_path osd.0) config get osd_mclock_profile \
+        | jq .osd_mclock_profile)
     mclock_profile=$(eval echo $mclock_profile)
     test $mclock_profile = "custom" || return 1
 
     # Save the original client reservations allocated to the OSDs
     local client_res
     client_res=$(CEPH_ARGS='' ceph --format=json daemon $(get_asok_path \
-        osd.0) config get osd_mclock_scheduler_client_res |
-        jq .osd_mclock_scheduler_client_res | bc)
+        osd.0) config get osd_mclock_scheduler_client_res \
+        | jq .osd_mclock_scheduler_client_res | bc)
     echo "Original client_res for osd.0 = $client_res"
 
     # Change a mclock config param and confirm the change
@@ -139,8 +139,8 @@ function TEST_profile_custom_to_builtin() {
     fi
     # Check value in the in-memory 'values' map
     res=$(CEPH_ARGS='' ceph --format=json daemon $(get_asok_path \
-        osd.0) config get osd_mclock_scheduler_client_res |
-        jq .osd_mclock_scheduler_client_res | bc)
+        osd.0) config get osd_mclock_scheduler_client_res \
+        | jq .osd_mclock_scheduler_client_res | bc)
     if (($(echo "$res != $client_res_new" | bc -l))); then
         return 1
     fi
@@ -154,8 +154,8 @@ function TEST_profile_custom_to_builtin() {
     ceph tell osd.0 config set osd_mclock_profile $orig_mclock_profile || return 1
     # Verify that the mclock profile is set back to the original on the OSD
     eval mclock_profile=$(CEPH_ARGS='' ceph --format=json daemon \
-        $(get_asok_path osd.0) config get osd_mclock_profile |
-        jq .osd_mclock_profile)
+        $(get_asok_path osd.0) config get osd_mclock_profile \
+        | jq .osd_mclock_profile)
     #mclock_profile=$(ceph config get osd.0 osd_mclock_profile)
     test "$mclock_profile" = "$orig_mclock_profile" || return 1
 
@@ -168,8 +168,8 @@ function TEST_profile_custom_to_builtin() {
     fi
     # Check value in the in-memory 'values' map
     res=$(CEPH_ARGS='' ceph --format=json daemon $(get_asok_path \
-        osd.0) config get osd_mclock_scheduler_client_res |
-        jq .osd_mclock_scheduler_client_res | bc)
+        osd.0) config get osd_mclock_scheduler_client_res \
+        | jq .osd_mclock_scheduler_client_res | bc)
     if (($(echo "$res != $client_res_new" | bc -l))); then
         return 1
     fi
@@ -189,8 +189,8 @@ function TEST_profile_custom_to_builtin() {
 
     # Check value in the in-memory 'values' map
     res=$(CEPH_ARGS='' ceph --format=json daemon $(get_asok_path \
-        osd.0) config get osd_mclock_scheduler_client_res |
-        jq .osd_mclock_scheduler_client_res | bc)
+        osd.0) config get osd_mclock_scheduler_client_res \
+        | jq .osd_mclock_scheduler_client_res | bc)
     if (($(echo "$res != $client_res" | bc -l))); then
         return 1
     fi
@@ -316,8 +316,8 @@ function TEST_profile_disallow_builtin_params_modify() {
 
     # Verify the running mClock profile
     local cur_mclock_profile=$(CEPH_ARGS='' ceph --format=json daemon \
-        $(get_asok_path osd.0) config get osd_mclock_profile |
-        jq .osd_mclock_profile)
+        $(get_asok_path osd.0) config get osd_mclock_profile \
+        | jq .osd_mclock_profile)
     cur_mclock_profile=$(eval echo $cur_mclock_profile)
     test $cur_mclock_profile = "high_recovery_ops" || return 1
 
@@ -347,8 +347,8 @@ function TEST_profile_disallow_builtin_params_modify() {
             fi
 
             # Check running configuration value using "config show" cmd
-            res=$(ceph config show osd.0 | grep $opt |
-                awk '{ print $2 }' | bc) || return 1
+            res=$(ceph config show osd.0 | grep $opt \
+                | awk '{ print $2 }' | bc) || return 1
             echo "Running config: osd.0 $opt = $res"
             if (($(echo "$res == $opt_val_new" | bc -l) || \
             $(echo "$res != $opt_val_orig" | bc -l))); then
@@ -391,8 +391,8 @@ function TEST_profile_disallow_builtin_params_override() {
 
     # Verify the running mClock profile
     local cur_mclock_profile=$(CEPH_ARGS='' ceph --format=json daemon \
-        $(get_asok_path osd.0) config get osd_mclock_profile |
-        jq .osd_mclock_profile)
+        $(get_asok_path osd.0) config get osd_mclock_profile \
+        | jq .osd_mclock_profile)
     cur_mclock_profile=$(eval echo $cur_mclock_profile)
     test $cur_mclock_profile = "high_recovery_ops" || return 1
 
@@ -422,8 +422,8 @@ function TEST_profile_disallow_builtin_params_override() {
             fi
 
             # Check running configuration value using "config show" cmd
-            res=$(ceph config show osd.0 | grep $opt |
-                awk '{ print $2 }' | bc) || return 1
+            res=$(ceph config show osd.0 | grep $opt \
+                | awk '{ print $2 }' | bc) || return 1
             echo "Running config: osd.0 $opt = $res"
             if (($(echo "$res == $opt_val_new" | bc -l) || \
             $(echo "$res != $opt_val_orig" | bc -l))); then

@@ -71,8 +71,8 @@ function TEST_recovery_scrub_1() {
     set -o pipefail
     count=0
     while (true); do
-        if ceph --format json pg dump pgs |
-            jq '.pg_stats | [.[] | .state | contains("recovering")]' | grep -q true; then
+        if ceph --format json pg dump pgs \
+            | jq '.pg_stats | [.[] | .state | contains("recovering")]' | grep -q true; then
             break
         fi
         sleep 2
@@ -248,8 +248,8 @@ function TEST_recovery_scrub_2() {
     count=0
     while (true); do
         #ceph --format json pg dump pgs | jq '.pg_stats | [.[].state]'
-        if test $(ceph --format json pg dump pgs |
-            jq '.pg_stats | [.[].state]' | grep recovering | wc -l) -ge 2; then
+        if test $(ceph --format json pg dump pgs \
+            | jq '.pg_stats | [.[].state]' | grep recovering | wc -l) -ge 2; then
             break
         fi
         sleep 2

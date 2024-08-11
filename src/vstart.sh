@@ -178,8 +178,8 @@ io_uring_enabled=0
 with_jaeger=0
 
 with_mgr_dashboard=true
-if [[ "$(get_cmake_variable WITH_MGR_DASHBOARD_FRONTEND)" != "ON" ]] ||
-    [[ "$(get_cmake_variable WITH_RBD)" != "ON" ]]; then
+if [[ "$(get_cmake_variable WITH_MGR_DASHBOARD_FRONTEND)" != "ON" ]] \
+    || [[ "$(get_cmake_variable WITH_RBD)" != "ON" ]]; then
     debug echo "ceph-mgr dashboard not built - disabling."
     with_mgr_dashboard=false
 fi
@@ -301,259 +301,259 @@ parse_secondary_devs() {
 crimson_smp=1
 while [ $# -ge 1 ]; do
     case $1 in
-    -d | --debug)
-        debug=1
-        ;;
-    -t | --trace)
-        trace=1
-        ;;
-    -s | --standby_mds)
-        standby=1
-        ;;
-    -l | --localhost)
-        ip="127.0.0.1"
-        ;;
-    -i)
-        [ -z "$2" ] && usage_exit
-        ip="$2"
-        shift
-        ;;
-    -e)
-        ec=1
-        ;;
-    --new | -n)
-        new=1
-        ;;
-    --inc-osd)
-        new=0
-        kill_all=0
-        inc_osd_num=$2
-        if [ "$inc_osd_num" == "" ]; then
-            inc_osd_num=1
-        else
+        -d | --debug)
+            debug=1
+            ;;
+        -t | --trace)
+            trace=1
+            ;;
+        -s | --standby_mds)
+            standby=1
+            ;;
+        -l | --localhost)
+            ip="127.0.0.1"
+            ;;
+        -i)
+            [ -z "$2" ] && usage_exit
+            ip="$2"
             shift
-        fi
-        ;;
-    --short)
-        short=1
-        ;;
-    --crimson)
-        crimson=1
-        ceph_osd=crimson-osd
-        nodaemon=1
-        msgr=2
-        ;;
-    --crimson-foreground)
-        crimson=1
-        ceph_osd=crimson-osd
-        nodaemon=0
-        msgr=2
-        ;;
-    --osd-args)
-        extra_osd_args="$2"
-        shift
-        ;;
-    --msgr1)
-        msgr="1"
-        ;;
-    --msgr2)
-        msgr="2"
-        ;;
-    --msgr21)
-        msgr="21"
-        ;;
-    --cephadm)
-        cephadm=1
-        ;;
-    --no-parallel)
-        parallel=false
-        ;;
-    --no-restart)
-        restart=0
-        ;;
-    --valgrind)
-        [ -z "$2" ] && usage_exit
-        valgrind=$2
-        shift
-        ;;
-    --valgrind_args)
-        valgrind_args="$2"
-        shift
-        ;;
-    --valgrind_mds)
-        [ -z "$2" ] && usage_exit
-        valgrind_mds=$2
-        shift
-        ;;
-    --valgrind_osd)
-        [ -z "$2" ] && usage_exit
-        valgrind_osd=$2
-        shift
-        ;;
-    --valgrind_mon)
-        [ -z "$2" ] && usage_exit
-        valgrind_mon=$2
-        shift
-        ;;
-    --valgrind_mgr)
-        [ -z "$2" ] && usage_exit
-        valgrind_mgr=$2
-        shift
-        ;;
-    --valgrind_rgw)
-        [ -z "$2" ] && usage_exit
-        valgrind_rgw=$2
-        shift
-        ;;
-    --nodaemon)
-        nodaemon=1
-        ;;
-    --redirect-output)
-        redirect=1
-        ;;
-    --smallmds)
-        smallmds=1
-        ;;
-    --rgw_port)
-        CEPH_RGW_PORT=$2
-        shift
-        ;;
-    --rgw_frontend)
-        rgw_frontend=$2
-        shift
-        ;;
-    --rgw_arrow_flight)
-        rgw_flight_frontend="yes"
-        ;;
-    --rgw_compression)
-        rgw_compression=$2
-        shift
-        ;;
-    --kstore_path)
-        kstore_path=$2
-        shift
-        ;;
-    -m)
-        [ -z "$2" ] && usage_exit
-        MON_ADDR=$2
-        shift
-        ;;
-    -x)
-        cephx=1 # this is on be default, flag exists for historical consistency
-        ;;
-    -X)
-        cephx=0
-        ;;
+            ;;
+        -e)
+            ec=1
+            ;;
+        --new | -n)
+            new=1
+            ;;
+        --inc-osd)
+            new=0
+            kill_all=0
+            inc_osd_num=$2
+            if [ "$inc_osd_num" == "" ]; then
+                inc_osd_num=1
+            else
+                shift
+            fi
+            ;;
+        --short)
+            short=1
+            ;;
+        --crimson)
+            crimson=1
+            ceph_osd=crimson-osd
+            nodaemon=1
+            msgr=2
+            ;;
+        --crimson-foreground)
+            crimson=1
+            ceph_osd=crimson-osd
+            nodaemon=0
+            msgr=2
+            ;;
+        --osd-args)
+            extra_osd_args="$2"
+            shift
+            ;;
+        --msgr1)
+            msgr="1"
+            ;;
+        --msgr2)
+            msgr="2"
+            ;;
+        --msgr21)
+            msgr="21"
+            ;;
+        --cephadm)
+            cephadm=1
+            ;;
+        --no-parallel)
+            parallel=false
+            ;;
+        --no-restart)
+            restart=0
+            ;;
+        --valgrind)
+            [ -z "$2" ] && usage_exit
+            valgrind=$2
+            shift
+            ;;
+        --valgrind_args)
+            valgrind_args="$2"
+            shift
+            ;;
+        --valgrind_mds)
+            [ -z "$2" ] && usage_exit
+            valgrind_mds=$2
+            shift
+            ;;
+        --valgrind_osd)
+            [ -z "$2" ] && usage_exit
+            valgrind_osd=$2
+            shift
+            ;;
+        --valgrind_mon)
+            [ -z "$2" ] && usage_exit
+            valgrind_mon=$2
+            shift
+            ;;
+        --valgrind_mgr)
+            [ -z "$2" ] && usage_exit
+            valgrind_mgr=$2
+            shift
+            ;;
+        --valgrind_rgw)
+            [ -z "$2" ] && usage_exit
+            valgrind_rgw=$2
+            shift
+            ;;
+        --nodaemon)
+            nodaemon=1
+            ;;
+        --redirect-output)
+            redirect=1
+            ;;
+        --smallmds)
+            smallmds=1
+            ;;
+        --rgw_port)
+            CEPH_RGW_PORT=$2
+            shift
+            ;;
+        --rgw_frontend)
+            rgw_frontend=$2
+            shift
+            ;;
+        --rgw_arrow_flight)
+            rgw_flight_frontend="yes"
+            ;;
+        --rgw_compression)
+            rgw_compression=$2
+            shift
+            ;;
+        --kstore_path)
+            kstore_path=$2
+            shift
+            ;;
+        -m)
+            [ -z "$2" ] && usage_exit
+            MON_ADDR=$2
+            shift
+            ;;
+        -x)
+            cephx=1 # this is on be default, flag exists for historical consistency
+            ;;
+        -X)
+            cephx=0
+            ;;
 
-    -g | --gssapi)
-        gssapi_authx=1
-        ;;
-    -G)
-        gssapi_authx=0
-        ;;
+        -g | --gssapi)
+            gssapi_authx=1
+            ;;
+        -G)
+            gssapi_authx=0
+            ;;
 
-    -k)
-        if [ ! -r $conf_fn ]; then
-            echo "cannot use old configuration: $conf_fn not readable." >&2
-            exit
-        fi
-        new=0
-        ;;
-    --memstore)
-        objectstore="memstore"
-        ;;
-    --cyanstore)
-        objectstore="cyanstore"
-        ;;
-    --seastore)
-        objectstore="seastore"
-        ;;
-    -b | --bluestore)
-        objectstore="bluestore"
-        ;;
-    -K | --kstore)
-        objectstore="kstore"
-        ;;
-    --hitset)
-        hitset="$hitset $2 $3"
-        shift
-        shift
-        ;;
-    -o)
-        extra_conf+=$'\n'"$2"
-        shift
-        ;;
-    --cache)
-        if [ -z "$cache" ]; then
-            cache="$2"
-        else
-            cache="$cache $2"
-        fi
-        shift
-        ;;
-    --nolockdep)
-        lockdep=0
-        ;;
-    --multimds)
-        CEPH_MAX_MDS="$2"
-        shift
-        ;;
-    --without-dashboard)
-        with_mgr_dashboard=false
-        ;;
-    --with-restful)
-        with_mgr_restful=true
-        ;;
-    --seastore-device-size)
-        seastore_size="$2"
-        shift
-        ;;
-    --seastore-devs)
-        parse_block_devs --seastore-devs "$2"
-        shift
-        ;;
-    --seastore-secondary-devs)
-        parse_secondary_devs --seastore-devs "$2"
-        shift
-        ;;
-    --seastore-secondary-devs-type)
-        secondary_block_devs_type="$2"
-        shift
-        ;;
-    --crimson-smp)
-        crimson_smp=$2
-        shift
-        ;;
-    --bluestore-spdk)
-        [ -z "$2" ] && usage_exit
-        IFS=',' read -r -a bluestore_spdk_dev <<<"$2"
-        spdk_enabled=1
-        shift
-        ;;
-    --bluestore-pmem)
-        [ -z "$2" ] && usage_exit
-        bluestore_pmem_file="$2"
-        pmem_enabled=1
-        shift
-        ;;
-    --bluestore-devs)
-        parse_block_devs --bluestore-devs "$2"
-        shift
-        ;;
-    --bluestore-zoned)
-        zoned_enabled=1
-        ;;
-    --bluestore-io-uring)
-        io_uring_enabled=1
-        shift
-        ;;
-    --jaeger)
-        with_jaeger=1
-        echo "with_jaeger $with_jaeger"
-        ;;
-    *)
-        usage_exit
-        ;;
+        -k)
+            if [ ! -r $conf_fn ]; then
+                echo "cannot use old configuration: $conf_fn not readable." >&2
+                exit
+            fi
+            new=0
+            ;;
+        --memstore)
+            objectstore="memstore"
+            ;;
+        --cyanstore)
+            objectstore="cyanstore"
+            ;;
+        --seastore)
+            objectstore="seastore"
+            ;;
+        -b | --bluestore)
+            objectstore="bluestore"
+            ;;
+        -K | --kstore)
+            objectstore="kstore"
+            ;;
+        --hitset)
+            hitset="$hitset $2 $3"
+            shift
+            shift
+            ;;
+        -o)
+            extra_conf+=$'\n'"$2"
+            shift
+            ;;
+        --cache)
+            if [ -z "$cache" ]; then
+                cache="$2"
+            else
+                cache="$cache $2"
+            fi
+            shift
+            ;;
+        --nolockdep)
+            lockdep=0
+            ;;
+        --multimds)
+            CEPH_MAX_MDS="$2"
+            shift
+            ;;
+        --without-dashboard)
+            with_mgr_dashboard=false
+            ;;
+        --with-restful)
+            with_mgr_restful=true
+            ;;
+        --seastore-device-size)
+            seastore_size="$2"
+            shift
+            ;;
+        --seastore-devs)
+            parse_block_devs --seastore-devs "$2"
+            shift
+            ;;
+        --seastore-secondary-devs)
+            parse_secondary_devs --seastore-devs "$2"
+            shift
+            ;;
+        --seastore-secondary-devs-type)
+            secondary_block_devs_type="$2"
+            shift
+            ;;
+        --crimson-smp)
+            crimson_smp=$2
+            shift
+            ;;
+        --bluestore-spdk)
+            [ -z "$2" ] && usage_exit
+            IFS=',' read -r -a bluestore_spdk_dev <<<"$2"
+            spdk_enabled=1
+            shift
+            ;;
+        --bluestore-pmem)
+            [ -z "$2" ] && usage_exit
+            bluestore_pmem_file="$2"
+            pmem_enabled=1
+            shift
+            ;;
+        --bluestore-devs)
+            parse_block_devs --bluestore-devs "$2"
+            shift
+            ;;
+        --bluestore-zoned)
+            zoned_enabled=1
+            ;;
+        --bluestore-io-uring)
+            io_uring_enabled=1
+            shift
+            ;;
+        --jaeger)
+            with_jaeger=1
+            echo "with_jaeger $with_jaeger"
+            ;;
+        *)
+            usage_exit
+            ;;
     esac
     shift
 done
@@ -567,18 +567,18 @@ if [ "$new" -eq 0 ]; then
         CEPH_ASOK_DIR=$(dirname $($CEPH_BIN/ceph-conf -c $conf_fn --show-config-value admin_socket))
     fi
     mkdir -p $CEPH_ASOK_DIR
-    MON=$($CEPH_BIN/ceph-conf -c $conf_fn --name $VSTART_SEC --lookup num_mon 2>/dev/null) &&
-        CEPH_NUM_MON="$MON"
-    OSD=$($CEPH_BIN/ceph-conf -c $conf_fn --name $VSTART_SEC --lookup num_osd 2>/dev/null) &&
-        CEPH_NUM_OSD="$OSD"
-    MDS=$($CEPH_BIN/ceph-conf -c $conf_fn --name $VSTART_SEC --lookup num_mds 2>/dev/null) &&
-        CEPH_NUM_MDS="$MDS"
-    MGR=$($CEPH_BIN/ceph-conf -c $conf_fn --name $VSTART_SEC --lookup num_mgr 2>/dev/null) &&
-        CEPH_NUM_MGR="$MGR"
-    RGW=$($CEPH_BIN/ceph-conf -c $conf_fn --name $VSTART_SEC --lookup num_rgw 2>/dev/null) &&
-        CEPH_NUM_RGW="$RGW"
-    NFS=$($CEPH_BIN/ceph-conf -c $conf_fn --name $VSTART_SEC --lookup num_ganesha 2>/dev/null) &&
-        GANESHA_DAEMON_NUM="$NFS"
+    MON=$($CEPH_BIN/ceph-conf -c $conf_fn --name $VSTART_SEC --lookup num_mon 2>/dev/null) \
+        && CEPH_NUM_MON="$MON"
+    OSD=$($CEPH_BIN/ceph-conf -c $conf_fn --name $VSTART_SEC --lookup num_osd 2>/dev/null) \
+        && CEPH_NUM_OSD="$OSD"
+    MDS=$($CEPH_BIN/ceph-conf -c $conf_fn --name $VSTART_SEC --lookup num_mds 2>/dev/null) \
+        && CEPH_NUM_MDS="$MDS"
+    MGR=$($CEPH_BIN/ceph-conf -c $conf_fn --name $VSTART_SEC --lookup num_mgr 2>/dev/null) \
+        && CEPH_NUM_MGR="$MGR"
+    RGW=$($CEPH_BIN/ceph-conf -c $conf_fn --name $VSTART_SEC --lookup num_rgw 2>/dev/null) \
+        && CEPH_NUM_RGW="$RGW"
+    NFS=$($CEPH_BIN/ceph-conf -c $conf_fn --name $VSTART_SEC --lookup num_ganesha 2>/dev/null) \
+        && GANESHA_DAEMON_NUM="$NFS"
 else
     # only delete if -n
     if [ -e "$conf_fn" ]; then
@@ -1188,8 +1188,8 @@ EOF
         debug echo Enabling cephadm orchestrator
         if [ "$new" -eq 1 ]; then
             digest=$(curl -s \
-                https://hub.docker.com/v2/repositories/ceph/daemon-base/tags/latest-master-devel |
-                jq -r '.images[0].digest')
+                https://hub.docker.com/v2/repositories/ceph/daemon-base/tags/latest-master-devel \
+                | jq -r '.images[0].digest')
             ceph_adm config set global container_image "docker.io/ceph/daemon-base@$digest"
         fi
         ceph_adm config-key set mgr/cephadm/ssh_identity_key -i ~/.ssh/id_rsa

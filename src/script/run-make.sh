@@ -49,12 +49,12 @@ function detect_ceph_dev_pkgs() {
     source /etc/os-release
     if [[ "$ID" == "ubuntu" ]]; then
         case "$VERSION" in
-        *Xenial*)
-            cmake_opts+=" -DWITH_RADOSGW_KAFKA_ENDPOINT=OFF"
-            ;;
-        *Focal*)
-            cmake_opts+=" -DWITH_SYSTEM_ZSTD=ON"
-            ;;
+            *Xenial*)
+                cmake_opts+=" -DWITH_RADOSGW_KAFKA_ENDPOINT=OFF"
+                ;;
+            *Focal*)
+                cmake_opts+=" -DWITH_SYSTEM_ZSTD=ON"
+                ;;
         esac
     fi
     echo "$cmake_opts"
@@ -189,18 +189,18 @@ if [ "$0" = "$BASH_SOURCE" ]; then
     eval set -- "${options}"
     while true; do
         case "$1" in
-        --cmake-args)
-            cmake_args=$2
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *)
-            echo "bad option $1" >&2
-            exit 2
-            ;;
+            --cmake-args)
+                cmake_args=$2
+                shift 2
+                ;;
+            --)
+                shift
+                break
+                ;;
+            *)
+                echo "bad option $1" >&2
+                exit 2
+                ;;
         esac
     done
     prepare

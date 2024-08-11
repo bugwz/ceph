@@ -19,37 +19,37 @@ MINGW_STRIP="${MINGW_BASE}-strip"
 MINGW_OBJCOPY="${MINGW_BASE}-objcopy"
 # -Distribution specific mingw settings-
 case "$OS" in
-ubuntu)
-    mingwPosix="-posix"
-    mingwLibDir="/usr/lib/gcc"
-    mingwVersion="$(${MINGW_CPP}${mingwPosix} -dumpversion)"
-    mingwTargetLibDir="${mingwLibDir}/${MINGW_BASE}/${mingwVersion}"
-    mingwLibpthreadDir="/usr/${MINGW_BASE}/lib"
-    PTW32Include=/usr/share/mingw-w64/include
-    PTW32Lib=/usr/x86_64-w64-mingw32/lib
-    ;;
-rhel)
-    mingwPosix=""
-    mingwLibDir="/usr/lib64/gcc"
-    mingwVersion="$(${MINGW_CPP}${mingwPosix} -dumpversion)"
-    mingwTargetLibDir="/usr/${MINGW_BASE}/sys-root/mingw/bin"
-    mingwLibpthreadDir="$mingwTargetLibDir"
-    PTW32Include=/usr/x86_64-w64-mingw32/sys-root/mingw/include
-    PTW32Lib=/usr/x86_64-w64-mingw32/sys-root/mingw/lib
-    ;;
-suse)
-    mingwPosix=""
-    mingwLibDir="/usr/lib64/gcc"
-    mingwVersion="$(${MINGW_CPP}${mingwPosix} -dumpversion)"
-    mingwTargetLibDir="/usr/${MINGW_BASE}/sys-root/mingw/bin"
-    mingwLibpthreadDir="$mingwTargetLibDir"
-    PTW32Include=/usr/x86_64-w64-mingw32/sys-root/mingw/include
-    PTW32Lib=/usr/x86_64-w64-mingw32/sys-root/mingw/lib
-    ;;
-*)
-    echo "$ID is unknown, automatic mingw configuration is not possible."
-    exit 1
-    ;;
+    ubuntu)
+        mingwPosix="-posix"
+        mingwLibDir="/usr/lib/gcc"
+        mingwVersion="$(${MINGW_CPP}${mingwPosix} -dumpversion)"
+        mingwTargetLibDir="${mingwLibDir}/${MINGW_BASE}/${mingwVersion}"
+        mingwLibpthreadDir="/usr/${MINGW_BASE}/lib"
+        PTW32Include=/usr/share/mingw-w64/include
+        PTW32Lib=/usr/x86_64-w64-mingw32/lib
+        ;;
+    rhel)
+        mingwPosix=""
+        mingwLibDir="/usr/lib64/gcc"
+        mingwVersion="$(${MINGW_CPP}${mingwPosix} -dumpversion)"
+        mingwTargetLibDir="/usr/${MINGW_BASE}/sys-root/mingw/bin"
+        mingwLibpthreadDir="$mingwTargetLibDir"
+        PTW32Include=/usr/x86_64-w64-mingw32/sys-root/mingw/include
+        PTW32Lib=/usr/x86_64-w64-mingw32/sys-root/mingw/lib
+        ;;
+    suse)
+        mingwPosix=""
+        mingwLibDir="/usr/lib64/gcc"
+        mingwVersion="$(${MINGW_CPP}${mingwPosix} -dumpversion)"
+        mingwTargetLibDir="/usr/${MINGW_BASE}/sys-root/mingw/bin"
+        mingwLibpthreadDir="$mingwTargetLibDir"
+        PTW32Include=/usr/x86_64-w64-mingw32/sys-root/mingw/include
+        PTW32Lib=/usr/x86_64-w64-mingw32/sys-root/mingw/lib
+        ;;
+    *)
+        echo "$ID is unknown, automatic mingw configuration is not possible."
+        exit 1
+        ;;
 esac
 # -Common mingw settings, dependent upon distribution specific settings-
 MINGW_FIND_ROOT_LIB_PATH="${mingwLibDir}/\${TOOLCHAIN_PREFIX}/${mingwVersion}"

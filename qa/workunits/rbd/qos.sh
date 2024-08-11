@@ -25,8 +25,8 @@ rbd_bench() {
     iops_bps=$(${timeout_cmd} rbd bench "${image}" \
         --io-type ${type} --io-size 4K \
         --io-total ${total} --rbd-cache=false \
-        --rbd_qos_${qos_type}_limit ${qos_limit} |
-        awk '/elapsed:.* GiB/ {print int($6) ":" int($8) * 1024 * 1024 * 1024}
+        --rbd_qos_${qos_type}_limit ${qos_limit} \
+        | awk '/elapsed:.* GiB/ {print int($6) ":" int($8) * 1024 * 1024 * 1024}
                         /elapsed:.* MiB/ {print int($6) ":" int($8) * 1024 * 1024}
                         /elapsed:.* KiB/ {print int($6) ":" int($8) * 1024}
                         /elapsed:.* B/   {print int($6) ":" int($8)}')

@@ -97,8 +97,8 @@ function count_data_objects() {
 function get_num_clones() {
     local pool=$1
 
-    rados -p $pool --format=json df |
-        python3 -c 'import sys, json; print(json.load(sys.stdin)["pools"][0]["num_object_clones"])'
+    rados -p $pool --format=json df \
+        | python3 -c 'import sys, json; print(json.load(sys.stdin)["pools"][0]["num_object_clones"])'
 }
 
 ceph osd pool create repdata 24 24

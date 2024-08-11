@@ -130,36 +130,36 @@ function main {
         echo "$*"
         echo "$1"
         case "$1" in
-        -h | --help)
-            usage
-            ;;
-        --fs)
-            FS="$2"
-            shift 2
-            ;;
-        --metadata-pool)
-            METADATA_POOL="$2"
-            shift 2
-            ;;
-        --mount)
-            MOUNT="$2"
-            shift 2
-            ;;
-        --first-damage)
-            FIRST_DAMAGE="$2"
-            shift 2
-            ;;
-        --python)
-            PYTHON="$2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *)
-            usage
-            ;;
+            -h | --help)
+                usage
+                ;;
+            --fs)
+                FS="$2"
+                shift 2
+                ;;
+            --metadata-pool)
+                METADATA_POOL="$2"
+                shift 2
+                ;;
+            --mount)
+                MOUNT="$2"
+                shift 2
+                ;;
+            --first-damage)
+                FIRST_DAMAGE="$2"
+                shift 2
+                ;;
+            --python)
+                PYTHON="$2"
+                shift 2
+                ;;
+            --)
+                shift
+                break
+                ;;
+            *)
+                usage
+                ;;
         esac
     done
 

@@ -182,7 +182,7 @@ void http_server_thread_entrypoint()
 {
     try {
         // 获取 exporter 地址和端口信息
-        // 依据 src/common/options 的默认配置信息， exporter_addr 的默认值为 0.0.0.0 
+        // 依据 src/common/options 的默认配置信息， exporter_addr 的默认值为 0.0.0.0
         std::string exporter_addr = g_conf().get_val<std::string>("exporter_addr");
         auto const address = net::ip::make_address(exporter_addr);
         // 依据 src/common/options 的默认配置信息， exporter_http_port 默认值为 9926

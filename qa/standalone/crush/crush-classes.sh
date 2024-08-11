@@ -51,8 +51,8 @@ function get_osds_up() {
     local poolname=$1
     local objectname=$2
 
-    local osds=$(ceph --format xml osd map $poolname $objectname 2>/dev/null |
-        $XMLSTARLET sel -t -m "//up/osd" -v . -o ' ')
+    local osds=$(ceph --format xml osd map $poolname $objectname 2>/dev/null \
+        | $XMLSTARLET sel -t -m "//up/osd" -v . -o ' ')
     # get rid of the trailing space
     echo $osds
 }

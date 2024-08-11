@@ -320,7 +320,7 @@ void MgrMonitor::post_paxos_update()
         bool send = false;
         // 如果没有执行过监控检查
         if (prev_health_checks.empty()) {
-            // 初始化监控检查 vector 的大小为 monitor 的 paxos server 数量 
+            // 初始化监控检查 vector 的大小为 monitor 的 paxos server 数量
             prev_health_checks.resize(mon.paxos_service.size());
             send = true;
         }

@@ -637,8 +637,8 @@ function TEST_backfill_ec_down_all_out() {
     # Can't use wait_for_clean() because state goes from active+undersized+degraded+remapped+backfilling
     # to  active+undersized+remapped
     while (true); do
-        if test "$(ceph --format json pg dump pgs |
-            jq '.pg_stats | [.[] | .state | select(. == "incomplete")] | length')" -ne "0"; then
+        if test "$(ceph --format json pg dump pgs \
+            | jq '.pg_stats | [.[] | .state | select(. == "incomplete")] | length')" -ne "0"; then
             sleep 2
             continue
         fi

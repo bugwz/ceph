@@ -123,8 +123,8 @@ lost1_impl() {
     [ -n "$pgs_unfound" ] || die "no pg with unfound objects"
 
     for pg in $pgs_unfound; do
-        ./ceph pg $pg mark_unfound_lost revert &&
-            die "mark_unfound_lost unexpectedly succeeded for pg $pg"
+        ./ceph pg $pg mark_unfound_lost revert \
+            && die "mark_unfound_lost unexpectedly succeeded for pg $pg"
     done
 
     if ! is_set mark_osd_lost $flags && ! is_set rm_osd $flags; then
@@ -136,8 +136,8 @@ lost1_impl() {
         # verify we get woken to an error when it's declared lost.
         echo "trying to get one of the unfound objects"
         (
-            ./rados -c ./ceph.conf -p $TEST_POOL get obj02 $TEMPDIR/obj02 &&
-                die "expected radostool error"
+            ./rados -c ./ceph.conf -p $TEST_POOL get obj02 $TEMPDIR/obj02 \
+                && die "expected radostool error"
         ) &
     fi
 
@@ -151,8 +151,8 @@ lost1_impl() {
 
     if ! is_set auto_mark_unfound_lost $flags; then
         for pg in $pgs_unfound; do
-            ./ceph pg $pg mark_unfound_lost ${lost_action} ||
-                die "mark_unfound_lost failed for pg $pg"
+            ./ceph pg $pg mark_unfound_lost ${lost_action} \
+                || die "mark_unfound_lost failed for pg $pg"
         done
     fi
 
@@ -163,9 +163,9 @@ lost1_impl() {
     [ $? -eq 1 ] || die "Unfound objects didn't go away."
 
     for pg in $(ceph pg ls | awk '/^[0-9]/ {print $1}'); do
-        ./ceph pg $pg mark_unfound_lost revert 2>&1 |
-            grep 'pg has no unfound objects' ||
-            die "pg $pg has unfound objects"
+        ./ceph pg $pg mark_unfound_lost revert 2>&1 \
+            | grep 'pg has no unfound objects' \
+            || die "pg $pg has unfound objects"
     done
 
     # Reading from a lost object gives back an error code.

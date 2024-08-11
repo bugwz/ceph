@@ -11,9 +11,9 @@ SRCDIR=.
 
 while getopts "d:o:h" flag; do
     case $flag in
-    d) SRCDIR=$OPTARG ;;
-    o) OUTPUT_BASENAME=$OPTARG ;;
-    *) usage ;;
+        d) SRCDIR=$OPTARG ;;
+        o) OUTPUT_BASENAME=$OPTARG ;;
+        *) usage ;;
     esac
 done
 

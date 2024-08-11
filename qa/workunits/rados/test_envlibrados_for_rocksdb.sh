@@ -19,24 +19,24 @@ CURRENT_PATH=$(pwd)
 # install prerequisites
 # for rocksdb
 case $(distro_id) in
-ubuntu | debian | devuan | softiron)
-    install git g++ libsnappy-dev zlib1g-dev libbz2-dev libradospp-dev cmake
-    ;;
-centos | fedora | rhel)
-    case $(distro_id) in
-    rhel)
-        # RHEL needs CRB repo for snappy-devel
-        sudo subscription-manager repos --enable "codeready-builder-for-rhel-8-x86_64-rpms"
+    ubuntu | debian | devuan | softiron)
+        install git g++ libsnappy-dev zlib1g-dev libbz2-dev libradospp-dev cmake
         ;;
-    esac
-    install git gcc-c++.x86_64 snappy-devel zlib zlib-devel bzip2 bzip2-devel libradospp-devel.x86_64 cmake libarchive-3.3.3
-    ;;
-opensuse* | suse | sles)
-    install git gcc-c++ snappy-devel zlib-devel libbz2-devel libradospp-devel
-    ;;
-*)
-    echo "$(distro_id) is unknown, $@ will have to be installed manually."
-    ;;
+    centos | fedora | rhel)
+        case $(distro_id) in
+            rhel)
+                # RHEL needs CRB repo for snappy-devel
+                sudo subscription-manager repos --enable "codeready-builder-for-rhel-8-x86_64-rpms"
+                ;;
+        esac
+        install git gcc-c++.x86_64 snappy-devel zlib zlib-devel bzip2 bzip2-devel libradospp-devel.x86_64 cmake libarchive-3.3.3
+        ;;
+    opensuse* | suse | sles)
+        install git gcc-c++ snappy-devel zlib-devel libbz2-devel libradospp-devel
+        ;;
+    *)
+        echo "$(distro_id) is unknown, $@ will have to be installed manually."
+        ;;
 esac
 
 # # gflags

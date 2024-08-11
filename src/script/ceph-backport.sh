@@ -729,36 +729,36 @@ function log {
     prefix="${this_script}: "
     verbose_only=
     case $level in
-    bare)
-        prefix=
-        ;;
-    debug)
-        prefix="${prefix}DEBUG: "
-        verbose_only="yes"
-        ;;
-    err*)
-        prefix="${prefix}ERROR: "
-        ;;
-    hex)
-        in_hex="yes"
-        ;;
-    info)
-        :
-        ;;
-    overwrite)
-        trailing_newline=
-        prefix=
-        ;;
-    verbose)
-        verbose_only="yes"
-        ;;
-    verbose_en)
-        verbose_only="yes"
-        trailing_newline=
-        ;;
-    warn | warning)
-        prefix="${prefix}WARNING: "
-        ;;
+        bare)
+            prefix=
+            ;;
+        debug)
+            prefix="${prefix}DEBUG: "
+            verbose_only="yes"
+            ;;
+        err*)
+            prefix="${prefix}ERROR: "
+            ;;
+        hex)
+            in_hex="yes"
+            ;;
+        info)
+            :
+            ;;
+        overwrite)
+            trailing_newline=
+            prefix=
+            ;;
+        verbose)
+            verbose_only="yes"
+            ;;
+        verbose_en)
+            verbose_only="yes"
+            trailing_newline=
+            ;;
+        warn | warning)
+            prefix="${prefix}WARNING: "
+            ;;
     esac
     if [ "$in_hex" ]; then
         print_in_hex "$msg"
@@ -932,8 +932,8 @@ function number_to_url {
 
 function populate_original_issue {
     if [ -z "$original_issue" ]; then
-        original_issue=$(curl --silent "${redmine_url}.json?include=relations" |
-            jq '.issue.relations[] | select(.relation_type | contains("copied_to")) | .issue_id')
+        original_issue=$(curl --silent "${redmine_url}.json?include=relations" \
+            | jq '.issue.relations[] | select(.relation_type | contains("copied_to")) | .issue_id')
         original_issue_url="$(number_to_url "redmine" "${original_issue}")"
     fi
 }
@@ -941,8 +941,8 @@ function populate_original_issue {
 function populate_original_pr {
     if [ "$original_issue" ]; then
         if [ -z "$original_pr" ]; then
-            original_pr=$(curl --silent "${original_issue_url}.json" |
-                jq -r '.issue.custom_fields[] | select(.id | contains(21)) | .value')
+            original_pr=$(curl --silent "${original_issue_url}.json" \
+                | jq -r '.issue.custom_fields[] | select(.id | contains(21)) | .value')
             original_pr_url="$(number_to_url "github" "${original_pr}")"
         fi
     fi
@@ -1070,21 +1070,21 @@ function try_known_milestones {
     local mtt=$1 # milestone to try
     local mn=""  # milestone number
     case $mtt in
-    cuttlefish) eol "$mtt" ;;
-    dumpling) eol "$mtt" ;;
-    emperor) eol "$mtt" ;;
-    firefly) eol "$mtt" ;;
-    giant) eol "$mtt" ;;
-    hammer) eol "$mtt" ;;
-    infernalis) eol "$mtt" ;;
-    jewel) mn="8" ;;
-    kraken) eol "$mtt" ;;
-    luminous) mn="10" ;;
-    mimic) mn="11" ;;
-    nautilus) mn="12" ;;
-    octopus) mn="13" ;;
-    pacific) mn="14" ;;
-    quincy) mn="15" ;;
+        cuttlefish) eol "$mtt" ;;
+        dumpling) eol "$mtt" ;;
+        emperor) eol "$mtt" ;;
+        firefly) eol "$mtt" ;;
+        giant) eol "$mtt" ;;
+        hammer) eol "$mtt" ;;
+        infernalis) eol "$mtt" ;;
+        jewel) mn="8" ;;
+        kraken) eol "$mtt" ;;
+        luminous) mn="10" ;;
+        mimic) mn="11" ;;
+        nautilus) mn="12" ;;
+        octopus) mn="13" ;;
+        pacific) mn="14" ;;
+        quincy) mn="15" ;;
     esac
     echo "$mn"
 }
@@ -1449,81 +1449,81 @@ USAGE_ADVICE=""
 VERBOSE=""
 while true; do
     case "$1" in
-    --cherry-pick-only)
-        CHERRY_PICK_PHASE="yes"
-        PR_PHASE=""
-        TRACKER_PHASE=""
-        shift
-        ;;
-    --component | -c)
-        shift
-        EXPLICIT_COMPONENT="$1"
-        shift
-        ;;
-    --debug | -d)
-        DEBUG="$1"
-        shift
-        ;;
-    --existing-pr)
-        shift
-        EXISTING_PR="$1"
-        CHERRY_PICK_PHASE=""
-        PR_PHASE=""
-        shift
-        ;;
-    --force)
-        FORCE="$1"
-        shift
-        ;;
-    --fork)
-        shift
-        EXPLICIT_FORK="$1"
-        shift
-        ;;
-    --help | -h)
-        ADVICE="1"
-        HELP="$1"
-        shift
-        ;;
-    --milestones)
-        CHECK_MILESTONES="$1"
-        shift
-        ;;
-    --prepare)
-        CHERRY_PICK_PHASE="yes"
-        PR_PHASE=""
-        TRACKER_PHASE=""
-        shift
-        ;;
-    --setup* | -s)
-        SETUP_OPTION="$1"
-        shift
-        ;;
-    --troubleshooting)
-        ADVICE="$1"
-        TROUBLESHOOTING_ADVICE="$1"
-        shift
-        ;;
-    --update-version) update_version_number_and_exit ;;
-    --usage)
-        ADVICE="$1"
-        USAGE_ADVICE="$1"
-        shift
-        ;;
-    --verbose | -v)
-        VERBOSE="$1"
-        shift
-        ;;
-    --version) display_version_message_and_exit ;;
-    --)
-        shift
-        ISSUE="$1"
-        break
-        ;;
-    *)
-        echo "Internal error"
-        false
-        ;;
+        --cherry-pick-only)
+            CHERRY_PICK_PHASE="yes"
+            PR_PHASE=""
+            TRACKER_PHASE=""
+            shift
+            ;;
+        --component | -c)
+            shift
+            EXPLICIT_COMPONENT="$1"
+            shift
+            ;;
+        --debug | -d)
+            DEBUG="$1"
+            shift
+            ;;
+        --existing-pr)
+            shift
+            EXISTING_PR="$1"
+            CHERRY_PICK_PHASE=""
+            PR_PHASE=""
+            shift
+            ;;
+        --force)
+            FORCE="$1"
+            shift
+            ;;
+        --fork)
+            shift
+            EXPLICIT_FORK="$1"
+            shift
+            ;;
+        --help | -h)
+            ADVICE="1"
+            HELP="$1"
+            shift
+            ;;
+        --milestones)
+            CHECK_MILESTONES="$1"
+            shift
+            ;;
+        --prepare)
+            CHERRY_PICK_PHASE="yes"
+            PR_PHASE=""
+            TRACKER_PHASE=""
+            shift
+            ;;
+        --setup* | -s)
+            SETUP_OPTION="$1"
+            shift
+            ;;
+        --troubleshooting)
+            ADVICE="$1"
+            TROUBLESHOOTING_ADVICE="$1"
+            shift
+            ;;
+        --update-version) update_version_number_and_exit ;;
+        --usage)
+            ADVICE="$1"
+            USAGE_ADVICE="$1"
+            shift
+            ;;
+        --verbose | -v)
+            VERBOSE="$1"
+            shift
+            ;;
+        --version) display_version_message_and_exit ;;
+        --)
+            shift
+            ISSUE="$1"
+            break
+            ;;
+        *)
+            echo "Internal error"
+            false
+            ;;
     esac
 done
 

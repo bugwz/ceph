@@ -69,13 +69,13 @@ check_device_available() {
         npx cypress verify
 
         case "$DEVICE" in
-        chrome)
-            [ -x "$(command -v chrome)" ] || [ -x "$(command -v google-chrome)" ] ||
-                [ -x "$(command -v google-chrome-stable)" ] || failed=true
-            ;;
-        chromium)
-            [ -x "$(command -v chromium)" ] || [ -x "$(command -v chromium-browser)" ] || failed=true
-            ;;
+            chrome)
+                [ -x "$(command -v chrome)" ] || [ -x "$(command -v google-chrome)" ] \
+                    || [ -x "$(command -v google-chrome-stable)" ] || failed=true
+                ;;
+            chromium)
+                [ -x "$(command -v chromium)" ] || [ -x "$(command -v chromium-browser)" ] || failed=true
+                ;;
         esac
     fi
 
@@ -97,13 +97,13 @@ check_device_available() {
 
 while getopts 'd:p:r:u:' flag; do
     case "${flag}" in
-    d) DEVICE=$OPTARG ;;
-    p) CYPRESS_LOGIN_PWD=$OPTARG ;;
-    r)
-        REMOTE='true'
-        CYPRESS_BASE_URL=$OPTARG
-        ;;
-    u) CYPRESS_LOGIN_USER=$OPTARG ;;
+        d) DEVICE=$OPTARG ;;
+        p) CYPRESS_LOGIN_PWD=$OPTARG ;;
+        r)
+            REMOTE='true'
+            CYPRESS_BASE_URL=$OPTARG
+            ;;
+        u) CYPRESS_LOGIN_USER=$OPTARG ;;
     esac
 done
 
@@ -130,24 +130,24 @@ cd $DASH_DIR/frontend
 rm -f cypress/reports/results-*.xml || true
 
 case "$DEVICE" in
-docker)
-    failed=0
-    CYPRESS_VERSION=$(cat package.json | grep '"cypress"' | grep -o "[0-9]\.[0-9]\.[0-9]")
-    docker run \
-        -v $(pwd):/e2e \
-        -w /e2e \
-        --env CYPRESS_BASE_URL \
-        --env CYPRESS_LOGIN_USER \
-        --env CYPRESS_LOGIN_PWD \
-        --env CYPRESS_CEPH2_URL \
-        --name=e2e \
-        --network=host \
-        cypress/included:${CYPRESS_VERSION} || failed=1
-    stop $failed
-    ;;
-*)
-    npx cypress run $CYPRESS_ARGS --browser $DEVICE --headless || stop 1
-    ;;
+    docker)
+        failed=0
+        CYPRESS_VERSION=$(cat package.json | grep '"cypress"' | grep -o "[0-9]\.[0-9]\.[0-9]")
+        docker run \
+            -v $(pwd):/e2e \
+            -w /e2e \
+            --env CYPRESS_BASE_URL \
+            --env CYPRESS_LOGIN_USER \
+            --env CYPRESS_LOGIN_PWD \
+            --env CYPRESS_CEPH2_URL \
+            --name=e2e \
+            --network=host \
+            cypress/included:${CYPRESS_VERSION} || failed=1
+        stop $failed
+        ;;
+    *)
+        npx cypress run $CYPRESS_ARGS --browser $DEVICE --headless || stop 1
+        ;;
 esac
 
 stop 0

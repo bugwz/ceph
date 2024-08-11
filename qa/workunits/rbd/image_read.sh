@@ -132,44 +132,44 @@ function parseargs() {
     PAGE_SIZE="${IMAGE_READ_PAGE_SIZE:-${DEFAULT_PAGE_SIZE}}"
     OBJECT_ORDER="${IMAGE_READ_OBJECT_ORDER:-${DEFAULT_OBJECT_ORDER}}"
 
-    parsed=$(getopt -o "${opts}" -l "${lopts}" -n "${PROGNAME}" -- "$@") ||
-        usage
+    parsed=$(getopt -o "${opts}" -l "${lopts}" -n "${PROGNAME}" -- "$@") \
+        || usage
     eval set -- "${parsed}"
     while true; do
         case "$1" in
-        -v | --verbose)
-            VERBOSE=$(boolean_toggle "${VERBOSE}")
-            ;;
-        -c | --clone)
-            TEST_CLONES=$(boolean_toggle "${TEST_CLONES}")
-            ;;
-        -d | --double)
-            DOUBLE_ORDER=$(boolean_toggle "${DOUBLE_ORDER}")
-            ;;
-        -h | --half)
-            HALF_ORDER=$(boolean_toggle "${HALF_ORDER}")
-            ;;
-        -l | --local)
-            LOCAL_FILES=$(boolean_toggle "${LOCAL_FILES}")
-            ;;
-        -1 | -2)
-            FORMAT="${1:1}"
-            ;;
-        -p | --page_size)
-            PAGE_SIZE="$2"
-            shift
-            ;;
-        -o | --order)
-            OBJECT_ORDER="$2"
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *)
-            err "getopt internal error"
-            ;;
+            -v | --verbose)
+                VERBOSE=$(boolean_toggle "${VERBOSE}")
+                ;;
+            -c | --clone)
+                TEST_CLONES=$(boolean_toggle "${TEST_CLONES}")
+                ;;
+            -d | --double)
+                DOUBLE_ORDER=$(boolean_toggle "${DOUBLE_ORDER}")
+                ;;
+            -h | --half)
+                HALF_ORDER=$(boolean_toggle "${HALF_ORDER}")
+                ;;
+            -l | --local)
+                LOCAL_FILES=$(boolean_toggle "${LOCAL_FILES}")
+                ;;
+            -1 | -2)
+                FORMAT="${1:1}"
+                ;;
+            -p | --page_size)
+                PAGE_SIZE="$2"
+                shift
+                ;;
+            -o | --order)
+                OBJECT_ORDER="$2"
+                shift
+                ;;
+            --)
+                shift
+                break
+                ;;
+            *)
+                err "getopt internal error"
+                ;;
         esac
         shift
     done
@@ -192,11 +192,11 @@ function parseargs() {
         fi
     fi
 
-    [ "${OBJECT_ORDER}" -lt "${MIN_OBJECT_ORDER}" ] &&
-        usage "object order (${OBJECT_ORDER}) must be" \
+    [ "${OBJECT_ORDER}" -lt "${MIN_OBJECT_ORDER}" ] \
+        && usage "object order (${OBJECT_ORDER}) must be" \
             "at least ${MIN_OBJECT_ORDER}"
-    [ "${OBJECT_ORDER}" -gt "${MAX_OBJECT_ORDER}" ] &&
-        usage "object order (${OBJECT_ORDER}) must be" \
+    [ "${OBJECT_ORDER}" -gt "${MAX_OBJECT_ORDER}" ] \
+        && usage "object order (${OBJECT_ORDER}) must be" \
             "at most ${MAX_OBJECT_ORDER}"
 
     if [ "${TEST_CLONES}" = true ]; then
@@ -223,8 +223,8 @@ function parseargs() {
     [ "${IMAGE_SIZE}" -lt 1 ] && IMAGE_SIZE=1
     IMAGE_OBJECTS=$((IMAGE_SIZE * (1024 * 1024) / OBJECT_SIZE))
 
-    [ "${OBJECT_PAGES}" -lt 4 ] &&
-        usage "object size (${OBJECT_SIZE}) must be" \
+    [ "${OBJECT_PAGES}" -lt 4 ] \
+        && usage "object size (${OBJECT_SIZE}) must be" \
             "at least 4 * page size (${PAGE_SIZE})"
 
     echo "parameters for this run:"
@@ -506,8 +506,8 @@ function fill_original() {
 
     verbose "filling original image"
     # Fill 16 objects worth of "random" data
-    source_data |
-        quiet dd bs="${PAGE_SIZE}" count=$((16 * OBJECT_PAGES)) \
+    source_data \
+        | quiet dd bs="${PAGE_SIZE}" count=$((16 * OBJECT_PAGES)) \
             of="${image_path}"
 }
 

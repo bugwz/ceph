@@ -282,8 +282,8 @@ function standard_scrub_wpq_cluster() {
 #
 function set_query_debug() {
     local pgid=$1
-    local prim_osd=$(ceph pg dump pgs_brief |
-        awk -v pg="^$pgid" -n -e '$0 ~ pg { print(gensub(/[^0-9]*([0-9]+).*/,"\\1","g",$5)); }')
+    local prim_osd=$(ceph pg dump pgs_brief \
+        | awk -v pg="^$pgid" -n -e '$0 ~ pg { print(gensub(/[^0-9]*([0-9]+).*/,"\\1","g",$5)); }')
 
     echo "Setting scrub debug data. Primary for $pgid is $prim_osd"
     CEPH_ARGS='' ceph --format=json daemon $(get_asok_path osd.$prim_osd) \

@@ -446,7 +446,7 @@ void DaemonMetricCollector::update_sockets()
             // 如果获取的 daemon_name 在 clients 中不存在，
             // 并且， daemon_name 中没有 mgr 字符串，
             // 并且， daemon_name 中没有 ceph-exporter 字符串
-            // 
+            //
             // 则， 将对应的 daemon_name 信息添加到 clients 列表中。
             if (clients.find(daemon_name) == clients.end() && !(daemon_name.find("mgr") != std::string::npos) &&
                 !(daemon_name.find("ceph-exporter") != std::string::npos)) {

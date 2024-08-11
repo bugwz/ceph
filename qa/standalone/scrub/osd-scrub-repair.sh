@@ -338,23 +338,23 @@ function initiate_and_fetch_state() {
         echo $i ") state now: " $st
 
         case "$st" in
-        *scrubbing*repair*)
-            echo "found scrub+repair"
-            return 1
-            ;; # PR #41258 should have prevented this
-        *scrubbing*)
-            echo "found scrub"
-            return 0
-            ;;
-        *inconsistent*)
-            echo "Got here too late. Scrub has already finished"
-            return 1
-            ;;
-        *recovery*)
-            echo "Got here too late. Scrub has already finished."
-            return 1
-            ;;
-        *) echo $st ;;
+            *scrubbing*repair*)
+                echo "found scrub+repair"
+                return 1
+                ;; # PR #41258 should have prevented this
+            *scrubbing*)
+                echo "found scrub"
+                return 0
+                ;;
+            *inconsistent*)
+                echo "Got here too late. Scrub has already finished"
+                return 1
+                ;;
+            *recovery*)
+                echo "Got here too late. Scrub has already finished."
+                return 1
+                ;;
+            *) echo $st ;;
         esac
 
         if [ $((i % 10)) == 4 ]; then
@@ -1032,112 +1032,112 @@ function TEST_corrupt_scrub_replicated() {
         local osd=$(expr $i % 2)
 
         case $i in
-        1)
-            # Size (deep scrub data_digest too)
-            local payload=UVWXYZZZ
-            echo $payload >$dir/CORRUPT
-            objectstore_tool $dir $osd $objname set-bytes $dir/CORRUPT || return 1
-            ;;
+            1)
+                # Size (deep scrub data_digest too)
+                local payload=UVWXYZZZ
+                echo $payload >$dir/CORRUPT
+                objectstore_tool $dir $osd $objname set-bytes $dir/CORRUPT || return 1
+                ;;
 
-        2)
-            # digest (deep scrub only)
-            local payload=UVWXYZ
-            echo $payload >$dir/CORRUPT
-            objectstore_tool $dir $osd $objname set-bytes $dir/CORRUPT || return 1
-            ;;
+            2)
+                # digest (deep scrub only)
+                local payload=UVWXYZ
+                echo $payload >$dir/CORRUPT
+                objectstore_tool $dir $osd $objname set-bytes $dir/CORRUPT || return 1
+                ;;
 
-        3)
-            # missing
-            objectstore_tool $dir $osd $objname remove || return 1
-            ;;
+            3)
+                # missing
+                objectstore_tool $dir $osd $objname remove || return 1
+                ;;
 
-        4)
-            # Modify omap value (deep scrub only)
-            objectstore_tool $dir $osd $objname set-omap key-$objname $dir/CORRUPT || return 1
-            ;;
+            4)
+                # Modify omap value (deep scrub only)
+                objectstore_tool $dir $osd $objname set-omap key-$objname $dir/CORRUPT || return 1
+                ;;
 
-        5)
-            # Delete omap key (deep scrub only)
-            objectstore_tool $dir $osd $objname rm-omap key-$objname || return 1
-            ;;
+            5)
+                # Delete omap key (deep scrub only)
+                objectstore_tool $dir $osd $objname rm-omap key-$objname || return 1
+                ;;
 
-        6)
-            # Add extra omap key (deep scrub only)
-            echo extra >$dir/extra-val
-            objectstore_tool $dir $osd $objname set-omap key2-$objname $dir/extra-val || return 1
-            rm $dir/extra-val
-            ;;
+            6)
+                # Add extra omap key (deep scrub only)
+                echo extra >$dir/extra-val
+                objectstore_tool $dir $osd $objname set-omap key2-$objname $dir/extra-val || return 1
+                rm $dir/extra-val
+                ;;
 
-        7)
-            # Modify omap header (deep scrub only)
-            echo -n newheader >$dir/hdr
-            objectstore_tool $dir $osd $objname set-omaphdr $dir/hdr || return 1
-            rm $dir/hdr
-            ;;
+            7)
+                # Modify omap header (deep scrub only)
+                echo -n newheader >$dir/hdr
+                objectstore_tool $dir $osd $objname set-omaphdr $dir/hdr || return 1
+                rm $dir/hdr
+                ;;
 
-        8)
-            rados --pool $poolname setxattr $objname key1-$objname val1-$objname || return 1
-            rados --pool $poolname setxattr $objname key2-$objname val2-$objname || return 1
+            8)
+                rados --pool $poolname setxattr $objname key1-$objname val1-$objname || return 1
+                rados --pool $poolname setxattr $objname key2-$objname val2-$objname || return 1
 
-            # Break xattrs
-            echo -n bad-val >$dir/bad-val
-            objectstore_tool $dir $osd $objname set-attr _key1-$objname $dir/bad-val || return 1
-            objectstore_tool $dir $osd $objname rm-attr _key2-$objname || return 1
-            echo -n val3-$objname >$dir/newval
-            objectstore_tool $dir $osd $objname set-attr _key3-$objname $dir/newval || return 1
-            rm $dir/bad-val $dir/newval
-            ;;
+                # Break xattrs
+                echo -n bad-val >$dir/bad-val
+                objectstore_tool $dir $osd $objname set-attr _key1-$objname $dir/bad-val || return 1
+                objectstore_tool $dir $osd $objname rm-attr _key2-$objname || return 1
+                echo -n val3-$objname >$dir/newval
+                objectstore_tool $dir $osd $objname set-attr _key3-$objname $dir/newval || return 1
+                rm $dir/bad-val $dir/newval
+                ;;
 
-        9)
-            objectstore_tool $dir $osd $objname get-attr _ >$dir/robj9-oi
-            echo -n D >$dir/change
-            rados --pool $poolname put $objname $dir/change
-            objectstore_tool $dir $osd $objname set-attr _ $dir/robj9-oi
-            rm $dir/oi $dir/change
-            ;;
+            9)
+                objectstore_tool $dir $osd $objname get-attr _ >$dir/robj9-oi
+                echo -n D >$dir/change
+                rados --pool $poolname put $objname $dir/change
+                objectstore_tool $dir $osd $objname set-attr _ $dir/robj9-oi
+                rm $dir/oi $dir/change
+                ;;
 
-            # ROBJ10 must be handled after digests are re-computed by a deep scrub below
-            # ROBJ11 must be handled with config change before deep scrub
-            # ROBJ12 must be handled with config change before scrubs
-            # ROBJ13 must be handled before scrubs
+                # ROBJ10 must be handled after digests are re-computed by a deep scrub below
+                # ROBJ11 must be handled with config change before deep scrub
+                # ROBJ12 must be handled with config change before scrubs
+                # ROBJ13 must be handled before scrubs
 
-        14)
-            echo -n bad-val >$dir/bad-val
-            objectstore_tool $dir 0 $objname set-attr _ $dir/bad-val || return 1
-            objectstore_tool $dir 1 $objname rm-attr _ || return 1
-            rm $dir/bad-val
-            ;;
+            14)
+                echo -n bad-val >$dir/bad-val
+                objectstore_tool $dir 0 $objname set-attr _ $dir/bad-val || return 1
+                objectstore_tool $dir 1 $objname rm-attr _ || return 1
+                rm $dir/bad-val
+                ;;
 
-        15)
-            objectstore_tool $dir $osd $objname rm-attr _ || return 1
-            ;;
+            15)
+                objectstore_tool $dir $osd $objname rm-attr _ || return 1
+                ;;
 
-        16)
-            objectstore_tool $dir 0 $objname rm-attr snapset || return 1
-            echo -n bad-val >$dir/bad-val
-            objectstore_tool $dir 1 $objname set-attr snapset $dir/bad-val || return 1
-            ;;
+            16)
+                objectstore_tool $dir 0 $objname rm-attr snapset || return 1
+                echo -n bad-val >$dir/bad-val
+                objectstore_tool $dir 1 $objname set-attr snapset $dir/bad-val || return 1
+                ;;
 
-        17)
-            # Deep-scrub only (all replicas are diffent than the object info
-            local payload=ROBJ17
-            echo $payload >$dir/new.ROBJ17
-            objectstore_tool $dir 0 $objname set-bytes $dir/new.ROBJ17 || return 1
-            objectstore_tool $dir 1 $objname set-bytes $dir/new.ROBJ17 || return 1
-            ;;
+            17)
+                # Deep-scrub only (all replicas are diffent than the object info
+                local payload=ROBJ17
+                echo $payload >$dir/new.ROBJ17
+                objectstore_tool $dir 0 $objname set-bytes $dir/new.ROBJ17 || return 1
+                objectstore_tool $dir 1 $objname set-bytes $dir/new.ROBJ17 || return 1
+                ;;
 
-        18)
-            # Deep-scrub only (all replicas are diffent than the object info
-            local payload=ROBJ18
-            echo $payload >$dir/new.ROBJ18
-            objectstore_tool $dir 0 $objname set-bytes $dir/new.ROBJ18 || return 1
-            objectstore_tool $dir 1 $objname set-bytes $dir/new.ROBJ18 || return 1
-            # Make one replica have a different object info, so a full repair must happen too
-            objectstore_tool $dir $osd $objname corrupt-info || return 1
-            ;;
+            18)
+                # Deep-scrub only (all replicas are diffent than the object info
+                local payload=ROBJ18
+                echo $payload >$dir/new.ROBJ18
+                objectstore_tool $dir 0 $objname set-bytes $dir/new.ROBJ18 || return 1
+                objectstore_tool $dir 1 $objname set-bytes $dir/new.ROBJ18 || return 1
+                # Make one replica have a different object info, so a full repair must happen too
+                objectstore_tool $dir $osd $objname corrupt-info || return 1
+                ;;
 
-        19) ;;
-            # Set osd-max-object-size smaller than this object's size
+            19) ;;
+                # Set osd-max-object-size smaller than this object's size
 
         esac
     done
@@ -3605,59 +3605,59 @@ function corrupt_scrub_erasure() {
         local osd=$(expr $i % 2)
 
         case $i in
-        1)
-            # Size (deep scrub data_digest too)
-            local payload=UVWXYZZZ
-            echo $payload >$dir/CORRUPT
-            objectstore_tool $dir $osd $objname set-bytes $dir/CORRUPT || return 1
-            ;;
+            1)
+                # Size (deep scrub data_digest too)
+                local payload=UVWXYZZZ
+                echo $payload >$dir/CORRUPT
+                objectstore_tool $dir $osd $objname set-bytes $dir/CORRUPT || return 1
+                ;;
 
-        2)
-            # Corrupt EC shard
-            dd if=/dev/urandom of=$dir/CORRUPT bs=2048 count=1
-            objectstore_tool $dir $osd $objname set-bytes $dir/CORRUPT || return 1
-            ;;
+            2)
+                # Corrupt EC shard
+                dd if=/dev/urandom of=$dir/CORRUPT bs=2048 count=1
+                objectstore_tool $dir $osd $objname set-bytes $dir/CORRUPT || return 1
+                ;;
 
-        3)
-            # missing
-            objectstore_tool $dir $osd $objname remove || return 1
-            ;;
+            3)
+                # missing
+                objectstore_tool $dir $osd $objname remove || return 1
+                ;;
 
-        4)
-            rados --pool $poolname setxattr $objname key1-$objname val1-$objname || return 1
-            rados --pool $poolname setxattr $objname key2-$objname val2-$objname || return 1
+            4)
+                rados --pool $poolname setxattr $objname key1-$objname val1-$objname || return 1
+                rados --pool $poolname setxattr $objname key2-$objname val2-$objname || return 1
 
-            # Break xattrs
-            echo -n bad-val >$dir/bad-val
-            objectstore_tool $dir $osd $objname set-attr _key1-$objname $dir/bad-val || return 1
-            objectstore_tool $dir $osd $objname rm-attr _key2-$objname || return 1
-            echo -n val3-$objname >$dir/newval
-            objectstore_tool $dir $osd $objname set-attr _key3-$objname $dir/newval || return 1
-            rm $dir/bad-val $dir/newval
-            ;;
+                # Break xattrs
+                echo -n bad-val >$dir/bad-val
+                objectstore_tool $dir $osd $objname set-attr _key1-$objname $dir/bad-val || return 1
+                objectstore_tool $dir $osd $objname rm-attr _key2-$objname || return 1
+                echo -n val3-$objname >$dir/newval
+                objectstore_tool $dir $osd $objname set-attr _key3-$objname $dir/newval || return 1
+                rm $dir/bad-val $dir/newval
+                ;;
 
-        5)
-            # Corrupt EC shard
-            dd if=/dev/urandom of=$dir/CORRUPT bs=2048 count=2
-            objectstore_tool $dir $osd $objname set-bytes $dir/CORRUPT || return 1
-            ;;
+            5)
+                # Corrupt EC shard
+                dd if=/dev/urandom of=$dir/CORRUPT bs=2048 count=2
+                objectstore_tool $dir $osd $objname set-bytes $dir/CORRUPT || return 1
+                ;;
 
-        6)
-            objectstore_tool $dir 0 $objname rm-attr hinfo_key || return 1
-            echo -n bad-val >$dir/bad-val
-            objectstore_tool $dir 1 $objname set-attr hinfo_key $dir/bad-val || return 1
-            ;;
+            6)
+                objectstore_tool $dir 0 $objname rm-attr hinfo_key || return 1
+                echo -n bad-val >$dir/bad-val
+                objectstore_tool $dir 1 $objname set-attr hinfo_key $dir/bad-val || return 1
+                ;;
 
-        7)
-            local payload=MAKETHISDIFFERENTFROMOTHEROBJECTS
-            echo $payload >$dir/DIFFERENT
-            rados --pool $poolname put $objname $dir/DIFFERENT || return 1
+            7)
+                local payload=MAKETHISDIFFERENTFROMOTHEROBJECTS
+                echo $payload >$dir/DIFFERENT
+                rados --pool $poolname put $objname $dir/DIFFERENT || return 1
 
-            # Get hinfo_key from EOBJ1
-            objectstore_tool $dir 0 EOBJ1 get-attr hinfo_key >$dir/hinfo
-            objectstore_tool $dir 0 $objname set-attr hinfo_key $dir/hinfo || return 1
-            rm -f $dir/hinfo
-            ;;
+                # Get hinfo_key from EOBJ1
+                objectstore_tool $dir 0 EOBJ1 get-attr hinfo_key >$dir/hinfo
+                objectstore_tool $dir 0 $objname set-attr hinfo_key $dir/hinfo || return 1
+                rm -f $dir/hinfo
+                ;;
 
         esac
     done
@@ -5942,15 +5942,15 @@ function TEST_corrupt_snapset_scrub_rep() {
         local osd=$(expr $i % 2)
 
         case $i in
-        1)
-            rados --pool $poolname put $objname $dir/change
-            objectstore_tool $dir $osd --head $objname clear-snapset corrupt || return 1
-            ;;
+            1)
+                rados --pool $poolname put $objname $dir/change
+                objectstore_tool $dir $osd --head $objname clear-snapset corrupt || return 1
+                ;;
 
-        2)
-            rados --pool $poolname put $objname $dir/change
-            objectstore_tool $dir $osd --head $objname clear-snapset corrupt || return 1
-            ;;
+            2)
+                rados --pool $poolname put $objname $dir/change
+                objectstore_tool $dir $osd --head $objname clear-snapset corrupt || return 1
+                ;;
 
         esac
     done

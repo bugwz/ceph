@@ -240,10 +240,10 @@ for t in mon mgr node-exporter prometheus grafana; do
 done
 
 ## ls
-$CEPHADM ls | jq '.[]' | jq 'select(.name == "mon.a").fsid' |
-    grep $FSID
-$CEPHADM ls | jq '.[]' | jq 'select(.name == "mgr.x").fsid' |
-    grep $FSID
+$CEPHADM ls | jq '.[]' | jq 'select(.name == "mon.a").fsid' \
+    | grep $FSID
+$CEPHADM ls | jq '.[]' | jq 'select(.name == "mgr.x").fsid' \
+    | grep $FSID
 
 # make sure the version is returned correctly
 $CEPHADM ls | jq '.[]' | jq 'select(.name == "mon.a").version' | grep -q \\.
@@ -257,8 +257,8 @@ jq --null-input \
     --arg name mon.b \
     --arg keyring /var/lib/ceph/$FSID/mon.a/keyring \
     --arg config "$MONCONFIG" \
-    '{"fsid": $fsid, "name": $name, "params":{"keyring": $keyring, "config": $config}}' |
-    $CEPHADM _orch deploy
+    '{"fsid": $fsid, "name": $name, "params":{"keyring": $keyring, "config": $config}}' \
+    | $CEPHADM _orch deploy
 for u in ceph-$FSID@mon.b; do
     systemctl is-enabled $u
     systemctl is-active $u
@@ -278,8 +278,8 @@ jq --null-input \
     --arg name mgr.y \
     --arg keyring $TMPDIR/keyring.mgr.y \
     --arg config "$CONFIG" \
-    '{"fsid": $fsid, "name": $name, "params":{"keyring": $keyring, "config": $config}}' |
-    $CEPHADM _orch deploy
+    '{"fsid": $fsid, "name": $name, "params":{"keyring": $keyring, "config": $config}}' \
+    | $CEPHADM _orch deploy
 for u in ceph-$FSID@mgr.y; do
     systemctl is-enabled $u
     systemctl is-active $u
@@ -288,13 +288,13 @@ done
 for f in $(seq 1 30); do
     if $CEPHADM shell --fsid $FSID \
         --config $CONFIG --keyring $KEYRING -- \
-        ceph -s -f json-pretty |
-        jq '.mgrmap.num_standbys' | grep -q 1; then break; fi
+        ceph -s -f json-pretty \
+        | jq '.mgrmap.num_standbys' | grep -q 1; then break; fi
     sleep 1
 done
 $CEPHADM shell --fsid $FSID --config $CONFIG --keyring $KEYRING -- \
-    ceph -s -f json-pretty |
-    jq '.mgrmap.num_standbys' | grep -q 1
+    ceph -s -f json-pretty \
+    | jq '.mgrmap.num_standbys' | grep -q 1
 
 # add osd.{1,2,..}
 dd if=/dev/zero of=$TMPDIR/$OSD_IMAGE_NAME bs=1 count=0 seek=$OSD_IMAGE_SIZE
@@ -335,16 +335,16 @@ for id in $(seq 0 $((--OSD_TO_CREATE))); do
         --arg keyring $TMPDIR/keyring.bootstrap.osd \
         --arg config "$CONFIG" \
         --arg osd_fsid $osd_fsid \
-        '{"fsid": $fsid, "name": $name, "params":{"keyring": $keyring, "config": $config, "osd_fsid": $osd_fsid}}' |
-        $CEPHADM _orch deploy
+        '{"fsid": $fsid, "name": $name, "params":{"keyring": $keyring, "config": $config, "osd_fsid": $osd_fsid}}' \
+        | $CEPHADM _orch deploy
 done
 
 # add node-exporter
 jq --null-input \
     --arg fsid $FSID \
     --arg name node-exporter.a \
-    '{"fsid": $fsid, "name": $name}' |
-    ${CEPHADM//--image $IMAGE_DEFAULT/} _orch deploy
+    '{"fsid": $fsid, "name": $name}' \
+    | ${CEPHADM//--image $IMAGE_DEFAULT/} _orch deploy
 cond="curl 'http://localhost:9100' | grep -q 'Node Exporter'"
 is_available "node-exporter" "$cond" 10
 
@@ -353,8 +353,8 @@ jq --null-input \
     --arg fsid $FSID \
     --arg name prometheus.a \
     --argjson config_blobs "$(cat ${CEPHADM_SAMPLES_DIR}/prometheus.json)" \
-    '{"fsid": $fsid, "name": $name, "config_blobs": $config_blobs}' |
-    ${CEPHADM//--image $IMAGE_DEFAULT/} _orch deploy
+    '{"fsid": $fsid, "name": $name, "config_blobs": $config_blobs}' \
+    | ${CEPHADM//--image $IMAGE_DEFAULT/} _orch deploy
 cond="curl 'localhost:9095/api/v1/query?query=up'"
 is_available "prometheus" "$cond" 10
 
@@ -363,8 +363,8 @@ jq --null-input \
     --arg fsid $FSID \
     --arg name grafana.a \
     --argjson config_blobs "$(cat ${CEPHADM_SAMPLES_DIR}/grafana.json)" \
-    '{"fsid": $fsid, "name": $name, "config_blobs": $config_blobs}' |
-    ${CEPHADM//--image $IMAGE_DEFAULT/} _orch deploy
+    '{"fsid": $fsid, "name": $name, "config_blobs": $config_blobs}' \
+    | ${CEPHADM//--image $IMAGE_DEFAULT/} _orch deploy
 cond="curl --insecure 'https://localhost:3000' | grep -q 'grafana'"
 is_available "grafana" "$cond" 50
 
@@ -383,8 +383,8 @@ jq --null-input \
     --arg keyring "$KEYRING" \
     --arg config "$CONFIG" \
     --argjson config_blobs "$(cat ${CEPHADM_SAMPLES_DIR}/nfs.json)" \
-    '{"fsid": $fsid, "name": $name, "params": {"keyring": $keyring, "config": $config}, "config_blobs": $config_blobs}' |
-    ${CEPHADM} _orch deploy
+    '{"fsid": $fsid, "name": $name, "params": {"keyring": $keyring, "config": $config}, "config_blobs": $config_blobs}' \
+    | ${CEPHADM} _orch deploy
 cond="$SUDO ss -tlnp '( sport = :nfs )' | grep 'ganesha.nfsd'"
 is_available "nfs" "$cond" 10
 $CEPHADM shell --fsid $FSID --config $CONFIG --keyring $KEYRING -- \
@@ -401,8 +401,8 @@ jq --null-input \
     --arg image "$alertmanager_image" \
     --argjson tcp_ports "${tcp_ports}" \
     --argjson config_blobs "$(cat ${CEPHADM_SAMPLES_DIR}/custom_container.json)" \
-    '{"fsid": $fsid, "name": $name, "image": $image, "params": {"keyring": $keyring, "config": $config, "tcp_ports": $tcp_ports}, "config_blobs": $config_blobs}' |
-    ${CEPHADM//--image $IMAGE_DEFAULT/} _orch deploy
+    '{"fsid": $fsid, "name": $name, "image": $image, "params": {"keyring": $keyring, "config": $config, "tcp_ports": $tcp_ports}, "config_blobs": $config_blobs}' \
+    | ${CEPHADM//--image $IMAGE_DEFAULT/} _orch deploy
 cond="$CEPHADM enter --fsid $FSID --name container.alertmanager.a -- test -f \
       /etc/alertmanager/alertmanager.yml"
 is_available "alertmanager.yml" "$cond" 10
@@ -444,8 +444,8 @@ $CEPHADM enter --fsid $FSID --name mgr.x -- pidof ceph-mgr
 $CEPHADM --timeout 60 enter --fsid $FSID --name mon.a -- sleep 10
 
 ## ceph-volume
-$CEPHADM ceph-volume --fsid $FSID -- inventory --format=json |
-    jq '.[]'
+$CEPHADM ceph-volume --fsid $FSID -- inventory --format=json \
+    | jq '.[]'
 
 ## preserve test state
 [ $CLEANUP = false ] && exit 0

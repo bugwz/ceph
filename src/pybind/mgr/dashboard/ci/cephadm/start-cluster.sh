@@ -37,11 +37,11 @@ DEV_MODE=''
 for arg in "$@"; do
     shift
     case "$arg" in
-    "--dev-mode")
-        DEV_MODE='true'
-        EXTRA_PARAMS+=" -P dev_mode=${DEV_MODE}"
-        ;;
-    "--expanded") EXTRA_PARAMS+=" -P expanded_cluster=true" ;;
+        "--dev-mode")
+            DEV_MODE='true'
+            EXTRA_PARAMS+=" -P dev_mode=${DEV_MODE}"
+            ;;
+        "--expanded") EXTRA_PARAMS+=" -P expanded_cluster=true" ;;
     esac
 done
 

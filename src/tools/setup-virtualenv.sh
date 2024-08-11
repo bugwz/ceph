@@ -43,20 +43,20 @@ eval set -- "$TEMP"
 PYTHON=python3
 while true; do
     case "$1" in
-    -h | --help) usage ;; # does not return
-    --python)
-        PYTHON="$2"
-        shift
-        shift
-        ;;
-    --)
-        shift
-        break
-        ;;
-    *)
-        echo "Internal error"
-        exit 1
-        ;;
+        -h | --help) usage ;; # does not return
+        --python)
+            PYTHON="$2"
+            shift
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Internal error"
+            exit 1
+            ;;
     esac
 done
 

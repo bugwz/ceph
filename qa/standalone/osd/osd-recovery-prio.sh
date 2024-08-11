@@ -401,8 +401,8 @@ function TEST_recovery_pool_priority() {
     set -o pipefail
     count=0
     while (true); do
-        if test $(ceph --format json pg dump pgs |
-            jq '.pg_stats | .[] | .state | contains("recovering")' | grep -c true) == "2"; then
+        if test $(ceph --format json pg dump pgs \
+            | jq '.pg_stats | .[] | .state | contains("recovering")' | grep -c true) == "2"; then
             break
         fi
         sleep 2

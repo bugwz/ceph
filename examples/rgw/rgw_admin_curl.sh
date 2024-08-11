@@ -51,40 +51,40 @@ use_jq=false
 
 while getopts "a:s:e:r:p:q:j" opt; do
     case "$opt" in
-    a)
-        access_key=${OPTARG}
-        ;;
-    s)
-        secret_key=${OPTARG}
-        ;;
-    e)
-        rgw_endpoint=${OPTARG}
-        ;;
-    r)
-        http_request=${OPTARG}
-        ;;
-    p)
-        admin_resource=${OPTARG}
-        ;;
-    q)
-        http_query=${OPTARG}
-        ;;
-    j)
-        use_jq=true
-        ;;
-    *)
-        show_help
-        exit 1
-        ;;
+        a)
+            access_key=${OPTARG}
+            ;;
+        s)
+            secret_key=${OPTARG}
+            ;;
+        e)
+            rgw_endpoint=${OPTARG}
+            ;;
+        r)
+            http_request=${OPTARG}
+            ;;
+        p)
+            admin_resource=${OPTARG}
+            ;;
+        q)
+            http_query=${OPTARG}
+            ;;
+        j)
+            use_jq=true
+            ;;
+        *)
+            show_help
+            exit 1
+            ;;
     esac
 done
 shift $((OPTIND - 1))
 
-if [ -z "${access_key}" ] || [ -z "${secret_key}" ] ||
-    [ -z "${rgw_endpoint}" ] || [ -z "${http_request}" ] ||
-    [ -z "${admin_resource}" ] || [ -z "${http_query}" ]; then
-    if [ "${http_request}" = "GET" ] && [ "${admin_resource}" = "bucket" ] &&
-        [ -z "${http_query}" ]; then
+if [ -z "${access_key}" ] || [ -z "${secret_key}" ] \
+    || [ -z "${rgw_endpoint}" ] || [ -z "${http_request}" ] \
+    || [ -z "${admin_resource}" ] || [ -z "${http_query}" ]; then
+    if [ "${http_request}" = "GET" ] && [ "${admin_resource}" = "bucket" ] \
+        && [ -z "${http_query}" ]; then
         :
     else
         show_help
@@ -101,8 +101,8 @@ ${contentType}
 ${dateTime}
 ${resource}"
 
-signature=$(echo -en "$headerToSign" |
-    openssl sha1 -hmac ${secret_key} -binary | base64)
+signature=$(echo -en "$headerToSign" \
+    | openssl sha1 -hmac ${secret_key} -binary | base64)
 
 if "$use_jq"; then
     curl -X ${http_request} -H "Content-Type: ${contentType}" -H "Date: ${dateTime}" \

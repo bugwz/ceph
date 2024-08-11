@@ -26,22 +26,22 @@ function print_usage() {
 
 while getopts ":qhs:t:" opt; do
     case $opt in
-    q)
-        SILENT=1
-        ;;
-    s)
-        SOURCE=$OPTARG
-        ;;
-    t)
-        TARGET=$OPTARG
-        ;;
-    h)
-        HELP=1
-        ;;
-    \?)
-        print_usage
-        exit 1
-        ;;
+        q)
+            SILENT=1
+            ;;
+        s)
+            SOURCE=$OPTARG
+            ;;
+        t)
+            TARGET=$OPTARG
+            ;;
+        h)
+            HELP=1
+            ;;
+        \?)
+            print_usage
+            exit 1
+            ;;
     esac
 done
 

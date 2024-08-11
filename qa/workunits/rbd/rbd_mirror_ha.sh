@@ -16,8 +16,8 @@ is_leader() {
     test -n "${pool}" || pool=${POOL}
 
     admin_daemon "${CLUSTER1}:${instance}" \
-        rbd mirror status ${pool} ${CLUSTER2}${PEER_CLUSTER_SUFFIX} |
-        grep '"leader": true'
+        rbd mirror status ${pool} ${CLUSTER2}${PEER_CLUSTER_SUFFIX} \
+        | grep '"leader": true'
 }
 
 wait_for_leader() {

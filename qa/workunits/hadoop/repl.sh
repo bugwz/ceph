@@ -26,8 +26,8 @@ done
 for repl in 2 3 7 8 9; do
     name=hadoop.$repl
     $HADOOP_PREFIX/bin/hadoop fs -rm -f /$name.dat
-    dd if=/dev/zero bs=1048576 count=1 |
-        $HADOOP_PREFIX/bin/hadoop fs -Dceph.data.pools="$name" \
+    dd if=/dev/zero bs=1048576 count=1 \
+        | $HADOOP_PREFIX/bin/hadoop fs -Dceph.data.pools="$name" \
             -put - /$name.dat
 done
 

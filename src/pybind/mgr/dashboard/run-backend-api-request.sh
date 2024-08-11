@@ -11,8 +11,8 @@ fi
 cd $CURR_DIR
 
 TOKEN=$(curl --insecure -s -H "Content-Type: application/json" -X POST \
-    -d '{"username":"admin","password":"admin"}' $API_URL/api/auth |
-    jq .token | sed -e 's/"//g')
+    -d '{"username":"admin","password":"admin"}' $API_URL/api/auth \
+    | jq .token | sed -e 's/"//g')
 
 echo "METHOD: $1"
 echo "URL: ${API_URL}${2}"

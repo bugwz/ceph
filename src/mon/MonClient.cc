@@ -691,7 +691,7 @@ void MonClient::_send_mon_message(MessageRef m)
     }
 }
 
-// 如果没有参数传入，则 rank 默认为 -1 
+// 如果没有参数传入，则 rank 默认为 -1
 void MonClient::_reopen_session(int rank)
 {
     ceph_assert(ceph_mutex_is_locked(monc_lock));

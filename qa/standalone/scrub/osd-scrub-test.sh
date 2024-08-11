@@ -205,8 +205,8 @@ function TEST_scrub_extended_sleep() {
             --osd_deep_scrub_randomize_ratio=0.0 \
             --osd_scrub_interval_randomize_ratio=0 \
             --osd_scrub_begin_week_day=$DAY_START \
-            --osd_scrub_end_week_day=$DAY_END ||
-            return 1
+            --osd_scrub_end_week_day=$DAY_END \
+            || return 1
     done
 
     # Create a pool with a single pg

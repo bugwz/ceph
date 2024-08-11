@@ -209,20 +209,20 @@ get_name_list() {
         type=$(echo $f | cut -c 1-3) # e.g. 'mon', if $item is 'mon1'
         id=$(echo $f | cut -c 4- | sed 's/\.//')
         case $f in
-        mon | osd | mds | mgr)
-            for d in $allconf; do
-                if echo $d | grep -q ^$type; then
-                    what="$what $d"
+            mon | osd | mds | mgr)
+                for d in $allconf; do
+                    if echo $d | grep -q ^$type; then
+                        what="$what $d"
+                    fi
+                done
+                ;;
+            *)
+                if ! echo " " $allconf $local " " | egrep -q "( $type$id | $type.$id )"; then
+                    echo "$0: $type.$id not found ($conf defines" $allconf", /var/lib/ceph defines" $local")"
+                    exit 1
                 fi
-            done
-            ;;
-        *)
-            if ! echo " " $allconf $local " " | egrep -q "( $type$id | $type.$id )"; then
-                echo "$0: $type.$id not found ($conf defines" $allconf", /var/lib/ceph defines" $local")"
-                exit 1
-            fi
-            what="$what $f"
-            ;;
+                what="$what $f"
+                ;;
         esac
     done
 }

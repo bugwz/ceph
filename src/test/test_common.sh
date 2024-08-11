@@ -84,12 +84,12 @@ yes_or_no_choice() {
         echo -n "${1} [y/n] "
         read ans
         case "${ans}" in
-        y | Y | yes | YES | Yes) return 0 ;;
-        n | N | no | NO | No) return 1 ;;
-        *)
-            echo "Please type yes or no."
-            echo
-            ;;
+            y | Y | yes | YES | Yes) return 0 ;;
+            n | N | no | NO | No) return 1 ;;
+            *)
+                echo "Please type yes or no."
+                echo
+                ;;
         esac
     done
 }
@@ -101,8 +101,8 @@ continue_prompt() {
         echo "Please type 'c' or 'continue' ${prompt}."
         read ans
         case "${ans}" in
-        c | continue) return 0 ;;
-        *) echo ;;
+            c | continue) return 0 ;;
+            *) echo ;;
         esac
     done
 }

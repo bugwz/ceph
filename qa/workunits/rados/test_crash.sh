@@ -13,11 +13,11 @@ sleep 5
 # root/600
 for f in $(find $TESTDIR/archive/coredump -type f); do
     gdb_output=$(echo "quit" | sudo gdb /usr/bin/ceph-osd $f)
-    if expr match "$gdb_output" ".*generated.*ceph-osd.*" &&
-        (
+    if expr match "$gdb_output" ".*generated.*ceph-osd.*" \
+        && (
 
-            expr match "$gdb_output" ".*terminated.*signal 6.*" ||
-                expr match "$gdb_output" ".*terminated.*signal SIGABRT.*"
+            expr match "$gdb_output" ".*terminated.*signal 6.*" \
+                || expr match "$gdb_output" ".*terminated.*signal SIGABRT.*"
         ); then
         sudo rm $f
     fi

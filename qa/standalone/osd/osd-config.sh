@@ -44,8 +44,8 @@ function TEST_config_init() {
     local cache=500
     run_osd $dir 0 \
         --osd-map-cache-size=$cache \
-        --osd-pg-epoch-persisted-max-stale=$stale ||
-        return 1
+        --osd-pg-epoch-persisted-max-stale=$stale \
+        || return 1
     CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.0) log flush || return 1
     grep 'is not > osd_pg_epoch_persisted_max_stale' $dir/osd.0.log || return 1
 }

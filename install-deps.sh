@@ -73,16 +73,16 @@ function munge_debian_control {
     shift
     local control=$1
     case "$version" in
-    *squeeze* | *wheezy*)
-        control="/tmp/control.$$"
-        grep -v babeltrace debian/control >$control
-        ;;
+        *squeeze* | *wheezy*)
+            control="/tmp/control.$$"
+            grep -v babeltrace debian/control >$control
+            ;;
     esac
     echo $control
 }
 
 # 这个函数是在 ubuntu 的机器上选择安装合适的 g++ 版本
-# 调用示例： 
+# 调用示例：
 # ensure_decent_gcc_on_ubuntu 9 bionic
 function ensure_decent_gcc_on_ubuntu {
     in_jenkins && echo "CI_DEBUG: Start ensure_decent_gcc_on_ubuntu() in install-deps.sh"
@@ -172,15 +172,15 @@ function clean_boost_on_ubuntu {
     in_jenkins && echo "CI_DEBUG: Running clean_boost_on_ubuntu() in install-deps.sh"
     # Find currently installed version. If there are multiple
     # versions, they end up newline separated
-    local installed_ver=$(apt -qq list --installed ceph-libboost*-dev 2>/dev/null |
-        cut -d' ' -f2 |
-        cut -d'.' -f1,2 |
-        sort -u)
+    local installed_ver=$(apt -qq list --installed ceph-libboost*-dev 2>/dev/null \
+        | cut -d' ' -f2 \
+        | cut -d'.' -f1,2 \
+        | sort -u)
     # If installed_ver contains whitespace, we can't really count on it,
     # but otherwise, bail out if the version installed is the version
     # we want.
-    if test -n "$installed_ver" &&
-        echo -n "$installed_ver" | tr '[:space:]' ' ' | grep -v -q ' '; then
+    if test -n "$installed_ver" \
+        && echo -n "$installed_ver" | tr '[:space:]' ' ' | grep -v -q ' '; then
         if echo "$installed_ver" | grep -q "^$boost_ver"; then
             return
         fi
@@ -208,10 +208,10 @@ function install_boost_on_ubuntu {
     # Once we get to this point, clean_boost_on_ubuntu() should ensure
     # that there is no more than one installed version.
     # 安装 ceph 的 libboost 的依赖
-    local installed_ver=$(apt -qq list --installed ceph-libboost*-dev 2>/dev/null |
-        grep -e 'libboost[0-9].[0-9]\+-dev' |
-        cut -d' ' -f2 |
-        cut -d'.' -f1,2)
+    local installed_ver=$(apt -qq list --installed ceph-libboost*-dev 2>/dev/null \
+        | grep -e 'libboost[0-9].[0-9]\+-dev' \
+        | cut -d' ' -f2 \
+        | cut -d'.' -f1,2)
     if test -n "$installed_ver"; then
         if echo "$installed_ver" | grep -q "^$boost_ver"; then
             return
@@ -402,66 +402,66 @@ else
     # 判断系统类型
     source /etc/os-release
     case "$ID" in
-    debian | ubuntu | devuan | elementary | softiron)
-        echo "Using apt-get to install dependencies"
-        # Put this before any other invocation of apt so it can clean
-        # up in a broken case.
-        clean_boost_on_ubuntu
-        $SUDO apt-get install -y devscripts equivs
-        $SUDO apt-get install -y dpkg-dev
-        ensure_python3_sphinx_on_ubuntu
-        case "$VERSION" in
-        *Bionic*)
-            # 在 ubuntu 机器上选择安装合适的 g++ 版本
-            ensure_decent_gcc_on_ubuntu 9 bionic
-            # 在 ubuntu 机器上选择安装合适的 boost 依赖
-            [ ! $NO_BOOST_PKGS ] && install_boost_on_ubuntu bionic
-            # 在 ubuntu 机器上选择安装合适的 libzbd 依赖
-            $with_zbd && install_libzbd_on_ubuntu bionic
-            ;;
-        *Focal*)
-            ensure_decent_gcc_on_ubuntu 11 focal
-            [ ! $NO_BOOST_PKGS ] && install_boost_on_ubuntu focal
-            $with_zbd && install_libzbd_on_ubuntu focal
-            ;;
-        *Jammy*)
-            [ ! $NO_BOOST_PKGS ] && install_boost_on_ubuntu jammy
-            $SUDO apt-get install -y gcc
-            ;;
-        *)
-            $SUDO apt-get install -y gcc
-            ;;
-        esac
-        if ! test -r debian/control; then
-            echo debian/control is not a readable file
-            exit 1
-        fi
-        touch $DIR/status
+        debian | ubuntu | devuan | elementary | softiron)
+            echo "Using apt-get to install dependencies"
+            # Put this before any other invocation of apt so it can clean
+            # up in a broken case.
+            clean_boost_on_ubuntu
+            $SUDO apt-get install -y devscripts equivs
+            $SUDO apt-get install -y dpkg-dev
+            ensure_python3_sphinx_on_ubuntu
+            case "$VERSION" in
+                *Bionic*)
+                    # 在 ubuntu 机器上选择安装合适的 g++ 版本
+                    ensure_decent_gcc_on_ubuntu 9 bionic
+                    # 在 ubuntu 机器上选择安装合适的 boost 依赖
+                    [ ! $NO_BOOST_PKGS ] && install_boost_on_ubuntu bionic
+                    # 在 ubuntu 机器上选择安装合适的 libzbd 依赖
+                    $with_zbd && install_libzbd_on_ubuntu bionic
+                    ;;
+                *Focal*)
+                    ensure_decent_gcc_on_ubuntu 11 focal
+                    [ ! $NO_BOOST_PKGS ] && install_boost_on_ubuntu focal
+                    $with_zbd && install_libzbd_on_ubuntu focal
+                    ;;
+                *Jammy*)
+                    [ ! $NO_BOOST_PKGS ] && install_boost_on_ubuntu jammy
+                    $SUDO apt-get install -y gcc
+                    ;;
+                *)
+                    $SUDO apt-get install -y gcc
+                    ;;
+            esac
+            if ! test -r debian/control; then
+                echo debian/control is not a readable file
+                exit 1
+            fi
+            touch $DIR/status
 
-        in_jenkins && echo "CI_DEBUG: Running munge_debian_control() in install-deps.sh"
-        backports=""
-        control=$(munge_debian_control "$VERSION" "debian/control")
-        case "$VERSION" in
-        *squeeze* | *wheezy*)
-            backports="-t $codename-backports"
-            ;;
-        esac
+            in_jenkins && echo "CI_DEBUG: Running munge_debian_control() in install-deps.sh"
+            backports=""
+            control=$(munge_debian_control "$VERSION" "debian/control")
+            case "$VERSION" in
+                *squeeze* | *wheezy*)
+                    backports="-t $codename-backports"
+                    ;;
+            esac
 
-        # make a metapackage that expresses the build dependencies,
-        # install it, rm the .deb; then uninstall the package as its
-        # work is done
-        build_profiles=""
-        if $for_make_check; then
-            build_profiles+=",pkg.ceph.check"
-        fi
-        if $with_seastar; then
-            build_profiles+=",pkg.ceph.crimson"
-        fi
-        if $with_pmem; then
-            build_profiles+=",pkg.ceph.pmdk"
-        fi
+            # make a metapackage that expresses the build dependencies,
+            # install it, rm the .deb; then uninstall the package as its
+            # work is done
+            build_profiles=""
+            if $for_make_check; then
+                build_profiles+=",pkg.ceph.check"
+            fi
+            if $with_seastar; then
+                build_profiles+=",pkg.ceph.crimson"
+            fi
+            if $with_pmem; then
+                build_profiles+=",pkg.ceph.pmdk"
+            fi
 
-        in_jenkins && cat <<EOF
+            in_jenkins && cat <<EOF
 CI_DEBUG: for_make_check=$for_make_check
 CI_DEBUG: with_seastar=$with_seastar
 CI_DEBUG: with_jaeger=$with_jaeger
@@ -469,83 +469,83 @@ CI_DEBUG: build_profiles=$build_profiles
 CI_DEBUG: Now running 'mk-build-deps' and installing ceph-build-deps package
 EOF
 
-        $SUDO env DEBIAN_FRONTEND=noninteractive mk-build-deps \
-            --build-profiles "${build_profiles#,}" \
-            --install --remove \
-            --tool="apt-get -y --no-install-recommends $backports" $control || exit 1
-        in_jenkins && echo "CI_DEBUG: Removing ceph-build-deps"
-        $SUDO env DEBIAN_FRONTEND=noninteractive apt-get -y remove ceph-build-deps
-        if [ "$control" != "debian/control" ]; then rm $control; fi
+            $SUDO env DEBIAN_FRONTEND=noninteractive mk-build-deps \
+                --build-profiles "${build_profiles#,}" \
+                --install --remove \
+                --tool="apt-get -y --no-install-recommends $backports" $control || exit 1
+            in_jenkins && echo "CI_DEBUG: Removing ceph-build-deps"
+            $SUDO env DEBIAN_FRONTEND=noninteractive apt-get -y remove ceph-build-deps
+            if [ "$control" != "debian/control" ]; then rm $control; fi
 
-        # for rgw motr backend build checks
-        if $with_rgw_motr; then
-            install_cortx_motr_on_ubuntu
-        fi
-        ;;
-    rocky | centos | fedora | rhel | ol | virtuozzo)
-        builddepcmd="dnf -y builddep --allowerasing"
-        echo "Using dnf to install dependencies"
-        case "$ID" in
-        fedora)
-            $SUDO dnf install -y dnf-utils
-            ;;
-        rocky | centos | rhel | ol | virtuozzo)
-            # 获取主版本
-            MAJOR_VERSION="$(echo $VERSION_ID | cut -d. -f1)"
-            $SUDO dnf install -y dnf-utils selinux-policy-targeted
-            rpm --quiet --query epel-release ||
-                $SUDO dnf -y install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-$MAJOR_VERSION.noarch.rpm
-            $SUDO rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-$MAJOR_VERSION
-            $SUDO rm -f /etc/yum.repos.d/dl.fedoraproject.org*
-            # 当系统版本为 centos 8 时
-            if test $ID = centos -a $MAJOR_VERSION = 8; then
-                # Enable 'powertools' or 'PowerTools' repo
-                # 启用 powertools 仓库
-                $SUDO dnf config-manager --set-enabled $(dnf repolist --all 2>/dev/null | gawk 'tolower($0) ~ /^powertools\s/{print $1}')
-                dts_ver=11
-                # before EPEL8 and PowerTools provide all dependencies, we use sepia for the dependencies
-                $SUDO dnf config-manager --add-repo http://apt-mirror.front.sepia.ceph.com/lab-extras/8/
-                $SUDO dnf config-manager --setopt=apt-mirror.front.sepia.ceph.com_lab-extras_8_.gpgcheck=0 --save
-                $SUDO dnf -y module enable javapackages-tools
-            elif test $ID = rhel -a $MAJOR_VERSION = 8; then
-                dts_ver=11
-                $SUDO dnf config-manager --set-enabled "codeready-builder-for-rhel-8-${ARCH}-rpms"
-                $SUDO dnf config-manager --add-repo http://apt-mirror.front.sepia.ceph.com/lab-extras/8/
-                $SUDO dnf config-manager --setopt=apt-mirror.front.sepia.ceph.com_lab-extras_8_.gpgcheck=0 --save
-                $SUDO dnf -y module enable javapackages-tools
+            # for rgw motr backend build checks
+            if $with_rgw_motr; then
+                install_cortx_motr_on_ubuntu
             fi
             ;;
-        esac
-        munge_ceph_spec_in $with_seastar $with_zbd $for_make_check $DIR/ceph.spec
-        # for python3_pkgversion macro defined by python-srpm-macros, which is required by python3-devel
-        $SUDO dnf install -y python3-devel
-        $SUDO $builddepcmd $DIR/ceph.spec 2>&1 | tee $DIR/yum-builddep.out
-        [ ${PIPESTATUS[0]} -ne 0 ] && exit 1
-        if [ -n "$dts_ver" ]; then
-            ensure_decent_gcc_on_rh $dts_ver
-        fi
-        IGNORE_YUM_BUILDEP_ERRORS="ValueError: SELinux policy is not managed or store cannot be accessed."
-        sed "/$IGNORE_YUM_BUILDEP_ERRORS/d" $DIR/yum-builddep.out | grep -i "error:" && exit 1
-        # for rgw motr backend build checks
-        if ! rpm --quiet -q cortx-motr-devel &&
-            { [[ $FOR_MAKE_CHECK ]] || $with_rgw_motr; }; then
-            $SUDO dnf install -y \
-                "$motr_pkgs_url/isa-l-2.30.0-1.el7.${ARCH}.rpm" \
-                "$motr_pkgs_url/cortx-motr-2.0.0-1_git3252d623_any.el8.${ARCH}.rpm" \
-                "$motr_pkgs_url/cortx-motr-devel-2.0.0-1_git3252d623_any.el8.${ARCH}.rpm"
-        fi
-        ;;
-    opensuse* | suse | sles)
-        echo "Using zypper to install dependencies"
-        zypp_install="zypper --gpg-auto-import-keys --non-interactive install --no-recommends"
-        $SUDO $zypp_install systemd-rpm-macros rpm-build || exit 1
-        munge_ceph_spec_in $with_seastar false $for_make_check $DIR/ceph.spec
-        $SUDO $zypp_install $(rpmspec -q --buildrequires $DIR/ceph.spec) || exit 1
-        ;;
-    *)
-        echo "$ID is unknown, dependencies will have to be installed manually."
-        exit 1
-        ;;
+        rocky | centos | fedora | rhel | ol | virtuozzo)
+            builddepcmd="dnf -y builddep --allowerasing"
+            echo "Using dnf to install dependencies"
+            case "$ID" in
+                fedora)
+                    $SUDO dnf install -y dnf-utils
+                    ;;
+                rocky | centos | rhel | ol | virtuozzo)
+                    # 获取主版本
+                    MAJOR_VERSION="$(echo $VERSION_ID | cut -d. -f1)"
+                    $SUDO dnf install -y dnf-utils selinux-policy-targeted
+                    rpm --quiet --query epel-release \
+                        || $SUDO dnf -y install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-$MAJOR_VERSION.noarch.rpm
+                    $SUDO rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-$MAJOR_VERSION
+                    $SUDO rm -f /etc/yum.repos.d/dl.fedoraproject.org*
+                    # 当系统版本为 centos 8 时
+                    if test $ID = centos -a $MAJOR_VERSION = 8; then
+                        # Enable 'powertools' or 'PowerTools' repo
+                        # 启用 powertools 仓库
+                        $SUDO dnf config-manager --set-enabled $(dnf repolist --all 2>/dev/null | gawk 'tolower($0) ~ /^powertools\s/{print $1}')
+                        dts_ver=11
+                        # before EPEL8 and PowerTools provide all dependencies, we use sepia for the dependencies
+                        $SUDO dnf config-manager --add-repo http://apt-mirror.front.sepia.ceph.com/lab-extras/8/
+                        $SUDO dnf config-manager --setopt=apt-mirror.front.sepia.ceph.com_lab-extras_8_.gpgcheck=0 --save
+                        $SUDO dnf -y module enable javapackages-tools
+                    elif test $ID = rhel -a $MAJOR_VERSION = 8; then
+                        dts_ver=11
+                        $SUDO dnf config-manager --set-enabled "codeready-builder-for-rhel-8-${ARCH}-rpms"
+                        $SUDO dnf config-manager --add-repo http://apt-mirror.front.sepia.ceph.com/lab-extras/8/
+                        $SUDO dnf config-manager --setopt=apt-mirror.front.sepia.ceph.com_lab-extras_8_.gpgcheck=0 --save
+                        $SUDO dnf -y module enable javapackages-tools
+                    fi
+                    ;;
+            esac
+            munge_ceph_spec_in $with_seastar $with_zbd $for_make_check $DIR/ceph.spec
+            # for python3_pkgversion macro defined by python-srpm-macros, which is required by python3-devel
+            $SUDO dnf install -y python3-devel
+            $SUDO $builddepcmd $DIR/ceph.spec 2>&1 | tee $DIR/yum-builddep.out
+            [ ${PIPESTATUS[0]} -ne 0 ] && exit 1
+            if [ -n "$dts_ver" ]; then
+                ensure_decent_gcc_on_rh $dts_ver
+            fi
+            IGNORE_YUM_BUILDEP_ERRORS="ValueError: SELinux policy is not managed or store cannot be accessed."
+            sed "/$IGNORE_YUM_BUILDEP_ERRORS/d" $DIR/yum-builddep.out | grep -i "error:" && exit 1
+            # for rgw motr backend build checks
+            if ! rpm --quiet -q cortx-motr-devel \
+                && { [[ $FOR_MAKE_CHECK ]] || $with_rgw_motr; }; then
+                $SUDO dnf install -y \
+                    "$motr_pkgs_url/isa-l-2.30.0-1.el7.${ARCH}.rpm" \
+                    "$motr_pkgs_url/cortx-motr-2.0.0-1_git3252d623_any.el8.${ARCH}.rpm" \
+                    "$motr_pkgs_url/cortx-motr-devel-2.0.0-1_git3252d623_any.el8.${ARCH}.rpm"
+            fi
+            ;;
+        opensuse* | suse | sles)
+            echo "Using zypper to install dependencies"
+            zypp_install="zypper --gpg-auto-import-keys --non-interactive install --no-recommends"
+            $SUDO $zypp_install systemd-rpm-macros rpm-build || exit 1
+            munge_ceph_spec_in $with_seastar false $for_make_check $DIR/ceph.spec
+            $SUDO $zypp_install $(rpmspec -q --buildrequires $DIR/ceph.spec) || exit 1
+            ;;
+        *)
+            echo "$ID is unknown, dependencies will have to be installed manually."
+            exit 1
+            ;;
     esac
 fi
 

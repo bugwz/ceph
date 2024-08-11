@@ -63,41 +63,41 @@ mkdir -p $depsSrcDir
 
 echo "Installing required packages."
 case "$OS" in
-rhel)
-    # pkgconf needs https://bugzilla.redhat.com/show_bug.cgi?id=1975416
-    sudo yum -y --setopt=skip_missing_names_on_install=False install \
-        mingw64-gcc-c++ \
-        cmake \
-        pkgconf \
-        python3-devel \
-        autoconf \
-        libtool \
-        ninja-build \
-        zip \
-        python3-PyYAML \
-        gcc \
-        diffutils \
-        patch \
-        wget \
-        perl \
-        git-core
-    ;;
-ubuntu)
-    sudo apt-get update
-    sudo env DEBIAN_FRONTEND=noninteractive apt-get -y install \
-        mingw-w64 g++ cmake pkg-config \
-        python3-dev python3-yaml \
-        autoconf libtool ninja-build wget zip \
-        git
-    ;;
-suse)
-    for PKG in mingw64-cross-gcc-c++ mingw64-libgcc_s_seh1 mingw64-libstdc++6 \
-        cmake pkgconf python3-devel autoconf libtool ninja zip \
-        python3-PyYAML \
-        gcc patch wget git; do
-        rpm -q $PKG >/dev/null || zypper -n install $PKG
-    done
-    ;;
+    rhel)
+        # pkgconf needs https://bugzilla.redhat.com/show_bug.cgi?id=1975416
+        sudo yum -y --setopt=skip_missing_names_on_install=False install \
+            mingw64-gcc-c++ \
+            cmake \
+            pkgconf \
+            python3-devel \
+            autoconf \
+            libtool \
+            ninja-build \
+            zip \
+            python3-PyYAML \
+            gcc \
+            diffutils \
+            patch \
+            wget \
+            perl \
+            git-core
+        ;;
+    ubuntu)
+        sudo apt-get update
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get -y install \
+            mingw-w64 g++ cmake pkg-config \
+            python3-dev python3-yaml \
+            autoconf libtool ninja-build wget zip \
+            git
+        ;;
+    suse)
+        for PKG in mingw64-cross-gcc-c++ mingw64-libgcc_s_seh1 mingw64-libstdc++6 \
+            cmake pkgconf python3-devel autoconf libtool ninja zip \
+            python3-PyYAML \
+            gcc patch wget git; do
+            rpm -q $PKG >/dev/null || zypper -n install $PKG
+        done
+        ;;
 esac
 
 MINGW_CMAKE_FILE="$DEPS_DIR/mingw.cmake"

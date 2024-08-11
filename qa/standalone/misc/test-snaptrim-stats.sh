@@ -88,8 +88,8 @@ function TEST_snaptrim_stats() {
     local snaptrim_duration_total=0.0
     for i in $(seq 0 $(expr $PGNUM - 1)); do
         local pgid="${poolid}.${i}"
-        objects_trimmed=$(expr $objects_trimmed + $(ceph pg $pgid query |
-            jq '.info.stats.objects_trimmed'))
+        objects_trimmed=$(expr $objects_trimmed + $(ceph pg $pgid query \
+            | jq '.info.stats.objects_trimmed'))
         snaptrim_duration_total=$(echo $snaptrim_duration_total + $(ceph pg \
             $pgid query | jq '.info.stats.snaptrim_duration') | bc)
     done
@@ -156,8 +156,8 @@ function TEST_snaptrim_stats_multiple_snaps() {
         local snaptrim_duration_total=0.0
         for i in $(seq 0 $(expr $PGNUM - 1)); do
             local pgid="${poolid}.${i}"
-            objects_trimmed=$(expr $objects_trimmed + $(ceph pg $pgid query |
-                jq '.info.stats.objects_trimmed'))
+            objects_trimmed=$(expr $objects_trimmed + $(ceph pg $pgid query \
+                | jq '.info.stats.objects_trimmed'))
             snaptrim_duration_total=$(echo $snaptrim_duration_total + $(ceph pg \
                 $pgid query | jq '.info.stats.snaptrim_duration') | bc)
         done

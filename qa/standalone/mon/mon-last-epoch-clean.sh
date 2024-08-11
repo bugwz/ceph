@@ -24,12 +24,12 @@ function check_lec_equals_pools() {
     local pool_id=$1
 
     report=$(ceph report)
-    lec=$(echo $report |
-        jq '.osdmap_clean_epochs.min_last_epoch_clean')
+    lec=$(echo $report \
+        | jq '.osdmap_clean_epochs.min_last_epoch_clean')
 
     if [[ -z "$pool_id" ]]; then
-        pools=($(echo $report |
-            jq \
+        pools=($(echo $report \
+            | jq \
                 ".osdmap_clean_epochs.last_epoch_clean.per_pool[] |" \
                 " select(.floor == $lec) | .poolid"))
 
@@ -38,8 +38,8 @@ function check_lec_equals_pools() {
             return 1
         )
     else
-        floor=($(echo $report |
-            jq \
+        floor=($(echo $report \
+            | jq \
                 ".osdmap_clean_epochs.last_epoch_clean.per_pool[] |" \
                 " select(.poolid == $pool_id) | .floor"))
 
@@ -60,11 +60,11 @@ function check_lec_lower_than_pool() {
     )
 
     report=$(ceph report)
-    lec=$(echo $report |
-        jq '.osdmap_clean_epochs.min_last_epoch_clean')
+    lec=$(echo $report \
+        | jq '.osdmap_clean_epochs.min_last_epoch_clean')
 
-    floor=($(echo $report |
-        jq \
+    floor=($(echo $report \
+        | jq \
             ".osdmap_clean_epochs.last_epoch_clean.per_pool[] |" \
             " select(.poolid == $pool_id) | .floor"))
 
@@ -90,13 +90,13 @@ function check_floor_pool_greater_than_pool() {
 
     report=$(ceph report)
 
-    floor_a=($(echo $report |
-        jq \
+    floor_a=($(echo $report \
+        | jq \
             ".osdmap_clean_epochs.last_epoch_clean.per_pool[] |" \
             " select(.poolid == $pool_a) | .floor"))
 
-    floor_b=($(echo $report |
-        jq \
+    floor_b=($(echo $report \
+        | jq \
             ".osdmap_clean_epochs.last_epoch_clean.per_pool[] |" \
             " select(.poolid == $pool_b) | .floor"))
 
@@ -112,12 +112,12 @@ function check_lec_honours_osd() {
     local osd=$1
 
     report=$(ceph report)
-    lec=$(echo $report |
-        jq '.osdmap_clean_epochs.min_last_epoch_clean')
+    lec=$(echo $report \
+        | jq '.osdmap_clean_epochs.min_last_epoch_clean')
 
     if [[ -z "$osd" ]]; then
-        osds=($(echo $report |
-            jq \
+        osds=($(echo $report \
+            | jq \
                 ".osdmap_clean_epochs.osd_epochs[] |" \
                 " select(.epoch >= $lec) | .id"))
 
@@ -126,8 +126,8 @@ function check_lec_honours_osd() {
             return 1
         )
     else
-        epoch=($(echo $report |
-            jq \
+        epoch=($(echo $report \
+            | jq \
                 ".osdmap_clean_epochs.osd_epochs[] |" \
                 " select(.id == $id) | .epoch"))
         [[ ${#epoch[*]} -eq 1 ]] || (
@@ -145,10 +145,10 @@ function check_lec_honours_osd() {
 
 function validate_fc() {
     report=$(ceph report)
-    lec=$(echo $report |
-        jq '.osdmap_clean_epochs.min_last_epoch_clean')
-    osdm_fc=$(echo $report |
-        jq '.osdmap_first_committed')
+    lec=$(echo $report \
+        | jq '.osdmap_clean_epochs.min_last_epoch_clean')
+    osdm_fc=$(echo $report \
+        | jq '.osdmap_first_committed')
 
     [[ $lec -eq $osdm_fc ]] || (
         echo $report
@@ -159,10 +159,10 @@ function validate_fc() {
 
 function get_fc_lc_diff() {
     report=$(ceph report)
-    osdm_fc=$(echo $report |
-        jq '.osdmap_first_committed')
-    osdm_lc=$(echo $report |
-        jq '.osdmap_last_committed')
+    osdm_fc=$(echo $report \
+        | jq '.osdmap_first_committed')
+    osdm_lc=$(echo $report \
+        | jq '.osdmap_last_committed')
 
     echo $((osdm_lc - osdm_fc))
 }
@@ -176,11 +176,11 @@ function get_pool_id() {
     )
 
     report=$(ceph report)
-    pool_id=$(echo $report |
-        jq ".osdmap.pools[] | select(.pool_name == \"$pn\") | .pool")
+    pool_id=$(echo $report \
+        | jq ".osdmap.pools[] | select(.pool_name == \"$pn\") | .pool")
 
-    [[ $pool_id -ge 0 ]] ||
-        (
+    [[ $pool_id -ge 0 ]] \
+        || (
             echo "unexpected pool id for pool \'$pn\': $pool_id"
             return -1
         )

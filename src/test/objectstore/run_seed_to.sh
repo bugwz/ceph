@@ -94,52 +94,52 @@ set_arg() {
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-    -c | --colls)
-        die_on_missing_arg "$1" "$2"
-        test_opts="$test_opts --test-num-colls $2"
-        shift 2
-        ;;
-    -o | --objs)
-        die_on_missing_arg "$1" "$2"
-        test_opts="$test_opts --test-num-objs $2"
-        shift 2
-        ;;
-    -h | --help)
-        usage $0
-        exit 0
-        ;;
-    -b | --btrfs)
-        die_on_missing_arg "$1" "$2"
-        on_btrfs=1
-        on_btrfs_seq=$2
-        shift 2
-        ;;
-    --no-journal-test)
-        journal_test=0
-        shift
-        ;;
-    -e | --exit-on-error)
-        exit_on_error=1
-        shift
-        ;;
-    -v | --valgrind)
-        v="valgrind --leak-check=full"
-        shift
-        ;;
-    --)
-        shift
-        break
-        ;;
-    -*)
-        echo "$1: unknown option" >&2
-        usage $0
-        exit 1
-        ;;
-    *)
-        obtained_args=$(($obtained_args + 1))
-        set_arg $obtained_args $1
-        shift
-        ;;
+        -c | --colls)
+            die_on_missing_arg "$1" "$2"
+            test_opts="$test_opts --test-num-colls $2"
+            shift 2
+            ;;
+        -o | --objs)
+            die_on_missing_arg "$1" "$2"
+            test_opts="$test_opts --test-num-objs $2"
+            shift 2
+            ;;
+        -h | --help)
+            usage $0
+            exit 0
+            ;;
+        -b | --btrfs)
+            die_on_missing_arg "$1" "$2"
+            on_btrfs=1
+            on_btrfs_seq=$2
+            shift 2
+            ;;
+        --no-journal-test)
+            journal_test=0
+            shift
+            ;;
+        -e | --exit-on-error)
+            exit_on_error=1
+            shift
+            ;;
+        -v | --valgrind)
+            v="valgrind --leak-check=full"
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*)
+            echo "$1: unknown option" >&2
+            usage $0
+            exit 1
+            ;;
+        *)
+            obtained_args=$(($obtained_args + 1))
+            set_arg $obtained_args $1
+            shift
+            ;;
     esac
 done
 
@@ -223,22 +223,22 @@ while [[ $num_runs -lt $total_runs ]]; do
     if [[ $num_runs -gt 0 && $journal_test -eq 1 ]]; then
         echo "run #$num_runs"
         case $num_runs in
-        1)
-            tmp_name_a="$tmp_name_a.00"
-            tmp_name_b="$tmp_name_b.00"
-            tmp_opts_a="$tmp_opts_a $opt_min_sync $opt_max_sync"
-            tmp_opts_b="$tmp_opts_b $opt_min_sync $opt_max_sync"
-            ;;
-        2)
-            tmp_name_a="$tmp_name_a.01"
-            tmp_name_b="$tmp_name_b.01"
-            tmp_opts_a="$tmp_opts_a $opt_min_sync $opt_max_sync"
-            ;;
-        3)
-            tmp_name_a="$tmp_name_a.10"
-            tmp_name_b="$tmp_name_b.10"
-            tmp_opts_b="$tmp_opts_b $opt_min_sync $opt_max_sync"
-            ;;
+            1)
+                tmp_name_a="$tmp_name_a.00"
+                tmp_name_b="$tmp_name_b.00"
+                tmp_opts_a="$tmp_opts_a $opt_min_sync $opt_max_sync"
+                tmp_opts_b="$tmp_opts_b $opt_min_sync $opt_max_sync"
+                ;;
+            2)
+                tmp_name_a="$tmp_name_a.01"
+                tmp_name_b="$tmp_name_b.01"
+                tmp_opts_a="$tmp_opts_a $opt_min_sync $opt_max_sync"
+                ;;
+            3)
+                tmp_name_a="$tmp_name_a.10"
+                tmp_name_b="$tmp_name_b.10"
+                tmp_opts_b="$tmp_opts_b $opt_min_sync $opt_max_sync"
+                ;;
         esac
     fi
 

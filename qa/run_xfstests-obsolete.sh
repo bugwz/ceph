@@ -125,8 +125,8 @@ function fs_type_valid() {
     arg_count 1 $#
 
     case "$1" in
-    xfs | ext4 | btrfs) return 0 ;;
-    *) return 1 ;;
+        xfs | ext4 | btrfs) return 0 ;;
+        *) return 1 ;;
     esac
 }
 
@@ -202,36 +202,36 @@ function parseargs() {
 
     while [ "$1" != "--" ]; do
         case "$1" in
-        -h | --help)
-            usage
-            ;;
-        -c | --count)
-            count_valid "$2" ||
-                usage "invalid count '$2'"
-            COUNT="$2"
-            shift
-            ;;
-        -f | --fs-type)
-            fs_type_valid "$2" ||
-                usage "invalid fs_type '$2'"
-            FS_TYPE="$2"
-            shift
-            ;;
-        -s | --scratch-dev)
-            device_valid "$2" ||
-                usage "invalid scratch-dev '$2'"
-            SCRATCH_DEV="$2"
-            shift
-            ;;
-        -t | --test-dev)
-            device_valid "$2" ||
-                usage "invalid test-dev '$2'"
-            TEST_DEV="$2"
-            shift
-            ;;
-        *)
-            exit 100 # Internal error
-            ;;
+            -h | --help)
+                usage
+                ;;
+            -c | --count)
+                count_valid "$2" \
+                    || usage "invalid count '$2'"
+                COUNT="$2"
+                shift
+                ;;
+            -f | --fs-type)
+                fs_type_valid "$2" \
+                    || usage "invalid fs_type '$2'"
+                FS_TYPE="$2"
+                shift
+                ;;
+            -s | --scratch-dev)
+                device_valid "$2" \
+                    || usage "invalid scratch-dev '$2'"
+                SCRATCH_DEV="$2"
+                shift
+                ;;
+            -t | --test-dev)
+                device_valid "$2" \
+                    || usage "invalid test-dev '$2'"
+                TEST_DEV="$2"
+                shift
+                ;;
+            *)
+                exit 100 # Internal error
+                ;;
         esac
         shift
     done
@@ -346,13 +346,13 @@ function do_mkfs() {
     local options
 
     case "${FSTYP}" in
-    xfs) options="${XFS_MKFS_OPTIONS}" ;;
-    ext4) options="${EXT4_MKFS_OPTIONS}" ;;
-    btrfs) options="${BTRFS_MKFS_OPTIONS}" ;;
+        xfs) options="${XFS_MKFS_OPTIONS}" ;;
+        ext4) options="${EXT4_MKFS_OPTIONS}" ;;
+        btrfs) options="${BTRFS_MKFS_OPTIONS}" ;;
     esac
 
-    "mkfs.${FSTYP}" ${options} "${dev}" ||
-        err "unable to make ${FSTYP} file system on device \"${dev}\""
+    "mkfs.${FSTYP}" ${options} "${dev}" \
+        || err "unable to make ${FSTYP} file system on device \"${dev}\""
 }
 
 # mount the given device on the given mount point
@@ -362,8 +362,8 @@ function do_mount() {
     local dev="${1}"
     local dir="${2}"
 
-    mount "${dev}" "${dir}" ||
-        err "unable to mount file system \"${dev}\" on \"${dir}\""
+    mount "${dev}" "${dir}" \
+        || err "unable to mount file system \"${dev}\" on \"${dir}\""
 }
 
 # unmount a previously-mounted device

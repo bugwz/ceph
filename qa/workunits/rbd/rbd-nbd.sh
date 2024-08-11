@@ -76,8 +76,8 @@ function cleanup() {
         if rbd -p ${POOL} --namespace "${ns}" status ${IMAGE} 2>/dev/null; then
             for s in 0.5 1 2 4 8 16 32; do
                 sleep $s
-                rbd -p ${POOL} --namespace "${ns}" status ${IMAGE} |
-                    grep 'Watchers: none' && break
+                rbd -p ${POOL} --namespace "${ns}" status ${IMAGE} \
+                    | grep 'Watchers: none' && break
             done
             rbd -p ${POOL} --namespace "${ns}" snap purge ${IMAGE}
             rbd -p ${POOL} --namespace "${ns}" remove ${IMAGE}
@@ -162,36 +162,36 @@ unmap_device ${DEV} ${PID}
 # notrim test
 DEV=$(_sudo rbd device --device-type nbd --options notrim map ${POOL}/${IMAGE})
 get_pid ${POOL}
-provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-    $XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
-used=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-    $XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
+provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
+used=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
 [ "${used}" -eq "${provisioned}" ]
 # should fail discard as at time of mapping notrim was used
 expect_false _sudo blkdiscard ${DEV}
 sync
-provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-    $XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
-used=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-    $XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
+provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
+used=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
 [ "${used}" -eq "${provisioned}" ]
 unmap_device ${DEV} ${PID}
 
 # trim test
 DEV=$(_sudo rbd device --device-type nbd map ${POOL}/${IMAGE})
 get_pid ${POOL}
-provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-    $XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
-used=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-    $XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
+provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
+used=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
 [ "${used}" -eq "${provisioned}" ]
 # should honor discard as at time of mapping trim was considered by default
 _sudo blkdiscard ${DEV}
 sync
-provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-    $XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
-used=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-    $XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
+provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
+used=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
 [ "${used}" -lt "${provisioned}" ]
 
 # resize test

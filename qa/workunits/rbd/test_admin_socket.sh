@@ -34,12 +34,12 @@ function rbd_get_perfcounter() {
     local name
 
     name=$(ceph --format xml --admin-daemon $(rbd_watch_asok ${image}) \
-        perf schema | $XMLSTARLET el -d3 |
-        grep "/librbd-.*-${image}/${counter}\$")
+        perf schema | $XMLSTARLET el -d3 \
+        | grep "/librbd-.*-${image}/${counter}\$")
     test -n "${name}" || return 1
 
-    ceph --format xml --admin-daemon $(rbd_watch_asok ${image}) perf dump |
-        $XMLSTARLET sel -t -m "${name}" -v .
+    ceph --format xml --admin-daemon $(rbd_watch_asok ${image}) perf dump \
+        | $XMLSTARLET sel -t -m "${name}" -v .
 }
 
 function rbd_check_perfcounter() {
@@ -58,8 +58,8 @@ function rbd_watch_start() {
     local asok=$(rbd_watch_asok ${image})
 
     mkfifo $(rbd_watch_fifo ${image})
-    (cat $(rbd_watch_fifo ${image}) |
-        rbd --admin-socket ${asok} watch ${image} \
+    (cat $(rbd_watch_fifo ${image}) \
+        | rbd --admin-socket ${asok} watch ${image} \
             >$(rbd_watch_out_file ${image}) 2>&1) &
 
     # find pid of the started rbd watch process

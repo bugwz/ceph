@@ -38,8 +38,8 @@ test_rbd_journal() {
 
     rbd create --image-feature exclusive-lock --image-feature journaling \
         --size 128 ${image}
-    local journal=$(rbd info ${image} --format=xml 2>/dev/null |
-        $XMLSTARLET sel -t -v "//image/journal")
+    local journal=$(rbd info ${image} --format=xml 2>/dev/null \
+        | $XMLSTARLET sel -t -v "//image/journal")
     test -n "${journal}"
     rbd journal info ${journal}
     rbd journal info --journal ${journal}
@@ -47,15 +47,15 @@ test_rbd_journal() {
 
     rbd feature disable ${image} journaling
 
-    rbd info ${image} --format=xml 2>/dev/null |
-        expect_false $XMLSTARLET sel -t -v "//image/journal"
+    rbd info ${image} --format=xml 2>/dev/null \
+        | expect_false $XMLSTARLET sel -t -v "//image/journal"
     expect_false rbd journal info ${journal}
     expect_false rbd journal info --image ${image}
 
     rbd feature enable ${image} journaling
 
-    local journal1=$(rbd info ${image} --format=xml 2>/dev/null |
-        $XMLSTARLET sel -t -v "//image/journal")
+    local journal1=$(rbd info ${image} --format=xml 2>/dev/null \
+        | $XMLSTARLET sel -t -v "//image/journal")
     test "${journal}" = "${journal1}"
 
     rbd journal info ${journal}
@@ -69,8 +69,8 @@ test_rbd_journal() {
     rbd journal status --image ${image} | fgrep "tid=$((count - 1))"
     restore_commit_position ${journal}
     rbd journal status --image ${image} | fgrep "positions=[]"
-    local count1=$(rbd journal inspect --verbose ${journal} |
-        grep -c 'event_type.*AioWrite')
+    local count1=$(rbd journal inspect --verbose ${journal} \
+        | grep -c 'event_type.*AioWrite')
     test "${count}" -eq "${count1}"
 
     rbd journal export ${journal} $TMPDIR/journal.export
@@ -82,8 +82,8 @@ test_rbd_journal() {
     local image1=${image}1
     rbd create --image-feature exclusive-lock --image-feature journaling \
         --size 128 ${image1}
-    journal1=$(rbd info ${image1} --format=xml 2>/dev/null |
-        $XMLSTARLET sel -t -v "//image/journal")
+    journal1=$(rbd info ${image1} --format=xml 2>/dev/null \
+        | $XMLSTARLET sel -t -v "//image/journal")
 
     save_commit_position ${journal1}
     rbd journal import --dest ${image1} $TMPDIR/journal.export
@@ -122,8 +122,8 @@ rbd_assert_eq() {
     local param=$3
     local expected_val=$4
 
-    local val=$(rbd --format xml ${cmd} --image ${image} |
-        $XMLSTARLET sel -t -v "${param}")
+    local val=$(rbd --format xml ${cmd} --image ${image} \
+        | $XMLSTARLET sel -t -v "${param}")
     test "${val}" = "${expected_val}"
 }
 
@@ -266,25 +266,25 @@ while [[ $# -gt 0 ]]; do
     opt=$1
 
     case "$opt" in
-    "-l")
-        do_list=1
-        ;;
-    "--no-cleanup")
-        cleanup=false
-        ;;
-    "-t")
-        shift
-        if [[ -z "$1" ]]; then
-            echo "missing argument to '-t'"
+        "-l")
+            do_list=1
+            ;;
+        "--no-cleanup")
+            cleanup=false
+            ;;
+        "-t")
+            shift
+            if [[ -z "$1" ]]; then
+                echo "missing argument to '-t'"
+                usage
+                exit 1
+            fi
+            tests_to_run+=" $1"
+            ;;
+        "-h")
             usage
-            exit 1
-        fi
-        tests_to_run+=" $1"
-        ;;
-    "-h")
-        usage
-        exit 0
-        ;;
+            exit 0
+            ;;
     esac
     shift
 done

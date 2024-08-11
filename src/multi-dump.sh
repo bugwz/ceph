@@ -31,8 +31,8 @@ die() {
 
 dump_osdmap() {
     for v in $(seq $START_EPOCH $END_EPOCH); do
-        ./ceph osd getmap $v -o $TEMPDIR/$v >>$TEMPDIR/cephtool-out ||
-            die "cephtool failed to dump epoch $v"
+        ./ceph osd getmap $v -o $TEMPDIR/$v >>$TEMPDIR/cephtool-out \
+            || die "cephtool failed to dump epoch $v"
     done
     if [ $DIFFMODE -eq 1 ]; then
         for v in $(seq $START_EPOCH $END_EPOCH); do
@@ -48,8 +48,8 @@ dump_osdmap() {
     else
         for v in $(seq $START_EPOCH $END_EPOCH); do
             echo "************** $v **************"
-            ./osdmaptool --print $TEMPDIR/$v ||
-                die "osdmaptool failed to print epoch $v"
+            ./osdmaptool --print $TEMPDIR/$v \
+                || die "osdmaptool failed to print epoch $v"
         done
     fi
 }
@@ -69,32 +69,32 @@ END_EPOCH=0
 
 while getopts "De:hs:t:" flag; do
     case $flag in
-    D) DIFFMODE=1 ;;
+        D) DIFFMODE=1 ;;
 
-    e) END_EPOCH=$OPTARG ;;
+        e) END_EPOCH=$OPTARG ;;
 
-    h)
-        usage
-        exit 0
-        ;;
+        h)
+            usage
+            exit 0
+            ;;
 
-    s) START_EPOCH=$OPTARG ;;
+        s) START_EPOCH=$OPTARG ;;
 
-    t) MAP_TYPE=$OPTARG ;;
+        t) MAP_TYPE=$OPTARG ;;
 
-    *)
-        usage
-        exit 1
-        ;;
+        *)
+            usage
+            exit 1
+            ;;
     esac
 done
 [ $END_EPOCH -eq 0 ] && die "You must supply an end epoch with -e"
 
 ### Dump maps
 case $MAP_TYPE in
-"osdmap") dump_osdmap ;;
+    "osdmap") dump_osdmap ;;
 
-*) die "sorry, don't know how to handle MAP_TYPE '$MAP_TYPE'" ;;
+    *) die "sorry, don't know how to handle MAP_TYPE '$MAP_TYPE'" ;;
 esac
 
 exit 0

@@ -44,8 +44,8 @@ function get_num_in_state() {
     local state=$1
     local expression
     expression+="select(contains(\"${state}\"))"
-    ceph --format json pg dump pgs 2>/dev/null |
-        jq ".pg_stats | [.[] | .state | $expression] | length"
+    ceph --format json pg dump pgs 2>/dev/null \
+        | jq ".pg_stats | [.[] | .state | $expression] | length"
 }
 
 function wait_for_not_state() {

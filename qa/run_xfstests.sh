@@ -81,8 +81,8 @@ function fs_type_valid() {
     arg_count 1 $#
 
     case "$1" in
-    xfs | ext4 | btrfs) return 0 ;;
-    *) return 1 ;;
+        xfs | ext4 | btrfs) return 0 ;;
+        *) return 1 ;;
     esac
 }
 
@@ -173,45 +173,45 @@ function parseargs() {
 
     while [ "$1" != "--" ]; do
         case "$1" in
-        -h | --help)
-            usage
-            ;;
-        -c | --count)
-            count_valid "$2" ||
-                usage "invalid count '$2'"
-            COUNT="$2"
-            shift
-            ;;
-        -f | --fs-type)
-            fs_type_valid "$2" ||
-                usage "invalid fs_type '$2'"
-            FSTYP="$2"
-            shift
-            ;;
-        -r | --randomize)
-            DO_RANDOMIZE="t"
-            ;;
-        -s | --scratch-dev)
-            device_valid "$2" ||
-                usage "invalid scratch-dev '$2'"
-            SCRATCH_DEV="$2"
-            shift
-            ;;
-        -t | --test-dev)
-            device_valid "$2" ||
-                usage "invalid test-dev '$2'"
-            TEST_DEV="$2"
-            shift
-            ;;
-        -x | --expunge-file)
-            expunge_file_valid "$2" ||
-                usage "invalid expunge-file '$2'"
-            EXPUNGE_FILE="$2"
-            shift
-            ;;
-        *)
-            exit 100 # Internal error
-            ;;
+            -h | --help)
+                usage
+                ;;
+            -c | --count)
+                count_valid "$2" \
+                    || usage "invalid count '$2'"
+                COUNT="$2"
+                shift
+                ;;
+            -f | --fs-type)
+                fs_type_valid "$2" \
+                    || usage "invalid fs_type '$2'"
+                FSTYP="$2"
+                shift
+                ;;
+            -r | --randomize)
+                DO_RANDOMIZE="t"
+                ;;
+            -s | --scratch-dev)
+                device_valid "$2" \
+                    || usage "invalid scratch-dev '$2'"
+                SCRATCH_DEV="$2"
+                shift
+                ;;
+            -t | --test-dev)
+                device_valid "$2" \
+                    || usage "invalid test-dev '$2'"
+                TEST_DEV="$2"
+                shift
+                ;;
+            -x | --expunge-file)
+                expunge_file_valid "$2" \
+                    || usage "invalid expunge-file '$2'"
+                EXPUNGE_FILE="$2"
+                shift
+                ;;
+            *)
+                exit 100 # Internal error
+                ;;
         esac
         shift
     done
@@ -233,13 +233,13 @@ function do_mkfs() {
     local options
 
     case "${FSTYP}" in
-    xfs) options="-f" ;;
-    ext4) options="-F" ;;
-    btrfs) options="-f" ;;
+        xfs) options="-f" ;;
+        ext4) options="-F" ;;
+        btrfs) options="-f" ;;
     esac
 
-    "mkfs.${FSTYP}" ${options} "${dev}" ||
-        err "unable to make ${FSTYP} file system on device \"${dev}\""
+    "mkfs.${FSTYP}" ${options} "${dev}" \
+        || err "unable to make ${FSTYP} file system on device \"${dev}\""
 }
 
 # top-level setup routine

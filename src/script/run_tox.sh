@@ -70,38 +70,38 @@ function main() {
     eval set -- "${options}"
     while true; do
         case "$1" in
-        -h | --help)
-            usage $0
-            exit 0
-            ;;
-        --source-dir)
-            source_dir=$2
-            shift 2
-            ;;
-        --build-dir)
-            build_dir=$2
-            shift 2
-            ;;
-        --tox-path)
-            tox_path=$2
-            shift 2
-            ;;
-        --tox-envs)
-            tox_envs=$2
-            shift 2
-            ;;
-        --venv-path)
-            venv_path=$2
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *)
-            echo "bad option $1" >&2
-            exit 2
-            ;;
+            -h | --help)
+                usage $0
+                exit 0
+                ;;
+            --source-dir)
+                source_dir=$2
+                shift 2
+                ;;
+            --build-dir)
+                build_dir=$2
+                shift 2
+                ;;
+            --tox-path)
+                tox_path=$2
+                shift 2
+                ;;
+            --tox-envs)
+                tox_envs=$2
+                shift 2
+                ;;
+            --venv-path)
+                venv_path=$2
+                shift 2
+                ;;
+            --)
+                shift
+                break
+                ;;
+            *)
+                echo "bad option $1" >&2
+                exit 2
+                ;;
         esac
     done
 

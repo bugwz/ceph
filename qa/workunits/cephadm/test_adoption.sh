@@ -46,8 +46,8 @@ for subdir in $(ls ${CORPUS_DIR}); do
                 --legacy-dir $TMP_TAR_DIR \
                 --name $name
             # validate after adopt
-            out=$($CEPHADM ls | jq '.[]' |
-                jq 'select(.name == "'$name'")')
+            out=$($CEPHADM ls | jq '.[]' \
+                | jq 'select(.name == "'$name'")')
             echo $out | jq -r '.style' | grep 'cephadm'
             echo $out | jq -r '.fsid' | grep $FSID_LEGACY
         done

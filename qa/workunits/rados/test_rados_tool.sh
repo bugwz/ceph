@@ -71,18 +71,18 @@ POOL_EC=trs_pool_ec
 
 while getopts "c:hkp:" flag; do
     case $flag in
-    c) RADOS_TOOL="$RADOS_TOOL -c $OPTARG" ;;
-    k) KEEP_TEMP_FILES=1 ;;
-    h)
-        usage
-        exit 0
-        ;;
-    p) POOL=$OPTARG ;;
-    *)
-        echo
-        usage
-        exit 1
-        ;;
+        c) RADOS_TOOL="$RADOS_TOOL -c $OPTARG" ;;
+        k) KEEP_TEMP_FILES=1 ;;
+        h)
+            usage
+            exit 0
+            ;;
+        p) POOL=$OPTARG ;;
+        *)
+            echo
+            usage
+            exit 1
+            ;;
     esac
 done
 
@@ -133,8 +133,8 @@ run_expect_fail "$RADOS_TOOL" -p "$POOL" import "$TDIR/dir_nonexistent"
 # export an empty pool to test purge
 run_expect_succ "$RADOS_TOOL" purge "$POOL" --yes-i-really-really-mean-it
 run_expect_succ "$RADOS_TOOL" -p "$POOL" export "$TDIR/empty"
-cmp -s "$TDIR/expb" "$TDIR/empty" ||
-    die "failed to export the same stuff we imported!"
+cmp -s "$TDIR/expb" "$TDIR/empty" \
+    || die "failed to export the same stuff we imported!"
 rm -f "$TDIR/empty"
 
 # import some stuff with extended attributes on it
@@ -208,8 +208,8 @@ for i in $(seq 1 5); do
     run_expect_succ --tee "$fname.omap.vals" "$RADOS_TOOL" -p "$POOL_CP_TARGET" listomapvals $objname
 done
 
-diff -q -r "$TDIR/dir_cp_src" "$TDIR/dir_cp_dst" ||
-    die "copy pool validation failed!"
+diff -q -r "$TDIR/dir_cp_src" "$TDIR/dir_cp_dst" \
+    || die "copy pool validation failed!"
 
 for opt in \
     block-size \

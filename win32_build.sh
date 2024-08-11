@@ -41,21 +41,21 @@ OS=${OS}
 if [[ -z $OS ]]; then
     source /etc/os-release
     case "$ID" in
-    opensuse* | suse | sles)
-        OS="suse"
-        ;;
-    rhel | centos)
-        OS="rhel"
-        ;;
-    ubuntu)
-        OS="ubuntu"
-        ;;
-    *)
-        echo "Unsupported Linux distro $ID."
-        echo "only SUSE, Ubuntu and RHEL are supported."
-        echo "Set the OS environment variable to override."
-        exit 1
-        ;;
+        opensuse* | suse | sles)
+            OS="suse"
+            ;;
+        rhel | centos)
+            OS="rhel"
+            ;;
+        ubuntu)
+            OS="ubuntu"
+            ;;
+        *)
+            echo "Unsupported Linux distro $ID."
+            echo "only SUSE, Ubuntu and RHEL are supported."
+            echo "Set the OS environment variable to override."
+            exit 1
+            ;;
     esac
 fi
 export OS="$OS"
@@ -243,8 +243,8 @@ if [[ -z $SKIP_ZIP ]]; then
         done
         # Copy any remaining files to the stripped directory
         for file in $binDir/*; do
-            [[ ! -f $strippedBinDir/$(basename $file) ]] &&
-                cp $file $strippedBinDir
+            [[ ! -f $strippedBinDir/$(basename $file) ]] \
+                && cp $file $strippedBinDir
         done
         ln -s $strippedBinDir $ZIP_TMPDIR/ceph
     else

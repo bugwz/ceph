@@ -59,8 +59,8 @@ function setup_osds() {
 function get_state() {
     local pgid=$1
     local sname=state
-    ceph --format json pg dump pgs 2>/dev/null |
-        jq -r ".pg_stats | .[] | select(.pgid==\"$pgid\") | .$sname"
+    ceph --format json pg dump pgs 2>/dev/null \
+        | jq -r ".pg_stats | .[] | select(.pgid==\"$pgid\") | .$sname"
 }
 
 function create_erasure_coded_pool() {
@@ -75,8 +75,8 @@ function create_erasure_coded_pool() {
         plugin=jerasure \
         k=$k m=$m \
         crush-failure-domain=osd || return 1
-    create_pool $poolname 1 1 erasure myprofile ||
-        return 1
+    create_pool $poolname 1 1 erasure myprofile \
+        || return 1
     wait_for_clean || return 1
 }
 

@@ -11,15 +11,15 @@ for file in ${BASEDIR}/dashboards_out/*.json; do
     for generated_file in ${TEMPDIR}/*.json; do
         generated_file_name="$(basename $generated_file)"
         if [ "$file_name" == "$generated_file_name" ]; then
-            jsondiff --indent 2 "${generated_file}" "${file}" |
-                tee -a ${TEMPDIR}/json_difference.log
+            jsondiff --indent 2 "${generated_file}" "${file}" \
+                | tee -a ${TEMPDIR}/json_difference.log
         fi
     done
 done
 
 jsonnet -J vendor -S alerts.jsonnet -o ${TEMPDIR}/prometheus_alerts.yml
-jsondiff --indent 2 "prometheus_alerts.yml" "${TEMPDIR}/prometheus_alerts.yml" |
-    tee -a ${TEMPDIR}/json_difference.log
+jsondiff --indent 2 "prometheus_alerts.yml" "${TEMPDIR}/prometheus_alerts.yml" \
+    | tee -a ${TEMPDIR}/json_difference.log
 
 err=0
 if [ $(wc -l <${TEMPDIR}/json_difference.log) -eq 0 ]; then

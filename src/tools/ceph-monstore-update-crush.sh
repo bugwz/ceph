@@ -39,8 +39,8 @@ function osdmap_get() {
     $CEPH_BIN/ceph-monstore-tool $store_path get osdmap -- \
         $epoch -o $osdmap >/dev/null || return
 
-    echo $($CEPH_BIN/osdmaptool --dump json $osdmap 2>/dev/null |
-        jq "$query")
+    echo $($CEPH_BIN/osdmaptool --dump json $osdmap 2>/dev/null \
+        | jq "$query")
 
     rm -f $osdmap
 }
@@ -98,32 +98,32 @@ function main() {
     local rewrite
     while [ "$1" != "--" ]; do
         case "$1" in
-        --verbose)
-            verbose=true
-            # set -xe
-            # PS4='${FUNCNAME[0]}: $LINENO: '
-            shift
-            ;;
-        -h | --help)
-            usage
-            return 0
-            ;;
-        --out)
-            output=$2
-            shift 2
-            ;;
-        --osdmap-epoch)
-            osdmap_epoch=$2
-            shift 2
-            ;;
-        --rewrite)
-            rewrite=true
-            shift
-            ;;
-        *)
-            usage "unexpected argument $1"
-            shift
-            ;;
+            --verbose)
+                verbose=true
+                # set -xe
+                # PS4='${FUNCNAME[0]}: $LINENO: '
+                shift
+                ;;
+            -h | --help)
+                usage
+                return 0
+                ;;
+            --out)
+                output=$2
+                shift 2
+                ;;
+            --osdmap-epoch)
+                osdmap_epoch=$2
+                shift 2
+                ;;
+            --rewrite)
+                rewrite=true
+                shift
+                ;;
+            *)
+                usage "unexpected argument $1"
+                shift
+                ;;
         esac
     done
     shift
@@ -134,8 +134,8 @@ function main() {
     # try accessing the store; if it fails, likely means a mon is running
     local last_osdmap_epoch
     local max_osd
-    last_osdmap_epoch=$(osdmap_get $store_path ".epoch") ||
-        die "error accessing mon store at $store_path"
+    last_osdmap_epoch=$(osdmap_get $store_path ".epoch") \
+        || die "error accessing mon store at $store_path"
     # get the max_osd # in last osdmap epoch, crushtool will use it to check
     # the crush maps in previous osdmaps
     max_osd=$(osdmap_get $store_path ".max_osd" $last_osdmap_epoch)

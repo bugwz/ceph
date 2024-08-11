@@ -54,25 +54,25 @@ maybe_kill() {
     local step=$1
     shift
     case $step in
-    0)
-        # killing processes
-        pkill -SIGTERM -u $MYUID $p
-        return 1
-        ;;
-    [1-5])
-        # wait for processes to stop
-        if pkill -0 -u $MYUID $p; then
-            # $p is still alive
+        0)
+            # killing processes
+            pkill -SIGTERM -u $MYUID $p
             return 1
-        fi
-        ;;
-    8)
-        # kill and print if some left
-        if pkill -0 -u $MYUID $p; then
-            echo "WARNING: $p did not orderly shutdown, killing it hard!" >&2
-            pkill -SIGKILL -u $MYUID $p
-        fi
-        ;;
+            ;;
+        [1-5])
+            # wait for processes to stop
+            if pkill -0 -u $MYUID $p; then
+                # $p is still alive
+                return 1
+            fi
+            ;;
+        8)
+            # kill and print if some left
+            if pkill -0 -u $MYUID $p; then
+                echo "WARNING: $p did not orderly shutdown, killing it hard!" >&2
+                pkill -SIGKILL -u $MYUID $p
+            fi
+            ;;
     esac
 }
 
@@ -128,44 +128,44 @@ stop_cephadm=0
 
 while [ $# -ge 1 ]; do
     case $1 in
-    all)
-        stop_all=1
-        ;;
-    mon | ceph-mon)
-        stop_mon=1
-        stop_all=0
-        ;;
-    mgr | ceph-mgr)
-        stop_mgr=1
-        stop_all=0
-        ;;
-    mds | ceph-mds)
-        stop_mds=1
-        stop_all=0
-        ;;
-    osd | ceph-osd)
-        stop_osd=1
-        stop_all=0
-        ;;
-    rgw | ceph-rgw)
-        stop_rgw=1
-        stop_all=0
-        ;;
-    nfs | ganesha.nfsd)
-        stop_ganesha=1
-        stop_all=0
-        ;;
-    --crimson)
-        ceph_osd=crimson-osd
-        ;;
-    --cephadm)
-        stop_cephadm=1
-        stop_all=0
-        ;;
-    *)
-        printf "$usage"
-        exit
-        ;;
+        all)
+            stop_all=1
+            ;;
+        mon | ceph-mon)
+            stop_mon=1
+            stop_all=0
+            ;;
+        mgr | ceph-mgr)
+            stop_mgr=1
+            stop_all=0
+            ;;
+        mds | ceph-mds)
+            stop_mds=1
+            stop_all=0
+            ;;
+        osd | ceph-osd)
+            stop_osd=1
+            stop_all=0
+            ;;
+        rgw | ceph-rgw)
+            stop_rgw=1
+            stop_all=0
+            ;;
+        nfs | ganesha.nfsd)
+            stop_ganesha=1
+            stop_all=0
+            ;;
+        --crimson)
+            ceph_osd=crimson-osd
+            ;;
+        --cephadm)
+            stop_cephadm=1
+            stop_all=0
+            ;;
+        *)
+            printf "$usage"
+            exit
+            ;;
     esac
     shift
 done
@@ -177,8 +177,8 @@ if [ $stop_all -eq 1 ]; then
     fi
 
     if "${CEPH_BIN}"/rbd device list -c $conf_fn >/dev/null 2>&1; then
-        "${CEPH_BIN}"/rbd device list -c $conf_fn | tail -n +2 |
-            while read DEV; do
+        "${CEPH_BIN}"/rbd device list -c $conf_fn | tail -n +2 \
+            | while read DEV; do
                 # While it is currently possible to create an rbd image with
                 # whitespace chars in its name, krbd will refuse mapping such
                 # an image, so we can safely split on whitespace here.  (The

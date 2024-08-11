@@ -125,59 +125,59 @@ readonly E_UNKNOWN=255
 # Process command-line arguments.
 while test $# -gt 0; do
     case $1 in
-    --format)
-        shift
-        FORMAT="$1"
-        shift
-        ;;
+        --format)
+            shift
+            FORMAT="$1"
+            shift
+            ;;
 
-    --prefix)
-        shift
-        PREFIX="$1"
-        shift
-        ;;
+        --prefix)
+            shift
+            PREFIX="$1"
+            shift
+            ;;
 
-    --separate | -s)
-        shift
-        SEPARATE=1
-        ;;
+        --separate | -s)
+            shift
+            SEPARATE=1
+            ;;
 
-    --tree-ish | -t)
-        shift
-        TREEISH="$1"
-        shift
-        ;;
+        --tree-ish | -t)
+            shift
+            TREEISH="$1"
+            shift
+            ;;
 
-    --ignore)
-        shift
-        IGNORE="$1"
-        shift
-        ;;
+        --ignore)
+            shift
+            IGNORE="$1"
+            shift
+            ;;
 
-    --version)
-        version
-        exit
-        ;;
+        --version)
+            version
+            exit
+            ;;
 
-    --verbose | -v)
-        shift
-        VERBOSE=1
-        ;;
+        --verbose | -v)
+            shift
+            VERBOSE=1
+            ;;
 
-    -? | --usage | --help)
-        usage
-        exit
-        ;;
+        -? | --usage | --help)
+            usage
+            exit
+            ;;
 
-    -*)
-        echo "Unrecognized option: $1" >&2
-        usage
-        exit $E_BAD_OPTION
-        ;;
+        -*)
+            echo "Unrecognized option: $1" >&2
+            usage
+            exit $E_BAD_OPTION
+            ;;
 
-    *)
-        break
-        ;;
+        *)
+            break
+            ;;
     esac
 done
 

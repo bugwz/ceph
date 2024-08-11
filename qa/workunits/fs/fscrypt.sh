@@ -33,20 +33,20 @@ setup_xfstests_env() {
 install_deps() {
     local system_value=$(sudo lsb_release -is | awk '{print tolower($0)}')
     case $system_value in
-    "centos" | "centosstream" | "fedora")
-        sudo yum install -y inih-devel userspace-rcu-devel \
-            libblkid-devel gettext libedit-devel \
-            libattr-devel device-mapper-devel libicu-devel
-        ;;
-    "ubuntu" | "debian")
-        sudo apt-get install -y libinih-dev liburcu-dev \
-            libblkid-dev gettext libedit-dev libattr1-dev \
-            libdevmapper-dev libicu-dev pkg-config
-        ;;
-    *)
-        echo "Unsupported distro $system_value"
-        exit 1
-        ;;
+        "centos" | "centosstream" | "fedora")
+            sudo yum install -y inih-devel userspace-rcu-devel \
+                libblkid-devel gettext libedit-devel \
+                libattr-devel device-mapper-devel libicu-devel
+            ;;
+        "ubuntu" | "debian")
+            sudo apt-get install -y libinih-dev liburcu-dev \
+                libblkid-dev gettext libedit-dev libattr1-dev \
+                libdevmapper-dev libicu-dev pkg-config
+            ;;
+        *)
+            echo "Unsupported distro $system_value"
+            exit 1
+            ;;
     esac
 }
 
@@ -84,32 +84,32 @@ raw_key=$(_generate_raw_encryption_key)
 keyid=$(_add_enckey $testdir "$raw_key" | awk '{print $NF}')
 
 case ${fscrypt} in
-"none")
-    # do nothing for the test directory and will test it
-    # as one non-encrypted directory.
-    pushd $testdir
-    ${mydir}/../suites/${testcase}.sh
-    popd
-    clean_up
-    ;;
-"unlocked")
-    # set encrypt policy with the key provided and then
-    # the test directory will be encrypted & unlocked
-    _set_encpolicy $testdir $keyid
-    pushd $testdir
-    ${mydir}/../suites/${testcase}.sh
-    popd
-    clean_up
-    ;;
-"locked")
-    # remove the key, then the test directory will be locked
-    # and any modification will be denied by requiring the key
-    _rm_enckey $testdir $keyid
-    clean_up
-    ;;
-*)
-    clean_up
-    echo "Unknown parameter $1"
-    exit 1
-    ;;
+    "none")
+        # do nothing for the test directory and will test it
+        # as one non-encrypted directory.
+        pushd $testdir
+        ${mydir}/../suites/${testcase}.sh
+        popd
+        clean_up
+        ;;
+    "unlocked")
+        # set encrypt policy with the key provided and then
+        # the test directory will be encrypted & unlocked
+        _set_encpolicy $testdir $keyid
+        pushd $testdir
+        ${mydir}/../suites/${testcase}.sh
+        popd
+        clean_up
+        ;;
+    "locked")
+        # remove the key, then the test directory will be locked
+        # and any modification will be denied by requiring the key
+        _rm_enckey $testdir $keyid
+        clean_up
+        ;;
+    *)
+        clean_up
+        echo "Unknown parameter $1"
+        exit 1
+        ;;
 esac

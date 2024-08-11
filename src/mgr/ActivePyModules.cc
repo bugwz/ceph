@@ -178,7 +178,7 @@ PyObject* ActivePyModules::cacheable_get_python(const std::string& what)
 {
     // 获取 cache 的失效时间
     // 从 src/common/options 中可以看出 mgr_ttl_cache_expire_seconds 参数的默认值为 0
-    // 
+    //
     // 该参数的相关命令为：
     // ceph config get mgr mgr_ttl_cache_expire_seconds
     // ceph config set mgr mgr_ttl_cache_expire_seconds <seconds>

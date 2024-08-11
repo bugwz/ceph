@@ -18,36 +18,36 @@ ARGS="-GNinja"
 if [ -r /etc/os-release ]; then
     source /etc/os-release
     case "$ID" in
-    fedora)
-        if [ "$VERSION_ID" -ge "35" ]; then
-            PYBUILD="3.10"
-        elif [ "$VERSION_ID" -ge "33" ]; then
-            PYBUILD="3.9"
-        elif [ "$VERSION_ID" -ge "32" ]; then
-            PYBUILD="3.8"
-        else
-            PYBUILD="3.7"
-        fi
-        ;;
-    rhel | centos)
-        MAJOR_VER=$(echo "$VERSION_ID" | sed -e 's/\..*$//')
-        if [ "$MAJOR_VER" -ge "9" ]; then
-            PYBUILD="3.9"
-        elif [ "$MAJOR_VER" -ge "8" ]; then
-            PYBUILD="3.6"
-        fi
-        ;;
-    opensuse* | suse | sles)
-        PYBUILD="3"
-        ARGS+=" -DWITH_RADOSGW_AMQP_ENDPOINT=OFF"
-        ARGS+=" -DWITH_RADOSGW_KAFKA_ENDPOINT=OFF"
-        ;;
-    ubuntu)
-        MAJOR_VER=$(echo "$VERSION_ID" | sed -e 's/\..*$//')
-        if [ "$MAJOR_VER" -ge "22" ]; then
-            PYBUILD="3.10"
-        fi
-        ;;
+        fedora)
+            if [ "$VERSION_ID" -ge "35" ]; then
+                PYBUILD="3.10"
+            elif [ "$VERSION_ID" -ge "33" ]; then
+                PYBUILD="3.9"
+            elif [ "$VERSION_ID" -ge "32" ]; then
+                PYBUILD="3.8"
+            else
+                PYBUILD="3.7"
+            fi
+            ;;
+        rhel | centos)
+            MAJOR_VER=$(echo "$VERSION_ID" | sed -e 's/\..*$//')
+            if [ "$MAJOR_VER" -ge "9" ]; then
+                PYBUILD="3.9"
+            elif [ "$MAJOR_VER" -ge "8" ]; then
+                PYBUILD="3.6"
+            fi
+            ;;
+        opensuse* | suse | sles)
+            PYBUILD="3"
+            ARGS+=" -DWITH_RADOSGW_AMQP_ENDPOINT=OFF"
+            ARGS+=" -DWITH_RADOSGW_KAFKA_ENDPOINT=OFF"
+            ;;
+        ubuntu)
+            MAJOR_VER=$(echo "$VERSION_ID" | sed -e 's/\..*$//')
+            if [ "$MAJOR_VER" -ge "22" ]; then
+                PYBUILD="3.10"
+            fi
+            ;;
 
     esac
 elif [ "$(uname)" == FreeBSD ]; then

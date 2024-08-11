@@ -30,13 +30,13 @@ setup() {
 cleanup() {
     set +e
 
-    test -n "${EC_POOL}" &&
-        ceph osd pool delete "${EC_POOL}" "${EC_POOL}" \
+    test -n "${EC_POOL}" \
+        && ceph osd pool delete "${EC_POOL}" "${EC_POOL}" \
             --yes-i-really-really-mean-it
     EC_POOL=
 
-    test -n "${REP_POOL}" &&
-        ceph osd pool delete "${REP_POOL}" "${REP_POOL}" \
+    test -n "${REP_POOL}" \
+        && ceph osd pool delete "${REP_POOL}" "${REP_POOL}" \
             --yes-i-really-really-mean-it
     REP_POOL=
 

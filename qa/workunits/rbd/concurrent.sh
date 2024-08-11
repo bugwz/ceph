@@ -183,28 +183,28 @@ function parseargs() {
 
     while [ "$1" != "--" ]; do
         case "$1" in
-        -h | --help)
-            usage
-            ;;
-        -i | --iterations)
-            ITER="$2"
-            [ "${ITER}" -lt 1 ] &&
-                usage "bad iterations value"
-            shift
-            ;;
-        -c | --count)
-            COUNT="$2"
-            [ "${COUNT}" -lt 1 ] &&
-                usage "bad count value"
-            shift
-            ;;
-        -d | --delay)
-            DELAY="$2"
-            shift
-            ;;
-        *)
-            exit 100 # Internal error
-            ;;
+            -h | --help)
+                usage
+                ;;
+            -i | --iterations)
+                ITER="$2"
+                [ "${ITER}" -lt 1 ] \
+                    && usage "bad iterations value"
+                shift
+                ;;
+            -c | --count)
+                COUNT="$2"
+                [ "${COUNT}" -lt 1 ] \
+                    && usage "bad count value"
+                shift
+                ;;
+            -d | --delay)
+                DELAY="$2"
+                shift
+                ;;
+            *)
+                exit 100 # Internal error
+                ;;
         esac
         shift
     done
@@ -248,8 +248,8 @@ function rbd_image_id() {
     [ $# -eq 1 ] || exit 99
     local image="$1"
 
-    grep -l "${image}" /sys/bus/rbd/devices/*/name 2>/dev/null |
-        cut -d / -f 6
+    grep -l "${image}" /sys/bus/rbd/devices/*/name 2>/dev/null \
+        | cut -d / -f 6
 }
 
 function rbd_map_image() {
@@ -295,8 +295,8 @@ function rbd_read_image() {
         >/dev/null 2>&1
     # Read the data at offset 2015 * 2048 bytes (where it was
     # written) and make sure it matches the original data.
-    cmp --quiet "${SOURCE_DATA}" "/dev/rbd${id}" 0 4126720 ||
-        echo "MISMATCH!!!"
+    cmp --quiet "${SOURCE_DATA}" "/dev/rbd${id}" 0 4126720 \
+        || echo "MISMATCH!!!"
     # Now read starting within the pre-written data, but ending
     # beyond it.  The rbd client zero-fills the unwritten
     # portion at the end of a read.
@@ -364,8 +364,8 @@ for iter in $(seq 1 "${ITER}"); do
     done
     # Sleep longer at first, overlap iterations more later.
     # Use awk to get sub-second granularity (see sleep(1)).
-    sleep $(echo "${DELAY}" "${iter}" "${ITER}" |
-        awk '{ printf("%.2f\n", $1 - $1 * $2 / $3);}')
+    sleep $(echo "${DELAY}" "${iter}" "${ITER}" \
+        | awk '{ printf("%.2f\n", $1 - $1 * $2 / $3);}')
 
 done
 wait

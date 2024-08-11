@@ -163,8 +163,8 @@ function teardown() {
     local dir=$1
     local dumplogs=$2
     kill_daemons $dir KILL
-    if [ $(uname) != FreeBSD ] &&
-        [ $(stat -f -c '%T' .) == "btrfs" ]; then
+    if [ $(uname) != FreeBSD ] \
+        && [ $(stat -f -c '%T' .) == "btrfs" ]; then
         __teardown_btrfs $dir
     fi
     local cores="no"
@@ -1025,8 +1025,8 @@ function get_osds() {
     local poolname=$1
     local objectname=$2
 
-    local osds=$(ceph --format json osd map $poolname $objectname 2>/dev/null |
-        jq '.acting | .[]')
+    local osds=$(ceph --format json osd map $poolname $objectname 2>/dev/null \
+        | jq '.acting | .[]')
     # get rid of the trailing space
     echo $osds
 }
@@ -1132,8 +1132,8 @@ function get_config() {
 
     CEPH_ARGS='' \
         ceph --format json daemon $(get_asok_path $daemon.$id) \
-        config get $config 2>/dev/null |
-        jq -r ".$config"
+        config get $config 2>/dev/null \
+        | jq -r ".$config"
 }
 
 function test_get_config() {
@@ -1168,8 +1168,8 @@ function set_config() {
     local value=$4
 
     test $(env CEPH_ARGS='' ceph --format json daemon $(get_asok_path $daemon.$id) \
-        config set $config $value 2>/dev/null |
-        jq 'has("success")') == true
+        config set $config $value 2>/dev/null \
+        | jq 'has("success")') == true
 }
 
 function test_set_config() {
@@ -1200,8 +1200,8 @@ function get_primary() {
     local poolname=$1
     local objectname=$2
 
-    ceph --format json osd map $poolname $objectname 2>/dev/null |
-        jq '.acting_primary'
+    ceph --format json osd map $poolname $objectname 2>/dev/null \
+        | jq '.acting_primary'
 }
 
 function test_get_primary() {
@@ -1234,8 +1234,8 @@ function get_not_primary() {
     local objectname=$2
 
     local primary=$(get_primary $poolname $objectname)
-    ceph --format json osd map $poolname $objectname 2>/dev/null |
-        jq ".acting | map(select (. != $primary)) | .[0]"
+    ceph --format json osd map $poolname $objectname 2>/dev/null \
+        | jq ".acting | map(select (. != $primary)) | .[0]"
 }
 
 function test_get_not_primary() {
@@ -1318,8 +1318,8 @@ function test_objectstore_tool() {
     create_rbd_pool || return 1
     wait_for_clean || return 1
     rados --pool rbd put GROUP /etc/group || return 1
-    objectstore_tool $dir $osd GROUP get-bytes |
-        diff - /etc/group
+    objectstore_tool $dir $osd GROUP get-bytes \
+        | diff - /etc/group
     ! objectstore_tool $dir $osd NOTEXISTS get-bytes || return 1
     teardown $dir || return 1
 }
@@ -1339,8 +1339,8 @@ function get_is_making_recovery_progress() {
     recovery_progress+=".recovering_keys_per_sec + "
     recovery_progress+=".recovering_bytes_per_sec + "
     recovery_progress+=".recovering_objects_per_sec"
-    local progress=$(ceph --format json status 2>/dev/null |
-        jq -r ".pgmap | $recovery_progress")
+    local progress=$(ceph --format json status 2>/dev/null \
+        | jq -r ".pgmap | $recovery_progress")
     test "$progress" != null
 }
 
@@ -1368,8 +1368,8 @@ function get_num_active_clean() {
     local expression
     expression+="select(contains(\"active\") and contains(\"clean\")) | "
     expression+="select(contains(\"stale\") | not)"
-    ceph --format json pg dump pgs 2>/dev/null |
-        jq ".pg_stats | [.[] | .state | $expression] | length"
+    ceph --format json pg dump pgs 2>/dev/null \
+        | jq ".pg_stats | [.[] | .state | $expression] | length"
 }
 
 function test_get_num_active_clean() {
@@ -1398,8 +1398,8 @@ function get_num_active_or_peered() {
     local expression
     expression+="select(contains(\"active\") or contains(\"peered\")) | "
     expression+="select(contains(\"stale\") | not)"
-    ceph --format json pg dump pgs 2>/dev/null |
-        jq ".pg_stats | [.[] | .state | $expression] | length"
+    ceph --format json pg dump pgs 2>/dev/null \
+        | jq ".pg_stats | [.[] | .state | $expression] | length"
 }
 
 function test_get_num_active_or_peered() {
@@ -1529,8 +1529,8 @@ function test_wait_osd_id_used_by_pgs() {
 function get_last_scrub_stamp() {
     local pgid=$1
     local sname=${2:-last_scrub_stamp}
-    ceph --format json pg dump pgs 2>/dev/null |
-        jq -r ".pg_stats | .[] | select(.pgid==\"$pgid\") | .$sname"
+    ceph --format json pg dump pgs 2>/dev/null \
+        | jq -r ".pg_stats | .[] | select(.pgid==\"$pgid\") | .$sname"
 }
 
 function test_get_last_scrub_stamp() {
@@ -2010,8 +2010,8 @@ function erasure_code_plugin_exists() {
     local grepstr
     local s
     case $(uname) in
-    FreeBSD) grepstr="Cannot open.*$plugin" ;;
-    *) grepstr="$plugin.*No such file" ;;
+        FreeBSD) grepstr="Cannot open.*$plugin" ;;
+        *) grepstr="$plugin.*No such file" ;;
     esac
 
     s=$(ceph osd erasure-code-profile set TESTPROFILE plugin=$plugin 2>&1)
@@ -2048,8 +2048,8 @@ function test_erasure_code_plugin_exists() {
 function display_logs() {
     local dir=$1
 
-    find $dir -maxdepth 1 -name '*.log' |
-        while read file; do
+    find $dir -maxdepth 1 -name '*.log' \
+        | while read file; do
             echo "======================= $file"
             cat $file
         done

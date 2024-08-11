@@ -31,42 +31,42 @@ eval set -- "$opts"
 
 while true; do
     case "$1" in
-    -a | --archive-dir)
-        archive_dir=$2
-        shift 2
-        ;;
-    --build-dir)
-        build_dir=$2
-        shift 2
-        ;;
-    --source-dir)
-        source_dir=$2
-        shift 2
-        ;;
-    --cbt)
-        cbt_dir=$2
-        shift 2
-        ;;
-    --use-existing)
-        use_existing=true
-        shift
-        ;;
-    --classical)
-        classical=true
-        shift
-        ;;
-    -h | --help)
-        usage $prog_name
-        return 0
-        ;;
-    --)
-        shift
-        break
-        ;;
-    *)
-        echo "unexpected argument $1" 1>&2
-        return 1
-        ;;
+        -a | --archive-dir)
+            archive_dir=$2
+            shift 2
+            ;;
+        --build-dir)
+            build_dir=$2
+            shift 2
+            ;;
+        --source-dir)
+            source_dir=$2
+            shift 2
+            ;;
+        --cbt)
+            cbt_dir=$2
+            shift 2
+            ;;
+        --use-existing)
+            use_existing=true
+            shift
+            ;;
+        --classical)
+            classical=true
+            shift
+            ;;
+        -h | --help)
+            usage $prog_name
+            return 0
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "unexpected argument $1" 1>&2
+            return 1
+            ;;
     esac
 done
 

@@ -11,9 +11,9 @@ function cleanup() {
     set +x
     if [[ -e $tmp/keyring ]] && [[ -e $tmp/keyring.orig ]]; then
         grep '\[.*\..*\]' $tmp/keyring.orig >$tmp/entities.orig
-        for e in $(grep '\[.*\..*\]' $tmp/keyring |
-            diff $tmp/entities.orig - |
-            sed -n 's/^.*\[\(.*\..*\)\]/\1/p'); do
+        for e in $(grep '\[.*\..*\]' $tmp/keyring \
+            | diff $tmp/entities.orig - \
+            | sed -n 's/^.*\[\(.*\..*\)\]/\1/p'); do
             ceph auth rm $e 2>&1 >&/dev/null
         done
     fi

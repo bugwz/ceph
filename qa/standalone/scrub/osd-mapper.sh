@@ -99,8 +99,8 @@ function TEST_truncated_sna_record() {
     ((extr_dbg >= 2)) && ceph-kvstore-tool bluestore-kv $dir/2 dump "p" | grep -a SNA_
     ((extr_dbg >= 2)) && grep -a SNA_ /tmp/oo2.dump
     ((extr_dbg >= 2)) && ceph-kvstore-tool bluestore-kv $dir/2 dump p 2>/dev/null
-    local num_sna_b4=$(ceph-kvstore-tool bluestore-kv $dir/$osd dump p 2>/dev/null | grep -a -e 'SNA_[0-9]_000000000000000[0-9]_000000000000000' |
-        awk -e '{print $2;}' | wc -l)
+    local num_sna_b4=$(ceph-kvstore-tool bluestore-kv $dir/$osd dump p 2>/dev/null | grep -a -e 'SNA_[0-9]_000000000000000[0-9]_000000000000000' \
+        | awk -e '{print $2;}' | wc -l)
 
     for sdn in $(seq 0 $(expr $osdn - 1)); do
         kvdir=$dir/$sdn
@@ -108,8 +108,8 @@ function TEST_truncated_sna_record() {
         ((extr_dbg >= 3)) && ceph-kvstore-tool bluestore-kv $kvdir dump "p"
 
         # truncate the 'mapping' (SNA_) entry corresponding to the snap13 clone
-        KY=$(ceph-kvstore-tool bluestore-kv $kvdir dump p 2>/dev/null | grep -a -e 'SNA_[0-9]_0000000000000003_000000000000000' |
-            awk -e '{print $2;}')
+        KY=$(ceph-kvstore-tool bluestore-kv $kvdir dump p 2>/dev/null | grep -a -e 'SNA_[0-9]_0000000000000003_000000000000000' \
+            | awk -e '{print $2;}')
         ((extr_dbg >= 1)) && echo "SNA key: $KY" | cat -v
 
         tmp_fn1=$(mktemp -p /tmp --suffix="_the_val")
@@ -166,10 +166,10 @@ function TEST_truncated_sna_record() {
     ((current_err_cnt == prev_err_cnt)) || return 1
     kill_daemons $dir TERM osd || return 1
     kvdir=$dir/$cur_prim
-    ((extr_dbg >= 2)) && ceph-kvstore-tool bluestore-kv $kvdir dump p 2>/dev/null | grep -a -e 'SNA_[0-9]_' |
-        awk -e '{print $2;}'
-    local num_sna_full=$(ceph-kvstore-tool bluestore-kv $kvdir dump p 2>/dev/null | grep -a -e 'SNA_[0-9]_000000000000000[0-9]_000000000000000' |
-        awk -e '{print $2;}' | wc -l)
+    ((extr_dbg >= 2)) && ceph-kvstore-tool bluestore-kv $kvdir dump p 2>/dev/null | grep -a -e 'SNA_[0-9]_' \
+        | awk -e '{print $2;}'
+    local num_sna_full=$(ceph-kvstore-tool bluestore-kv $kvdir dump p 2>/dev/null | grep -a -e 'SNA_[0-9]_000000000000000[0-9]_000000000000000' \
+        | awk -e '{print $2;}' | wc -l)
     ((num_sna_full == num_sna_b4)) || return 1
     return 0
 }

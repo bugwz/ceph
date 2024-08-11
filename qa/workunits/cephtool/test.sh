@@ -58,8 +58,8 @@ function retry_eagain() {
     for count in $(seq 1 $max); do
         status=0
         "$@" >$tmpfile 2>&1 || status=$?
-        if test $status = 0 ||
-            ! grep --quiet EAGAIN $tmpfile; then
+        if test $status = 0 \
+            || ! grep --quiet EAGAIN $tmpfile; then
             break
         fi
         sleep 1
@@ -83,8 +83,8 @@ function map_enxio_to_eagain() {
     local tmpfile=$TEMP_DIR/map_enxio_to_eagain.$$
 
     "$@" >$tmpfile 2>&1 || status=$?
-    if test $status != 0 &&
-        grep --quiet ENXIO $tmpfile; then
+    if test $status != 0 \
+        && grep --quiet ENXIO $tmpfile; then
         echo "EAGAIN added by $0::map_enxio_to_eagain" >>$tmpfile
     fi
     cat $tmpfile
@@ -1107,9 +1107,9 @@ function test_mon_mds_metadata() {
     local nmons=$(ceph tell 'mon.*' version | grep -c 'version')
     test "$nmons" -gt 0
 
-    ceph fs dump |
-        sed -nEe "s/^([0-9]+):.*'([a-z])' mds\\.([0-9]+)\\..*/\\1 \\2 \\3/p" |
-        while read gid id rank; do
+    ceph fs dump \
+        | sed -nEe "s/^([0-9]+):.*'([a-z])' mds\\.([0-9]+)\\..*/\\1 \\2 \\3/p" \
+        | while read gid id rank; do
             ceph mds metadata ${gid} | grep '"hostname":'
             ceph mds metadata ${id} | grep '"hostname":'
             ceph mds metadata ${rank} | grep '"hostname":'
@@ -1293,8 +1293,8 @@ function test_mon_osd_create_destroy() {
     k=$(ceph auth get-key osd.$id --format=json-pretty 2>/dev/null | jq '.key')
     s=$(cat $all_secrets | jq '.cephx_secret')
     [[ $k == $s ]]
-    k=$(ceph auth get-key client.osd-lockbox.$uuid --format=json-pretty 2>/dev/null |
-        jq '.key')
+    k=$(ceph auth get-key client.osd-lockbox.$uuid --format=json-pretty 2>/dev/null \
+        | jq '.key')
     s=$(cat $all_secrets | jq '.cephx_lockbox_secret')
     [[ $k == $s ]]
     ceph config-key exists dm-crypt/osd/$uuid/luks
@@ -1529,8 +1529,8 @@ function test_mon_osd() {
     fi
 
     info_json=$(ceph osd info 0 --format=json | jq -cM '.')
-    dump_json=$(ceph osd dump --format=json |
-        jq -cM '.osds[] | select(.osd == 0)')
+    dump_json=$(ceph osd dump --format=json \
+        | jq -cM '.osds[] | select(.osd == 0)')
     [[ "${info_json}" == "${dump_json}" ]]
 
     info_plain="$(ceph osd info)"
@@ -1973,10 +1973,10 @@ function test_mon_osd_pool_quota() {
     #
     # get quotas in json-pretty format
     #
-    ceph osd pool get-quota tmp-quota-pool --format=json-pretty |
-        grep '"quota_max_objects":.*10000000'
-    ceph osd pool get-quota tmp-quota-pool --format=json-pretty |
-        grep '"quota_max_bytes":.*10'
+    ceph osd pool get-quota tmp-quota-pool --format=json-pretty \
+        | grep '"quota_max_objects":.*10000000'
+    ceph osd pool get-quota tmp-quota-pool --format=json-pretty \
+        | grep '"quota_max_bytes":.*10'
     #
     # get quotas
     #
@@ -2340,34 +2340,34 @@ function test_mon_osd_tiered_pool_set() {
     ceph osd pool get real-tier hit_set_fpp | grep "hit_set_fpp: 0.01"
 
     ceph osd pool set real-tier target_max_objects 123
-    ceph osd pool get real-tier target_max_objects |
-        grep 'target_max_objects:[ \t]\+123'
+    ceph osd pool get real-tier target_max_objects \
+        | grep 'target_max_objects:[ \t]\+123'
     ceph osd pool set real-tier target_max_bytes 123456
-    ceph osd pool get real-tier target_max_bytes |
-        grep 'target_max_bytes:[ \t]\+123456'
+    ceph osd pool get real-tier target_max_bytes \
+        | grep 'target_max_bytes:[ \t]\+123456'
     ceph osd pool set real-tier cache_target_dirty_ratio .123
-    ceph osd pool get real-tier cache_target_dirty_ratio |
-        grep 'cache_target_dirty_ratio:[ \t]\+0.123'
+    ceph osd pool get real-tier cache_target_dirty_ratio \
+        | grep 'cache_target_dirty_ratio:[ \t]\+0.123'
     expect_false ceph osd pool set real-tier cache_target_dirty_ratio -.2
     expect_false ceph osd pool set real-tier cache_target_dirty_ratio 1.1
     ceph osd pool set real-tier cache_target_dirty_high_ratio .123
-    ceph osd pool get real-tier cache_target_dirty_high_ratio |
-        grep 'cache_target_dirty_high_ratio:[ \t]\+0.123'
+    ceph osd pool get real-tier cache_target_dirty_high_ratio \
+        | grep 'cache_target_dirty_high_ratio:[ \t]\+0.123'
     expect_false ceph osd pool set real-tier cache_target_dirty_high_ratio -.2
     expect_false ceph osd pool set real-tier cache_target_dirty_high_ratio 1.1
     ceph osd pool set real-tier cache_target_full_ratio .123
-    ceph osd pool get real-tier cache_target_full_ratio |
-        grep 'cache_target_full_ratio:[ \t]\+0.123'
+    ceph osd pool get real-tier cache_target_full_ratio \
+        | grep 'cache_target_full_ratio:[ \t]\+0.123'
     ceph osd dump -f json-pretty | grep '"cache_target_full_ratio_micro": 123000'
     ceph osd pool set real-tier cache_target_full_ratio 1.0
     ceph osd pool set real-tier cache_target_full_ratio 0
     expect_false ceph osd pool set real-tier cache_target_full_ratio 1.1
     ceph osd pool set real-tier cache_min_flush_age 123
-    ceph osd pool get real-tier cache_min_flush_age |
-        grep 'cache_min_flush_age:[ \t]\+123'
+    ceph osd pool get real-tier cache_min_flush_age \
+        | grep 'cache_min_flush_age:[ \t]\+123'
     ceph osd pool set real-tier cache_min_evict_age 234
-    ceph osd pool get real-tier cache_min_evict_age |
-        grep 'cache_min_evict_age:[ \t]\+234'
+    ceph osd pool get real-tier cache_min_evict_age \
+        | grep 'cache_min_evict_age:[ \t]\+234'
 
     # iec vs si units
     ceph osd pool set real-tier target_max_objects 1K
@@ -2721,35 +2721,35 @@ function test_per_pool_scrub_status() {
     ceph osd pool create noscrub_pool 16
     ceph osd pool create noscrub_pool2 16
     ceph -s | expect_false grep -q "Some pool(s) have the.*scrub.* flag(s) set"
-    ceph -s --format json |
-        jq .health.checks.POOL_SCRUB_FLAGS.summary.message |
-        expect_false grep -q "Some pool(s) have the.*scrub.* flag(s) set"
-    ceph report | jq .health.checks.POOL_SCRUB_FLAGS.detail |
-        expect_false grep -q "Pool .* has .*scrub.* flag"
-    ceph health detail | jq .health.checks.POOL_SCRUB_FLAGS.detail |
-        expect_false grep -q "Pool .* has .*scrub.* flag"
+    ceph -s --format json \
+        | jq .health.checks.POOL_SCRUB_FLAGS.summary.message \
+        | expect_false grep -q "Some pool(s) have the.*scrub.* flag(s) set"
+    ceph report | jq .health.checks.POOL_SCRUB_FLAGS.detail \
+        | expect_false grep -q "Pool .* has .*scrub.* flag"
+    ceph health detail | jq .health.checks.POOL_SCRUB_FLAGS.detail \
+        | expect_false grep -q "Pool .* has .*scrub.* flag"
 
     ceph osd pool set noscrub_pool noscrub 1
     ceph -s | expect_true grep -q "Some pool(s) have the noscrub flag(s) set"
-    ceph -s --format json |
-        jq .health.checks.POOL_SCRUB_FLAGS.summary.message |
-        expect_true grep -q "Some pool(s) have the noscrub flag(s) set"
-    ceph report | jq .health.checks.POOL_SCRUB_FLAGS.detail |
-        expect_true grep -q "Pool noscrub_pool has noscrub flag"
+    ceph -s --format json \
+        | jq .health.checks.POOL_SCRUB_FLAGS.summary.message \
+        | expect_true grep -q "Some pool(s) have the noscrub flag(s) set"
+    ceph report | jq .health.checks.POOL_SCRUB_FLAGS.detail \
+        | expect_true grep -q "Pool noscrub_pool has noscrub flag"
     ceph health detail | expect_true grep -q "Pool noscrub_pool has noscrub flag"
 
     ceph osd pool set noscrub_pool nodeep-scrub 1
     ceph osd pool set noscrub_pool2 nodeep-scrub 1
     ceph -s | expect_true grep -q "Some pool(s) have the noscrub, nodeep-scrub flag(s) set"
-    ceph -s --format json |
-        jq .health.checks.POOL_SCRUB_FLAGS.summary.message |
-        expect_true grep -q "Some pool(s) have the noscrub, nodeep-scrub flag(s) set"
-    ceph report | jq .health.checks.POOL_SCRUB_FLAGS.detail |
-        expect_true grep -q "Pool noscrub_pool has noscrub flag"
-    ceph report | jq .health.checks.POOL_SCRUB_FLAGS.detail |
-        expect_true grep -q "Pool noscrub_pool has nodeep-scrub flag"
-    ceph report | jq .health.checks.POOL_SCRUB_FLAGS.detail |
-        expect_true grep -q "Pool noscrub_pool2 has nodeep-scrub flag"
+    ceph -s --format json \
+        | jq .health.checks.POOL_SCRUB_FLAGS.summary.message \
+        | expect_true grep -q "Some pool(s) have the noscrub, nodeep-scrub flag(s) set"
+    ceph report | jq .health.checks.POOL_SCRUB_FLAGS.detail \
+        | expect_true grep -q "Pool noscrub_pool has noscrub flag"
+    ceph report | jq .health.checks.POOL_SCRUB_FLAGS.detail \
+        | expect_true grep -q "Pool noscrub_pool has nodeep-scrub flag"
+    ceph report | jq .health.checks.POOL_SCRUB_FLAGS.detail \
+        | expect_true grep -q "Pool noscrub_pool2 has nodeep-scrub flag"
     ceph health detail | expect_true grep -q "Pool noscrub_pool has noscrub flag"
     ceph health detail | expect_true grep -q "Pool noscrub_pool has nodeep-scrub flag"
     ceph health detail | expect_true grep -q "Pool noscrub_pool2 has nodeep-scrub flag"
@@ -2847,40 +2847,40 @@ while [[ $# -gt 0 ]]; do
     opt=$1
 
     case "$opt" in
-    "-l")
-        do_list=1
-        ;;
-    "--asok-does-not-need-root")
-        SUDO=""
-        ;;
-    "--no-sanity-check")
-        sanity_check=false
-        ;;
-    "--test-mon")
-        tests_to_run+="$MON_TESTS"
-        ;;
-    "--test-osd")
-        tests_to_run+="$OSD_TESTS"
-        ;;
-    "--test-mds")
-        tests_to_run+="$MDS_TESTS"
-        ;;
-    "--test-mgr")
-        tests_to_run+="$MGR_TESTS"
-        ;;
-    "-t")
-        shift
-        if [[ -z "$1" ]]; then
-            echo "missing argument to '-t'"
+        "-l")
+            do_list=1
+            ;;
+        "--asok-does-not-need-root")
+            SUDO=""
+            ;;
+        "--no-sanity-check")
+            sanity_check=false
+            ;;
+        "--test-mon")
+            tests_to_run+="$MON_TESTS"
+            ;;
+        "--test-osd")
+            tests_to_run+="$OSD_TESTS"
+            ;;
+        "--test-mds")
+            tests_to_run+="$MDS_TESTS"
+            ;;
+        "--test-mgr")
+            tests_to_run+="$MGR_TESTS"
+            ;;
+        "-t")
+            shift
+            if [[ -z "$1" ]]; then
+                echo "missing argument to '-t'"
+                usage
+                exit 1
+            fi
+            tests_to_run+=" $1"
+            ;;
+        "-h")
             usage
-            exit 1
-        fi
-        tests_to_run+=" $1"
-        ;;
-    "-h")
-        usage
-        exit 0
-        ;;
+            exit 0
+            ;;
     esac
     shift
 done

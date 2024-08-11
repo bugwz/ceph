@@ -43,14 +43,14 @@ mkdir .snap/test3
 
 echo "Delete the snapshots..."
 
-find ./ -type d -print |
-    xargs -I% -n1 find %/.snap -mindepth 1 -maxdepth 1 \
+find ./ -type d -print \
+    | xargs -I% -n1 find %/.snap -mindepth 1 -maxdepth 1 \
         \( ! -name "_*" \) -print 2>/dev/null
 
-find ./ -type d -print |
-    xargs -I% -n1 find %/.snap -mindepth 1 -maxdepth 1 \
-        \( ! -name "_*" \) -print 2>/dev/null |
-    xargs -n1 rmdir
+find ./ -type d -print \
+    | xargs -I% -n1 find %/.snap -mindepth 1 -maxdepth 1 \
+        \( ! -name "_*" \) -print 2>/dev/null \
+    | xargs -n1 rmdir
 
 echo "Delete all the files and directories ..."
 rm -Rfv ./*

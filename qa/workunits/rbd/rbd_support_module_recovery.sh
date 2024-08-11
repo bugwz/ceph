@@ -35,18 +35,18 @@ END_TIME=$((CURRENT_TIME + RUN_TIME))
 PREV_CLIENT_ADDR=""
 CLIENT_ADDR=""
 while ((CURRENT_TIME <= END_TIME)); do
-    if [[ -n "${CLIENT_ADDR}" ]] &&
-        [[ "${CLIENT_ADDR}" != "${PREV_CLIENT_ADDR}" ]]; then
+    if [[ -n "${CLIENT_ADDR}" ]] \
+        && [[ "${CLIENT_ADDR}" != "${PREV_CLIENT_ADDR}" ]]; then
         ceph osd blocklist add ${CLIENT_ADDR}
         # Confirm rbd_support module's client is blocklisted
         ceph osd blocklist ls | grep -q ${CLIENT_ADDR}
         PREV_CLIENT_ADDR=${CLIENT_ADDR}
     fi
     sleep 10
-    CLIENT_ADDR=$(ceph mgr dump |
-        jq .active_clients[] |
-        jq 'select(.name == "rbd_support")' |
-        jq -r '[.addrvec[0].addr, "/", .addrvec[0].nonce|tostring] | add')
+    CLIENT_ADDR=$(ceph mgr dump \
+        | jq .active_clients[] \
+        | jq 'select(.name == "rbd_support")' \
+        | jq -r '[.addrvec[0].addr, "/", .addrvec[0].nonce|tostring] | add')
     CURRENT_TIME=$(date +%s)
 done
 
@@ -57,11 +57,11 @@ for ((i = 1; i <= 24; i++)); do
         --image ${IMAGE_PREFIX}1 2m && break
     sleep 10
 done
-rbd mirror snapshot schedule ls -p ${POOL} --image ${IMAGE_PREFIX}1 |
-    grep 'every 2m'
+rbd mirror snapshot schedule ls -p ${POOL} --image ${IMAGE_PREFIX}1 \
+    | grep 'every 2m'
 # Verify that the schedule present before client blocklisting is preserved
-rbd mirror snapshot schedule ls -p ${POOL} --image ${IMAGE_PREFIX}1 |
-    grep 'every 1m'
+rbd mirror snapshot schedule ls -p ${POOL} --image ${IMAGE_PREFIX}1 \
+    | grep 'every 1m'
 rbd mirror snapshot schedule rm -p ${POOL} --image ${IMAGE_PREFIX}1 2m
 for ((i = 1; i <= ${NUM_IMAGES}; i++)); do
     rbd mirror snapshot schedule rm -p ${POOL} --image ${IMAGE_PREFIX}$i 1m

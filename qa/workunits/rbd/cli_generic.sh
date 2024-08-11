@@ -902,8 +902,8 @@ test_namespace() {
 get_migration_state() {
     local image=$1
 
-    rbd --format xml status $image |
-        $XMLSTARLET sel -t -v '//status/migration/state'
+    rbd --format xml status $image \
+        | $XMLSTARLET sel -t -v '//status/migration/state'
 }
 
 test_migration() {
@@ -1142,15 +1142,15 @@ test_trash_purge_schedule() {
     test "$(rbd trash purge schedule ls -p rbd2 -R --format json)" = "[]"
 
     for i in $(seq 12); do
-        test "$(rbd trash purge schedule status --format xml |
-            $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd' && break
+        test "$(rbd trash purge schedule status --format xml \
+            | $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd' && break
         sleep 10
     done
     rbd trash purge schedule status
-    test "$(rbd trash purge schedule status --format xml |
-        $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd'
-    test "$(rbd trash purge schedule status -p rbd --format xml |
-        $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd'
+    test "$(rbd trash purge schedule status --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd'
+    test "$(rbd trash purge schedule status -p rbd --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd'
 
     rbd trash purge schedule add 2d 00:17
     rbd trash purge schedule ls | grep 'every 2d starting at 00:17'
@@ -1158,37 +1158,37 @@ test_trash_purge_schedule() {
     expect_fail rbd trash purge schedule ls -p rbd2
     rbd trash purge schedule ls -p rbd2 -R | grep 'every 2d starting at 00:17'
     rbd trash purge schedule ls -p rbd2/ns1 -R | grep 'every 2d starting at 00:17'
-    test "$(rbd trash purge schedule ls -R -p rbd2/ns1 --format xml |
-        $XMLSTARLET sel -t -v '//schedules/schedule/pool')" = "-"
-    test "$(rbd trash purge schedule ls -R -p rbd2/ns1 --format xml |
-        $XMLSTARLET sel -t -v '//schedules/schedule/namespace')" = "-"
-    test "$(rbd trash purge schedule ls -R -p rbd2/ns1 --format xml |
-        $XMLSTARLET sel -t -v '//schedules/schedule/items/item/start_time')" = "00:17:00"
+    test "$(rbd trash purge schedule ls -R -p rbd2/ns1 --format xml \
+        | $XMLSTARLET sel -t -v '//schedules/schedule/pool')" = "-"
+    test "$(rbd trash purge schedule ls -R -p rbd2/ns1 --format xml \
+        | $XMLSTARLET sel -t -v '//schedules/schedule/namespace')" = "-"
+    test "$(rbd trash purge schedule ls -R -p rbd2/ns1 --format xml \
+        | $XMLSTARLET sel -t -v '//schedules/schedule/items/item/start_time')" = "00:17:00"
 
     for i in $(seq 12); do
-        rbd trash purge schedule status --format xml |
-            $XMLSTARLET sel -t -v '//scheduled/item/pool' | grep 'rbd2' && break
+        rbd trash purge schedule status --format xml \
+            | $XMLSTARLET sel -t -v '//scheduled/item/pool' | grep 'rbd2' && break
         sleep 10
     done
     rbd trash purge schedule status
-    rbd trash purge schedule status --format xml |
-        $XMLSTARLET sel -t -v '//scheduled/item/pool' | grep 'rbd2'
-    echo $(rbd trash purge schedule status --format xml |
-        $XMLSTARLET sel -t -v '//scheduled/item/pool') | grep 'rbd rbd2 rbd2'
-    test "$(rbd trash purge schedule status -p rbd --format xml |
-        $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd'
-    test "$(echo $(rbd trash purge schedule status -p rbd2 --format xml |
-        $XMLSTARLET sel -t -v '//scheduled/item/pool'))" = 'rbd2 rbd2'
+    rbd trash purge schedule status --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled/item/pool' | grep 'rbd2'
+    echo $(rbd trash purge schedule status --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled/item/pool') | grep 'rbd rbd2 rbd2'
+    test "$(rbd trash purge schedule status -p rbd --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd'
+    test "$(echo $(rbd trash purge schedule status -p rbd2 --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled/item/pool'))" = 'rbd2 rbd2'
 
-    test "$(echo $(rbd trash purge schedule ls -R --format xml |
-        $XMLSTARLET sel -t -v '//schedules/schedule/items'))" = "2d00:17:00 1d01:30:00"
+    test "$(echo $(rbd trash purge schedule ls -R --format xml \
+        | $XMLSTARLET sel -t -v '//schedules/schedule/items'))" = "2d00:17:00 1d01:30:00"
 
     rbd trash purge schedule add 1d
     rbd trash purge schedule ls | grep 'every 2d starting at 00:17'
     rbd trash purge schedule ls | grep 'every 1d'
 
-    rbd trash purge schedule ls -R --format xml |
-        $XMLSTARLET sel -t -v '//schedules/schedule/items' | grep '2d00:17'
+    rbd trash purge schedule ls -R --format xml \
+        | $XMLSTARLET sel -t -v '//schedules/schedule/items' | grep '2d00:17'
 
     rbd trash purge schedule rm 1d
     rbd trash purge schedule ls | grep 'every 2d starting at 00:17'
@@ -1248,9 +1248,9 @@ test_trash_purge_schedule_recovery() {
     rbd trash purge schedule ls -p rbd3 -R | grep 'rbd3 *ns1 *every 2d'
 
     # Fetch and blocklist the rbd_support module's RADOS client
-    CLIENT_ADDR=$(ceph mgr dump | jq .active_clients[] |
-        jq 'select(.name == "rbd_support")' |
-        jq -r '[.addrvec[0].addr, "/", .addrvec[0].nonce|tostring] | add')
+    CLIENT_ADDR=$(ceph mgr dump | jq .active_clients[] \
+        | jq 'select(.name == "rbd_support")' \
+        | jq -r '[.addrvec[0].addr, "/", .addrvec[0].nonce|tostring] | add')
     ceph osd blocklist add $CLIENT_ADDR
     ceph osd blocklist ls | grep $CLIENT_ADDR
 
@@ -1294,13 +1294,13 @@ test_mirror_snapshot_schedule() {
 
     rbd create $RBD_CREATE_ARGS -s 1 rbd2/ns1/test1
 
-    test "$(rbd mirror image status rbd2/ns1/test1 |
-        grep -c mirror.primary)" = '0'
+    test "$(rbd mirror image status rbd2/ns1/test1 \
+        | grep -c mirror.primary)" = '0'
 
     rbd mirror image enable rbd2/ns1/test1 snapshot
 
-    test "$(rbd mirror image status rbd2/ns1/test1 |
-        grep -c mirror.primary)" = '1'
+    test "$(rbd mirror image status rbd2/ns1/test1 \
+        | grep -c mirror.primary)" = '1'
 
     rbd mirror snapshot schedule add -p rbd2/ns1 --image test1 1m
     expect_fail rbd mirror snapshot schedule ls
@@ -1312,13 +1312,13 @@ test_mirror_snapshot_schedule() {
     test "$(rbd mirror snapshot schedule ls -p rbd2/ns1 --image test1)" = 'every 1m'
 
     for i in $(seq 12); do
-        test "$(rbd mirror image status rbd2/ns1/test1 |
-            grep -c mirror.primary)" -gt '1' && break
+        test "$(rbd mirror image status rbd2/ns1/test1 \
+            | grep -c mirror.primary)" -gt '1' && break
         sleep 10
     done
 
-    test "$(rbd mirror image status rbd2/ns1/test1 |
-        grep -c mirror.primary)" -gt '1'
+    test "$(rbd mirror image status rbd2/ns1/test1 \
+        | grep -c mirror.primary)" -gt '1'
 
     # repeat with kicked in schedule, see https://tracker.ceph.com/issues/53915
     expect_fail rbd mirror snapshot schedule ls
@@ -1330,14 +1330,14 @@ test_mirror_snapshot_schedule() {
     test "$(rbd mirror snapshot schedule ls -p rbd2/ns1 --image test1)" = 'every 1m'
 
     rbd mirror snapshot schedule status
-    test "$(rbd mirror snapshot schedule status --format xml |
-        $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
-    test "$(rbd mirror snapshot schedule status -p rbd2 --format xml |
-        $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
-    test "$(rbd mirror snapshot schedule status -p rbd2/ns1 --format xml |
-        $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
-    test "$(rbd mirror snapshot schedule status -p rbd2/ns1 --image test1 --format xml |
-        $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
+    test "$(rbd mirror snapshot schedule status --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
+    test "$(rbd mirror snapshot schedule status -p rbd2 --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
+    test "$(rbd mirror snapshot schedule status -p rbd2/ns1 --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
+    test "$(rbd mirror snapshot schedule status -p rbd2/ns1 --image test1 --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
 
     rbd mirror image demote rbd2/ns1/test1
     for i in $(seq 12); do
@@ -1400,16 +1400,16 @@ test_mirror_snapshot_schedule_recovery() {
 
     rbd create $RBD_CREATE_ARGS -s 1 rbd3/ns1/test1
     rbd mirror image enable rbd3/ns1/test1 snapshot
-    test "$(rbd mirror image status rbd3/ns1/test1 |
-        grep -c mirror.primary)" = '1'
+    test "$(rbd mirror image status rbd3/ns1/test1 \
+        | grep -c mirror.primary)" = '1'
 
     rbd mirror snapshot schedule add -p rbd3/ns1 --image test1 1m
     test "$(rbd mirror snapshot schedule ls -p rbd3/ns1 --image test1)" = 'every 1m'
 
     # Fetch and blocklist rbd_support module's RADOS client
-    CLIENT_ADDR=$(ceph mgr dump | jq .active_clients[] |
-        jq 'select(.name == "rbd_support")' |
-        jq -r '[.addrvec[0].addr, "/", .addrvec[0].nonce|tostring] | add')
+    CLIENT_ADDR=$(ceph mgr dump | jq .active_clients[] \
+        | jq 'select(.name == "rbd_support")' \
+        | jq -r '[.addrvec[0].addr, "/", .addrvec[0].nonce|tostring] | add')
     ceph osd blocklist add $CLIENT_ADDR
     ceph osd blocklist ls | grep $CLIENT_ADDR
 
@@ -1461,24 +1461,24 @@ test_perf_image_iostat() {
     done
 
     # test specifying pool spec via spec syntax
-    test "$(rbd perf image iostat --format json rbd1 |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test2'
-    test "$(rbd perf image iostat --format json rbd1/ns |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test3'
-    test "$(rbd perf image iostat --format json --rbd-default-pool rbd1 /ns |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test3'
+    test "$(rbd perf image iostat --format json rbd1 \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test2'
+    test "$(rbd perf image iostat --format json rbd1/ns \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test3'
+    test "$(rbd perf image iostat --format json --rbd-default-pool rbd1 /ns \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test3'
 
     # test specifying pool spec via options
-    test "$(rbd perf image iostat --format json --pool rbd2 |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test4'
-    test "$(rbd perf image iostat --format json --pool rbd2 --namespace ns |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test5'
-    test "$(rbd perf image iostat --format json --rbd-default-pool rbd2 --namespace ns |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test5'
+    test "$(rbd perf image iostat --format json --pool rbd2 \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test4'
+    test "$(rbd perf image iostat --format json --pool rbd2 --namespace ns \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test5'
+    test "$(rbd perf image iostat --format json --rbd-default-pool rbd2 --namespace ns \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test5'
 
     # test omitting pool spec (-> GLOBAL_POOL_KEY)
-    test "$(rbd perf image iostat --format json |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test1 test2 test3 test4 test5'
+    test "$(rbd perf image iostat --format json \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test1 test2 test3 test4 test5'
 
     for pid in "${BENCH_PIDS[@]}"; do
         kill $pid
@@ -1512,21 +1512,21 @@ test_perf_image_iostat_recovery() {
         BENCH_PIDS+=($!)
     done
 
-    test "$(rbd perf image iostat --format json rbd3 |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test1'
+    test "$(rbd perf image iostat --format json rbd3 \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test1'
 
     # Fetch and blocklist the rbd_support module's RADOS client
-    CLIENT_ADDR=$(ceph mgr dump | jq .active_clients[] |
-        jq 'select(.name == "rbd_support")' |
-        jq -r '[.addrvec[0].addr, "/", .addrvec[0].nonce|tostring] | add')
+    CLIENT_ADDR=$(ceph mgr dump | jq .active_clients[] \
+        | jq 'select(.name == "rbd_support")' \
+        | jq -r '[.addrvec[0].addr, "/", .addrvec[0].nonce|tostring] | add')
     ceph osd blocklist add $CLIENT_ADDR
     ceph osd blocklist ls | grep $CLIENT_ADDR
 
     expect_fail rbd perf image iostat --format json rbd3/ns
     sleep 10
     for i in $(seq 24); do
-        test "$(rbd perf image iostat --format json rbd3/ns |
-            jq -r 'map(.image) | sort | join(" ")')" = 'test2' && break
+        test "$(rbd perf image iostat --format json rbd3/ns \
+            | jq -r 'map(.image) | sort | join(" ")')" = 'test2' && break
         sleep 10
     done
 
@@ -1550,8 +1550,8 @@ test_mirror_pool_peer_bootstrap_create() {
     rbd pool init rbd2
     rbd mirror pool enable rbd2 pool
 
-    readarray -t MON_ADDRS < <(ceph mon dump |
-        sed -n 's/^[0-9]: \(.*\) mon\.[a-z]$/\1/p')
+    readarray -t MON_ADDRS < <(ceph mon dump \
+        | sed -n 's/^[0-9]: \(.*\) mon\.[a-z]$/\1/p')
 
     # check that all monitors make it to the token even if only one
     # valid monitor is specified
@@ -1648,9 +1648,9 @@ test_tasks_recovery() {
     rbd clone rbd2/img1@snap rbd2/clone1
 
     # Fetch and blocklist rbd_support module's RADOS client
-    CLIENT_ADDR=$(ceph mgr dump | jq .active_clients[] |
-        jq 'select(.name == "rbd_support")' |
-        jq -r '[.addrvec[0].addr, "/", .addrvec[0].nonce|tostring] | add')
+    CLIENT_ADDR=$(ceph mgr dump | jq .active_clients[] \
+        | jq 'select(.name == "rbd_support")' \
+        | jq -r '[.addrvec[0].addr, "/", .addrvec[0].nonce|tostring] | add')
     ceph osd blocklist add $CLIENT_ADDR
     ceph osd blocklist ls | grep $CLIENT_ADDR
 

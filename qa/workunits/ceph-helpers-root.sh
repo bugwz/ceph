@@ -47,18 +47,18 @@ function install() {
 
 function install_one() {
     case $(distro_id) in
-    ubuntu | debian | devuan | softiron)
-        sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
-        ;;
-    centos | fedora | rhel)
-        sudo yum install -y "$@"
-        ;;
-    opensuse* | suse | sles)
-        sudo zypper --non-interactive install "$@"
-        ;;
-    *)
-        echo "$(distro_id) is unknown, $@ will have to be installed manually."
-        ;;
+        ubuntu | debian | devuan | softiron)
+            sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
+            ;;
+        centos | fedora | rhel)
+            sudo yum install -y "$@"
+            ;;
+        opensuse* | suse | sles)
+            sudo zypper --non-interactive install "$@"
+            ;;
+        *)
+            echo "$(distro_id) is unknown, $@ will have to be installed manually."
+            ;;
     esac
 }
 

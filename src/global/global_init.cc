@@ -111,7 +111,7 @@ void global_pre_init(const std::map<std::string, std::string>* defaults, std::ve
 
     // 注意： ceph_argparse_early_args 这个函数的实现位于 src/common 目录中，
     // 比如在使用 ceph-fuse 命令的时候，会发现 src/common 中的相关代码是被打包
-    // 成动态库的，可以通过 dd cep-fuse 命令来查看，也可以通过 nm -D ceph-fuse 
+    // 成动态库的，可以通过 dd cep-fuse 命令来查看，也可以通过 nm -D ceph-fuse
     // 命令来过滤 ceph_argparse_early_args 符号验证。所以在使用的时候有可能会
     // 发生奇怪的现象，比如安装了 16.2.10 版本的 ceph-fuse ，但是本地却安装了
     // 16.2.14 版本的 ceph-common 相关包，当我们执行 ceph-fuse --version 命令

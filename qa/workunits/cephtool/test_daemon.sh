@@ -15,15 +15,15 @@ CEPH=${CEPH:-'sudo ceph'}
 ${CEPH} daemon mon.a version | grep version
 
 # get debug_ms setting and strip it, painfully for reuse
-old_ms=$(${CEPH} daemon mon.a config get debug_ms |
-    grep debug_ms | sed -e 's/.*: //' -e 's/["\}\\]//g')
+old_ms=$(${CEPH} daemon mon.a config get debug_ms \
+    | grep debug_ms | sed -e 's/.*: //' -e 's/["\}\\]//g')
 ${CEPH} daemon mon.a config set debug_ms 13
-new_ms=$(${CEPH} daemon mon.a config get debug_ms |
-    grep debug_ms | sed -e 's/.*: //' -e 's/["\}\\]//g')
+new_ms=$(${CEPH} daemon mon.a config get debug_ms \
+    | grep debug_ms | sed -e 's/.*: //' -e 's/["\}\\]//g')
 [ "$new_ms" = "13/13" ]
 ${CEPH} daemon mon.a config set debug_ms $old_ms
-new_ms=$(${CEPH} daemon mon.a config get debug_ms |
-    grep debug_ms | sed -e 's/.*: //' -e 's/["\}\\]//g')
+new_ms=$(${CEPH} daemon mon.a config get debug_ms \
+    | grep debug_ms | sed -e 's/.*: //' -e 's/["\}\\]//g')
 [ "$new_ms" = "$old_ms" ]
 
 # unregistered/non-existent command

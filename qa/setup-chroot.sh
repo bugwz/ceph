@@ -29,16 +29,16 @@ INSTALL_DIR=
 SRC_DIR=
 while getopts “hr:s:” OPTION; do
     case $OPTION in
-    h)
-        usage
-        exit 1
-        ;;
-    r) INSTALL_DIR=$OPTARG ;;
-    s) SRC_DIR=$OPTARG ;;
-    ?)
-        usage
-        exit
-        ;;
+        h)
+            usage
+            exit 1
+            ;;
+        r) INSTALL_DIR=$OPTARG ;;
+        s) SRC_DIR=$OPTARG ;;
+        ?)
+            usage
+            exit
+            ;;
     esac
 done
 

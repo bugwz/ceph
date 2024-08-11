@@ -61,8 +61,8 @@ function TEST_dashboard() {
     tries=0
     while [[ $tries < 30 ]]; do
         if curl -c $dir/cookiefile -X POST -d '{"username":"admin","password":"admin"}' http://127.0.0.1:$dashboard_port/api/auth; then
-            if curl -b $dir/cookiefile -s http://127.0.0.1:$dashboard_port/api/summary |
-                jq '.health.overall_status' | grep HEALTH_; then
+            if curl -b $dir/cookiefile -s http://127.0.0.1:$dashboard_port/api/summary \
+                | jq '.health.overall_status' | grep HEALTH_; then
                 break
             fi
         fi

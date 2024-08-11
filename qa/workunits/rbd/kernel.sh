@@ -18,13 +18,13 @@ function get_device_dir {
     local POOL=$1
     local IMAGE=$2
     local SNAP=$3
-    rbd device list | tail -n +2 | egrep "\s+$POOL\s+$IMAGE\s+$SNAP\s+" |
-        awk '{print $1;}'
+    rbd device list | tail -n +2 | egrep "\s+$POOL\s+$IMAGE\s+$SNAP\s+" \
+        | awk '{print $1;}'
 }
 
 function clean_up {
-    [ -e /dev/rbd/rbd/testimg1@snap1 ] &&
-        sudo rbd device unmap /dev/rbd/rbd/testimg1@snap1
+    [ -e /dev/rbd/rbd/testimg1@snap1 ] \
+        && sudo rbd device unmap /dev/rbd/rbd/testimg1@snap1
     if [ -e /dev/rbd/rbd/testimg1 ]; then
         sudo rbd device unmap /dev/rbd/rbd/testimg1
         rbd snap purge testimg1 || true

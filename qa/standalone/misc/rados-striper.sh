@@ -80,8 +80,8 @@ function run() {
     rados --pool rbd --striper rmxattr toyfile somexattr || return 1
 
     local attr_not_found_str="No data available"
-    [ $(uname) = FreeBSD ] &&
-        attr_not_found_str="Attribute not found"
+    [ $(uname) = FreeBSD ] \
+        && attr_not_found_str="Attribute not found"
     expect_failure $dir "$attr_not_found_str" \
         rados --pool rbd --striper getxattr toyfile somexattr || return 1
     expect_failure $dir "$attr_not_found_str" \

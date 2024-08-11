@@ -139,17 +139,17 @@ _sudo sync
 [ "$(dd if=${DATA} bs=1M | md5)" = "$(rbd -p ${POOL} --no-progress export ${IMAGE} - | md5)" ]
 
 echo trim test
-provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-    $XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
-used=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-    $XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
+provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
+used=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
 [ "${used}" -eq "${provisioned}" ]
 _sudo newfs -E ${DEV}
 _sudo sync
-provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-    $XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
-used=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-    $XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
+provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
+used=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
 [ "${used}" -lt "${provisioned}" ]
 
 echo resize test

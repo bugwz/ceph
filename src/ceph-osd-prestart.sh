@@ -10,18 +10,18 @@ eval set -- "$(${GETOPT} -o i: --long id:,cluster: -- $@)"
 
 while true; do
     case "$1" in
-    -i | --id)
-        id=$2
-        shift 2
-        ;;
-    --cluster)
-        cluster=$2
-        shift 2
-        ;;
-    --)
-        shift
-        break
-        ;;
+        -i | --id)
+            id=$2
+            shift 2
+            ;;
+        --cluster)
+            cluster=$2
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
     esac
 done
 

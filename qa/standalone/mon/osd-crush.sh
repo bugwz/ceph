@@ -39,19 +39,19 @@ function TEST_crush_rule_create_simple() {
 
     run_mon $dir a || return 1
 
-    ceph --format xml osd crush rule dump replicated_rule |
-        egrep '<op>take</op><item>[^<]+</item><item_name>default</item_name>' |
-        grep '<op>choose_firstn</op><num>0</num><type>osd</type>' || return 1
+    ceph --format xml osd crush rule dump replicated_rule \
+        | egrep '<op>take</op><item>[^<]+</item><item_name>default</item_name>' \
+        | grep '<op>choose_firstn</op><num>0</num><type>osd</type>' || return 1
     local rule=rule0
     local root=host1
     ceph osd crush add-bucket $root host
     local failure_domain=osd
     ceph osd crush rule create-simple $rule $root $failure_domain || return 1
-    ceph osd crush rule create-simple $rule $root $failure_domain 2>&1 |
-        grep "$rule already exists" || return 1
-    ceph --format xml osd crush rule dump $rule |
-        egrep '<op>take</op><item>[^<]+</item><item_name>'$root'</item_name>' |
-        grep '<op>choose_firstn</op><num>0</num><type>'$failure_domain'</type>' || return 1
+    ceph osd crush rule create-simple $rule $root $failure_domain 2>&1 \
+        | grep "$rule already exists" || return 1
+    ceph --format xml osd crush rule dump $rule \
+        | egrep '<op>take</op><item>[^<]+</item><item_name>'$root'</item_name>' \
+        | grep '<op>choose_firstn</op><num>0</num><type>'$failure_domain'</type>' || return 1
     ceph osd crush rule rm $rule || return 1
 }
 
@@ -62,10 +62,10 @@ function TEST_crush_rule_dump() {
 
     local rule=rule1
     ceph osd crush rule create-erasure $rule || return 1
-    test $(ceph --format json osd crush rule dump $rule |
-        jq ".rule_name == \"$rule\"") == true || return 1
-    test $(ceph --format json osd crush rule dump |
-        jq "map(select(.rule_name == \"$rule\")) | length == 1") == true || return 1
+    test $(ceph --format json osd crush rule dump $rule \
+        | jq ".rule_name == \"$rule\"") == true || return 1
+    test $(ceph --format json osd crush rule dump \
+        | jq "map(select(.rule_name == \"$rule\")) | length == 1") == true || return 1
     ! ceph osd crush rule dump non_existent_rule || return 1
     ceph osd crush rule rm $rule || return 1
 }
@@ -93,11 +93,11 @@ function TEST_crush_rule_create_erasure() {
     # create a new rule with the default profile, implicitly
     #
     ceph osd crush rule create-erasure $rule || return 1
-    ceph osd crush rule create-erasure $rule 2>&1 |
-        grep "$rule already exists" || return 1
-    ceph --format xml osd crush rule dump $rule |
-        egrep '<op>take</op><item>[^<]+</item><item_name>default</item_name>' |
-        grep '<op>chooseleaf_indep</op><num>0</num><type>host</type>' || return 1
+    ceph osd crush rule create-erasure $rule 2>&1 \
+        | grep "$rule already exists" || return 1
+    ceph --format xml osd crush rule dump $rule \
+        | egrep '<op>take</op><item>[^<]+</item><item_name>default</item_name>' \
+        | grep '<op>chooseleaf_indep</op><num>0</num><type>host</type>' || return 1
     ceph osd crush rule rm $rule || return 1
     ! ceph osd crush rule ls | grep $rule || return 1
     #
