@@ -2,12 +2,12 @@
 if [ -f ~/secrets ]; then
     source ~/secrets
 fi
-subm=`which subscription-manager`
+subm=$(which subscription-manager)
 if [ ${#subm} -eq 0 ]; then
     sudo yum -y update
     exit
 fi
-subst=`sudo subscription-manager status | grep "^Overall" | awk '{print $NF}'`
+subst=$(sudo subscription-manager status | grep "^Overall" | awk '{print $NF}')
 if [ $subst == 'Unknown' ]; then
     mynameis=${subscrname:-'inigomontoya'}
     mypassis=${subscrpassword:-'youkeelmyfatherpreparetodie'}

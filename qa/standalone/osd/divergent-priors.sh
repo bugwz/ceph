@@ -41,13 +41,12 @@ function run() {
     CEPH_ARGS+="--osd_min_pg_log_entries=$loglen --osd_max_pg_log_entries=$loglen --osd_pg_log_trim_min=$trim "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
     done
 }
-
 
 # Special case divergence test
 #	Test handling of divergent entries with prior_version
@@ -64,9 +63,8 @@ function TEST_divergent() {
     local osds="$(seq 0 $(expr $num_osds - 1))"
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    for i in $osds
-    do
-      run_osd $dir $i || return 1
+    for i in $osds; do
+        run_osd $dir $i || return 1
     done
 
     ceph osd set noout
@@ -84,19 +82,17 @@ function TEST_divergent() {
     echo "primary and soon to be divergent is $divergent"
     ceph pg dump pgs
     local non_divergent=""
-    for i in $osds
-    do
-      if [ "$i" = "$divergent" ]; then
-	  continue
-      fi
-      non_divergent="$non_divergent $i"
+    for i in $osds; do
+        if [ "$i" = "$divergent" ]; then
+            continue
+        fi
+        non_divergent="$non_divergent $i"
     done
 
     echo "writing initial objects"
     # write a bunch of objects
-    for i in $(seq 1 $testobjects)
-    do
-      rados -p $poolname put existing_$i $dummyfile
+    for i in $(seq 1 $testobjects); do
+        rados -p $poolname put existing_$i $dummyfile
     done
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
@@ -106,9 +102,8 @@ function TEST_divergent() {
     # blackhole non_divergent
     echo "blackholing osds $non_divergent"
     ceph pg dump pgs
-    for i in $non_divergent
-    do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
+    for i in $non_divergent; do
+        CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
     done
 
     local case5=$testobjects
@@ -126,25 +121,21 @@ function TEST_divergent() {
     echo 'killing all the osds'
     ceph pg dump pgs
     kill_daemons $dir KILL osd || return 1
-    for i in $osds
-    do
-      ceph osd down osd.$i
+    for i in $osds; do
+        ceph osd down osd.$i
     done
-    for i in $non_divergent
-    do
-      ceph osd out osd.$i
+    for i in $non_divergent; do
+        ceph osd out osd.$i
     done
 
     # bring up non-divergent
     echo "bringing up non_divergent $non_divergent"
     ceph pg dump pgs
-    for i in $non_divergent
-    do
-      activate_osd $dir $i || return 1
+    for i in $non_divergent; do
+        activate_osd $dir $i || return 1
     done
-    for i in $non_divergent
-    do
-      ceph osd in osd.$i
+    for i in $non_divergent; do
+        ceph osd in osd.$i
     done
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
@@ -158,9 +149,8 @@ function TEST_divergent() {
     # ensure no recovery of up osds first
     echo 'delay recovery'
     ceph pg dump pgs
-    for i in $non_divergent
-    do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
+    for i in $non_divergent; do
+        CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
     done
 
     # bring in our divergent friend
@@ -198,25 +188,22 @@ function TEST_divergent() {
     echo "allowing recovery"
     ceph pg dump pgs
     # Set osd_recovery_delay_start back to 0 and kick the queue
-    for i in $osds
-    do
-	 ceph tell osd.$i debug kick_recovery_wq 0
+    for i in $osds; do
+        ceph tell osd.$i debug kick_recovery_wq 0
     done
 
     echo 'reading divergent objects'
     ceph pg dump pgs
-    for i in $(seq 1 $(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE))
-    do
-      rados -p $poolname get existing_$i $dir/existing || return 1
+    for i in $(seq 1 $(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE)); do
+        rados -p $poolname get existing_$i $dir/existing || return 1
     done
     rm -f $dir/existing
 
     grep _merge_object_divergent_entries $(find $dir -name '*osd*log')
     # Check for _merge_object_divergent_entries for case #5
-    if ! grep -q "_merge_object_divergent_entries.*cannot roll back, removing and adding to missing" $(find $dir -name '*osd*log')
-    then
-	    echo failure
-	    return 1
+    if ! grep -q "_merge_object_divergent_entries.*cannot roll back, removing and adding to missing" $(find $dir -name '*osd*log'); then
+        echo failure
+        return 1
     fi
     echo "success"
 
@@ -235,9 +222,8 @@ function TEST_divergent_ec() {
     local osds="$(seq 0 $(expr $num_osds - 1))"
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    for i in $osds
-    do
-      run_osd $dir $i || return 1
+    for i in $osds; do
+        run_osd $dir $i || return 1
     done
 
     ceph osd set noout
@@ -253,19 +239,17 @@ function TEST_divergent_ec() {
     echo "primary and soon to be divergent is $divergent"
     ceph pg dump pgs
     local non_divergent=""
-    for i in $osds
-    do
-      if [ "$i" = "$divergent" ]; then
-	  continue
-      fi
-      non_divergent="$non_divergent $i"
+    for i in $osds; do
+        if [ "$i" = "$divergent" ]; then
+            continue
+        fi
+        non_divergent="$non_divergent $i"
     done
 
     echo "writing initial objects"
     # write a bunch of objects
-    for i in $(seq 1 $testobjects)
-    do
-      rados -p $poolname put existing_$i $dummyfile
+    for i in $(seq 1 $testobjects); do
+        rados -p $poolname put existing_$i $dummyfile
     done
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
@@ -275,9 +259,8 @@ function TEST_divergent_ec() {
     # blackhole non_divergent
     echo "blackholing osds $non_divergent"
     ceph pg dump pgs
-    for i in $non_divergent
-    do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
+    for i in $non_divergent; do
+        CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
     done
 
     # Write some soon to be divergent
@@ -294,25 +277,21 @@ function TEST_divergent_ec() {
     echo 'killing all the osds'
     ceph pg dump pgs
     kill_daemons $dir KILL osd || return 1
-    for i in $osds
-    do
-      ceph osd down osd.$i
+    for i in $osds; do
+        ceph osd down osd.$i
     done
-    for i in $non_divergent
-    do
-      ceph osd out osd.$i
+    for i in $non_divergent; do
+        ceph osd out osd.$i
     done
 
     # bring up non-divergent
     echo "bringing up non_divergent $non_divergent"
     ceph pg dump pgs
-    for i in $non_divergent
-    do
-      activate_osd $dir $i || return 1
+    for i in $non_divergent; do
+        activate_osd $dir $i || return 1
     done
-    for i in $non_divergent
-    do
-      ceph osd in osd.$i
+    for i in $non_divergent; do
+        ceph osd in osd.$i
     done
 
     sleep 5
@@ -327,11 +306,10 @@ function TEST_divergent_ec() {
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
 
     # Dump logs
-    for i in $non_divergent
-    do
-      kill_daemons $dir KILL osd.$i || return 1
-      _objectstore_tool_nodown $dir $i --op log --pgid $pgid
-      activate_osd $dir $i || return 1
+    for i in $non_divergent; do
+        kill_daemons $dir KILL osd.$i || return 1
+        _objectstore_tool_nodown $dir $i --op log --pgid $pgid
+        activate_osd $dir $i || return 1
     done
     _objectstore_tool_nodown $dir $divergent --op log --pgid $pgid
 
@@ -340,9 +318,8 @@ function TEST_divergent_ec() {
     # ensure no recovery of up osds first
     echo 'delay recovery'
     ceph pg dump pgs
-    for i in $non_divergent
-    do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
+    for i in $non_divergent; do
+        CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
     done
 
     # bring in our divergent friend
@@ -380,32 +357,29 @@ function TEST_divergent_ec() {
     echo "allowing recovery"
     ceph pg dump pgs
     # Set osd_recovery_delay_start back to 0 and kick the queue
-    for i in $osds
-    do
-	 ceph tell osd.$i debug kick_recovery_wq 0
+    for i in $osds; do
+        ceph tell osd.$i debug kick_recovery_wq 0
     done
 
     echo 'reading divergent objects'
     ceph pg dump pgs
-    for i in $(seq 1 $(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE))
-    do
-      rados -p $poolname get existing_$i $dir/existing || return 1
+    for i in $(seq 1 $(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE)); do
+        rados -p $poolname get existing_$i $dir/existing || return 1
     done
     rm -f $dir/existing
 
     grep _merge_object_divergent_entries $(find $dir -name '*osd*log')
     # Check for _merge_object_divergent_entries for case #3
     # XXX: Not reproducing this case
-#    if ! grep -q "_merge_object_divergent_entries.* missing, .* adjusting" $(find $dir -name '*osd*log')
-#    then
-#	echo failure
-#	return 1
-#    fi
+    #    if ! grep -q "_merge_object_divergent_entries.* missing, .* adjusting" $(find $dir -name '*osd*log')
+    #    then
+    #	echo failure
+    #	return 1
+    #    fi
     # Check for _merge_object_divergent_entries for case #4
-    if ! grep -q "_merge_object_divergent_entries.*rolled back" $(find $dir -name '*osd*log')
-    then
-	echo failure
-	return 1
+    if ! grep -q "_merge_object_divergent_entries.*rolled back" $(find $dir -name '*osd*log'); then
+        echo failure
+        return 1
     fi
     echo "success"
 
@@ -428,9 +402,8 @@ function TEST_divergent_2() {
     local osds="$(seq 0 $(expr $num_osds - 1))"
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    for i in $osds
-    do
-      run_osd $dir $i || return 1
+    for i in $osds; do
+        run_osd $dir $i || return 1
     done
 
     ceph osd set noout
@@ -448,19 +421,17 @@ function TEST_divergent_2() {
     echo "primary and soon to be divergent is $divergent"
     ceph pg dump pgs
     local non_divergent=""
-    for i in $osds
-    do
-      if [ "$i" = "$divergent" ]; then
-	  continue
-      fi
-      non_divergent="$non_divergent $i"
+    for i in $osds; do
+        if [ "$i" = "$divergent" ]; then
+            continue
+        fi
+        non_divergent="$non_divergent $i"
     done
 
     echo "writing initial objects"
     # write a bunch of objects
-    for i in $(seq 1 $testobjects)
-    do
-      rados -p $poolname put existing_$i $dummyfile
+    for i in $(seq 1 $testobjects); do
+        rados -p $poolname put existing_$i $dummyfile
     done
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
@@ -470,29 +441,25 @@ function TEST_divergent_2() {
     # blackhole non_divergent
     echo "blackholing osds $non_divergent"
     ceph pg dump pgs
-    for i in $non_divergent
-    do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
+    for i in $non_divergent; do
+        CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
     done
 
     # Do some creates to hit case 2
     echo 'create new divergent objects'
-    for i in $(seq 1 $DIVERGENT_CREATE)
-    do
-      rados -p $poolname create newobject_$i &
+    for i in $(seq 1 $DIVERGENT_CREATE); do
+        rados -p $poolname create newobject_$i &
     done
     # Write some soon to be divergent
     echo 'writing divergent objects'
-    for i in $(seq 1 $DIVERGENT_WRITE)
-    do
-      rados -p $poolname put existing_$i $dummyfile2 &
+    for i in $(seq 1 $DIVERGENT_WRITE); do
+        rados -p $poolname put existing_$i $dummyfile2 &
     done
     # Remove some soon to be divergent
     echo 'remove divergent objects'
-    for i in $(seq 1 $DIVERGENT_REMOVE)
-    do
-      rmi=$(expr $i + $DIVERGENT_WRITE)
-      rados -p $poolname rm existing_$rmi &
+    for i in $(seq 1 $DIVERGENT_REMOVE); do
+        rmi=$(expr $i + $DIVERGENT_WRITE)
+        rados -p $poolname rm existing_$rmi &
     done
     sleep 10
     killall -9 rados
@@ -501,25 +468,21 @@ function TEST_divergent_2() {
     echo 'killing all the osds'
     ceph pg dump pgs
     kill_daemons $dir KILL osd || return 1
-    for i in $osds
-    do
-      ceph osd down osd.$i
+    for i in $osds; do
+        ceph osd down osd.$i
     done
-    for i in $non_divergent
-    do
-      ceph osd out osd.$i
+    for i in $non_divergent; do
+        ceph osd out osd.$i
     done
 
     # bring up non-divergent
     echo "bringing up non_divergent $non_divergent"
     ceph pg dump pgs
-    for i in $non_divergent
-    do
-      activate_osd $dir $i || return 1
+    for i in $non_divergent; do
+        activate_osd $dir $i || return 1
     done
-    for i in $non_divergent
-    do
-      ceph osd in osd.$i
+    for i in $non_divergent; do
+        ceph osd in osd.$i
     done
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
@@ -535,9 +498,8 @@ function TEST_divergent_2() {
     # ensure no recovery of up osds first
     echo 'delay recovery'
     ceph pg dump pgs
-    for i in $non_divergent
-    do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
+    for i in $non_divergent; do
+        CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
     done
 
     # bring in our divergent friend
@@ -584,35 +546,30 @@ function TEST_divergent_2() {
     echo "allowing recovery"
     ceph pg dump pgs
     # Set osd_recovery_delay_start back to 0 and kick the queue
-    for i in $osds
-    do
-	 ceph tell osd.$i debug kick_recovery_wq 0
+    for i in $osds; do
+        ceph tell osd.$i debug kick_recovery_wq 0
     done
 
     echo 'reading divergent objects'
     ceph pg dump pgs
-    for i in $(seq 1 $(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE))
-    do
-      rados -p $poolname get existing_$i $dir/existing || return 1
+    for i in $(seq 1 $(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE)); do
+        rados -p $poolname get existing_$i $dir/existing || return 1
     done
-    for i in $(seq 1 $DIVERGENT_CREATE)
-    do
-      rados -p $poolname get newobject_$i $dir/existing
+    for i in $(seq 1 $DIVERGENT_CREATE); do
+        rados -p $poolname get newobject_$i $dir/existing
     done
     rm -f $dir/existing
 
     grep _merge_object_divergent_entries $(find $dir -name '*osd*log')
     # Check for _merge_object_divergent_entries for case #1
-    if ! grep -q "_merge_object_divergent_entries: more recent entry found:" $(find $dir -name '*osd*log')
-    then
-	    echo failure
-	    return 1
+    if ! grep -q "_merge_object_divergent_entries: more recent entry found:" $(find $dir -name '*osd*log'); then
+        echo failure
+        return 1
     fi
     # Check for _merge_object_divergent_entries for case #2
-    if ! grep -q "_merge_object_divergent_entries.*prior_version or op type indicates creation" $(find $dir -name '*osd*log')
-    then
-	    echo failure
-	    return 1
+    if ! grep -q "_merge_object_divergent_entries.*prior_version or op type indicates creation" $(find $dir -name '*osd*log'); then
+        echo failure
+        return 1
     fi
     echo "success"
 
@@ -635,9 +592,8 @@ function TEST_divergent_3() {
     local osds="$(seq 0 $(expr $num_osds - 1))"
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    for i in $osds
-    do
-      run_osd $dir $i || return 1
+    for i in $osds; do
+        run_osd $dir $i || return 1
     done
 
     ceph osd set noout
@@ -658,19 +614,17 @@ function TEST_divergent_3() {
     echo "primary and soon to be divergent is $divergent"
     ceph pg dump pgs
     local non_divergent=""
-    for i in $osds
-    do
-      if [ "$i" = "$divergent" ]; then
-	  continue
-      fi
-      non_divergent="$non_divergent $i"
+    for i in $osds; do
+        if [ "$i" = "$divergent" ]; then
+            continue
+        fi
+        non_divergent="$non_divergent $i"
     done
 
     echo "writing initial objects"
     # write a bunch of objects
-    for i in $(seq 1 $testobjects)
-    do
-      rados -p $poolname put existing_$i $dummyfile
+    for i in $(seq 1 $testobjects); do
+        rados -p $poolname put existing_$i $dummyfile
     done
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
@@ -680,29 +634,25 @@ function TEST_divergent_3() {
     # blackhole non_divergent
     echo "blackholing osds $non_divergent"
     ceph pg dump pgs
-    for i in $non_divergent
-    do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
+    for i in $non_divergent; do
+        CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
     done
 
     # Do some creates to hit case 2
     echo 'create new divergent objects'
-    for i in $(seq 1 $DIVERGENT_CREATE)
-    do
-      rados -p $poolname create newobject_$i &
+    for i in $(seq 1 $DIVERGENT_CREATE); do
+        rados -p $poolname create newobject_$i &
     done
     # Write some soon to be divergent
     echo 'writing divergent objects'
-    for i in $(seq 1 $DIVERGENT_WRITE)
-    do
-      rados -p $poolname put existing_$i $dummyfile2 &
+    for i in $(seq 1 $DIVERGENT_WRITE); do
+        rados -p $poolname put existing_$i $dummyfile2 &
     done
     # Remove some soon to be divergent
     echo 'remove divergent objects'
-    for i in $(seq 1 $DIVERGENT_REMOVE)
-    do
-      rmi=$(expr $i + $DIVERGENT_WRITE)
-      rados -p $poolname rm existing_$rmi &
+    for i in $(seq 1 $DIVERGENT_REMOVE); do
+        rmi=$(expr $i + $DIVERGENT_WRITE)
+        rados -p $poolname rm existing_$rmi &
     done
     sleep 10
     killall -9 rados
@@ -711,25 +661,21 @@ function TEST_divergent_3() {
     echo 'killing all the osds'
     ceph pg dump pgs
     kill_daemons $dir KILL osd || return 1
-    for i in $osds
-    do
-      ceph osd down osd.$i
+    for i in $osds; do
+        ceph osd down osd.$i
     done
-    for i in $non_divergent
-    do
-      ceph osd out osd.$i
+    for i in $non_divergent; do
+        ceph osd out osd.$i
     done
 
     # bring up non-divergent
     echo "bringing up non_divergent $non_divergent"
     ceph pg dump pgs
-    for i in $non_divergent
-    do
-      activate_osd $dir $i || return 1
+    for i in $non_divergent; do
+        activate_osd $dir $i || return 1
     done
-    for i in $non_divergent
-    do
-      ceph osd in osd.$i
+    for i in $non_divergent; do
+        ceph osd in osd.$i
     done
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
@@ -745,9 +691,8 @@ function TEST_divergent_3() {
     # ensure no recovery of up osds first
     echo 'delay recovery'
     ceph pg dump pgs
-    for i in $non_divergent
-    do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
+    for i in $non_divergent; do
+        CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
     done
 
     # bring in our divergent friend
@@ -794,35 +739,30 @@ function TEST_divergent_3() {
     echo "allowing recovery"
     ceph pg dump pgs
     # Set osd_recovery_delay_start back to 0 and kick the queue
-    for i in $osds
-    do
-	 ceph tell osd.$i debug kick_recovery_wq 0
+    for i in $osds; do
+        ceph tell osd.$i debug kick_recovery_wq 0
     done
 
     echo 'reading divergent objects'
     ceph pg dump pgs
-    for i in $(seq 1 $(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE))
-    do
-      rados -p $poolname get existing_$i $dir/existing || return 1
+    for i in $(seq 1 $(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE)); do
+        rados -p $poolname get existing_$i $dir/existing || return 1
     done
-    for i in $(seq 1 $DIVERGENT_CREATE)
-    do
-      rados -p $poolname get newobject_$i $dir/existing
+    for i in $(seq 1 $DIVERGENT_CREATE); do
+        rados -p $poolname get newobject_$i $dir/existing
     done
     rm -f $dir/existing
 
     grep _merge_object_divergent_entries $(find $dir -name '*osd*log')
     # Check for _merge_object_divergent_entries for case #1
-    if ! grep -q "_merge_object_divergent_entries: more recent entry found:" $(find $dir -name '*osd*log')
-    then
-	    echo failure
-	    return 1
+    if ! grep -q "_merge_object_divergent_entries: more recent entry found:" $(find $dir -name '*osd*log'); then
+        echo failure
+        return 1
     fi
     # Check for _merge_object_divergent_entries for case #2
-    if ! grep -q "_merge_object_divergent_entries.*prior_version or op type indicates creation" $(find $dir -name '*osd*log')
-    then
-	    echo failure
-	    return 1
+    if ! grep -q "_merge_object_divergent_entries.*prior_version or op type indicates creation" $(find $dir -name '*osd*log'); then
+        echo failure
+        return 1
     fi
     echo "success"
 
@@ -831,7 +771,6 @@ function TEST_divergent_3() {
     delete_pool $poolname
     kill_daemons $dir || return 1
 }
-
 
 main divergent-priors "$@"
 

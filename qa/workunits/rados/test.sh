@@ -31,31 +31,28 @@ for f in \
     api_c_read_operations \
     list_parallel \
     open_pools_parallel \
-    delete_pools_parallel
-do
+    delete_pools_parallel; do
     if [ $parallel -eq 1 ]; then
-	r=`printf '%25s' $f`
-	ff=`echo $f | awk '{print $1}'`
-	bash -o pipefail -exc "ceph_test_rados_$f $color 2>&1 | tee ceph_test_rados_$ff.log | sed \"s/^/$r: /\"" &
-	pid=$!
-	echo "test $f on pid $pid"
-	pids[$f]=$pid
+        r=$(printf '%25s' $f)
+        ff=$(echo $f | awk '{print $1}')
+        bash -o pipefail -exc "ceph_test_rados_$f $color 2>&1 | tee ceph_test_rados_$ff.log | sed \"s/^/$r: /\"" &
+        pid=$!
+        echo "test $f on pid $pid"
+        pids[$f]=$pid
     else
-	ceph_test_rados_$f
+        ceph_test_rados_$f
     fi
 done
 
 ret=0
 if [ $parallel -eq 1 ]; then
-for t in "${!pids[@]}"
-do
-  pid=${pids[$t]}
-  if ! wait $pid
-  then
-    echo "error in $t ($pid)"
-    ret=1
-  fi
-done
+    for t in "${!pids[@]}"; do
+        pid=${pids[$t]}
+        if ! wait $pid; then
+            echo "error in $t ($pid)"
+            ret=1
+        fi
+    done
 fi
 
 exit $ret

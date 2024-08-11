@@ -14,33 +14,31 @@
 
 #include "common/hostname.h"
 
-#include <unistd.h>
-
 #include "include/compat.h"
+
+#include <unistd.h>
 
 std::string ceph_get_hostname()
 {
-  // are we in a container?  if so we would prefer the *real* hostname.
-  const char *node_name = getenv("NODE_NAME");
-  if (node_name) {
-    return node_name;
-  }
+    // are we in a container?  if so we would prefer the *real* hostname.
+    const char* node_name = getenv("NODE_NAME");
+    if (node_name) {
+        return node_name;
+    }
 
-  char buf[1024];
-  gethostname(buf, 1024);
-  return std::string(buf);
+    char buf[1024];
+    gethostname(buf, 1024);
+    return std::string(buf);
 }
 
 std::string ceph_get_short_hostname()
 {
-  std::string hostname = ceph_get_hostname();
-  size_t pos = hostname.find('.');
-  if (pos == std::string::npos)
-  {
-    return hostname;
-  }
-  else
-  {
-    return hostname.substr(0, pos);
-  }
+    std::string hostname = ceph_get_hostname();
+    size_t pos = hostname.find('.');
+    if (pos == std::string::npos) {
+        return hostname;
+    }
+    else {
+        return hostname.substr(0, pos);
+    }
 }

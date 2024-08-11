@@ -32,7 +32,7 @@ function run() {
     export poolname=test
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -44,7 +44,7 @@ function below_margin() {
     shift
     local -i target=$1
 
-    return $(( $check <= $target && $check >= $target - $margin ? 0 : 1 ))
+    return $(($check <= $target && $check >= $target - $margin ? 0 : 1))
 }
 
 function above_margin() {
@@ -52,7 +52,7 @@ function above_margin() {
     shift
     local -i target=$1
 
-    return $(( $check >= $target && $check <= $target + $margin ? 0 : 1 ))
+    return $(($check >= $target && $check <= $target + $margin ? 0 : 1))
 }
 
 FIND_UPACT='grep "pg[[]${PG}.*backfilling.*update_calc_stats " $log | tail -1 | sed "s/.*[)] \([[][^ p]*\).*$/\1/"'
@@ -73,20 +73,17 @@ function check() {
     local check_setup=${11:-true}
 
     local log=$(grep -l +backfilling $dir/osd.$primary.log)
-    if [ $check_setup = "true" ];
-    then
-      local alllogs=$(grep -l +backfilling $dir/osd.*.log)
-      if [ "$(echo "$alllogs" | wc -w)" != "1" ];
-      then
-        echo "Test setup failure, a single OSD should have performed backfill"
-        return 1
-      fi
+    if [ $check_setup = "true" ]; then
+        local alllogs=$(grep -l +backfilling $dir/osd.*.log)
+        if [ "$(echo "$alllogs" | wc -w)" != "1" ]; then
+            echo "Test setup failure, a single OSD should have performed backfill"
+            return 1
+        fi
     fi
 
     local addp=" "
-    if [ "$type" = "erasure" ];
-    then
-      addp="p"
+    if [ "$type" = "erasure" ]; then
+        addp="p"
     fi
 
     UPACT=$(eval $FIND_UPACT)
@@ -111,15 +108,14 @@ function check() {
     above_margin $LAST $misplaced_end || return 1
 
     # This is the value of set into MISSING_ON_PRIMARY
-    if [ -n "$primary_start" ];
-    then
-      which="shard $primary"
-      FIRST=$(eval $FIND_FIRST)
-      [ -n "$FIRST" ] || return 1
-      below_margin $FIRST $primary_start || return 1
-      LAST=$(eval $FIND_LAST)
-      [ -n "$LAST" ] || return 1
-      above_margin $LAST $primary_end || return 1
+    if [ -n "$primary_start" ]; then
+        which="shard $primary"
+        FIRST=$(eval $FIND_FIRST)
+        [ -n "$FIRST" ] || return 1
+        below_margin $FIRST $primary_start || return 1
+        LAST=$(eval $FIND_LAST)
+        [ -n "$LAST" ] || return 1
+        above_margin $LAST $primary_end || return 1
     fi
 }
 
@@ -147,9 +143,8 @@ function TEST_backfill_sizeup() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     ceph osd set nobackfill
@@ -168,8 +163,6 @@ function TEST_backfill_sizeup() {
     delete_pool $poolname
     kill_daemons $dir || return 1
 }
-
-
 
 # [1] -> [0, 2, 4]
 # degraded 1000 -> 0
@@ -195,9 +188,8 @@ function TEST_backfill_sizeup_out() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local PG=$(get_pg $poolname obj1)
@@ -218,7 +210,6 @@ function TEST_backfill_sizeup_out() {
     delete_pool $poolname
     kill_daemons $dir || return 1
 }
-
 
 # [1 0] -> [1,2]/[1,0]
 # misplaced 500 -> 0
@@ -244,9 +235,8 @@ function TEST_backfill_out() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local PG=$(get_pg $poolname obj1)
@@ -265,7 +255,6 @@ function TEST_backfill_out() {
     delete_pool $poolname
     kill_daemons $dir || return 1
 }
-
 
 # [0, 1] -> [0, 2]/[0]
 # osd 1 down/out
@@ -292,9 +281,8 @@ function TEST_backfill_down_out() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local PG=$(get_pg $poolname obj1)
@@ -316,7 +304,6 @@ function TEST_backfill_down_out() {
     delete_pool $poolname
     kill_daemons $dir || return 1
 }
-
 
 # [1, 0] -> [2, 3, 4]
 # degraded 500 -> 0
@@ -343,9 +330,8 @@ function TEST_backfill_out2() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local PG=$(get_pg $poolname obj1)
@@ -375,7 +361,6 @@ function TEST_backfill_out2() {
     kill_daemons $dir || return 1
 }
 
-
 # [0,1] ->  [2,4,3]/[0,1]
 # degraded 1000 -> 0
 # misplaced 1000 -> 500
@@ -401,9 +386,8 @@ function TEST_backfill_sizeup4_allout() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local PG=$(get_pg $poolname obj1)
@@ -432,7 +416,6 @@ function TEST_backfill_sizeup4_allout() {
     kill_daemons $dir || return 1
 }
 
-
 # [1,2,0] ->  [3]/[1,2]
 # misplaced 1000 -> 500
 # state ends at active+clean+remapped [3]/[3,1]
@@ -454,9 +437,8 @@ function TEST_backfill_remapped() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local PG=$(get_pg $poolname obj1)
@@ -466,10 +448,8 @@ function TEST_backfill_remapped() {
 
     ceph osd set nobackfill
     ceph osd out osd.${otherosd}
-    for i in $(get_osds $poolname obj1)
-    do
-        if [ $i = $primary -o $i = $otherosd ];
-        then
+    for i in $(get_osds $poolname obj1); do
+        if [ $i = $primary -o $i = $otherosd ]; then
             continue
         fi
         ceph osd out osd.$i
@@ -506,7 +486,6 @@ function TEST_backfill_remapped() {
 # PG_STAT OBJECTS MISSING_ON_PRIMARY DEGRADED MISPLACED UNFOUND BYTES LOG DISK_LOG STATE                                STATE_STAMP                VERSION REPORTED UP         UP_PRIMARY ACTING  ACTING_PRIMARY LAST_SCRUB SCRUB_STAMP                LAST_DEEP_SCRUB DEEP_SCRUB_STAMP
 # 1.0         500                  0      0      1500       0     0 100      100 active+degraded+remapped+backfilling 2017-10-31 16:53:39.467126  19'500   23:615 [4,3,NONE]          4 [1,0,2]              1        0'0 2017-10-31 16:52:59.624429             0'0 2017-10-31 16:52:59.624429
 
-
 # ENDS:
 
 # PG_STAT OBJECTS MISSING_ON_PRIMARY DEGRADED MISPLACED UNFOUND BYTES LOG DISK_LOG STATE                 STATE_STAMP                VERSION REPORTED UP         UP_PRIMARY ACTING  ACTING_PRIMARY LAST_SCRUB SCRUB_STAMP LAST_DEEP_SCRUB DEEP_SCRUB_STAMP
@@ -527,9 +506,8 @@ function TEST_backfill_ec_all_out() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local PG=$(get_pg $poolname obj1)
@@ -537,8 +515,7 @@ function TEST_backfill_ec_all_out() {
     local primary=$(get_primary $poolname obj1)
 
     ceph osd set nobackfill
-    for o in $(get_osds $poolname obj1)
-    do
+    for o in $(get_osds $poolname obj1); do
         ceph osd out osd.$o
     done
     # Primary might change before backfill starts
@@ -557,7 +534,6 @@ function TEST_backfill_ec_all_out() {
     delete_pool $poolname
     kill_daemons $dir || return 1
 }
-
 
 # [1,0,2] -> [4, 0, 2]
 # misplaced 500 -> 0
@@ -581,9 +557,8 @@ function TEST_backfill_ec_prim_out() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local PG=$(get_pg $poolname obj1)
@@ -633,9 +608,8 @@ function TEST_backfill_ec_down_all_out() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local PG=$(get_pg $poolname obj1)
@@ -647,8 +621,7 @@ function TEST_backfill_ec_down_all_out() {
     ceph osd set nobackfill
     kill $(cat $dir/osd.${otherosd}.pid)
     ceph osd down osd.${otherosd}
-    for o in $allosds
-    do
+    for o in $allosds; do
         ceph osd out osd.$o
     done
     # Primary might change before backfill starts
@@ -663,29 +636,24 @@ function TEST_backfill_ec_down_all_out() {
     # Wait for recovery to finish
     # Can't use wait_for_clean() because state goes from active+undersized+degraded+remapped+backfilling
     # to  active+undersized+remapped
-    while(true)
-    do
-      if test "$(ceph --format json pg dump pgs |
-         jq '.pg_stats | [.[] | .state | select(. == "incomplete")] | length')" -ne "0"
-      then
-        sleep 2
-        continue
-      fi
-      break
+    while (true); do
+        if test "$(ceph --format json pg dump pgs \
+            | jq '.pg_stats | [.[] | .state | select(. == "incomplete")] | length')" -ne "0"; then
+            sleep 2
+            continue
+        fi
+        break
     done
     ceph pg dump pgs
-    for i in $(seq 1 60)
-    do
-      if ceph pg dump pgs | grep ^$PG | grep -qv backfilling
-      then
-          break
-      fi
-      if [ $i = "60" ];
-      then
-          echo "Timeout waiting for recovery to finish"
-          return 1
-      fi
-      sleep 1
+    for i in $(seq 1 60); do
+        if ceph pg dump pgs | grep ^$PG | grep -qv backfilling; then
+            break
+        fi
+        if [ $i = "60" ]; then
+            echo "Timeout waiting for recovery to finish"
+            return 1
+        fi
+        sleep 1
     done
 
     ceph pg dump pgs
@@ -696,7 +664,6 @@ function TEST_backfill_ec_down_all_out() {
     delete_pool $poolname
     kill_daemons $dir || return 1
 }
-
 
 # [1,0,2] -> [1,3,2]
 # degraded 500 -> 0
@@ -722,9 +689,8 @@ function TEST_backfill_ec_down_out() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $objects)
-    do
-	rados -p $poolname put obj$i /dev/null
+    for i in $(seq 1 $objects); do
+        rados -p $poolname put obj$i /dev/null
     done
 
     local PG=$(get_pg $poolname obj1)
@@ -752,7 +718,6 @@ function TEST_backfill_ec_down_out() {
     delete_pool $poolname
     kill_daemons $dir || return 1
 }
-
 
 main osd-backfill-stats "$@"
 

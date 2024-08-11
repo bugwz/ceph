@@ -25,22 +25,22 @@ rbd bench --io-type write foo --io-size 4096 --io-threads 5 --io-total 4096000 -
 rbd snap create foo --snap=three
 rbd snap create foo.copy --snap=two
 
-rbd export-diff foo@two --from-snap three foo.diff && exit 1 || true  # wrong snap order
+rbd export-diff foo@two --from-snap three foo.diff && exit 1 || true # wrong snap order
 rm -f foo.diff
 
 rbd export-diff foo@three --from-snap two foo.diff
 rbd import-diff foo.diff foo.copy
-rbd import-diff foo.diff foo.copy && exit 1 || true   # this should fail with EEXIST on the end snap
+rbd import-diff foo.diff foo.copy && exit 1 || true # this should fail with EEXIST on the end snap
 rbd snap ls foo.copy | grep three
 
 rbd create foo.copy2 --size 1000
-rbd import-diff foo.diff foo.copy2 && exit 1 || true   # this should fail bc the start snap dne
+rbd import-diff foo.diff foo.copy2 && exit 1 || true # this should fail bc the start snap dne
 
 rbd export foo foo.out
-orig=`md5sum foo.out | awk '{print $1}'`
+orig=$(md5sum foo.out | awk '{print $1}')
 rm foo.out
 rbd export foo.copy foo.out
-copy=`md5sum foo.out | awk '{print $1}'`
+copy=$(md5sum foo.out | awk '{print $1}')
 
 if [ "$orig" != "$copy" ]; then
     echo does not match
@@ -50,4 +50,3 @@ fi
 cleanup
 
 echo OK
-

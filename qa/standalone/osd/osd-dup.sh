@@ -2,7 +2,7 @@
 
 source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
 
-[ `uname` = FreeBSD ] && exit 0
+[ $(uname) = FreeBSD ] && exit 0
 
 function run() {
     local dir=$1
@@ -16,7 +16,7 @@ function run() {
     CEPH_ARGS+="--filestore_wbthrottle_xfs_ios_hard_limit=900 "
     CEPH_ARGS+="--filestore_wbthrottle_btrfs_ios_hard_limit=900 "
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -46,7 +46,7 @@ function TEST_filestore_to_bluestore() {
     timeout 20 rados bench -p foo 10 write -b 4096 --no-cleanup || return 1
 
     # kill
-    while kill $osd_pid; do sleep 1 ; done
+    while kill $osd_pid; do sleep 1; done
     ceph osd down 0
 
     mv $dir/0 $dir/0.old || return 1
@@ -56,14 +56,14 @@ function TEST_filestore_to_bluestore() {
     O=$CEPH_ARGS
     CEPH_ARGS+="--log-file $dir/cot.log --log-max-recent 0 "
     ceph-objectstore-tool --type bluestore --data-path $dir/0 --fsid $ofsid \
-			  --op mkfs --no-mon-config || return 1
+        --op mkfs --no-mon-config || return 1
     ceph-objectstore-tool --data-path $dir/0.old --target-data-path $dir/0 \
-			  --op dup || return 1
+        --op dup || return 1
     CEPH_ARGS=$O
 
     activate_osd $dir 0 || return 1
 
-    while ! ceph osd stat | grep '3 up' ; do sleep 1 ; done
+    while ! ceph osd stat | grep '3 up'; do sleep 1; done
     ceph osd metadata 0 | grep bluestore || return 1
 
     ceph osd scrub 0

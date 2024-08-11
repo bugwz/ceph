@@ -28,11 +28,11 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         run_mon $dir a || return 1
-	run_mgr $dir x || return 1
-	create_pool rbd 4 || return 1
+        run_mgr $dir x || return 1
+        create_pool rbd 4 || return 1
 
         # check that erasure code plugins are preloaded
         CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.a) log flush || return 1
@@ -46,7 +46,7 @@ function setup_osds() {
     local count=$1
     shift
 
-    for id in $(seq 0 $(expr $count - 1)) ; do
+    for id in $(seq 0 $(expr $count - 1)); do
         run_osd $dir $id || return 1
     done
 
@@ -58,8 +58,8 @@ function setup_osds() {
 function get_state() {
     local pgid=$1
     local sname=state
-    ceph --format json pg dump pgs 2>/dev/null | \
-        jq -r ".pg_stats | .[] | select(.pgid==\"$pgid\") | .$sname"
+    ceph --format json pg dump pgs 2>/dev/null \
+        | jq -r ".pg_stats | .[] | select(.pgid==\"$pgid\") | .$sname"
 }
 
 function create_erasure_coded_pool() {
@@ -90,9 +90,9 @@ function rados_put() {
     local poolname=$2
     local objname=${3:-SOMETHING}
 
-    for marker in AAA BBB CCCC DDDD ; do
+    for marker in AAA BBB CCCC DDDD; do
         printf "%*s" 1024 $marker
-    done > $dir/ORIGINAL
+    done >$dir/ORIGINAL
     #
     # get and put an object, compare they are equal
     #
@@ -108,8 +108,7 @@ function rados_get() {
     #
     # Expect a failure to get object
     #
-    if [ $expect = "fail" ];
-    then
+    if [ $expect = "fail" ]; then
         ! rados --pool $poolname get $objname $dir/COPY
         return
     fi
@@ -120,7 +119,6 @@ function rados_get() {
     diff $dir/ORIGINAL $dir/COPY || return 1
     rm $dir/COPY
 }
-
 
 function inject_remove() {
     local pooltype=$1
@@ -159,8 +157,7 @@ function rados_put_get_data() {
     inject_$inject ec data $poolname $objname $dir $shard_id || return 1
     rados_get $dir $poolname $objname || return 1
 
-    if [ "$arg" = "recovery" ];
-    then
+    if [ "$arg" = "recovery" ]; then
         #
         # take out the last OSD used to store the object,
         # bring it back, and check for clean PGs which means
@@ -169,7 +166,7 @@ function rados_put_get_data() {
         local -a initial_osds=($(get_osds $poolname $objname))
         local last_osd=${initial_osds[-1]}
         # Kill OSD
-        kill_daemons $dir TERM osd.${last_osd} >&2 < /dev/null || return 1
+        kill_daemons $dir TERM osd.${last_osd} >&2 </dev/null || return 1
         ceph osd out ${last_osd} || return 1
         ! get_osds $poolname $objname | grep '\<'${last_osd}'\>' || return 1
         ceph osd in ${last_osd} || return 1
@@ -202,15 +199,13 @@ function set_size() {
     local -a initial_osds=($(get_osds $poolname $objname))
     local osd_id=${initial_osds[$shard_id]}
     ceph osd set noout
-    if [ "$mode" = "add" ];
-    then
-      objectstore_tool $dir $osd_id $objname get-bytes $dir/CORRUPT || return 1
-      dd if=/dev/urandom bs=$bytes count=1 >> $dir/CORRUPT
-    elif [ "$bytes" = "0" ];
-    then
-      touch $dir/CORRUPT
+    if [ "$mode" = "add" ]; then
+        objectstore_tool $dir $osd_id $objname get-bytes $dir/CORRUPT || return 1
+        dd if=/dev/urandom bs=$bytes count=1 >>$dir/CORRUPT
+    elif [ "$bytes" = "0" ]; then
+        touch $dir/CORRUPT
     else
-      dd if=/dev/urandom bs=$bytes count=1 of=$dir/CORRUPT
+        dd if=/dev/urandom bs=$bytes count=1 of=$dir/CORRUPT
     fi
     objectstore_tool $dir $osd_id $objname set-bytes $dir/CORRUPT || return 1
     rm -f $dir/CORRUPT
@@ -365,7 +360,7 @@ function TEST_ec_object_attr_read_error() {
 
     local primary_osd=$(get_primary $poolname $objname)
     # Kill primary OSD
-    kill_daemons $dir TERM osd.${primary_osd} >&2 < /dev/null || return 1
+    kill_daemons $dir TERM osd.${primary_osd} >&2 </dev/null || return 1
 
     # Write data
     rados_put $dir $poolname $objname || return 1
@@ -400,7 +395,7 @@ function TEST_ec_single_recovery_error() {
     local -a initial_osds=($(get_osds $poolname $objname))
     local last_osd=${initial_osds[-1]}
     # Kill OSD
-    kill_daemons $dir TERM osd.${last_osd} >&2 < /dev/null || return 1
+    kill_daemons $dir TERM osd.${last_osd} >&2 </dev/null || return 1
     ceph osd down ${last_osd} || return 1
     ceph osd out ${last_osd} || return 1
 
@@ -432,7 +427,7 @@ function TEST_ec_recovery_multiple_errors() {
     local -a initial_osds=($(get_osds $poolname $objname))
     local last_osd=${initial_osds[-1]}
     # Kill OSD
-    kill_daemons $dir TERM osd.${last_osd} >&2 < /dev/null || return 1
+    kill_daemons $dir TERM osd.${last_osd} >&2 </dev/null || return 1
     ceph osd down ${last_osd} || return 1
     ceph osd out ${last_osd} || return 1
 
@@ -528,16 +523,15 @@ function TEST_ec_backfill_unfound() {
 
     local -a initial_osds=($(get_osds $poolname $objname))
     local last_osd=${initial_osds[-1]}
-    kill_daemons $dir TERM osd.${last_osd} 2>&2 < /dev/null || return 1
+    kill_daemons $dir TERM osd.${last_osd} 2>&2 </dev/null || return 1
     ceph osd down ${last_osd} || return 1
     ceph osd out ${last_osd} || return 1
 
     ceph pg dump pgs
 
     dd if=/dev/urandom of=${dir}/ORIGINAL bs=1024 count=4
-    for i in $(seq 1 $lastobj)
-    do
-      rados --pool $poolname put obj${i} $dir/ORIGINAL || return 1
+    for i in $(seq 1 $lastobj); do
+        rados --pool $poolname put obj${i} $dir/ORIGINAL || return 1
     done
 
     inject_eio ec data $poolname $testobj $dir 0 || return 1
@@ -549,17 +543,17 @@ function TEST_ec_backfill_unfound() {
     sleep 15
 
     for tmp in $(seq 1 100); do
-      state=$(get_state 2.0)
-      echo $state | grep backfill_unfound
-      if [ "$?" = "0" ]; then
-        break
-      fi
-      echo $state
-      sleep 1
+        state=$(get_state 2.0)
+        echo $state | grep backfill_unfound
+        if [ "$?" = "0" ]; then
+            break
+        fi
+        echo $state
+        sleep 1
     done
 
     ceph pg dump pgs
-    kill_daemons $dir TERM osd.${last_osd} 2>&2 < /dev/null || return 1
+    kill_daemons $dir TERM osd.${last_osd} 2>&2 </dev/null || return 1
     sleep 5
 
     ceph pg dump pgs
@@ -587,15 +581,14 @@ function TEST_ec_backfill_unfound() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $lastobj)
-    do
-      if [ obj${i} = "$testobj" ]; then
-        # Doesn't exist anymore
-        ! rados -p $poolname get $testobj $dir/CHECK || return 1
-      else
-        rados --pool $poolname get obj${i} $dir/CHECK || return 1
-        diff -q $dir/ORIGINAL $dir/CHECK || return 1
-      fi
+    for i in $(seq 1 $lastobj); do
+        if [ obj${i} = "$testobj" ]; then
+            # Doesn't exist anymore
+            ! rados -p $poolname get $testobj $dir/CHECK || return 1
+        else
+            rados --pool $poolname get obj${i} $dir/CHECK || return 1
+            diff -q $dir/ORIGINAL $dir/CHECK || return 1
+        fi
     done
 
     rm -f ${dir}/ORIGINAL ${dir}/CHECK
@@ -626,16 +619,15 @@ function TEST_ec_recovery_unfound() {
 
     local -a initial_osds=($(get_osds $poolname $objname))
     local last_osd=${initial_osds[-1]}
-    kill_daemons $dir TERM osd.${last_osd} 2>&2 < /dev/null || return 1
+    kill_daemons $dir TERM osd.${last_osd} 2>&2 </dev/null || return 1
     ceph osd down ${last_osd} || return 1
     ceph osd out ${last_osd} || return 1
 
     ceph pg dump pgs
 
     dd if=/dev/urandom of=${dir}/ORIGINAL bs=1024 count=4
-    for i in $(seq 1 $lastobj)
-    do
-      rados --pool $poolname put obj${i} $dir/ORIGINAL || return 1
+    for i in $(seq 1 $lastobj); do
+        rados --pool $poolname put obj${i} $dir/ORIGINAL || return 1
     done
 
     inject_eio ec data $poolname $testobj $dir 0 || return 1
@@ -647,13 +639,13 @@ function TEST_ec_recovery_unfound() {
     sleep 15
 
     for tmp in $(seq 1 100); do
-      state=$(get_state 2.0)
-      echo $state | grep recovery_unfound
-      if [ "$?" = "0" ]; then
-        break
-      fi
-      echo "$state "
-      sleep 1
+        state=$(get_state 2.0)
+        echo $state | grep recovery_unfound
+        if [ "$?" = "0" ]; then
+            break
+        fi
+        echo "$state "
+        sleep 1
     done
 
     ceph pg dump pgs
@@ -676,15 +668,14 @@ function TEST_ec_recovery_unfound() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $lastobj)
-    do
-      if [ obj${i} = "$testobj" ]; then
-        # Doesn't exist anymore
-        ! rados -p $poolname get $testobj $dir/CHECK || return 1
-      else
-        rados --pool $poolname get obj${i} $dir/CHECK || return 1
-        diff -q $dir/ORIGINAL $dir/CHECK || return 1
-      fi
+    for i in $(seq 1 $lastobj); do
+        if [ obj${i} = "$testobj" ]; then
+            # Doesn't exist anymore
+            ! rados -p $poolname get $testobj $dir/CHECK || return 1
+        else
+            rados --pool $poolname get obj${i} $dir/CHECK || return 1
+            diff -q $dir/ORIGINAL $dir/CHECK || return 1
+        fi
     done
 
     rm -f ${dir}/ORIGINAL ${dir}/CHECK

@@ -7,7 +7,7 @@
  * more programs. Obviously, at that point, those programs will provide an
  * equivalent test.
  */
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-  return 0;
+    return 0;
 }

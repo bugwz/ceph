@@ -28,13 +28,12 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON --osd_max_backfills=1 --debug_reserver=20 "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
     done
 }
-
 
 function _common_test() {
     local dir=$1
@@ -51,25 +50,22 @@ function _common_test() {
     export CEPH_ARGS
     export EXTRA_OPTS=" $extra_opts"
 
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $osd || return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $osd || return 1
     done
 
     create_pool test 1 1
 
-    for j in $(seq 1 $objects)
-    do
-       rados -p test put obj-${j} /etc/passwd
+    for j in $(seq 1 $objects); do
+        rados -p test put obj-${j} /etc/passwd
     done
 
     # Mark out all OSDs for this pool
     ceph osd out $(ceph pg dump pgs --format=json | jq '.pg_stats[0].up[]')
     if [ "$moreobjects" != "0" ]; then
-      for j in $(seq 1 $moreobjects)
-      do
-        rados -p test put obj-more-${j} /etc/passwd
-      done
+        for j in $(seq 1 $moreobjects); do
+            rados -p test put obj-more-${j} /etc/passwd
+        done
     fi
     sleep 1
     wait_for_clean
@@ -83,22 +79,21 @@ function _common_test() {
     _objectstore_tool_nodown $dir $newprimary --no-mon-config --pgid 1.0 --op log | tee $dir/result.log
     LOGLEN=$(jq '.pg_log_t.log | length' $dir/result.log)
     if [ $LOGLEN != "$loglen" ]; then
-	echo "FAILED: Wrong log length got $LOGLEN (expected $loglen)"
-	ERRORS=$(expr $ERRORS + 1)
+        echo "FAILED: Wrong log length got $LOGLEN (expected $loglen)"
+        ERRORS=$(expr $ERRORS + 1)
     fi
     DUPSLEN=$(jq '.pg_log_t.dups | length' $dir/result.log)
     if [ $DUPSLEN != "$dupslen" ]; then
-	echo "FAILED: Wrong dups length got $DUPSLEN (expected $dupslen)"
-	ERRORS=$(expr $ERRORS + 1)
+        echo "FAILED: Wrong dups length got $DUPSLEN (expected $dupslen)"
+        ERRORS=$(expr $ERRORS + 1)
     fi
     grep "copy_up_to\|copy_after" $dir/osd.*.log
     rm -f $dir/result.log
     if [ $ERRORS != "0" ]; then
-	 echo TEST FAILED
-	 return 1
+        echo TEST FAILED
+        return 1
     fi
 }
-
 
 # Cause copy_up_to() to only partially copy logs, copy additional dups, and trim dups
 function TEST_backfill_log_1() {
@@ -107,7 +102,6 @@ function TEST_backfill_log_1() {
     _common_test $dir "--osd_min_pg_log_entries=1 --osd_max_pg_log_entries=2 --osd_pg_log_dups_tracked=10" 2 8 150
 }
 
-
 # Cause copy_up_to() to only partially copy logs, copy additional dups
 function TEST_backfill_log_2() {
     local dir=$1
@@ -115,14 +109,12 @@ function TEST_backfill_log_2() {
     _common_test $dir "--osd_min_pg_log_entries=1 --osd_max_pg_log_entries=2" 2 148 150
 }
 
-
 # Cause copy_after() to only copy logs, no dups
 function TEST_recovery_1() {
     local dir=$1
 
     _common_test $dir "--osd_min_pg_log_entries=50 --osd_max_pg_log_entries=50 --osd_pg_log_dups_tracked=60 --osd_pg_log_trim_min=10" 40 0 40
 }
-
 
 # Cause copy_after() to copy logs with dups
 function TEST_recovery_2() {

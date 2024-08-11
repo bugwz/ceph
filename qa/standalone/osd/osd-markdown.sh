@@ -28,7 +28,7 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -36,24 +36,25 @@ function run() {
 }
 
 function markdown_N_impl() {
-  markdown_times=$1
-  total_time=$2
-  sleeptime=$3
-  for i in `seq 1 $markdown_times`
-  do
-    # check the OSD is UP
-    ceph tell osd.0 get_latest_osdmap || return 1
-    ceph osd tree
-    ceph osd tree | grep osd.0 |grep up || return 1
-    # mark the OSD down.
-    # override any dup setting in the environment to ensure we do this
-    # exactly once (modulo messenger failures, at least; we can't *actually*
-    # provide exactly-once semantics for mon commands).
-    ( unset CEPH_CLI_TEST_DUP_COMMAND ; ceph osd down 0 )
-    sleep $sleeptime
-  done
+    markdown_times=$1
+    total_time=$2
+    sleeptime=$3
+    for i in $(seq 1 $markdown_times); do
+        # check the OSD is UP
+        ceph tell osd.0 get_latest_osdmap || return 1
+        ceph osd tree
+        ceph osd tree | grep osd.0 | grep up || return 1
+        # mark the OSD down.
+        # override any dup setting in the environment to ensure we do this
+        # exactly once (modulo messenger failures, at least; we can't *actually*
+        # provide exactly-once semantics for mon commands).
+        (
+            unset CEPH_CLI_TEST_DUP_COMMAND
+            ceph osd down 0
+        )
+        sleep $sleeptime
+    done
 }
-
 
 function TEST_markdown_exceed_maxdown_count() {
     local dir=$1
@@ -73,7 +74,7 @@ function TEST_markdown_exceed_maxdown_count() {
     ceph tell osd.0 injectargs '--osd_max_markdown_count '$count'' || return 1
     ceph tell osd.0 injectargs '--osd_max_markdown_period '$period'' || return 1
 
-    markdown_N_impl $(($count+1)) $period $sleeptime
+    markdown_N_impl $(($count + 1)) $period $sleeptime
     # down N+1 times ,the osd.0 should die
     ceph osd tree | grep down | grep osd.0 || return 1
 }
@@ -98,7 +99,7 @@ function TEST_markdown_boot() {
 
     markdown_N_impl $count $period $sleeptime
     #down N times, osd.0 should be up
-    sleep 15  # give osd plenty of time to notice and come back up
+    sleep 15 # give osd plenty of time to notice and come back up
     ceph tell osd.0 get_latest_osdmap || return 1
     ceph osd tree | grep up | grep osd.0 || return 1
 }
@@ -121,8 +122,8 @@ function TEST_markdown_boot_exceed_time() {
     ceph tell osd.0 injectargs '--osd_max_markdown_count '$count'' || return 1
     ceph tell osd.0 injectargs '--osd_max_markdown_period '$period'' || return 1
 
-    markdown_N_impl $(($count+1)) $period $sleeptime
-    sleep 15  # give osd plenty of time to notice and come back up
+    markdown_N_impl $(($count + 1)) $period $sleeptime
+    sleep 15 # give osd plenty of time to notice and come back up
     ceph tell osd.0 get_latest_osdmap || return 1
     ceph osd tree | grep up | grep osd.0 || return 1
 }

@@ -1,19 +1,22 @@
 #!/bin/bash -ex
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DASHBOARD_FRONTEND_DIR=${SCRIPT_DIR}/../../../src/pybind/mgr/dashboard/frontend
 
 [ -z "$SUDO" ] && SUDO=sudo
 
-install_common () {
+install_common() {
     NODEJS_VERSION="16"
-    if grep -q  debian /etc/*-release; then
+    if grep -q debian /etc/*-release; then
         $SUDO apt-get update
         # https://github.com/nodesource/distributions#manual-installation
         $SUDO apt-get install curl gpg
         KEYRING=/usr/share/keyrings/nodesource.gpg
         curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | gpg --dearmor | $SUDO tee "$KEYRING" >/dev/null
-        DISTRO="$(source /etc/lsb-release; echo $DISTRIB_CODENAME)"
+        DISTRO="$(
+            source /etc/lsb-release
+            echo $DISTRIB_CODENAME
+        )"
         VERSION="node_$NODEJS_VERSION.x"
         echo "deb [signed-by=$KEYRING] https://deb.nodesource.com/$VERSION $DISTRO main" | $SUDO tee /etc/apt/sources.list.d/nodesource.list
         echo "deb-src [signed-by=$KEYRING] https://deb.nodesource.com/$VERSION $DISTRO main" | $SUDO tee -a /etc/apt/sources.list.d/nodesource.list
@@ -28,8 +31,8 @@ install_common () {
     fi
 }
 
-install_chrome () {
-    if grep -q  debian /etc/*-release; then
+install_chrome() {
+    if grep -q debian /etc/*-release; then
         $SUDO bash -c 'echo "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
         curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | $SUDO apt-key add -
         $SUDO apt-get update
@@ -55,7 +58,7 @@ EOF
     fi
 }
 
-cypress_run () {
+cypress_run() {
     local specs="$1"
     local timeout="$2"
     local override_config="ignoreTestFiles=*.po.ts,retries=0,testFiles=${specs}"
@@ -88,12 +91,12 @@ ceph osd pool rm device_health_metrics device_health_metrics --yes-i-really-real
 # Take `orch device ls` and `orch ps` as ground truth.
 ceph orch device ls --refresh
 ceph orch ps --refresh
-sleep 10  # the previous call is asynchronous
+sleep 10 # the previous call is asynchronous
 ceph orch device ls --format=json | tee cypress/fixtures/orchestrator/inventory.json
 ceph orch ps --format=json | tee cypress/fixtures/orchestrator/services.json
 
 DASHBOARD_ADMIN_SECRET_FILE="/tmp/dashboard-admin-secret.txt"
-printf 'admin' > "${DASHBOARD_ADMIN_SECRET_FILE}"
+printf 'admin' >"${DASHBOARD_ADMIN_SECRET_FILE}"
 ceph dashboard ac-user-set-password admin -i "${DASHBOARD_ADMIN_SECRET_FILE}" --force-password
 
 # Run Dashboard e2e tests.

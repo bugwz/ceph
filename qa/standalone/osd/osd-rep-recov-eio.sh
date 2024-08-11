@@ -30,14 +30,13 @@ function run() {
     CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
-
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
-	# set warning amount in case default changes
+        # set warning amount in case default changes
         run_mon $dir a --mon_osd_warn_num_repaired=$warnings || return 1
-	run_mgr $dir x || return 1
-	ceph osd pool create foo 8 || return 1
+        run_mgr $dir x || return 1
+        ceph osd pool create foo 8 || return 1
 
         $func $dir || return 1
         teardown $dir || return 1
@@ -49,7 +48,7 @@ function setup_osds() {
     shift
     local type=$1
 
-    for id in $(seq 0 $(expr $count - 1)) ; do
+    for id in $(seq 0 $(expr $count - 1)); do
         run_osd${type} $dir $id || return 1
     done
     wait_for_clean || return 1
@@ -58,8 +57,8 @@ function setup_osds() {
 function get_state() {
     local pgid=$1
     local sname=state
-    ceph --format json pg dump pgs 2>/dev/null | \
-        jq -r ".pg_stats | .[] | select(.pgid==\"$pgid\") | .$sname"
+    ceph --format json pg dump pgs 2>/dev/null \
+        | jq -r ".pg_stats | .[] | select(.pgid==\"$pgid\") | .$sname"
 }
 
 function rados_put() {
@@ -67,9 +66,9 @@ function rados_put() {
     local poolname=$2
     local objname=${3:-SOMETHING}
 
-    for marker in AAA BBB CCCC DDDD ; do
+    for marker in AAA BBB CCCC DDDD; do
         printf "%*s" 1024 $marker
-    done > $dir/ORIGINAL
+    done >$dir/ORIGINAL
     #
     # get and put an object, compare they are equal
     #
@@ -85,16 +84,14 @@ function rados_get() {
     #
     # Expect a failure to get object
     #
-    if [ $expect = "fail" ];
-    then
+    if [ $expect = "fail" ]; then
         ! rados --pool $poolname get $objname $dir/COPY
         return
     fi
     #
     # Expect hang trying to get object
     #
-    if [ $expect = "hang" ];
-    then
+    if [ $expect = "hang" ]; then
         timeout 5 rados --pool $poolname get $objname $dir/COPY
         test "$?" = "124"
         return
@@ -191,11 +188,10 @@ function TEST_rados_repair_warning() {
     local objbase=obj-warn
     local inject=eio
 
-   for i in $(seq 1 $OBJS)
-    do
-      rados_put $dir $poolname ${objbase}-$i || return 1
-      inject_$inject rep data $poolname ${objbase}-$i $dir 0 || return 1
-      rados_get $dir $poolname ${objbase}-$i || return 1
+    for i in $(seq 1 $OBJS); do
+        rados_put $dir $poolname ${objbase}-$i || return 1
+        inject_$inject rep data $poolname ${objbase}-$i $dir 0 || return 1
+        rados_get $dir $poolname ${objbase}-$i || return 1
     done
     local pgid=$(get_pg $poolname ${objbase}-1)
 
@@ -219,13 +215,12 @@ function TEST_rados_repair_warning() {
     ceph health | $(! grep -q "Too many repaired reads on 1 OSDs") || return 1
     set +o pipefail
 
-    for i in $(seq 1 $OBJS)
-     do
-       inject_$inject rep data $poolname ${objbase}-$i $dir 0 || return 1
-       inject_$inject rep data $poolname ${objbase}-$i $dir 1 || return 1
-       # Force primary to pull from the bad peer, so we can repair it too!
-       set_config osd $primary osd_debug_feed_pullee $bad_peer || return 1
-       rados_get $dir $poolname ${objbase}-$i || return 1
+    for i in $(seq 1 $OBJS); do
+        inject_$inject rep data $poolname ${objbase}-$i $dir 0 || return 1
+        inject_$inject rep data $poolname ${objbase}-$i $dir 1 || return 1
+        # Force primary to pull from the bad peer, so we can repair it too!
+        set_config osd $primary osd_debug_feed_pullee $bad_peer || return 1
+        rados_get $dir $poolname ${objbase}-$i || return 1
     done
 
     wait_for_clean
@@ -239,19 +234,16 @@ function TEST_rados_repair_warning() {
     # The default tick time is 5 seconds
     CHECKTIME=10
     LOOPS=0
-    while(true)
-    do
-      sleep 1
-      if ceph health | grep -q "Too many repaired reads on 2 OSDs"
-      then
-	      break
-      fi
-      LOOPS=$(expr $LOOPS + 1)
-      if test "$LOOPS" = "$CHECKTIME"
-      then
-	      echo "Too many repaired reads not seen after $CHECKTIME seconds"
-	      return 1
-      fi
+    while (true); do
+        sleep 1
+        if ceph health | grep -q "Too many repaired reads on 2 OSDs"; then
+            break
+        fi
+        LOOPS=$(expr $LOOPS + 1)
+        if test "$LOOPS" = "$CHECKTIME"; then
+            echo "Too many repaired reads not seen after $CHECKTIME seconds"
+            return 1
+        fi
     done
     ceph health detail | grep -q "osd.$primary had $(expr $OBJS \* 2) reads repaired" || return 1
     ceph health detail | grep -q "osd.$bad_peer had $OBJS reads repaired" || return 1
@@ -281,16 +273,15 @@ function TEST_rep_backfill_unfound() {
 
     local -a initial_osds=($(get_osds $poolname $objname))
     local last_osd=${initial_osds[-1]}
-    kill_daemons $dir TERM osd.${last_osd} 2>&2 < /dev/null || return 1
+    kill_daemons $dir TERM osd.${last_osd} 2>&2 </dev/null || return 1
     ceph osd down ${last_osd} || return 1
     ceph osd out ${last_osd} || return 1
 
     ceph pg dump pgs
 
     dd if=/dev/urandom of=${dir}/ORIGINAL bs=1024 count=4
-    for i in $(seq 1 $lastobj)
-    do
-      rados --pool $poolname put obj${i} $dir/ORIGINAL || return 1
+    for i in $(seq 1 $lastobj); do
+        rados --pool $poolname put obj${i} $dir/ORIGINAL || return 1
     done
 
     inject_eio rep data $poolname $testobj $dir 0 || return 1
@@ -302,13 +293,13 @@ function TEST_rep_backfill_unfound() {
     sleep 15
 
     for tmp in $(seq 1 100); do
-      state=$(get_state 2.0)
-      echo $state | grep backfill_unfound
-      if [ "$?" = "0" ]; then
-        break
-      fi
-      echo "$state "
-      sleep 1
+        state=$(get_state 2.0)
+        echo $state | grep backfill_unfound
+        if [ "$?" = "0" ]; then
+            break
+        fi
+        echo "$state "
+        sleep 1
     done
 
     ceph pg dump pgs
@@ -322,15 +313,14 @@ function TEST_rep_backfill_unfound() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $lastobj)
-    do
-      if [ obj${i} = "$testobj" ]; then
-        # Doesn't exist anymore
-        ! rados -p $poolname get $testobj $dir/CHECK || return 1
-      else
-        rados --pool $poolname get obj${i} $dir/CHECK || return 1
-        diff -q $dir/ORIGINAL $dir/CHECK || return 1
-      fi
+    for i in $(seq 1 $lastobj); do
+        if [ obj${i} = "$testobj" ]; then
+            # Doesn't exist anymore
+            ! rados -p $poolname get $testobj $dir/CHECK || return 1
+        else
+            rados --pool $poolname get obj${i} $dir/CHECK || return 1
+            diff -q $dir/ORIGINAL $dir/CHECK || return 1
+        fi
     done
 
     rm -f ${dir}/ORIGINAL ${dir}/CHECK
@@ -358,16 +348,15 @@ function TEST_rep_recovery_unfound() {
 
     local -a initial_osds=($(get_osds $poolname $objname))
     local last_osd=${initial_osds[-1]}
-    kill_daemons $dir TERM osd.${last_osd} 2>&2 < /dev/null || return 1
+    kill_daemons $dir TERM osd.${last_osd} 2>&2 </dev/null || return 1
     ceph osd down ${last_osd} || return 1
     ceph osd out ${last_osd} || return 1
 
     ceph pg dump pgs
 
     dd if=/dev/urandom of=${dir}/ORIGINAL bs=1024 count=4
-    for i in $(seq 1 $lastobj)
-    do
-      rados --pool $poolname put obj${i} $dir/ORIGINAL || return 1
+    for i in $(seq 1 $lastobj); do
+        rados --pool $poolname put obj${i} $dir/ORIGINAL || return 1
     done
 
     inject_eio rep data $poolname $testobj $dir 0 || return 1
@@ -379,13 +368,13 @@ function TEST_rep_recovery_unfound() {
     sleep 15
 
     for tmp in $(seq 1 100); do
-      state=$(get_state 2.0)
-      echo $state | grep -v recovering
-      if [ "$?" = "0" ]; then
-        break
-      fi
-      echo "$state "
-      sleep 1
+        state=$(get_state 2.0)
+        echo $state | grep -v recovering
+        if [ "$?" = "0" ]; then
+            break
+        fi
+        echo "$state "
+        sleep 1
     done
 
     ceph pg dump pgs
@@ -399,15 +388,14 @@ function TEST_rep_recovery_unfound() {
 
     wait_for_clean || return 1
 
-    for i in $(seq 1 $lastobj)
-    do
-      if [ obj${i} = "$testobj" ]; then
-        # Doesn't exist anymore
-        ! rados -p $poolname get $testobj $dir/CHECK || return 1
-      else
-        rados --pool $poolname get obj${i} $dir/CHECK || return 1
-        diff -q $dir/ORIGINAL $dir/CHECK || return 1
-      fi
+    for i in $(seq 1 $lastobj); do
+        if [ obj${i} = "$testobj" ]; then
+            # Doesn't exist anymore
+            ! rados -p $poolname get $testobj $dir/CHECK || return 1
+        else
+            rados --pool $poolname get obj${i} $dir/CHECK || return 1
+            diff -q $dir/ORIGINAL $dir/CHECK || return 1
+        fi
     done
 
     rm -f ${dir}/ORIGINAL ${dir}/CHECK
@@ -447,20 +435,18 @@ function TEST_rep_read_unfound() {
     flush_pg_stats
     ceph --format=json pg dump pgs | jq '.'
 
-    if ! ceph --format=json pg dump pgs | jq '.pg_stats | .[0].state' | grep -q recovery_unfound
-    then
-      echo "Failure to get to recovery_unfound state"
-      return 1
+    if ! ceph --format=json pg dump pgs | jq '.pg_stats | .[0].state' | grep -q recovery_unfound; then
+        echo "Failure to get to recovery_unfound state"
+        return 1
     fi
 
     objectstore_tool $dir $other $objname set-bytes $dir/ORIGINAL || return 1
 
     wait
 
-    if ! cmp $dir/ORIGINAL $dir/tmp
-    then
-       echo "Bad data after primary repair"
-       return 1
+    if ! cmp $dir/ORIGINAL $dir/tmp; then
+        echo "Bad data after primary repair"
+        return 1
     fi
 }
 

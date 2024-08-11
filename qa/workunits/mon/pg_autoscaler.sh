@@ -16,11 +16,11 @@ function wait_for() {
     local sec=$1
     local cmd=$2
 
-    while true ; do
-        if bash -c "$cmd" ; then
+    while true; do
+        if bash -c "$cmd"; then
             break
         fi
-        sec=$(( $sec - 1 ))
+        sec=$(($sec - 1))
         if [ $sec -eq 0 ]; then
             echo failed
             return 1
@@ -30,17 +30,16 @@ function wait_for() {
     return 0
 }
 
-function power2() { echo "x=l($1)/l(2); scale=0; 2^((x+0.5)/1)" | bc -l;}
+function power2() { echo "x=l($1)/l(2); scale=0; 2^((x+0.5)/1)" | bc -l; }
 
 function eval_actual_expected_val() {
     local actual_value=$1
     local expected_value=$2
-    if [[ $actual_value = $expected_value ]]
-    then
-     echo "Success: " $actual_value "=" $expected_value
+    if [[ $actual_value = $expected_value ]]; then
+        echo "Success: " $actual_value "=" $expected_value
     else
-      echo "Error: " $actual_value "!=" $expected_value
-      exit 1
+        echo "Error: " $actual_value "!=" $expected_value
+        exit 1
     fi
 }
 
@@ -83,23 +82,23 @@ eval_actual_expected_val $BULK_FLAG_4 'True'
 # This part of this code will now evaluate the accuracy of the autoscaler
 
 # get pool size
-POOL_SIZE_1=$(ceph osd pool get meta0 size| grep -Eo '[0-9]{1,4}')
-POOL_SIZE_2=$(ceph osd pool get bulk0 size| grep -Eo '[0-9]{1,4}')
-POOL_SIZE_3=$(ceph osd pool get bulk1 size| grep -Eo '[0-9]{1,4}')
-POOL_SIZE_4=$(ceph osd pool get bulk2 size| grep -Eo '[0-9]{1,4}')
+POOL_SIZE_1=$(ceph osd pool get meta0 size | grep -Eo '[0-9]{1,4}')
+POOL_SIZE_2=$(ceph osd pool get bulk0 size | grep -Eo '[0-9]{1,4}')
+POOL_SIZE_3=$(ceph osd pool get bulk1 size | grep -Eo '[0-9]{1,4}')
+POOL_SIZE_4=$(ceph osd pool get bulk2 size | grep -Eo '[0-9]{1,4}')
 
 # Calculate target pg of each pools
 # First Pool is a non-bulk so we do it first.
 # Since the Capacity ratio = 0 we first meta pool remains the same pg_num
 
-TARGET_PG_1=$(ceph osd pool get meta0 pg_num| grep -Eo '[0-9]{1,4}')
+TARGET_PG_1=$(ceph osd pool get meta0 pg_num | grep -Eo '[0-9]{1,4}')
 PG_LEFT=$NUM_OSDS*100
 NUM_POOLS_LEFT=$NUM_POOLS-1
 # Rest of the pool is bulk and even pools so pretty straight forward
 # calculations.
-TARGET_PG_2=$(power2 $((($PG_LEFT)/($NUM_POOLS_LEFT)/($POOL_SIZE_2))))
-TARGET_PG_3=$(power2 $((($PG_LEFT)/($NUM_POOLS_LEFT)/($POOL_SIZE_3))))
-TARGET_PG_4=$(power2 $((($PG_LEFT)/($NUM_POOLS_LEFT)/($POOL_SIZE_4))))
+TARGET_PG_2=$(power2 $((($PG_LEFT) / ($NUM_POOLS_LEFT) / ($POOL_SIZE_2))))
+TARGET_PG_3=$(power2 $((($PG_LEFT) / ($NUM_POOLS_LEFT) / ($POOL_SIZE_3))))
+TARGET_PG_4=$(power2 $((($PG_LEFT) / ($NUM_POOLS_LEFT) / ($POOL_SIZE_4))))
 
 # evaluate target_pg against pg num of each pools
 wait_for 300 "ceph osd pool get meta0 pg_num | grep $TARGET_PG_1"
@@ -143,4 +142,3 @@ ceph osd pool rm bulk1 bulk1 --yes-i-really-really-mean-it
 ceph osd pool rm bulk2 bulk2 --yes-i-really-really-mean-it
 
 echo OK
-

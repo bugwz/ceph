@@ -25,7 +25,7 @@ function main {
 
     while [ "$#" -gt 0 ]; do
         case "$1" in
-            -h|--help)
+            -h | --help)
                 printf '%s: [--no-cache] <branch>[:sha1] <environment>\n' "$0"
                 exit 0
                 ;;
@@ -85,10 +85,10 @@ function main {
     T=$(mktemp -d)
     pushd "$T"
     repo_url="https://shaman.ceph.com/api/repos/ceph/${branch}/${sha}/${env/://}/flavors/${FLAVOR}/repo"
-    if grep ubuntu <<<"$env" > /dev/null 2>&1; then
+    if grep ubuntu <<<"$env" >/dev/null 2>&1; then
         # Docker makes it impossible to access anything outside the CWD : /
         cp -- /ceph/shaman/cephdev.asc .
-        cat > Dockerfile <<EOF
+        cat >Dockerfile <<EOF
 FROM ${env}
 
 WORKDIR /root

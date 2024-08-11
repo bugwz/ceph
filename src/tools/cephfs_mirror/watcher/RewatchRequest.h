@@ -17,44 +17,41 @@ namespace watcher {
 // Rewatch an existing watch -- the watch can be in an operatioal
 // or error state.
 
-class RewatchRequest {
+class RewatchRequest
+{
 public:
+    static RewatchRequest* create(librados::IoCtx& ioctx, const std::string& oid, ceph::shared_mutex& watch_lock,
+                                  librados::WatchCtx2* watch_ctx, uint64_t* watch_handle, Context* on_finish)
+    {
+        return new RewatchRequest(ioctx, oid, watch_lock, watch_ctx, watch_handle, on_finish);
+    }
 
-  static RewatchRequest *create(librados::IoCtx &ioctx, const std::string &oid,
-                                ceph::shared_mutex &watch_lock,
-                                librados::WatchCtx2 *watch_ctx,
-                                uint64_t *watch_handle, Context *on_finish) {
-    return new RewatchRequest(ioctx, oid, watch_lock, watch_ctx, watch_handle,
-                              on_finish);
-  }
+    RewatchRequest(librados::IoCtx& ioctx, const std::string& oid, ceph::shared_mutex& watch_lock,
+                   librados::WatchCtx2* watch_ctx, uint64_t* watch_handle, Context* on_finish);
 
-  RewatchRequest(librados::IoCtx &ioctx, const std::string &oid,
-                 ceph::shared_mutex &watch_lock, librados::WatchCtx2 *watch_ctx,
-                 uint64_t *watch_handle, Context *on_finish);
-
-  void send();
+    void send();
 
 private:
-  librados::IoCtx& m_ioctx;
-  std::string m_oid;
-  ceph::shared_mutex &m_lock;
-  librados::WatchCtx2 *m_watch_ctx;
-  uint64_t *m_watch_handle;
-  Context *m_on_finish;
+    librados::IoCtx& m_ioctx;
+    std::string m_oid;
+    ceph::shared_mutex& m_lock;
+    librados::WatchCtx2* m_watch_ctx;
+    uint64_t* m_watch_handle;
+    Context* m_on_finish;
 
-  uint64_t m_rewatch_handle = 0;
+    uint64_t m_rewatch_handle = 0;
 
-  void unwatch();
-  void handle_unwatch(int r);
+    void unwatch();
+    void handle_unwatch(int r);
 
-  void rewatch();
-  void handle_rewatch(int r);
+    void rewatch();
+    void handle_rewatch(int r);
 
-  void finish(int r);
+    void finish(int r);
 };
 
-} // namespace watcher
-} // namespace mirror
-} // namespace cephfs
+}   // namespace watcher
+}   // namespace mirror
+}   // namespace cephfs
 
-#endif // CEPHFS_MIRROR_WATCHER_REWATCH_REQUEST_H
+#endif   // CEPHFS_MIRROR_WATCHER_REWATCH_REQUEST_H

@@ -5,32 +5,32 @@ CEPH_SECRET_FILE=${CEPH_SECRET_FILE:-}
 CEPH_ID=${CEPH_ID:-admin}
 SECRET_ARGS=''
 if [ ! -z $CEPH_SECRET_FILE ]; then
-	SECRET_ARGS="--secret $CEPH_SECRET_FILE"
+    SECRET_ARGS="--secret $CEPH_SECRET_FILE"
 fi
 
 TMP_FILES="/tmp/img1 /tmp/img1.small /tmp/img1.snap1 /tmp/img1.export /tmp/img1.trunc"
 
 function expect_false() {
-	if "$@"; then return 1; else return 0; fi
+    if "$@"; then return 1; else return 0; fi
 }
 
 function get_device_dir {
-	local POOL=$1
-	local IMAGE=$2
-	local SNAP=$3
-	rbd device list | tail -n +2 | egrep "\s+$POOL\s+$IMAGE\s+$SNAP\s+" |
-	    awk '{print $1;}'
+    local POOL=$1
+    local IMAGE=$2
+    local SNAP=$3
+    rbd device list | tail -n +2 | egrep "\s+$POOL\s+$IMAGE\s+$SNAP\s+" \
+        | awk '{print $1;}'
 }
 
 function clean_up {
-	[ -e /dev/rbd/rbd/testimg1@snap1 ] &&
-		sudo rbd device unmap /dev/rbd/rbd/testimg1@snap1
-	if [ -e /dev/rbd/rbd/testimg1 ]; then
-		sudo rbd device unmap /dev/rbd/rbd/testimg1
-		rbd snap purge testimg1 || true
-	fi
-	rbd ls | grep testimg1 > /dev/null && rbd rm testimg1 || true
-	sudo rm -f $TMP_FILES
+    [ -e /dev/rbd/rbd/testimg1@snap1 ] \
+        && sudo rbd device unmap /dev/rbd/rbd/testimg1@snap1
+    if [ -e /dev/rbd/rbd/testimg1 ]; then
+        sudo rbd device unmap /dev/rbd/rbd/testimg1
+        rbd snap purge testimg1 || true
+    fi
+    rbd ls | grep testimg1 >/dev/null && rbd rm testimg1 || true
+    sudo rm -f $TMP_FILES
 }
 
 clean_up

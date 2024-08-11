@@ -25,7 +25,7 @@ static const int DEPGRAPH_LEVEL = 12;
 static const int SLEEP_LEVEL = 13;
 static const int THREAD_LEVEL = 10;
 
-}
+}   // namespace rbd_replay
 
 #define dout_subsys ceph_subsys_rbd_replay
 #undef dout_prefix

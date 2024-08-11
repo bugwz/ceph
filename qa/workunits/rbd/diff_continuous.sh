@@ -8,9 +8,9 @@ iosize=16384
 iototal=16384000
 iothreads=16
 
-parent=`uuidgen`"-parent"
-src=`uuidgen`"-src";
-dst=`uuidgen`"-dst";
+parent=$(uuidgen)"-parent"
+src=$(uuidgen)"-src"
+dst=$(uuidgen)"-dst"
 
 function cleanup() {
     rbd snap purge $src || :
@@ -32,10 +32,10 @@ rbd clone $parent@parent $src --stripe-count 4 --stripe-unit 262144
 rbd create $dst --size $size --image-format 2 --order 19
 
 # mirror for a while
-for s in `seq 1 $max`; do
+for s in $(seq 1 $max); do
     rbd snap create $src --snap=snap$s
-    rbd export-diff $src@snap$s - $lastsnap | rbd import-diff - $dst  &
-    rbd bench --io-type write $src --io-size $iosize --io-threads $iothreads --io-total $iototal --io-pattern rand  &
+    rbd export-diff $src@snap$s - $lastsnap | rbd import-diff - $dst &
+    rbd bench --io-type write $src --io-size $iosize --io-threads $iothreads --io-total $iototal --io-pattern rand &
     wait
     lastsnap="--from-snap snap$s"
 done
@@ -44,12 +44,12 @@ done
 #exit 0
 
 # validate
-for s in `seq 1 $max`; do
-    ssum=`rbd export $src@snap$s - | md5sum`
-    dsum=`rbd export $dst@snap$s - | md5sum`
+for s in $(seq 1 $max); do
+    ssum=$(rbd export $src@snap$s - | md5sum)
+    dsum=$(rbd export $dst@snap$s - | md5sum)
     if [ "$ssum" != "$dsum" ]; then
-	echo different sum at snap$s
-	exit 1
+        echo different sum at snap$s
+        exit 1
     fi
 done
 
@@ -57,4 +57,3 @@ cleanup
 trap "" EXIT
 
 echo OK
-

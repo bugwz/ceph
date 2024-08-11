@@ -61,7 +61,7 @@ if [ -z "$MIRRORS" ]; then
     exit 1
 fi
 
-IFS=', ' read -r -a array <<< "$MIRRORS"
+IFS=', ' read -r -a array <<<"$MIRRORS"
 
 for MIRROR in "${array[@]}"; do
     test_http $MIRROR

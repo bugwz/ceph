@@ -5,6 +5,6 @@
 
 namespace librbd {
 
-MockJournal *MockJournal::s_instance = nullptr;
+MockJournal* MockJournal::s_instance = nullptr;
 
-} // namespace librbd
+}   // namespace librbd

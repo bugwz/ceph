@@ -18,11 +18,11 @@ sleep_seconds=10
 while [ ${retrying_seconds} -le 7200 ]; do
     [ $(rbd --cluster ${CLUSTER2} --pool ${POOL} ls | wc -l) -ge ${image_count} ] && break
     sleep ${sleep_seconds}
-    retrying_seconds=$(($retrying_seconds+${sleep_seconds}))
+    retrying_seconds=$(($retrying_seconds + ${sleep_seconds}))
 done
 
 testlog "TEST: snapshot all pool images"
-snap_id=`uuidgen`
+snap_id=$(uuidgen)
 for image in $(rbd --cluster ${CLUSTER1} --pool ${POOL} ls); do
     create_snapshot ${CLUSTER1} ${POOL} ${image} ${snap_id}
 done

@@ -1,7 +1,7 @@
 #!/bin/sh -x
 
 expect_failure() {
-	if "$@"; then return 1; else return 0; fi
+    if "$@"; then return 1; else return 0; fi
 }
 
 set -e
@@ -25,7 +25,7 @@ expect_failure python3 -c "import os; os.rename('group/file2', 'group/subvol2/fi
 ln group/subvol2/file1 group/subvol2/file1_
 
 # create hardlink out of subvolume
-expect_failure ln group/subvol2/file1  group/file1_
+expect_failure ln group/subvol2/file1 group/file1_
 expect_failure ln group/file2 group/subvol1/file2_
 
 # create snapshot at subvolume root

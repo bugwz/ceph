@@ -20,44 +20,40 @@ using std::set;
 using std::list;
 using ceph::for_each_substr;
 
-void get_str_list(const string& str, const char *delims, list<string>& str_list)
+void get_str_list(const string& str, const char* delims, list<string>& str_list)
 {
-  str_list.clear();
-  for_each_substr(str, delims, [&str_list] (auto token) {
-      str_list.emplace_back(token.begin(), token.end());
-    });
+    str_list.clear();
+    for_each_substr(str, delims, [&str_list](auto token) { str_list.emplace_back(token.begin(), token.end()); });
 }
 
 void get_str_list(const string& str, list<string>& str_list)
 {
-  const char *delims = ";,= \t";
-  get_str_list(str, delims, str_list);
+    const char* delims = ";,= \t";
+    get_str_list(str, delims, str_list);
 }
 
-list<string> get_str_list(const string& str, const char *delims)
+list<string> get_str_list(const string& str, const char* delims)
 {
-  list<string> result;
-  get_str_list(str, delims, result);
-  return result;
+    list<string> result;
+    get_str_list(str, delims, result);
+    return result;
 }
 
-void get_str_vec(const string& str, const char *delims, vector<string>& str_vec)
+void get_str_vec(const string& str, const char* delims, vector<string>& str_vec)
 {
-  str_vec.clear();
-  for_each_substr(str, delims, [&str_vec] (auto token) {
-      str_vec.emplace_back(token.begin(), token.end());
-    });
+    str_vec.clear();
+    for_each_substr(str, delims, [&str_vec](auto token) { str_vec.emplace_back(token.begin(), token.end()); });
 }
 
 void get_str_vec(const string& str, vector<string>& str_vec)
 {
-  const char *delims = ";,= \t";
-  get_str_vec(str, delims, str_vec);
+    const char* delims = ";,= \t";
+    get_str_vec(str, delims, str_vec);
 }
 
-vector<string> get_str_vec(const string& str, const char *delims)
+vector<string> get_str_vec(const string& str, const char* delims)
 {
-  vector<string> result;
-  get_str_vec(str, delims, result);
-  return result;
+    vector<string> result;
+    get_str_vec(str, delims, result);
+    return result;
 }

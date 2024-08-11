@@ -27,7 +27,7 @@ function run() {
 
     export -n CEPH_CLI_TEST_DUP_COMMAND
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         $func $dir || return 1
     done
 }
@@ -43,9 +43,8 @@ function TEST_scrub_test() {
     setup $dir || return 1
     run_mon $dir a --osd_pool_default_size=3 || return 1
     run_mgr $dir x || return 1
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $osd || return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $osd || return 1
     done
 
     # Create a pool with a single pg
@@ -54,19 +53,17 @@ function TEST_scrub_test() {
     poolid=$(ceph osd dump | grep "^pool.*[']${poolname}[']" | awk '{ print $2 }')
 
     dd if=/dev/urandom of=$TESTDATA bs=1032 count=1
-    for i in `seq 1 $objects`
-    do
+    for i in $(seq 1 $objects); do
         rados -p $poolname put obj${i} $TESTDATA
     done
     rm -f $TESTDATA
 
     local primary=$(get_primary $poolname obj1)
     local otherosd=$(get_not_primary $poolname obj1)
-    if [ "$otherosd" = "2" ];
-    then
-      local anotherosd="0"
+    if [ "$otherosd" = "2" ]; then
+        local anotherosd="0"
     else
-      local anotherosd="2"
+        local anotherosd="2"
     fi
 
     objectstore_tool $dir $anotherosd obj1 set-bytes /etc/fstab
@@ -142,9 +139,8 @@ function TEST_interval_changes() {
     # This min scrub interval results in 30 seconds backoff time
     run_mon $dir a --osd_pool_default_size=$OSDS || return 1
     run_mgr $dir x || return 1
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $osd --osd_scrub_min_interval=$min_interval --osd_scrub_max_interval=$max_interval --osd_scrub_interval_randomize_ratio=0 || return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $osd --osd_scrub_min_interval=$min_interval --osd_scrub_max_interval=$max_interval --osd_scrub_interval_randomize_ratio=0 || return 1
     done
 
     # Create a pool with a single pg
@@ -153,8 +149,7 @@ function TEST_interval_changes() {
     local poolid=$(ceph osd dump | grep "^pool.*[']${poolname}[']" | awk '{ print $2 }')
 
     dd if=/dev/urandom of=$TESTDATA bs=1032 count=1
-    for i in `seq 1 $objects`
-    do
+    for i in $(seq 1 $objects); do
         rados -p $poolname put obj${i} $TESTDATA
     done
     rm -f $TESTDATA
@@ -197,9 +192,8 @@ function TEST_scrub_extended_sleep() {
 
     DAY=$(date +%w)
     # Handle wrap
-    if [ "$DAY" -ge "4" ];
-    then
-      DAY="0"
+    if [ "$DAY" -ge "4" ]; then
+        DAY="0"
     fi
     # Start after 2 days in case we are near midnight
     DAY_START=$(expr $DAY + 2)
@@ -208,16 +202,15 @@ function TEST_scrub_extended_sleep() {
     setup $dir || return 1
     run_mon $dir a --osd_pool_default_size=3 || return 1
     run_mgr $dir x || return 1
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $osd --osd_scrub_sleep=0 \
-                        --osd_scrub_extended_sleep=20 \
-                        --bluestore_cache_autotune=false \
-	                --osd_deep_scrub_randomize_ratio=0.0 \
-	                --osd_scrub_interval_randomize_ratio=0 \
-			--osd_scrub_begin_week_day=$DAY_START \
-			--osd_scrub_end_week_day=$DAY_END \
-			|| return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $osd --osd_scrub_sleep=0 \
+            --osd_scrub_extended_sleep=20 \
+            --bluestore_cache_autotune=false \
+            --osd_deep_scrub_randomize_ratio=0.0 \
+            --osd_scrub_interval_randomize_ratio=0 \
+            --osd_scrub_begin_week_day=$DAY_START \
+            --osd_scrub_end_week_day=$DAY_END \
+            || return 1
     done
 
     # Create a pool with a single pg
@@ -232,19 +225,17 @@ function TEST_scrub_extended_sleep() {
 
     # Allow scrub to start extended sleep
     PASSED="false"
-    for ((i=0; i < 15; i++)); do
-      if grep -q "scrub state.*, sleeping" $dir/osd.${primary}.log
-      then
-	PASSED="true"
-        break
-      fi
-      sleep 1
+    for ((i = 0; i < 15; i++)); do
+        if grep -q "scrub state.*, sleeping" $dir/osd.${primary}.log; then
+            PASSED="true"
+            break
+        fi
+        sleep 1
     done
 
     # Check that extended sleep was triggered
-    if [ $PASSED = "false" ];
-    then
-      return 1
+    if [ $PASSED = "false" ]; then
+        return 1
     fi
 
     # release scrub to run after extended sleep finishes
@@ -255,24 +246,22 @@ function TEST_scrub_extended_sleep() {
     # but test up to 10 seconds and make sure it happens by 25 seconds.
     count=0
     PASSED="false"
-    for ((i=0; i < 25; i++)); do
-	count=$(expr $count + 1)
-        if test "$(get_last_scrub_stamp $pgid)" '>' "$last_scrub" ; then
-	    # Did scrub run too soon?
-	    if [ $count -lt "10" ];
-	    then
-              return 1
+    for ((i = 0; i < 25; i++)); do
+        count=$(expr $count + 1)
+        if test "$(get_last_scrub_stamp $pgid)" '>' "$last_scrub"; then
+            # Did scrub run too soon?
+            if [ $count -lt "10" ]; then
+                return 1
             fi
-	    PASSED="true"
-	    break
+            PASSED="true"
+            break
         fi
         sleep 1
     done
 
     # Make sure scrub eventually ran
-    if [ $PASSED = "false" ];
-    then
-      return 1
+    if [ $PASSED = "false" ]; then
+        return 1
     fi
 
     teardown $dir || return 1
@@ -286,25 +275,22 @@ function _scrub_abort() {
     local type=$2
 
     TESTDATA="testdata.$$"
-    if test $type = "scrub";
-    then
-      stopscrub="noscrub"
-      check="noscrub"
+    if test $type = "scrub"; then
+        stopscrub="noscrub"
+        check="noscrub"
     else
-      stopscrub="nodeep-scrub"
-      check="nodeep_scrub"
+        stopscrub="nodeep-scrub"
+        check="nodeep_scrub"
     fi
-
 
     setup $dir || return 1
     run_mon $dir a --osd_pool_default_size=3 || return 1
     run_mgr $dir x || return 1
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $osd --osd_pool_default_pg_autoscale_mode=off \
-	      --osd_deep_scrub_randomize_ratio=0.0 \
-	      --osd_scrub_sleep=5.0 \
-	      --osd_scrub_interval_randomize_ratio=0  || return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $osd --osd_pool_default_pg_autoscale_mode=off \
+            --osd_deep_scrub_randomize_ratio=0.0 \
+            --osd_scrub_sleep=5.0 \
+            --osd_scrub_interval_randomize_ratio=0 || return 1
     done
 
     # Create a pool with a single pg
@@ -313,8 +299,7 @@ function _scrub_abort() {
     poolid=$(ceph osd dump | grep "^pool.*[']${poolname}[']" | awk '{ print $2 }')
 
     dd if=/dev/urandom of=$TESTDATA bs=1032 count=1
-    for i in `seq 1 $objects`
-    do
+    for i in $(seq 1 $objects); do
         rados -p $poolname put obj${i} $TESTDATA
     done
     rm -f $TESTDATA
@@ -324,67 +309,58 @@ function _scrub_abort() {
 
     ceph tell $pgid $type || return 1
     # deep-scrub won't start without scrub noticing
-    if [ "$type" = "deep_scrub" ];
-    then
-      ceph tell $pgid scrub || return 1
+    if [ "$type" = "deep_scrub" ]; then
+        ceph tell $pgid scrub || return 1
     fi
 
     # Wait for scrubbing to start
     set -o pipefail
     found="no"
-    for i in $(seq 0 200)
-    do
-      flush_pg_stats
-      if ceph pg dump pgs | grep  ^$pgid| grep -q "scrubbing"
-      then
-        found="yes"
-        #ceph pg dump pgs
-        break
-      fi
+    for i in $(seq 0 200); do
+        flush_pg_stats
+        if ceph pg dump pgs | grep ^$pgid | grep -q "scrubbing"; then
+            found="yes"
+            #ceph pg dump pgs
+            break
+        fi
     done
     set +o pipefail
 
-    if test $found = "no";
-    then
-      echo "Scrubbing never started"
-      return 1
+    if test $found = "no"; then
+        echo "Scrubbing never started"
+        return 1
     fi
 
     ceph osd set $stopscrub
-    if [ "$type" = "deep_scrub" ];
-    then
-      ceph osd set noscrub
+    if [ "$type" = "deep_scrub" ]; then
+        ceph osd set noscrub
     fi
 
     # Wait for scrubbing to end
     set -o pipefail
-    for i in $(seq 0 200)
-    do
-      flush_pg_stats
-      if ceph pg dump pgs | grep ^$pgid | grep -q "scrubbing"
-      then
-        continue
-      fi
-      #ceph pg dump pgs
-      break
+    for i in $(seq 0 200); do
+        flush_pg_stats
+        if ceph pg dump pgs | grep ^$pgid | grep -q "scrubbing"; then
+            continue
+        fi
+        #ceph pg dump pgs
+        break
     done
     set +o pipefail
 
     sleep 5
 
-    if ! grep "$check set, aborting" $dir/osd.${primary}.log
-    then
-      echo "Abort not seen in log"
-      return 1
+    if ! grep "$check set, aborting" $dir/osd.${primary}.log; then
+        echo "Abort not seen in log"
+        return 1
     fi
 
     local last_scrub=$(get_last_scrub_stamp $pgid)
     ceph config set osd "osd_scrub_sleep" "0.1"
 
     ceph osd unset $stopscrub
-    if [ "$type" = "deep_scrub" ];
-    then
-      ceph osd unset noscrub
+    if [ "$type" = "deep_scrub" ]; then
+        ceph osd unset noscrub
     fi
     TIMEOUT=$(($objects / 2))
     wait_for_scrub $pgid "$last_scrub" || return 1
@@ -415,13 +391,12 @@ function TEST_scrub_permit_time() {
     run_mgr $dir x || return 1
     local scrub_begin_hour=$(date -d '2 hour ago' +"%H" | sed 's/^0//')
     local scrub_end_hour=$(date -d '1 hour ago' +"%H" | sed 's/^0//')
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $osd --bluestore_cache_autotune=false \
-	                --osd_deep_scrub_randomize_ratio=0.0 \
-	                --osd_scrub_interval_randomize_ratio=0 \
-                        --osd_scrub_begin_hour=$scrub_begin_hour \
-                        --osd_scrub_end_hour=$scrub_end_hour || return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $osd --bluestore_cache_autotune=false \
+            --osd_deep_scrub_randomize_ratio=0.0 \
+            --osd_scrub_interval_randomize_ratio=0 \
+            --osd_scrub_begin_hour=$scrub_begin_hour \
+            --osd_scrub_end_hour=$scrub_end_hour || return 1
     done
 
     # Create a pool with a single pg
@@ -436,11 +411,11 @@ function TEST_scrub_permit_time() {
     # current time to set last_scrub_stamp, it sets the deadline
     # back by osd_max_interval which would cause the time permit checking
     # to be skipped.  Set back 1 day, the default scrub_min_interval.
-    ceph tell $pgid scrub $(( 24 * 60 * 60 )) || return 1
+    ceph tell $pgid scrub $((24 * 60 * 60)) || return 1
 
     # Scrub should not run
-    for ((i=0; i < 30; i++)); do
-        if test "$(get_last_scrub_stamp $pgid)" '>' "$last_scrub" ; then
+    for ((i = 0; i < 30; i++)); do
+        if test "$(get_last_scrub_stamp $pgid)" '>' "$last_scrub"; then
             return 1
         fi
         sleep 1

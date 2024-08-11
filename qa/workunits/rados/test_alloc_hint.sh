@@ -34,7 +34,7 @@ function get_conf_val() {
 }
 
 function setup_osd_data() {
-    for (( i = 0 ; i < "${NUM_OSDS}" ; i++ )); do
+    for ((i = 0; i < "${NUM_OSDS}"; i++)); do
         OSD_DATA[i]="$(get_conf_val "osd.$i" "osd_data")"
     done
 }
@@ -54,7 +54,7 @@ function expect_alloc_hint_eq() {
     export CEPH_ARGS="--osd-objectstore=filestore"
     local expected_extsize="$1"
 
-    for (( i = 0 ; i < "${NUM_OSDS}" ; i++ )); do
+    for ((i = 0; i < "${NUM_OSDS}"; i++)); do
         # Make sure that stuff is flushed from the journal to the store
         # by the time we get to it, as we prod the actual files and not
         # the journal.
@@ -97,9 +97,9 @@ NUM_PG="12"
 NUM_PGP="${NUM_PG}"
 
 LOW_CAP="$(get_conf_val "osd.0" "filestore_max_alloc_hint_size")"
-HIGH_CAP="$((LOW_CAP * 10))" # 10M, assuming 1M default cap
+HIGH_CAP="$((LOW_CAP * 10))"  # 10M, assuming 1M default cap
 SMALL_HINT="$((LOW_CAP / 4))" # 256K, assuming 1M default cap
-BIG_HINT="$((LOW_CAP * 6))" # 6M, assuming 1M default cap
+BIG_HINT="$((LOW_CAP * 6))"   # 6M, assuming 1M default cap
 
 setup_osd_data
 

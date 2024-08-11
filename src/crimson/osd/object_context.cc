@@ -8,27 +8,23 @@
 
 namespace crimson::osd {
 
-ObjectContextRegistry::ObjectContextRegistry(crimson::common::ConfigProxy &conf)
+ObjectContextRegistry::ObjectContextRegistry(crimson::common::ConfigProxy& conf)
 {
-  obc_lru.set_target_size(conf.get_val<uint64_t>("crimson_osd_obc_lru_size"));
-  conf.add_observer(this);
+    obc_lru.set_target_size(conf.get_val<uint64_t>("crimson_osd_obc_lru_size"));
+    conf.add_observer(this);
 }
 
 const char** ObjectContextRegistry::get_tracked_conf_keys() const
 {
-  static const char* KEYS[] = {
-    "crimson_osd_obc_lru_size",
-    nullptr
-  };
-  return KEYS;
+    static const char* KEYS[] = {"crimson_osd_obc_lru_size", nullptr};
+    return KEYS;
 }
 
-void ObjectContextRegistry::handle_conf_change(
-  const crimson::common::ConfigProxy& conf,
-  const std::set <std::string> &changed)
+void ObjectContextRegistry::handle_conf_change(const crimson::common::ConfigProxy& conf,
+                                               const std::set<std::string>& changed)
 {
-  obc_lru.set_target_size(conf.get_val<uint64_t>("crimson_osd_obc_lru_size"));
+    obc_lru.set_target_size(conf.get_val<uint64_t>("crimson_osd_obc_lru_size"));
 }
 
 
-}
+}   // namespace crimson::osd

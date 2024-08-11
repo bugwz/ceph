@@ -4,10 +4,11 @@
 #ifndef CEPH_RBD_MIRROR_THREADS_H
 #define CEPH_RBD_MIRROR_THREADS_H
 
+#include "common/Timer.h"
+#include "common/ceph_mutex.h"
 #include "include/common_fwd.h"
 #include "include/rados/librados_fwd.hpp"
-#include "common/ceph_mutex.h"
-#include "common/Timer.h"
+
 #include <memory>
 
 class ThreadPool;
@@ -15,31 +16,33 @@ class ThreadPool;
 namespace librbd {
 struct AsioEngine;
 struct ImageCtx;
-namespace asio { struct ContextWQ; }
-} // namespace librbd
+namespace asio {
+struct ContextWQ;
+}
+}   // namespace librbd
 
 namespace rbd {
 namespace mirror {
 
-template <typename ImageCtxT = librbd::ImageCtx>
-class Threads {
+template<typename ImageCtxT = librbd::ImageCtx> class Threads
+{
 public:
-  librbd::AsioEngine* asio_engine = nullptr;
-  librbd::asio::ContextWQ* work_queue = nullptr;
+    librbd::AsioEngine* asio_engine = nullptr;
+    librbd::asio::ContextWQ* work_queue = nullptr;
 
-  SafeTimer *timer = nullptr;
-  ceph::mutex timer_lock = ceph::make_mutex("Threads::timer_lock");
+    SafeTimer* timer = nullptr;
+    ceph::mutex timer_lock = ceph::make_mutex("Threads::timer_lock");
 
-  explicit Threads(std::shared_ptr<librados::Rados>& rados);
-  Threads(const Threads&) = delete;
-  Threads& operator=(const Threads&) = delete;
+    explicit Threads(std::shared_ptr<librados::Rados>& rados);
+    Threads(const Threads&) = delete;
+    Threads& operator=(const Threads&) = delete;
 
-  ~Threads();
+    ~Threads();
 };
 
-} // namespace mirror
-} // namespace rbd
+}   // namespace mirror
+}   // namespace rbd
 
 extern template class rbd::mirror::Threads<librbd::ImageCtx>;
 
-#endif // CEPH_RBD_MIRROR_THREADS_H
+#endif   // CEPH_RBD_MIRROR_THREADS_H

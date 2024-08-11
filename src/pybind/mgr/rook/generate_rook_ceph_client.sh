@@ -7,7 +7,6 @@ cd "$script_location"
 
 rm -rf rook_client
 
-
 cp -r ./rook-client-python/rook_client .
 rm -rf rook_client/cassandra
 rm -rf rook_client/edgefs

@@ -1,7 +1,7 @@
 #!/bin/sh -ex
 
-cwd=`pwd`
-cat > conf <<EOF
+cwd=$(pwd)
+cat >conf <<EOF
 [mon]
 admin socket = 
 log file = $cwd/\$name.log
@@ -31,7 +31,7 @@ ceph-mon -c conf -i d --mon-data $cwd/mon.d
 while true; do
     ceph -c conf -k keyring --monmap mm health
     if ceph -c conf -k keyring --monmap mm mon stat | grep 'quorum 0,1'; then
-	break
+        break
     fi
     sleep 1
 done
@@ -44,11 +44,10 @@ ceph-mon -c conf -i e --mon-data $cwd/mon.e
 while true; do
     ceph -c conf -k keyring --monmap mm health
     if ceph -c conf -k keyring --monmap mm mon stat | grep 'quorum 0,1,2'; then
-	break
+        break
     fi
     sleep 1
 done
-
 
 killall ceph-mon
 echo OK

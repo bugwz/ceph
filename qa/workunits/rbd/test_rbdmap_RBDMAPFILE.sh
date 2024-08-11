@@ -23,12 +23,12 @@ echo "TEST: restart the rbdmap.service"
 sudo systemctl restart rbdmap.service
 
 echo "TEST: ensure that /usr/bin/rbdmap runs to completion"
-until sudo systemctl status rbdmap.service | grep 'active (exited)' ; do
+until sudo systemctl status rbdmap.service | grep 'active (exited)'; do
     sleep 0.5
 done
 
 echo "TEST: assert that rbdmap has not logged anything since TIMESTAMP"
-journalctl --since "$TIMESTAMP" -t rbdmap  | grep 'rbdmap\[[[:digit:]]' && exit 1
+journalctl --since "$TIMESTAMP" -t rbdmap | grep 'rbdmap\[[[:digit:]]' && exit 1
 journalctl --since "$TIMESTAMP" -t init-rbdmap | grep 'rbdmap\[[[:digit:]]' && exit 1
 
 exit 0

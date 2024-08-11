@@ -7,13 +7,13 @@
 mktemp=$(which mktemp)
 cat=$(which cat)
 grep=$(which grep)
-PYTHON_EXECUTABLE=`which python3`
+PYTHON_EXECUTABLE=$(which python3)
 STDERR_FILE=$($mktemp)
 INVALID="→"
 
 echo "stderr file created: $STDERR_FILE"
 
-INVALID="$INVALID" $PYTHON_EXECUTABLE $1 2> ${STDERR_FILE}
+INVALID="$INVALID" $PYTHON_EXECUTABLE $1 2>${STDERR_FILE}
 
 retVal=$?
 

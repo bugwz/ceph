@@ -14,56 +14,57 @@
  *
  */
 
-#include "common/convenience.h" // include first: tests that header is standalone
+#include "common/convenience.h"   // include first: tests that header is standalone
 
-#include <string>
 #include <boost/optional.hpp>
 #include <gtest/gtest.h>
+#include <string>
 
 // A just god would not allow the C++ standard to make taking the
 // address of member functions in the standard library undefined behavior.
-static std::string::size_type l(const std::string& s) {
-  return s.size();
+static std::string::size_type l(const std::string& s)
+{
+    return s.size();
 }
 
 TEST(Convenience, MaybeDo)
 {
-  boost::optional<std::string> s("qwerty");
-  boost::optional<std::string> t;
-  auto r = ceph::maybe_do(s, l);
-  EXPECT_TRUE(r);
-  EXPECT_EQ(*r, s->size());
+    boost::optional<std::string> s("qwerty");
+    boost::optional<std::string> t;
+    auto r = ceph::maybe_do(s, l);
+    EXPECT_TRUE(r);
+    EXPECT_EQ(*r, s->size());
 
-  EXPECT_FALSE(ceph::maybe_do(t, l));
+    EXPECT_FALSE(ceph::maybe_do(t, l));
 }
 
 TEST(Convenience, MaybeDoOr)
 {
-  const boost::optional<std::string> s("qwerty");
-  const boost::optional<std::string> t;
-  auto r = ceph::maybe_do_or(s, l, 0);
-  EXPECT_EQ(r, s->size());
+    const boost::optional<std::string> s("qwerty");
+    const boost::optional<std::string> t;
+    auto r = ceph::maybe_do_or(s, l, 0);
+    EXPECT_EQ(r, s->size());
 
-  EXPECT_EQ(ceph::maybe_do_or(t, l, 0u), 0u);
+    EXPECT_EQ(ceph::maybe_do_or(t, l, 0u), 0u);
 }
 
 TEST(Convenience, StdMaybeDo)
 {
-  std::optional<std::string> s("qwerty");
-  std::optional<std::string> t;
-  auto r = ceph::maybe_do(s, l);
-  EXPECT_TRUE(r);
-  EXPECT_EQ(*r, s->size());
+    std::optional<std::string> s("qwerty");
+    std::optional<std::string> t;
+    auto r = ceph::maybe_do(s, l);
+    EXPECT_TRUE(r);
+    EXPECT_EQ(*r, s->size());
 
-  EXPECT_FALSE(ceph::maybe_do(t, l));
+    EXPECT_FALSE(ceph::maybe_do(t, l));
 }
 
 TEST(Convenience, StdMaybeDoOr)
 {
-  const std::optional<std::string> s("qwerty");
-  const std::optional<std::string> t;
-  auto r = ceph::maybe_do_or(s, l, 0);
-  EXPECT_EQ(r, s->size());
+    const std::optional<std::string> s("qwerty");
+    const std::optional<std::string> t;
+    auto r = ceph::maybe_do_or(s, l, 0);
+    EXPECT_EQ(r, s->size());
 
-  EXPECT_EQ(ceph::maybe_do_or(t, l, 0u), 0u);
+    EXPECT_EQ(ceph::maybe_do_or(t, l, 0u), 0u);
 }

@@ -30,22 +30,20 @@ function run() {
     export poolprefix=test
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
     done
 }
 
-
 function get_num_in_state() {
     local state=$1
     local expression
     expression+="select(contains(\"${state}\"))"
-    ceph --format json pg dump pgs 2>/dev/null | \
-        jq ".pg_stats | [.[] | .state | $expression] | length"
+    ceph --format json pg dump pgs 2>/dev/null \
+        | jq ".pg_stats | [.[] | .state | $expression] | length"
 }
-
 
 function wait_for_state() {
     local state=$1
@@ -54,14 +52,14 @@ function wait_for_state() {
     local -i loop=0
 
     flush_pg_stats || return 1
-    while test $(get_num_pgs) == 0 ; do
-	sleep 1
+    while test $(get_num_pgs) == 0; do
+        sleep 1
     done
 
-    while true ; do
+    while true; do
         cur_in_state=$(get_num_in_state ${state})
         test $cur_in_state -gt 0 && break
-        if (( $loop >= ${#delays[*]} )) ; then
+        if (($loop >= ${#delays[*]})); then
             ceph pg dump pgs
             return 1
         fi
@@ -71,12 +69,10 @@ function wait_for_state() {
     return 0
 }
 
-
 function wait_for_recovery_toofull() {
     local timeout=$1
     wait_for_state recovery_toofull $timeout
 }
-
 
 # Create 1 pools with size 1
 # set ful-ratio to 50%
@@ -93,80 +89,71 @@ function TEST_recovery_test_simple() {
     run_mgr $dir x || return 1
     export CEPH_ARGS
 
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $osd || return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $osd || return 1
     done
 
     ceph osd set-nearfull-ratio .40
     ceph osd set-backfillfull-ratio .45
     ceph osd set-full-ratio .50
 
-    for p in $(seq 1 $pools)
-    do
-      create_pool "${poolprefix}$p" 1 1
-      ceph osd pool set "${poolprefix}$p" size 1 --yes-i-really-mean-it
+    for p in $(seq 1 $pools); do
+        create_pool "${poolprefix}$p" 1 1
+        ceph osd pool set "${poolprefix}$p" size 1 --yes-i-really-mean-it
     done
 
     wait_for_clean || return 1
 
     dd if=/dev/urandom of=$dir/datafile bs=1024 count=5
-    for o in $(seq 1 $objects)
-    do
-      rados -p "${poolprefix}$p" put obj$o $dir/datafile
+    for o in $(seq 1 $objects); do
+        rados -p "${poolprefix}$p" put obj$o $dir/datafile
     done
 
-    for o in $(seq 0 $(expr $OSDS - 1))
-    do
-      ceph tell osd.$o injectargs '--fake_statfs_for_testing 3686400' || return 1
+    for o in $(seq 0 $(expr $OSDS - 1)); do
+        ceph tell osd.$o injectargs '--fake_statfs_for_testing 3686400' || return 1
     done
     sleep 5
 
     ceph pg dump pgs
 
-    for p in $(seq 1 $pools)
-    do
-      ceph osd pool set "${poolprefix}$p" size 2
+    for p in $(seq 1 $pools); do
+        ceph osd pool set "${poolprefix}$p" size 2
     done
 
     # If this times out, we'll detected errors below
     wait_for_recovery_toofull 30
 
     ERRORS=0
-    if [ "$(ceph pg dump pgs | grep +recovery_toofull | wc -l)" != "1" ];
-    then
-      echo "One pool should have been in recovery_toofull"
-      ERRORS="$(expr $ERRORS + 1)"
+    if [ "$(ceph pg dump pgs | grep +recovery_toofull | wc -l)" != "1" ]; then
+        echo "One pool should have been in recovery_toofull"
+        ERRORS="$(expr $ERRORS + 1)"
     fi
 
     ceph pg dump pgs
     ceph status
-    ceph status --format=json-pretty > $dir/stat.json
+    ceph status --format=json-pretty >$dir/stat.json
 
     eval SEV=$(jq '.health.checks.PG_RECOVERY_FULL.severity' $dir/stat.json)
     if [ "$SEV" != "HEALTH_ERR" ]; then
-      echo "PG_RECOVERY_FULL severity $SEV not HEALTH_ERR"
-      ERRORS="$(expr $ERRORS + 1)"
+        echo "PG_RECOVERY_FULL severity $SEV not HEALTH_ERR"
+        ERRORS="$(expr $ERRORS + 1)"
     fi
     eval MSG=$(jq '.health.checks.PG_RECOVERY_FULL.summary.message' $dir/stat.json)
     if [ "$MSG" != "Full OSDs blocking recovery: 1 pg recovery_toofull" ]; then
-      echo "PG_RECOVERY_FULL message '$MSG' mismatched"
-      ERRORS="$(expr $ERRORS + 1)"
+        echo "PG_RECOVERY_FULL message '$MSG' mismatched"
+        ERRORS="$(expr $ERRORS + 1)"
     fi
     rm -f $dir/stat.json
 
-    if [ $ERRORS != "0" ];
-    then
-      return 1
+    if [ $ERRORS != "0" ]; then
+        return 1
     fi
 
-    for i in $(seq 1 $pools)
-    do
-      delete_pool "${poolprefix}$i"
+    for i in $(seq 1 $pools); do
+        delete_pool "${poolprefix}$i"
     done
     kill_daemons $dir || return 1
 }
-
 
 main osd-recovery-space "$@"
 

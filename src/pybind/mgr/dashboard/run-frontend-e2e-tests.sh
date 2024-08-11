@@ -40,8 +40,8 @@ check_device_available() {
 
         case "$DEVICE" in
             chrome)
-                [ -x "$(command -v chrome)" ] || [ -x "$(command -v google-chrome)" ] ||
-                [ -x "$(command -v google-chrome-stable)" ] || failed=true
+                [ -x "$(command -v chrome)" ] || [ -x "$(command -v google-chrome)" ] \
+                    || [ -x "$(command -v google-chrome-stable)" ] || failed=true
                 ;;
             chromium)
                 [ -x "$(command -v chromium)" ] || [ -x "$(command -v chromium-browser)" ] || failed=true
@@ -50,7 +50,7 @@ check_device_available() {
     fi
 
     if [ "$failed" = "true" ]; then
-            echo "ERROR: $DEVICE not found. You need to install $DEVICE or \
+        echo "ERROR: $DEVICE not found. You need to install $DEVICE or \
     use a different device. Supported devices: chrome (default), chromium, electron or docker."
         stop 1
     fi
@@ -65,19 +65,21 @@ check_device_available() {
 : ${REMOTE:='false'}
 
 while getopts 'd:p:r:u:' flag; do
-  case "${flag}" in
-    d) DEVICE=$OPTARG;;
-    p) CYPRESS_LOGIN_PWD=$OPTARG;;
-    r) REMOTE='true'
-       CYPRESS_BASE_URL=$OPTARG;;
-    u) CYPRESS_LOGIN_USER=$OPTARG;;
-  esac
+    case "${flag}" in
+        d) DEVICE=$OPTARG ;;
+        p) CYPRESS_LOGIN_PWD=$OPTARG ;;
+        r)
+            REMOTE='true'
+            CYPRESS_BASE_URL=$OPTARG
+            ;;
+        u) CYPRESS_LOGIN_USER=$OPTARG ;;
+    esac
 done
 
-DASH_DIR=`pwd`
+DASH_DIR=$(pwd)
 [ -z "$BUILD_DIR" ] && BUILD_DIR=build
 cd ../../../../${BUILD_DIR}
-FULL_PATH_BUILD_DIR=`pwd`
+FULL_PATH_BUILD_DIR=$(pwd)
 
 [[ "$(command -v npm)" == '' ]] && . ${FULL_PATH_BUILD_DIR}/src/pybind/mgr/dashboard/node-env/bin/activate
 

@@ -13,17 +13,15 @@
  */
 
 
-#include <errno.h>
-#include <stdlib.h>
-
-#include "include/int_types.h"
-#include <ntdef.h>
-#include <ntstatus.h>
-
 #include "include/compat.h"
+#include "include/fs_types.h"
 #include "include/int_types.h"
 #include "include/types.h"
-#include "include/fs_types.h"
+
+#include <errno.h>
+#include <ntdef.h>
+#include <ntstatus.h>
+#include <stdlib.h>
 
 // We're only converting errors defined in errno.h, not standard Windows
 // system error codes that are usually retrievied using GetLastErrorCode().
@@ -32,9 +30,9 @@
 
 __u32 ceph_to_hostos_errno_unsigned(__u32 r)
 {
-  // using an array like like freebsd_errno.cc might be more readable but
-  // we have some large values defined by Boost.
-  switch(r) {
+    // using an array like like freebsd_errno.cc might be more readable but
+    // we have some large values defined by Boost.
+    switch (r) {
     case 1: return EPERM;
     case 2: return ENOENT;
     case 3: return ESRCH;
@@ -169,14 +167,14 @@ __u32 ceph_to_hostos_errno_unsigned(__u32 r)
     case 131: return ENOTRECOVERABLE;
     case 132: return ERFKILL;
     case 133: return EHWPOISON;
-    default:
-      return r;
-  }
+    default: return r;
+    }
 }
 
-__u32 hostos_to_ceph_errno_unsigned(__u32 r) {
-  // Windows errno -> Linux errno
-  switch(r) {
+__u32 hostos_to_ceph_errno_unsigned(__u32 r)
+{
+    // Windows errno -> Linux errno
+    switch (r) {
     case EPERM: return 1;
     case ENOENT: return 2;
     case ESRCH: return 3;
@@ -313,14 +311,13 @@ __u32 hostos_to_ceph_errno_unsigned(__u32 r) {
     case ENOTRECOVERABLE: return 131;
     case ERFKILL: return 132;
     case EHWPOISON: return 133;
-    default:
-      return r;
- }
+    default: return r;
+    }
 }
 
 __s32 wsae_to_errno_unsigned(__s32 r)
 {
-  switch(r) {
+    switch (r) {
     case WSAEINTR: return EINTR;
     case WSAEBADF: return EBADF;
     case WSAEACCES: return EACCES;
@@ -391,38 +388,39 @@ __s32 wsae_to_errno_unsigned(__s32 r)
     // case WSANO_RECOVERY
     // case WSANO_DATA:
     default: return r;
-  }
+    }
 }
 
 // converts from linux errno values to host values
 __s32 ceph_to_hostos_errno(__s32 r)
 {
-  int sign = (r < 0 ? -1 : 1);
-  return ceph_to_hostos_errno_unsigned(abs(r)) * sign;
+    int sign = (r < 0 ? -1 : 1);
+    return ceph_to_hostos_errno_unsigned(abs(r)) * sign;
 }
 
 // converts Host OS errno values to linux/Ceph values
 __s32 hostos_to_ceph_errno(__s32 r)
 {
-  int sign = (r < 0 ? -1 : 1);
-  return hostos_to_ceph_errno_unsigned(abs(r)) * sign;
+    int sign = (r < 0 ? -1 : 1);
+    return hostos_to_ceph_errno_unsigned(abs(r)) * sign;
 }
 
 __s32 wsae_to_errno(__s32 r)
 {
-  int sign = (r < 0 ? -1 : 1);
-  return wsae_to_errno_unsigned(abs(r)) * sign;
+    int sign = (r < 0 ? -1 : 1);
+    return wsae_to_errno_unsigned(abs(r)) * sign;
 }
 
-__u32 errno_to_ntstatus(__s32 r) {
-  // errno -> NTSTATUS
-  // In some cases, there might be more than one applicable NTSTATUS
-  // value or there might be none. Certain values can be overridden
-  // when the caller (or whoever is supposed to handle the error) is
-  // expecting a different NTSTATUS value.
-  r = abs(r);
+__u32 errno_to_ntstatus(__s32 r)
+{
+    // errno -> NTSTATUS
+    // In some cases, there might be more than one applicable NTSTATUS
+    // value or there might be none. Certain values can be overridden
+    // when the caller (or whoever is supposed to handle the error) is
+    // expecting a different NTSTATUS value.
+    r = abs(r);
 
-  switch(r) {
+    switch (r) {
     case 0: return 0;
     case EPERM: return STATUS_ACCESS_DENIED;
     case ENOENT: return STATUS_OBJECT_NAME_NOT_FOUND;
@@ -560,93 +558,87 @@ __u32 errno_to_ntstatus(__s32 r) {
     case ENOTRECOVERABLE: return STATUS_INTERNAL_ERROR;
     case ERFKILL: return STATUS_INTERNAL_ERROR;
     case EHWPOISON: return STATUS_INTERNAL_ERROR;
-    default:
-      return STATUS_INTERNAL_ERROR;
- }
+    default: return STATUS_INTERNAL_ERROR;
+    }
 }
 
 std::string win32_strerror(int err)
 {
-  // As opposed to dlerror messages, this has to be freed.
-  LPSTR msg = NULL;
-  DWORD msg_len = ::FormatMessageA(
-    FORMAT_MESSAGE_ALLOCATE_BUFFER |
-    FORMAT_MESSAGE_FROM_SYSTEM |
-    FORMAT_MESSAGE_IGNORE_INSERTS,
-    NULL,
-    err,
-    0,
-    (LPSTR) &msg,
-    0,
-    NULL);
+    // As opposed to dlerror messages, this has to be freed.
+    LPSTR msg = NULL;
+    DWORD msg_len =
+        ::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                         NULL,
+                         err,
+                         0,
+                         (LPSTR)&msg,
+                         0,
+                         NULL);
 
-  std::ostringstream msg_stream;
-  msg_stream << "(" << err << ") ";
-  if (!msg_len) {
-    msg_stream << "Unknown error";
-  }
-  else {
-    msg_stream << msg;
-    ::LocalFree(msg);
-  }
-  return msg_stream.str();
+    std::ostringstream msg_stream;
+    msg_stream << "(" << err << ") ";
+    if (!msg_len) {
+        msg_stream << "Unknown error";
+    }
+    else {
+        msg_stream << msg;
+        ::LocalFree(msg);
+    }
+    return msg_stream.str();
 }
 
 std::string win32_lasterror_str()
 {
-  DWORD err = ::GetLastError();
-  return win32_strerror(err);
+    DWORD err = ::GetLastError();
+    return win32_strerror(err);
 }
 
-static const ceph::unordered_map<int,NTSTATUS> cephfs_errno_to_ntstatus = {
-  {CEPHFS_EBLOCKLISTED,    STATUS_SYSTEM_SHUTDOWN},
-  {CEPHFS_EPERM,           STATUS_ACCESS_DENIED},
-  {CEPHFS_ESTALE,          STATUS_INVALID_HANDLE},
-  {CEPHFS_ENOSPC,          STATUS_DISK_FULL},
-  {CEPHFS_ETIMEDOUT,       STATUS_TIMEOUT},
-  {CEPHFS_EIO,             STATUS_DATA_ERROR},
-  {CEPHFS_ENOTCONN,        STATUS_CONNECTION_DISCONNECTED},
-  {CEPHFS_EEXIST,          STATUS_OBJECT_NAME_COLLISION},
-  {CEPHFS_EINTR,           STATUS_RETRY},
-  {CEPHFS_EINVAL,          STATUS_INVALID_PARAMETER},
-  {CEPHFS_EBADF,           STATUS_INVALID_HANDLE},
-  {CEPHFS_EROFS,           STATUS_MEDIA_WRITE_PROTECTED},
-  {CEPHFS_EAGAIN,          STATUS_RETRY},
-  {CEPHFS_EACCES,          STATUS_ACCESS_DENIED},
-  {CEPHFS_ELOOP,           STATUS_TOO_MANY_LINKS},
-  {CEPHFS_EISDIR,          STATUS_FILE_IS_A_DIRECTORY},
-  {CEPHFS_ENOENT,          STATUS_OBJECT_NAME_NOT_FOUND},
-  {CEPHFS_ENOTDIR,         STATUS_NOT_A_DIRECTORY},
-  {CEPHFS_ENAMETOOLONG,    STATUS_NAME_TOO_LONG},
-  {CEPHFS_EBUSY,           STATUS_DEVICE_BUSY},
-  {CEPHFS_EDQUOT,          STATUS_QUOTA_EXCEEDED},
-  {CEPHFS_EFBIG,           STATUS_FILE_TOO_LARGE},
-  {CEPHFS_ERANGE,          STATUS_INVALID_PARAMETER},
-  {CEPHFS_ENXIO,           STATUS_NOT_FOUND},
-  {CEPHFS_ECANCELED,       STATUS_REQUEST_CANCELED},
-  {CEPHFS_ENODATA,         STATUS_NOT_FOUND},
-  {CEPHFS_EOPNOTSUPP,      STATUS_NOT_SUPPORTED},
-  {CEPHFS_EXDEV,           STATUS_NOT_SAME_DEVICE},
-  {CEPHFS_ENOMEM,          STATUS_NO_MEMORY},
-  {CEPHFS_ENOTRECOVERABLE, STATUS_INTERNAL_ERROR},
-  {CEPHFS_ENOSYS,          STATUS_NOT_IMPLEMENTED},
-  {CEPHFS_ENOTEMPTY,       STATUS_DIRECTORY_NOT_EMPTY},
-  {CEPHFS_EDEADLK,         STATUS_POSSIBLE_DEADLOCK},
-  {CEPHFS_EDOM,            STATUS_INVALID_PARAMETER},
-  {CEPHFS_EMLINK,          STATUS_TOO_MANY_LINKS},
-  {CEPHFS_ETIME,           STATUS_TIMEOUT},
-  {CEPHFS_EOLDSNAPC,       STATUS_DATA_ERROR}
-};
+static const ceph::unordered_map<int, NTSTATUS> cephfs_errno_to_ntstatus = {
+    {CEPHFS_EBLOCKLISTED, STATUS_SYSTEM_SHUTDOWN},
+    {CEPHFS_EPERM, STATUS_ACCESS_DENIED},
+    {CEPHFS_ESTALE, STATUS_INVALID_HANDLE},
+    {CEPHFS_ENOSPC, STATUS_DISK_FULL},
+    {CEPHFS_ETIMEDOUT, STATUS_TIMEOUT},
+    {CEPHFS_EIO, STATUS_DATA_ERROR},
+    {CEPHFS_ENOTCONN, STATUS_CONNECTION_DISCONNECTED},
+    {CEPHFS_EEXIST, STATUS_OBJECT_NAME_COLLISION},
+    {CEPHFS_EINTR, STATUS_RETRY},
+    {CEPHFS_EINVAL, STATUS_INVALID_PARAMETER},
+    {CEPHFS_EBADF, STATUS_INVALID_HANDLE},
+    {CEPHFS_EROFS, STATUS_MEDIA_WRITE_PROTECTED},
+    {CEPHFS_EAGAIN, STATUS_RETRY},
+    {CEPHFS_EACCES, STATUS_ACCESS_DENIED},
+    {CEPHFS_ELOOP, STATUS_TOO_MANY_LINKS},
+    {CEPHFS_EISDIR, STATUS_FILE_IS_A_DIRECTORY},
+    {CEPHFS_ENOENT, STATUS_OBJECT_NAME_NOT_FOUND},
+    {CEPHFS_ENOTDIR, STATUS_NOT_A_DIRECTORY},
+    {CEPHFS_ENAMETOOLONG, STATUS_NAME_TOO_LONG},
+    {CEPHFS_EBUSY, STATUS_DEVICE_BUSY},
+    {CEPHFS_EDQUOT, STATUS_QUOTA_EXCEEDED},
+    {CEPHFS_EFBIG, STATUS_FILE_TOO_LARGE},
+    {CEPHFS_ERANGE, STATUS_INVALID_PARAMETER},
+    {CEPHFS_ENXIO, STATUS_NOT_FOUND},
+    {CEPHFS_ECANCELED, STATUS_REQUEST_CANCELED},
+    {CEPHFS_ENODATA, STATUS_NOT_FOUND},
+    {CEPHFS_EOPNOTSUPP, STATUS_NOT_SUPPORTED},
+    {CEPHFS_EXDEV, STATUS_NOT_SAME_DEVICE},
+    {CEPHFS_ENOMEM, STATUS_NO_MEMORY},
+    {CEPHFS_ENOTRECOVERABLE, STATUS_INTERNAL_ERROR},
+    {CEPHFS_ENOSYS, STATUS_NOT_IMPLEMENTED},
+    {CEPHFS_ENOTEMPTY, STATUS_DIRECTORY_NOT_EMPTY},
+    {CEPHFS_EDEADLK, STATUS_POSSIBLE_DEADLOCK},
+    {CEPHFS_EDOM, STATUS_INVALID_PARAMETER},
+    {CEPHFS_EMLINK, STATUS_TOO_MANY_LINKS},
+    {CEPHFS_ETIME, STATUS_TIMEOUT},
+    {CEPHFS_EOLDSNAPC, STATUS_DATA_ERROR}};
 
 __u32 cephfs_errno_to_ntsatus(int cephfs_errno)
 {
-  cephfs_errno = abs(cephfs_errno);
+    cephfs_errno = abs(cephfs_errno);
 
-  if (cephfs_errno == 0)
-    return 0;
+    if (cephfs_errno == 0) return 0;
 
-  auto it = cephfs_errno_to_ntstatus.find(cephfs_errno);
-  if (it != cephfs_errno_to_ntstatus.end())
-    return it->second;
-  return STATUS_INTERNAL_ERROR;
+    auto it = cephfs_errno_to_ntstatus.find(cephfs_errno);
+    if (it != cephfs_errno_to_ntstatus.end()) return it->second;
+    return STATUS_INTERNAL_ERROR;
 }

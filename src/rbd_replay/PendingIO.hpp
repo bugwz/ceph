@@ -15,50 +15,44 @@
 #ifndef _INCLUDED_RBD_REPLAY_PENDINGIO_HPP
 #define _INCLUDED_RBD_REPLAY_PENDINGIO_HPP
 
-#include <boost/enable_shared_from_this.hpp>
 #include "actions.hpp"
 
+#include <boost/enable_shared_from_this.hpp>
+
 /// Do not call outside of rbd_replay::PendingIO.
-extern "C"
-void rbd_replay_pending_io_callback(librbd::completion_t cb, void *arg);
+extern "C" void rbd_replay_pending_io_callback(librbd::completion_t cb, void* arg);
 
 namespace rbd_replay {
 
 /**
    A PendingIO is an I/O operation that has been started but not completed.
 */
-class PendingIO : public boost::enable_shared_from_this<PendingIO> {
+class PendingIO : public boost::enable_shared_from_this<PendingIO>
+{
 public:
-  typedef boost::shared_ptr<PendingIO> ptr;
+    typedef boost::shared_ptr<PendingIO> ptr;
 
-  PendingIO(action_id_t id,
-            ActionCtx &worker);
+    PendingIO(action_id_t id, ActionCtx& worker);
 
-  ~PendingIO();
+    ~PendingIO();
 
-  action_id_t id() const {
-    return m_id;
-  }
+    action_id_t id() const { return m_id; }
 
-  ceph::bufferlist &bufferlist() {
-    return m_bl;
-  }
+    ceph::bufferlist& bufferlist() { return m_bl; }
 
-  librbd::RBD::AioCompletion &completion() {
-    return *m_completion;
-  }
+    librbd::RBD::AioCompletion& completion() { return *m_completion; }
 
 private:
-  void completed(librbd::completion_t cb);
+    void completed(librbd::completion_t cb);
 
-  friend void ::rbd_replay_pending_io_callback(librbd::completion_t cb, void *arg);
+    friend void ::rbd_replay_pending_io_callback(librbd::completion_t cb, void* arg);
 
-  const action_id_t m_id;
-  ceph::bufferlist m_bl;
-  librbd::RBD::AioCompletion *m_completion;
-  ActionCtx &m_worker;
+    const action_id_t m_id;
+    ceph::bufferlist m_bl;
+    librbd::RBD::AioCompletion* m_completion;
+    ActionCtx& m_worker;
 };
 
-}
+}   // namespace rbd_replay
 
 #endif

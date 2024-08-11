@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
  * Ceph - scalable distributed file system
@@ -11,7 +11,7 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  */
 #ifndef __CEPH_TYPES_H
 #define __CEPH_TYPES_H
@@ -26,7 +26,7 @@ const shard_id_t shard_id_t::NO_SHARD(-1);
 
 std::ostream& operator<<(std::ostream& lhs, const shard_id_t& rhs)
 {
-  return lhs << (unsigned)(uint8_t)rhs.id;
+    return lhs << (unsigned)(uint8_t)rhs.id;
 }
 
 #endif

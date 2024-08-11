@@ -7,7 +7,7 @@ namespace libradosstriper {
 
 class RadosStriper;
 
-} // namespace libradosstriper
+}   // namespace libradosstriper
 
 namespace librados {
 inline namespace v14_2_0 {
@@ -28,7 +28,7 @@ class Rados;
 class WatchCtx;
 class WatchCtx2;
 
-} // inline namespace v14_2_0
-} // namespace librados
+}   // namespace v14_2_0
+}   // namespace librados
 
-#endif // __LIBRADOS_FWD_HPP
+#endif   // __LIBRADOS_FWD_HPP

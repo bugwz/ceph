@@ -19,12 +19,12 @@ verbose=
 
 test -d ../src && export PATH=$PATH:.
 
-if ! which jq ; then
+if ! which jq; then
     echo "Missing jq binary!"
     exit 1
 fi
 
-if [ `uname` = FreeBSD ]; then
+if [ $(uname) = FreeBSD ]; then
     GETOPT=/usr/local/bin/getopt
 else
     GETOPT=getopt
@@ -34,13 +34,13 @@ function osdmap_get() {
     local store_path=$1
     local query=$2
     local epoch=${3:+-v $3}
-    local osdmap=`mktemp`
+    local osdmap=$(mktemp)
 
     $CEPH_BIN/ceph-monstore-tool $store_path get osdmap -- \
-                       $epoch -o $osdmap > /dev/null || return
+        $epoch -o $osdmap >/dev/null || return
 
-    echo $($CEPH_BIN/osdmaptool --dump json $osdmap 2> /dev/null | \
-           jq "$query")
+    echo $($CEPH_BIN/osdmaptool --dump json $osdmap 2>/dev/null \
+        | jq "$query")
 
     rm -f $osdmap
 }
@@ -50,13 +50,13 @@ function test_crush() {
     local epoch=$2
     local max_osd=$3
     local crush=$4
-    local osdmap=`mktemp`
+    local osdmap=$(mktemp)
 
     $CEPH_BIN/ceph-monstore-tool $store_path get osdmap -- \
-                       -v $epoch -o $osdmap > /dev/null
-    $CEPH_BIN/osdmaptool --export-crush $crush $osdmap &> /dev/null
+        -v $epoch -o $osdmap >/dev/null
+    $CEPH_BIN/osdmaptool --export-crush $crush $osdmap &>/dev/null
 
-    if $CEPH_BIN/crushtool --test --check $max_osd -i $crush > /dev/null; then
+    if $CEPH_BIN/crushtool --test --check $max_osd -i $crush >/dev/null; then
         good=true
     else
         good=false
@@ -102,22 +102,28 @@ function main() {
                 verbose=true
                 # set -xe
                 # PS4='${FUNCNAME[0]}: $LINENO: '
-                shift;;
-            -h|--help)
+                shift
+                ;;
+            -h | --help)
                 usage
-                return 0;;
+                return 0
+                ;;
             --out)
                 output=$2
-                shift 2;;
+                shift 2
+                ;;
             --osdmap-epoch)
                 osdmap_epoch=$2
-                shift 2;;
+                shift 2
+                ;;
             --rewrite)
                 rewrite=true
-                shift;;
+                shift
+                ;;
             *)
                 usage "unexpected argument $1"
-                shift;;
+                shift
+                ;;
         esac
     done
     shift
@@ -128,8 +134,8 @@ function main() {
     # try accessing the store; if it fails, likely means a mon is running
     local last_osdmap_epoch
     local max_osd
-    last_osdmap_epoch=$(osdmap_get $store_path ".epoch") || \
-        die "error accessing mon store at $store_path"
+    last_osdmap_epoch=$(osdmap_get $store_path ".epoch") \
+        || die "error accessing mon store at $store_path"
     # get the max_osd # in last osdmap epoch, crushtool will use it to check
     # the crush maps in previous osdmaps
     max_osd=$(osdmap_get $store_path ".max_osd" $last_osdmap_epoch)
@@ -137,8 +143,8 @@ function main() {
     local good_crush
     local good_epoch
     test $verbose && echo "the latest osdmap epoch is $last_osdmap_epoch"
-    for epoch in `seq $last_osdmap_epoch -1 1`; do
-        local crush_path=`mktemp`
+    for epoch in $(seq $last_osdmap_epoch -1 1); do
+        local crush_path=$(mktemp)
         test $verbose && echo "checking crush map #$epoch"
         if test_crush $store_path $epoch $max_osd $crush_path; then
             test $verbose && echo "crush map version #$epoch works with osdmap epoch #$osdmap_epoch"
@@ -161,9 +167,9 @@ function main() {
     elif test $output; then
         $CEPH_BIN/crushtool --decompile $good_crush --outfn $output
     elif test $rewrite; then
-        $CEPH_BIN/ceph-monstore-tool $store_path rewrite-crush --  \
-                           --crush $good_crush      \
-                           --good-epoch $good_epoch
+        $CEPH_BIN/ceph-monstore-tool $store_path rewrite-crush -- \
+            --crush $good_crush \
+            --good-epoch $good_epoch
     else
         echo
         $CEPH_BIN/crushtool --decompile $good_crush

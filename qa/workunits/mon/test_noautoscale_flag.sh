@@ -15,7 +15,7 @@ ceph osd pool create pool_a
 
 echo 'pool_a autoscale_mode:' $(ceph osd pool autoscale-status | grep pool_a | grep -o -m 1 'on\|off')
 
-NUM_POOLS=$[NUM_POOLS+1]
+NUM_POOLS=$((NUM_POOLS + 1))
 
 sleep 2
 
@@ -31,15 +31,13 @@ ceph osd pool unset noautoscale
 
 echo $(ceph osd pool get noautoscale)
 
-
 ceph osd pool create pool_b
 
 echo 'pool_a autoscale_mode:' $(ceph osd pool autoscale-status | grep pool_a | grep -o -m 1 'on\|off')
 
 echo 'pool_b autoscale_mode:' $(ceph osd pool autoscale-status | grep pool_b | grep -o -m 1 'on\|off')
 
-
-NUM_POOLS=$[NUM_POOLS+1]
+NUM_POOLS=$((NUM_POOLS + 1))
 
 sleep 2
 
@@ -61,8 +59,7 @@ echo 'pool_b autoscale_mode:' $(ceph osd pool autoscale-status | grep pool_b | g
 
 echo 'pool_c autoscale_mode:' $(ceph osd pool autoscale-status | grep pool_c | grep -o -m 1 'on\|off')
 
-
-NUM_POOLS=$[NUM_POOLS+1]
+NUM_POOLS=$((NUM_POOLS + 1))
 
 sleep 2
 
@@ -74,10 +71,10 @@ RESULT3=$(ceph osd pool autoscale-status | grep -oe 'off' | wc -l)
 
 test "$RESULT3" -eq "$NUM_POOLS"
 
-ceph osd pool rm pool_a pool_a  --yes-i-really-really-mean-it
+ceph osd pool rm pool_a pool_a --yes-i-really-really-mean-it
 
-ceph osd pool rm pool_b pool_b  --yes-i-really-really-mean-it
+ceph osd pool rm pool_b pool_b --yes-i-really-really-mean-it
 
-ceph osd pool rm pool_c pool_c  --yes-i-really-really-mean-it
+ceph osd pool rm pool_c pool_c --yes-i-really-really-mean-it
 
 echo OK

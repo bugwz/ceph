@@ -5,13 +5,10 @@
 
 . $(dirname $0)/cephfs_mirror_helpers.sh
 
-cleanup()
-{
-    for i in `seq 1 $NR_DIRECTORIES`
-    do
+cleanup() {
+    for i in $(seq 1 $NR_DIRECTORIES); do
         local repo_name="${REPO_PATH_PFX}_$i"
-        for j in `seq 1 $NR_SNAPSHOTS`
-        do
+        for j in $(seq 1 $NR_SNAPSHOTS); do
             snap_name=$repo_name/.snap/snap_$j
             if test -d $snap_name; then
                 rmdir $snap_name
@@ -22,28 +19,23 @@ cleanup()
 }
 trap cleanup EXIT
 
-configure_peer()
-{
+configure_peer() {
     ceph mgr module enable mirroring
     ceph fs snapshot mirror enable $PRIMARY_FS
     ceph fs snapshot mirror peer_add $PRIMARY_FS client.mirror_remote@ceph $BACKUP_FS
 
-    for i in `seq 1 $NR_DIRECTORIES`
-    do
+    for i in $(seq 1 $NR_DIRECTORIES); do
         local repo_name="${REPO_PATH_PFX}_$i"
         ceph fs snapshot mirror add $PRIMARY_FS "$MIRROR_SUBDIR/$repo_name"
     done
 }
 
-create_snaps()
-{
-    for i in `seq 1 $NR_DIRECTORIES`
-    do
+create_snaps() {
+    for i in $(seq 1 $NR_DIRECTORIES); do
         local repo_name="${REPO_PATH_PFX}_$i"
-        for j in `seq 1 $NR_SNAPSHOTS`
-        do
+        for j in $(seq 1 $NR_SNAPSHOTS); do
             snap_name=$repo_name/.snap/snap_$j
-            r=$(( $RANDOM % 100 + 5 ))
+            r=$(($RANDOM % 100 + 5))
             arr=($repo_name "reset" "--hard" "HEAD~$r")
             exec_git_cmd "${arr[@]}"
             mkdir $snap_name

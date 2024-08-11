@@ -16,29 +16,32 @@
 #include "common/ceph_context.h"
 #include "common/config.h"
 #include "global/global_context.h"
+
 #include "gtest/gtest.h"
 
 using namespace ceph;
 
-TEST(HeartbeatMap, Healthy) {
-  HeartbeatMap hm(g_ceph_context);
-  heartbeat_handle_d *h = hm.add_worker("one", pthread_self());
+TEST(HeartbeatMap, Healthy)
+{
+    HeartbeatMap hm(g_ceph_context);
+    heartbeat_handle_d* h = hm.add_worker("one", pthread_self());
 
-  hm.reset_timeout(h, ceph::make_timespan(9), ceph::make_timespan(18));
-  bool healthy = hm.is_healthy();
-  ASSERT_TRUE(healthy);
+    hm.reset_timeout(h, ceph::make_timespan(9), ceph::make_timespan(18));
+    bool healthy = hm.is_healthy();
+    ASSERT_TRUE(healthy);
 
-  hm.remove_worker(h);
+    hm.remove_worker(h);
 }
 
-TEST(HeartbeatMap, Unhealth) {
-  HeartbeatMap hm(g_ceph_context);
-  heartbeat_handle_d *h = hm.add_worker("one", pthread_self());
+TEST(HeartbeatMap, Unhealth)
+{
+    HeartbeatMap hm(g_ceph_context);
+    heartbeat_handle_d* h = hm.add_worker("one", pthread_self());
 
-  hm.reset_timeout(h, ceph::make_timespan(1), ceph::make_timespan(3));
-  sleep(2);
-  bool healthy = hm.is_healthy();
-  ASSERT_FALSE(healthy);
+    hm.reset_timeout(h, ceph::make_timespan(1), ceph::make_timespan(3));
+    sleep(2);
+    bool healthy = hm.is_healthy();
+    ASSERT_FALSE(healthy);
 
-  hm.remove_worker(h);
+    hm.remove_worker(h);
 }

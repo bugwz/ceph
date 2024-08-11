@@ -29,7 +29,7 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -38,8 +38,7 @@ function run() {
 
 PGID=
 
-function test_log_size()
-{
+function test_log_size() {
     local PGID=$1
     local EXPECTED=$2
     ceph tell osd.\* flush_pg_stats
@@ -70,8 +69,7 @@ function setup_log_test() {
     ceph tell osd.\* injectargs -- --osd-pg-log-dups-tracked 10 || return 1
 
     touch $dir/foo
-    for i in $(seq 1 20)
-    do
+    for i in $(seq 1 20); do
         rados -p test put foo $dir/foo || return 1
     done
 
@@ -80,8 +78,7 @@ function setup_log_test() {
     rados -p test rm foo || return 1
 
     # generate error entries
-    for i in $(seq 1 20)
-    do
+    for i in $(seq 1 20); do
         rados -p test rm foo
     done
 
@@ -89,8 +86,7 @@ function setup_log_test() {
     test_log_size $PGID 21 || return 1
 }
 
-function TEST_repro_long_log1()
-{
+function TEST_repro_long_log1() {
     local dir=$1
 
     setup_log_test $dir || return 1
@@ -99,12 +95,11 @@ function TEST_repro_long_log1()
     test_log_size $PGID 22 || return 1
 }
 
-function TEST_repro_long_log2()
-{
+function TEST_repro_long_log2() {
     local dir=$1
 
     setup_log_test $dir || return 1
-    local PRIMARY=$(ceph pg $PGID query  | jq '.info.stats.up_primary')
+    local PRIMARY=$(ceph pg $PGID query | jq '.info.stats.up_primary')
     kill_daemons $dir TERM osd.$PRIMARY || return 1
     CEPH_ARGS="--osd-max-pg-log-entries=2 --no-mon-config" ceph-objectstore-tool --data-path $dir/$PRIMARY --pgid $PGID --op trim-pg-log || return 1
     activate_osd $dir $PRIMARY || return 1
@@ -112,8 +107,7 @@ function TEST_repro_long_log2()
     test_log_size $PGID 2 || return 1
 }
 
-function TEST_trim_max_entries()
-{
+function TEST_trim_max_entries() {
     local dir=$1
 
     setup_log_test $dir || return 1

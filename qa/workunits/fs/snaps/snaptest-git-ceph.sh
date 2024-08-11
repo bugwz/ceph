@@ -5,18 +5,16 @@ set -e
 git clone https://git.ceph.com/ceph.git
 cd ceph
 
-versions=`seq 1 21`
+versions=$(seq 1 21)
 
-for v in $versions
-do
+for v in $versions; do
     ver="v0.$v"
     echo $ver
     git reset --hard $ver
     mkdir .snap/$ver
 done
 
-for v in $versions
-do
+for v in $versions; do
     ver="v0.$v"
     echo checking $ver
     cd .snap/$ver
@@ -24,8 +22,7 @@ do
     cd ../..
 done
 
-for v in $versions
-do
+for v in $versions; do
     ver="v0.$v"
     rmdir .snap/$ver
 done

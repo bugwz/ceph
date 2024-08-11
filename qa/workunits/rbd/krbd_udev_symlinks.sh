@@ -3,42 +3,42 @@
 set -ex
 
 SPECS=(
-rbd/img1
-rbd/img2
-rbd/img2@snap1
-rbd/img3
-rbd/img3@snap1
-rbd/img3@snap2
-rbd/ns1/img1
-rbd/ns1/img2
-rbd/ns1/img2@snap1
-rbd/ns1/img3
-rbd/ns1/img3@snap1
-rbd/ns1/img3@snap2
-rbd/ns2/img1
-rbd/ns2/img2
-rbd/ns2/img2@snap1
-rbd/ns2/img3
-rbd/ns2/img3@snap1
-rbd/ns2/img3@snap2
-custom/img1
-custom/img1@snap1
-custom/img2
-custom/img2@snap1
-custom/img2@snap2
-custom/img3
-custom/ns1/img1
-custom/ns1/img1@snap1
-custom/ns1/img2
-custom/ns1/img2@snap1
-custom/ns1/img2@snap2
-custom/ns1/img3
-custom/ns2/img1
-custom/ns2/img1@snap1
-custom/ns2/img2
-custom/ns2/img2@snap1
-custom/ns2/img2@snap2
-custom/ns2/img3
+    rbd/img1
+    rbd/img2
+    rbd/img2@snap1
+    rbd/img3
+    rbd/img3@snap1
+    rbd/img3@snap2
+    rbd/ns1/img1
+    rbd/ns1/img2
+    rbd/ns1/img2@snap1
+    rbd/ns1/img3
+    rbd/ns1/img3@snap1
+    rbd/ns1/img3@snap2
+    rbd/ns2/img1
+    rbd/ns2/img2
+    rbd/ns2/img2@snap1
+    rbd/ns2/img3
+    rbd/ns2/img3@snap1
+    rbd/ns2/img3@snap2
+    custom/img1
+    custom/img1@snap1
+    custom/img2
+    custom/img2@snap1
+    custom/img2@snap2
+    custom/img3
+    custom/ns1/img1
+    custom/ns1/img1@snap1
+    custom/ns1/img2
+    custom/ns1/img2@snap1
+    custom/ns1/img2@snap2
+    custom/ns1/img3
+    custom/ns2/img1
+    custom/ns2/img1@snap1
+    custom/ns2/img2
+    custom/ns2/img2@snap1
+    custom/ns2/img2@snap2
+    custom/ns2/img3
 )
 
 ceph osd pool create custom 8
@@ -70,7 +70,8 @@ done
 
 # map in random order
 COUNT=${#SPECS[@]}
-read -r -a INDEXES < <(python3 <<EOF
+read -r -a INDEXES < <(
+    python3 <<EOF
 import random
 l = list(range($COUNT))
 random.shuffle(l)

@@ -6,7 +6,7 @@ set -ex
 
 function get_jobs() {
     local jobs=$(nproc)
-    if [ $jobs -ge 8 ] ; then
+    if [ $jobs -ge 8 ]; then
         echo 8
     else
         echo $jobs
@@ -38,7 +38,7 @@ function run() {
     ceph osd out 0
     ceph osd in 0
     init-ceph restart osd.1
-    for f in ../qa/workunits/cls/*.sh ; do
+    for f in ../qa/workunits/cls/*.sh; do
         $f
     done
     ../qa/workunits/rados/test.sh

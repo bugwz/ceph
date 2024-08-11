@@ -1,25 +1,26 @@
 #ifndef __LIBRADOS_HPP
 #define __LIBRADOS_HPP
 
-#include <string>
-#include <list>
-#include <map>
-#include <memory>
-#include <set>
-#include <vector>
-#include <utility>
 #include "buffer.h"
-
 #include "librados.h"
 #include "librados_fwd.hpp"
 #include "rados_types.hpp"
 
-namespace libradosstriper
-{
-  class RadosStriper;
+#include <list>
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace libradosstriper {
+class RadosStriper;
 }
 
-namespace neorados { class RADOS; }
+namespace neorados {
+class RADOS;
+}
 
 namespace librados {
 
@@ -37,59 +38,61 @@ struct PoolAsyncCompletionImpl;
 typedef struct rados_cluster_stat_t cluster_stat_t;
 typedef struct rados_pool_stat_t pool_stat_t;
 
-typedef void *list_ctx_t;
+typedef void* list_ctx_t;
 typedef uint64_t auid_t;
-typedef void *config_t;
+typedef void* config_t;
 
-typedef struct {
-  std::string client;
-  std::string cookie;
-  std::string address;
+typedef struct
+{
+    std::string client;
+    std::string cookie;
+    std::string address;
 } locker_t;
 
 typedef std::map<std::string, pool_stat_t> stats_map;
 
-typedef void *completion_t;
-typedef void (*callback_t)(completion_t cb, void *arg);
+typedef void* completion_t;
+typedef void (*callback_t)(completion_t cb, void* arg);
 
 inline namespace v14_2_0 {
 
-  class IoCtx;
-  class RadosClient;
+class IoCtx;
+class RadosClient;
 
-  class CEPH_RADOS_API ListObject
-  {
-  public:
+class CEPH_RADOS_API ListObject
+{
+public:
     const std::string& get_nspace() const;
     const std::string& get_oid() const;
     const std::string& get_locator() const;
 
     ListObject();
     ~ListObject();
-    ListObject( const ListObject&);
+    ListObject(const ListObject&);
     ListObject& operator=(const ListObject& rhs);
-  private:
-    ListObject(ListObjectImpl *impl);
+
+private:
+    ListObject(ListObjectImpl* impl);
 
     friend class librados::NObjectIteratorImpl;
     friend std::ostream& operator<<(std::ostream& out, const ListObject& lop);
 
-    ListObjectImpl *impl;
-  };
-  CEPH_RADOS_API std::ostream& operator<<(std::ostream& out, const librados::ListObject& lop);
+    ListObjectImpl* impl;
+};
+CEPH_RADOS_API std::ostream& operator<<(std::ostream& out, const librados::ListObject& lop);
 
-  class CEPH_RADOS_API NObjectIterator;
+class CEPH_RADOS_API NObjectIterator;
 
-  class CEPH_RADOS_API ObjectCursor
-  {
-    public:
+class CEPH_RADOS_API ObjectCursor
+{
+public:
     ObjectCursor();
-    ObjectCursor(const ObjectCursor &rhs);
+    ObjectCursor(const ObjectCursor& rhs);
     explicit ObjectCursor(rados_object_list_cursor c);
     ~ObjectCursor();
     ObjectCursor& operator=(const ObjectCursor& rhs);
-    bool operator<(const ObjectCursor &rhs) const;
-    bool operator==(const ObjectCursor &rhs) const;
+    bool operator<(const ObjectCursor& rhs) const;
+    bool operator==(const ObjectCursor& rhs) const;
     void set(rados_object_list_cursor c);
 
     friend class IoCtx;
@@ -99,25 +102,28 @@ inline namespace v14_2_0 {
     std::string to_str() const;
     bool from_str(const std::string& s);
 
-    protected:
+protected:
     rados_object_list_cursor c_cursor;
-  };
-  CEPH_RADOS_API std::ostream& operator<<(std::ostream& os, const librados::ObjectCursor& oc);
+};
+CEPH_RADOS_API std::ostream& operator<<(std::ostream& os, const librados::ObjectCursor& oc);
 
-  class CEPH_RADOS_API NObjectIterator : public std::iterator <std::forward_iterator_tag, ListObject> {
-  public:
+class CEPH_RADOS_API NObjectIterator : public std::iterator<std::forward_iterator_tag, ListObject>
+{
+public:
     static const NObjectIterator __EndObjectIterator;
-    NObjectIterator(): impl(NULL) {}
+    NObjectIterator()
+        : impl(NULL)
+    {}
     ~NObjectIterator();
-    NObjectIterator(const NObjectIterator &rhs);
+    NObjectIterator(const NObjectIterator& rhs);
     NObjectIterator& operator=(const NObjectIterator& rhs);
 
     bool operator==(const NObjectIterator& rhs) const;
     bool operator!=(const NObjectIterator& rhs) const;
     const ListObject& operator*() const;
     const ListObject* operator->() const;
-    NObjectIterator &operator++(); //< Preincrement; errors are thrown as exceptions
-    NObjectIterator operator++(int); //< Postincrement; errors are thrown as exceptions
+    NObjectIterator& operator++();     //< Preincrement; errors are thrown as exceptions
+    NObjectIterator operator++(int);   //< Postincrement; errors are thrown as exceptions
     friend class IoCtx;
     friend class librados::NObjectIteratorImpl;
 
@@ -138,31 +144,33 @@ inline namespace v14_2_0 {
      * Configure PGLS filter to be applied OSD-side (requires caller
      * to know/understand the format expected by the OSD)
      */
-    void set_filter(const bufferlist &bl);
+    void set_filter(const bufferlist& bl);
 
-  private:
-    NObjectIterator(ObjListCtx *ctx_);
+private:
+    NObjectIterator(ObjListCtx* ctx_);
     void get_next();
-    NObjectIteratorImpl *impl;
-  };
+    NObjectIteratorImpl* impl;
+};
 
-  class CEPH_RADOS_API ObjectItem
-  {
-    public:
+class CEPH_RADOS_API ObjectItem
+{
+public:
     std::string oid;
     std::string nspace;
     std::string locator;
-  };
+};
 
-  /// DEPRECATED; do not use
-  class CEPH_RADOS_API WatchCtx {
-  public:
+/// DEPRECATED; do not use
+class CEPH_RADOS_API WatchCtx
+{
+public:
     virtual ~WatchCtx();
     virtual void notify(uint8_t opcode, uint64_t ver, bufferlist& bl) = 0;
-  };
+};
 
-  class CEPH_RADOS_API WatchCtx2 {
-  public:
+class CEPH_RADOS_API WatchCtx2
+{
+public:
     virtual ~WatchCtx2();
     /**
      * Callback activated when we receive a notify event.
@@ -172,10 +180,7 @@ inline namespace v14_2_0 {
      * @param notifier_id the unique client id of the notifier
      * @param bl opaque notify payload (from the notifier)
      */
-    virtual void handle_notify(uint64_t notify_id,
-			       uint64_t cookie,
-			       uint64_t notifier_id,
-			       bufferlist& bl) = 0;
+    virtual void handle_notify(uint64_t notify_id, uint64_t cookie, uint64_t notifier_id, bufferlist& bl) = 0;
 
     /**
      * Callback activated when we encounter an error with the watch.
@@ -189,104 +194,113 @@ inline namespace v14_2_0 {
      * @param err error
      */
     virtual void handle_error(uint64_t cookie, int err) = 0;
-  };
+};
 
-  struct CEPH_RADOS_API AioCompletion {
-    AioCompletion(AioCompletionImpl *pc_) : pc(pc_) {}
+struct CEPH_RADOS_API AioCompletion
+{
+    AioCompletion(AioCompletionImpl* pc_)
+        : pc(pc_)
+    {}
     ~AioCompletion();
-    int set_complete_callback(void *cb_arg, callback_t cb);
-    int set_safe_callback(void *cb_arg, callback_t cb)
-      __attribute__ ((deprecated));
+    int set_complete_callback(void* cb_arg, callback_t cb);
+    int set_safe_callback(void* cb_arg, callback_t cb) __attribute__((deprecated));
     int wait_for_complete();
-    int wait_for_safe() __attribute__ ((deprecated));
+    int wait_for_safe() __attribute__((deprecated));
     int wait_for_complete_and_cb();
-    int wait_for_safe_and_cb() __attribute__ ((deprecated));
+    int wait_for_safe_and_cb() __attribute__((deprecated));
     bool is_complete();
-    bool is_safe() __attribute__ ((deprecated));
+    bool is_safe() __attribute__((deprecated));
     bool is_complete_and_cb();
-    bool is_safe_and_cb() __attribute__ ((deprecated));
+    bool is_safe_and_cb() __attribute__((deprecated));
     int get_return_value();
-    int get_version() __attribute__ ((deprecated));
+    int get_version() __attribute__((deprecated));
     uint64_t get_version64();
     void release();
-    AioCompletionImpl *pc;
-  };
+    AioCompletionImpl* pc;
+};
 
-  struct CEPH_RADOS_API PoolAsyncCompletion {
-    PoolAsyncCompletion(PoolAsyncCompletionImpl *pc_) : pc(pc_) {}
+struct CEPH_RADOS_API PoolAsyncCompletion
+{
+    PoolAsyncCompletion(PoolAsyncCompletionImpl* pc_)
+        : pc(pc_)
+    {}
     ~PoolAsyncCompletion();
-    int set_callback(void *cb_arg, callback_t cb);
+    int set_callback(void* cb_arg, callback_t cb);
     int wait();
     bool is_complete();
     int get_return_value();
     void release();
-    PoolAsyncCompletionImpl *pc;
-  };
+    PoolAsyncCompletionImpl* pc;
+};
 
-  /**
-   * These are per-op flags which may be different among
-   * ops added to an ObjectOperation.
-   */
-  enum ObjectOperationFlags {
-    OP_EXCL =   LIBRADOS_OP_FLAG_EXCL,
+/**
+ * These are per-op flags which may be different among
+ * ops added to an ObjectOperation.
+ */
+enum ObjectOperationFlags
+{
+    OP_EXCL = LIBRADOS_OP_FLAG_EXCL,
     OP_FAILOK = LIBRADOS_OP_FLAG_FAILOK,
     OP_FADVISE_RANDOM = LIBRADOS_OP_FLAG_FADVISE_RANDOM,
     OP_FADVISE_SEQUENTIAL = LIBRADOS_OP_FLAG_FADVISE_SEQUENTIAL,
     OP_FADVISE_WILLNEED = LIBRADOS_OP_FLAG_FADVISE_WILLNEED,
     OP_FADVISE_DONTNEED = LIBRADOS_OP_FLAG_FADVISE_DONTNEED,
     OP_FADVISE_NOCACHE = LIBRADOS_OP_FLAG_FADVISE_NOCACHE,
-  };
+};
 
-  class CEPH_RADOS_API ObjectOperationCompletion {
-  public:
+class CEPH_RADOS_API ObjectOperationCompletion
+{
+public:
     virtual ~ObjectOperationCompletion() {}
     virtual void handle_completion(int r, bufferlist& outbl) = 0;
-  };
+};
 
-  /**
-   * These flags apply to the ObjectOperation as a whole.
-   *
-   * BALANCE_READS and LOCALIZE_READS should only be used
-   * when reading from data you're certain won't change,
-   * like a snapshot, or where eventual consistency is ok.
-   *
-   * ORDER_READS_WRITES will order reads the same way writes are
-   * ordered (e.g., waiting for degraded objects).  In particular, it
-   * will make a write followed by a read sequence be preserved.
-   *
-   * IGNORE_CACHE will skip the caching logic on the OSD that normally
-   * handles promotion of objects between tiers.  This allows an operation
-   * to operate (or read) the cached (or uncached) object, even if it is
-   * not coherent.
-   *
-   * IGNORE_OVERLAY will ignore the pool overlay tiering metadata and
-   * process the op directly on the destination pool.  This is useful
-   * for CACHE_FLUSH and CACHE_EVICT operations.
-   */
-  enum ObjectOperationGlobalFlags {
-    OPERATION_NOFLAG             = LIBRADOS_OPERATION_NOFLAG,
-    OPERATION_BALANCE_READS      = LIBRADOS_OPERATION_BALANCE_READS,
-    OPERATION_LOCALIZE_READS     = LIBRADOS_OPERATION_LOCALIZE_READS,
+/**
+ * These flags apply to the ObjectOperation as a whole.
+ *
+ * BALANCE_READS and LOCALIZE_READS should only be used
+ * when reading from data you're certain won't change,
+ * like a snapshot, or where eventual consistency is ok.
+ *
+ * ORDER_READS_WRITES will order reads the same way writes are
+ * ordered (e.g., waiting for degraded objects).  In particular, it
+ * will make a write followed by a read sequence be preserved.
+ *
+ * IGNORE_CACHE will skip the caching logic on the OSD that normally
+ * handles promotion of objects between tiers.  This allows an operation
+ * to operate (or read) the cached (or uncached) object, even if it is
+ * not coherent.
+ *
+ * IGNORE_OVERLAY will ignore the pool overlay tiering metadata and
+ * process the op directly on the destination pool.  This is useful
+ * for CACHE_FLUSH and CACHE_EVICT operations.
+ */
+enum ObjectOperationGlobalFlags
+{
+    OPERATION_NOFLAG = LIBRADOS_OPERATION_NOFLAG,
+    OPERATION_BALANCE_READS = LIBRADOS_OPERATION_BALANCE_READS,
+    OPERATION_LOCALIZE_READS = LIBRADOS_OPERATION_LOCALIZE_READS,
     OPERATION_ORDER_READS_WRITES = LIBRADOS_OPERATION_ORDER_READS_WRITES,
-    OPERATION_IGNORE_CACHE       = LIBRADOS_OPERATION_IGNORE_CACHE,
-    OPERATION_SKIPRWLOCKS        = LIBRADOS_OPERATION_SKIPRWLOCKS,
-    OPERATION_IGNORE_OVERLAY     = LIBRADOS_OPERATION_IGNORE_OVERLAY,
+    OPERATION_IGNORE_CACHE = LIBRADOS_OPERATION_IGNORE_CACHE,
+    OPERATION_SKIPRWLOCKS = LIBRADOS_OPERATION_SKIPRWLOCKS,
+    OPERATION_IGNORE_OVERLAY = LIBRADOS_OPERATION_IGNORE_OVERLAY,
     // send requests to cluster despite the cluster or pool being
     // marked full; ops will either succeed (e.g., delete) or return
     // EDQUOT or ENOSPC
-    OPERATION_FULL_TRY           = LIBRADOS_OPERATION_FULL_TRY,
+    OPERATION_FULL_TRY = LIBRADOS_OPERATION_FULL_TRY,
     // mainly for delete
-    OPERATION_FULL_FORCE	 = LIBRADOS_OPERATION_FULL_FORCE,
-    OPERATION_IGNORE_REDIRECT	 = LIBRADOS_OPERATION_IGNORE_REDIRECT,
-    OPERATION_ORDERSNAP          = LIBRADOS_OPERATION_ORDERSNAP,
+    OPERATION_FULL_FORCE = LIBRADOS_OPERATION_FULL_FORCE,
+    OPERATION_IGNORE_REDIRECT = LIBRADOS_OPERATION_IGNORE_REDIRECT,
+    OPERATION_ORDERSNAP = LIBRADOS_OPERATION_ORDERSNAP,
     // enable/allow return value and per-op return code/buffers
-    OPERATION_RETURNVEC          = LIBRADOS_OPERATION_RETURNVEC,
-  };
+    OPERATION_RETURNVEC = LIBRADOS_OPERATION_RETURNVEC,
+};
 
-  /*
-   * Alloc hint flags for the alloc_hint operation.
-   */
-  enum AllocHintFlags {
+/*
+ * Alloc hint flags for the alloc_hint operation.
+ */
+enum AllocHintFlags
+{
     ALLOC_HINT_FLAG_SEQUENTIAL_WRITE = 1,
     ALLOC_HINT_FLAG_RANDOM_WRITE = 2,
     ALLOC_HINT_FLAG_SEQUENTIAL_READ = 4,
@@ -297,16 +311,16 @@ inline namespace v14_2_0 {
     ALLOC_HINT_FLAG_LONGLIVED = 128,
     ALLOC_HINT_FLAG_COMPRESSIBLE = 256,
     ALLOC_HINT_FLAG_INCOMPRESSIBLE = 512,
-  };
+};
 
-  /*
-   * ObjectOperation : compound object operation
-   * Batch multiple object operations into a single request, to be applied
-   * atomically.
-   */
-  class CEPH_RADOS_API ObjectOperation
-  {
-  public:
+/*
+ * ObjectOperation : compound object operation
+ * Batch multiple object operations into a single request, to be applied
+ * atomically.
+ */
+class CEPH_RADOS_API ObjectOperation
+{
+public:
     ObjectOperation();
     virtual ~ObjectOperation();
 
@@ -320,19 +334,19 @@ inline namespace v14_2_0 {
      *          kill your program.
      */
     ObjectOperation(ObjectOperation&&);
-    ObjectOperation& operator =(ObjectOperation&&);
+    ObjectOperation& operator=(ObjectOperation&&);
 
     size_t size();
     void set_op_flags(ObjectOperationFlags flags) __attribute__((deprecated));
-    //flag mean ObjectOperationFlags
+    // flag mean ObjectOperationFlags
     void set_op_flags2(int flags);
 
-    void cmpext(uint64_t off, const bufferlist& cmp_bl, int *prval);
-    void cmpxattr(const char *name, uint8_t op, const bufferlist& val);
-    void cmpxattr(const char *name, uint8_t op, uint64_t v);
-    void exec(const char *cls, const char *method, bufferlist& inbl);
-    void exec(const char *cls, const char *method, bufferlist& inbl, bufferlist *obl, int *prval);
-    void exec(const char *cls, const char *method, bufferlist& inbl, ObjectOperationCompletion *completion);
+    void cmpext(uint64_t off, const bufferlist& cmp_bl, int* prval);
+    void cmpxattr(const char* name, uint8_t op, const bufferlist& val);
+    void cmpxattr(const char* name, uint8_t op, uint64_t v);
+    void exec(const char* cls, const char* method, bufferlist& inbl);
+    void exec(const char* cls, const char* method, bufferlist& inbl, bufferlist* obl, int* prval);
+    void exec(const char* cls, const char* method, bufferlist& inbl, ObjectOperationCompletion* completion);
     /**
      * Guard operation with a check that object version == ver
      *
@@ -363,50 +377,50 @@ inline namespace v14_2_0 {
      * assertions['foo'] = make_pair(bar, CEPH_OSD_CMP_XATTR_OP_GT);
      * op.omap_cmp(assertions, &r);
      */
-    void omap_cmp(
-      const std::map<std::string, std::pair<bufferlist, int> > &assertions,
-      int *prval);
+    void omap_cmp(const std::map<std::string, std::pair<bufferlist, int> >& assertions, int* prval);
 
-  protected:
+protected:
     ObjectOperationImpl* impl;
     friend class IoCtx;
     friend class Rados;
-  };
+};
 
-  /*
-   * ObjectWriteOperation : compound object write operation
-   * Batch multiple object operations into a single request, to be applied
-   * atomically.
-   */
-  class CEPH_RADOS_API ObjectWriteOperation : public ObjectOperation
-  {
-  protected:
-    time_t *unused;
-  public:
-    ObjectWriteOperation() : unused(NULL) {}
+/*
+ * ObjectWriteOperation : compound object write operation
+ * Batch multiple object operations into a single request, to be applied
+ * atomically.
+ */
+class CEPH_RADOS_API ObjectWriteOperation : public ObjectOperation
+{
+protected:
+    time_t* unused;
+
+public:
+    ObjectWriteOperation()
+        : unused(NULL)
+    {}
     ~ObjectWriteOperation() override {}
 
     ObjectWriteOperation(ObjectWriteOperation&&) = default;
-    ObjectWriteOperation& operator =(ObjectWriteOperation&&) = default;
+    ObjectWriteOperation& operator=(ObjectWriteOperation&&) = default;
 
-    void mtime(time_t *pt);
-    void mtime2(struct timespec *pts);
+    void mtime(time_t* pt);
+    void mtime2(struct timespec* pts);
 
     void create(bool exclusive);
     void create(bool exclusive,
-		const std::string& category); ///< NOTE: category is unused
+                const std::string& category);   ///< NOTE: category is unused
 
     void write(uint64_t off, const bufferlist& bl);
     void write_full(const bufferlist& bl);
-    void writesame(uint64_t off, uint64_t write_len,
-		   const bufferlist& bl);
+    void writesame(uint64_t off, uint64_t write_len, const bufferlist& bl);
     void append(const bufferlist& bl);
     void remove();
     void truncate(uint64_t off);
     void zero(uint64_t off, uint64_t len);
-    void rmxattr(const char *name);
-    void setxattr(const char *name, const bufferlist& bl);
-    void setxattr(const char *name, const bufferlist&& bl);
+    void rmxattr(const char* name);
+    void setxattr(const char* name, const bufferlist& bl);
+    void setxattr(const char* name, const bufferlist&& bl);
     void tmap_update(const bufferlist& cmdbl);
     void tmap_put(const bufferlist& bl);
     void selfmanaged_snap_rollback(uint64_t snapid);
@@ -425,14 +439,14 @@ inline namespace v14_2_0 {
      *
      * @param map [in] keys and values to set
      */
-    void omap_set(const std::map<std::string, bufferlist> &map);
+    void omap_set(const std::map<std::string, bufferlist>& map);
 
     /**
      * set header
      *
      * @param bl [in] header to set
      */
-    void omap_set_header(const bufferlist &bl);
+    void omap_set_header(const bufferlist& bl);
 
     /**
      * Clears omap contents
@@ -444,7 +458,7 @@ inline namespace v14_2_0 {
      *
      * @param to_rm [in] keys to remove
      */
-    void omap_rm_keys(const std::set<std::string> &to_rm);
+    void omap_rm_keys(const std::set<std::string>& to_rm);
 
     /**
      * Copy an object
@@ -458,8 +472,7 @@ inline namespace v14_2_0 {
      * @param src_version current version of the source object
      * @param src_fadvise_flags the fadvise flags for source object
      */
-    void copy_from(const std::string& src, const IoCtx& src_ioctx,
-		   uint64_t src_version, uint32_t src_fadvise_flags);
+    void copy_from(const std::string& src, const IoCtx& src_ioctx, uint64_t src_version, uint32_t src_fadvise_flags);
 
     /**
      * Copy an object
@@ -477,9 +490,8 @@ inline namespace v14_2_0 {
      * @param truncate_size truncate size for the destination object
      * @param src_fadvise_flags the fadvise flags for source object
      */
-    void copy_from2(const std::string& src, const IoCtx& src_ioctx,
-		    uint64_t src_version, uint32_t truncate_seq,
-		    uint64_t truncate_size, uint32_t src_fadvise_flags);
+    void copy_from2(const std::string& src, const IoCtx& src_ioctx, uint64_t src_version, uint32_t truncate_seq,
+                    uint64_t truncate_size, uint32_t src_fadvise_flags);
 
     /**
      * undirty an object
@@ -495,11 +507,8 @@ inline namespace v14_2_0 {
      * @param expected_write_size expected size of writes to the object, in bytes
      * @param flags flags ()
      */
-    void set_alloc_hint(uint64_t expected_object_size,
-                        uint64_t expected_write_size);
-    void set_alloc_hint2(uint64_t expected_object_size,
-			 uint64_t expected_write_size,
-			 uint32_t flags);
+    void set_alloc_hint(uint64_t expected_object_size, uint64_t expected_write_size);
+    void set_alloc_hint2(uint64_t expected_object_size, uint64_t expected_write_size, uint32_t flags);
 
     /**
      * Pin/unpin an object in cache tier
@@ -514,42 +523,39 @@ inline namespace v14_2_0 {
      *
      * Set redirect target
      */
-    void set_redirect(const std::string& tgt_obj, const IoCtx& tgt_ioctx,
-		      uint64_t tgt_version, int flag = 0);
+    void set_redirect(const std::string& tgt_obj, const IoCtx& tgt_ioctx, uint64_t tgt_version, int flag = 0);
     void tier_promote();
     void unset_manifest();
 
     friend class IoCtx;
-  };
+};
 
-  /*
-   * ObjectReadOperation : compound object operation that return value
-   * Batch multiple object operations into a single request, to be applied
-   * atomically.
-   */
-  class CEPH_RADOS_API ObjectReadOperation : public ObjectOperation
-  {
-  public:
+/*
+ * ObjectReadOperation : compound object operation that return value
+ * Batch multiple object operations into a single request, to be applied
+ * atomically.
+ */
+class CEPH_RADOS_API ObjectReadOperation : public ObjectOperation
+{
+public:
     ObjectReadOperation() {}
     ~ObjectReadOperation() override {}
 
     ObjectReadOperation(ObjectReadOperation&&) = default;
-    ObjectReadOperation& operator =(ObjectReadOperation&&) = default;
+    ObjectReadOperation& operator=(ObjectReadOperation&&) = default;
 
-    void stat(uint64_t *psize, time_t *pmtime, int *prval);
-    void stat2(uint64_t *psize, struct timespec *pts, int *prval);
-    void getxattr(const char *name, bufferlist *pbl, int *prval);
-    void getxattrs(std::map<std::string, bufferlist> *pattrs, int *prval);
-    void read(size_t off, uint64_t len, bufferlist *pbl, int *prval);
-    void checksum(rados_checksum_type_t type, const bufferlist &init_value_bl,
-		  uint64_t off, size_t len, size_t chunk_size, bufferlist *pbl,
-		  int *prval);
+    void stat(uint64_t* psize, time_t* pmtime, int* prval);
+    void stat2(uint64_t* psize, struct timespec* pts, int* prval);
+    void getxattr(const char* name, bufferlist* pbl, int* prval);
+    void getxattrs(std::map<std::string, bufferlist>* pattrs, int* prval);
+    void read(size_t off, uint64_t len, bufferlist* pbl, int* prval);
+    void checksum(rados_checksum_type_t type, const bufferlist& init_value_bl, uint64_t off, size_t len,
+                  size_t chunk_size, bufferlist* pbl, int* prval);
 
     /**
      * see aio_sparse_read()
      */
-    void sparse_read(uint64_t off, uint64_t len, std::map<uint64_t,uint64_t> *m,
-                    bufferlist *data_bl, int *prval);
+    void sparse_read(uint64_t off, uint64_t len, std::map<uint64_t, uint64_t>* m, bufferlist* data_bl, int* prval);
 
     /**
      * omap_get_vals: keys and values from the object omap
@@ -561,11 +567,8 @@ inline namespace v14_2_0 {
      * @param out_vals [out] place returned values in out_vals on completion
      * @param prval [out] place error code in prval upon completion
      */
-    void omap_get_vals(
-      const std::string &start_after,
-      uint64_t max_return,
-      std::map<std::string, bufferlist> *out_vals,
-      int *prval) __attribute__ ((deprecated));  // use v2
+    void omap_get_vals(const std::string& start_after, uint64_t max_return, std::map<std::string, bufferlist>* out_vals,
+                       int* prval) __attribute__((deprecated));   // use v2
 
     /**
      * omap_get_vals: keys and values from the object omap
@@ -577,12 +580,8 @@ inline namespace v14_2_0 {
      * @param out_vals [out] place returned values in out_vals on completion
      * @param prval [out] place error code in prval upon completion
      */
-    void omap_get_vals2(
-      const std::string &start_after,
-      uint64_t max_return,
-      std::map<std::string, bufferlist> *out_vals,
-      bool *pmore,
-      int *prval);
+    void omap_get_vals2(const std::string& start_after, uint64_t max_return,
+                        std::map<std::string, bufferlist>* out_vals, bool* pmore, int* prval);
 
     /**
      * omap_get_vals: keys and values from the object omap
@@ -595,12 +594,9 @@ inline namespace v14_2_0 {
      * @param out_vals [out] place returned values in out_vals on completion
      * @param prval [out] place error code in prval upon completion
      */
-    void omap_get_vals(
-      const std::string &start_after,
-      const std::string &filter_prefix,
-      uint64_t max_return,
-      std::map<std::string, bufferlist> *out_vals,
-      int *prval) __attribute__ ((deprecated));  // use v2
+    void omap_get_vals(const std::string& start_after, const std::string& filter_prefix, uint64_t max_return,
+                       std::map<std::string, bufferlist>* out_vals,
+                       int* prval) __attribute__((deprecated));   // use v2
 
     /**
      * omap_get_vals2: keys and values from the object omap
@@ -614,13 +610,8 @@ inline namespace v14_2_0 {
      * @param pmore [out] pointer to bool indicating whether there are more keys
      * @param prval [out] place error code in prval upon completion
      */
-    void omap_get_vals2(
-      const std::string &start_after,
-      const std::string &filter_prefix,
-      uint64_t max_return,
-      std::map<std::string, bufferlist> *out_vals,
-      bool *pmore,
-      int *prval);
+    void omap_get_vals2(const std::string& start_after, const std::string& filter_prefix, uint64_t max_return,
+                        std::map<std::string, bufferlist>* out_vals, bool* pmore, int* prval);
 
 
     /**
@@ -633,10 +624,8 @@ inline namespace v14_2_0 {
      * @param out_keys [out] place returned values in out_keys on completion
      * @param prval [out] place error code in prval upon completion
      */
-    void omap_get_keys(const std::string &start_after,
-                       uint64_t max_return,
-                       std::set<std::string> *out_keys,
-                       int *prval) __attribute__ ((deprecated)); // use v2
+    void omap_get_keys(const std::string& start_after, uint64_t max_return, std::set<std::string>* out_keys,
+                       int* prval) __attribute__((deprecated));   // use v2
 
     /**
      * omap_get_keys2: keys from the object omap
@@ -649,11 +638,8 @@ inline namespace v14_2_0 {
      * @param pmore [out] pointer to bool indicating whether there are more keys
      * @param prval [out] place error code in prval upon completion
      */
-    void omap_get_keys2(const std::string &start_after,
-			uint64_t max_return,
-			std::set<std::string> *out_keys,
-			bool *pmore,
-			int *prval);
+    void omap_get_keys2(const std::string& start_after, uint64_t max_return, std::set<std::string>* out_keys,
+                        bool* pmore, int* prval);
 
     /**
      * omap_get_header: get header from object omap
@@ -661,7 +647,7 @@ inline namespace v14_2_0 {
      * @param header [out] place header here upon completion
      * @param prval [out] place error code in prval upon completion
      */
-    void omap_get_header(bufferlist *header, int *prval);
+    void omap_get_header(bufferlist* header, int* prval);
 
     /**
      * get key/value pairs for specified keys
@@ -670,9 +656,7 @@ inline namespace v14_2_0 {
      * @param map [out] place key/value pairs found here on completion
      * @param prval [out] place error code in prval upon completion
      */
-    void omap_get_vals_by_keys(const std::set<std::string> &keys,
-			       std::map<std::string, bufferlist> *map,
-			       int *prval);
+    void omap_get_vals_by_keys(const std::set<std::string>& keys, std::map<std::string, bufferlist>* map, int* prval);
 
     /**
      * list_watchers: Get list watchers of object
@@ -680,7 +664,7 @@ inline namespace v14_2_0 {
      * @param out_watchers [out] place returned values in out_watchers on completion
      * @param prval [out] place error code in prval upon completion
      */
-    void list_watchers(std::list<obj_watch_t> *out_watchers, int *prval);
+    void list_watchers(std::list<obj_watch_t>* out_watchers, int* prval);
 
     /**
      * list snapshot clones associated with a logical object
@@ -696,7 +680,7 @@ inline namespace v14_2_0 {
      * @param out_snaps [out] pointer to resulting snap_set_t
      * @param prval [out] place error code in prval upon completion
      */
-    void list_snaps(snap_set_t *out_snaps, int *prval);
+    void list_snaps(snap_set_t* out_snaps, int* prval);
 
     /**
      * query dirty state of an object
@@ -704,7 +688,7 @@ inline namespace v14_2_0 {
      * @param isdirty [out] pointer to resulting bool
      * @param prval [out] place error code in prval upon completion
      */
-    void is_dirty(bool *isdirty, int *prval);
+    void is_dirty(bool* isdirty, int* prval);
 
     /**
      * flush a cache tier object to backing tier; will block racing
@@ -735,10 +719,10 @@ inline namespace v14_2_0 {
     /**
      * Extensible tier
      *
-     * set_chunk: make a chunk pointing a part of the source object at the target 
+     * set_chunk: make a chunk pointing a part of the source object at the target
      * 		  object
      *
-     * @param src_offset [in] source offset to indicate the start position of 
+     * @param src_offset [in] source offset to indicate the start position of
      * 				a chunk in the source object
      * @param src_length [in] source length to set the length of the chunk
      * @param tgt_oid    [in] target object's id to set a chunk
@@ -746,8 +730,8 @@ inline namespace v14_2_0 {
      * @param flag       [in] flag for the source object
      *
      */
-    void set_chunk(uint64_t src_offset, uint64_t src_length, const IoCtx& tgt_ioctx,
-                   std::string tgt_oid, uint64_t tgt_offset, int flag = 0);
+    void set_chunk(uint64_t src_offset, uint64_t src_length, const IoCtx& tgt_ioctx, std::string tgt_oid,
+                   uint64_t tgt_offset, int flag = 0);
     /**
      * flush a manifest tier object to backing tier; will block racing
      * updates.
@@ -758,27 +742,27 @@ inline namespace v14_2_0 {
      * updates.
      */
     void tier_evict();
-  };
+};
 
-  /* IoCtx : This is a context in which we can perform I/O.
-   * It includes a Pool,
-   *
-   * Typical use (error checking omitted):
-   *
-   * IoCtx p;
-   * rados.ioctx_create("my_pool", p);
-   * p->stat(&stats);
-   * ... etc ...
-   *
-   * NOTE: be sure to call watch_flush() prior to destroying any IoCtx
-   * that is used for watch events to ensure that racing callbacks
-   * have completed.
-   */
-  class CEPH_RADOS_API IoCtx
-  {
-  public:
+/* IoCtx : This is a context in which we can perform I/O.
+ * It includes a Pool,
+ *
+ * Typical use (error checking omitted):
+ *
+ * IoCtx p;
+ * rados.ioctx_create("my_pool", p);
+ * p->stat(&stats);
+ * ... etc ...
+ *
+ * NOTE: be sure to call watch_flush() prior to destroying any IoCtx
+ * that is used for watch events to ensure that racing callbacks
+ * have completed.
+ */
+class CEPH_RADOS_API IoCtx
+{
+public:
     IoCtx();
-    static void from_rados_ioctx_t(rados_ioctx_t p, IoCtx &pool);
+    static void from_rados_ioctx_t(rados_ioctx_t p, IoCtx& pool);
     IoCtx(const IoCtx& rhs);
     IoCtx& operator=(const IoCtx& rhs);
     IoCtx(IoCtx&& rhs) noexcept;
@@ -795,30 +779,27 @@ inline namespace v14_2_0 {
     void dup(const IoCtx& rhs);
 
     // set pool auid
-    int set_auid(uint64_t auid_)
-      __attribute__ ((deprecated));
+    int set_auid(uint64_t auid_) __attribute__((deprecated));
 
     // set pool auid
-    int set_auid_async(uint64_t auid_, PoolAsyncCompletion *c)
-      __attribute__ ((deprecated));
+    int set_auid_async(uint64_t auid_, PoolAsyncCompletion* c) __attribute__((deprecated));
 
     // get pool auid
-    int get_auid(uint64_t *auid_)
-      __attribute__ ((deprecated));
+    int get_auid(uint64_t* auid_) __attribute__((deprecated));
 
     uint64_t get_instance_id() const;
 
     std::string get_pool_name();
 
     bool pool_requires_alignment();
-    int pool_requires_alignment2(bool * req);
+    int pool_requires_alignment2(bool* req);
     uint64_t pool_required_alignment();
-    int pool_required_alignment2(uint64_t * alignment);
+    int pool_required_alignment2(uint64_t* alignment);
 
     // create an object
     int create(const std::string& oid, bool exclusive);
     int create(const std::string& oid, bool exclusive,
-	       const std::string& category); ///< category is unused
+               const std::string& category);   ///< category is unused
 
     /**
      * write bytes to an object at a specified offset
@@ -838,26 +819,23 @@ inline namespace v14_2_0 {
      * NOTE: this call steals the contents of @param bl.
      */
     int write_full(const std::string& oid, bufferlist& bl);
-    int writesame(const std::string& oid, bufferlist& bl,
-		  size_t write_len, uint64_t off);
+    int writesame(const std::string& oid, bufferlist& bl, size_t write_len, uint64_t off);
     int read(const std::string& oid, bufferlist& bl, size_t len, uint64_t off);
-    int checksum(const std::string& o, rados_checksum_type_t type,
-		 const bufferlist &init_value_bl, size_t len, uint64_t off,
-		 size_t chunk_size, bufferlist *pbl);
+    int checksum(const std::string& o, rados_checksum_type_t type, const bufferlist& init_value_bl, size_t len,
+                 uint64_t off, size_t chunk_size, bufferlist* pbl);
     int remove(const std::string& oid);
     int remove(const std::string& oid, int flags);
     int trunc(const std::string& oid, uint64_t size);
-    int mapext(const std::string& o, uint64_t off, size_t len, std::map<uint64_t,uint64_t>& m);
+    int mapext(const std::string& o, uint64_t off, size_t len, std::map<uint64_t, uint64_t>& m);
     int cmpext(const std::string& o, uint64_t off, bufferlist& cmp_bl);
-    int sparse_read(const std::string& o, std::map<uint64_t,uint64_t>& m, bufferlist& bl, size_t len, uint64_t off);
-    int getxattr(const std::string& oid, const char *name, bufferlist& bl);
+    int sparse_read(const std::string& o, std::map<uint64_t, uint64_t>& m, bufferlist& bl, size_t len, uint64_t off);
+    int getxattr(const std::string& oid, const char* name, bufferlist& bl);
     int getxattrs(const std::string& oid, std::map<std::string, bufferlist>& attrset);
-    int setxattr(const std::string& oid, const char *name, bufferlist& bl);
-    int rmxattr(const std::string& oid, const char *name);
-    int stat(const std::string& oid, uint64_t *psize, time_t *pmtime);
-    int stat2(const std::string& oid, uint64_t *psize, struct timespec *pts);
-    int exec(const std::string& oid, const char *cls, const char *method,
-	     bufferlist& inbl, bufferlist& outbl);
+    int setxattr(const std::string& oid, const char* name, bufferlist& bl);
+    int rmxattr(const std::string& oid, const char* name);
+    int stat(const std::string& oid, uint64_t* psize, time_t* pmtime);
+    int stat2(const std::string& oid, uint64_t* psize, struct timespec* pts);
+    int exec(const std::string& oid, const char* cls, const char* method, bufferlist& inbl, bufferlist& outbl);
     /**
      * modify object tmap based on encoded update sequence
      *
@@ -865,116 +843,84 @@ inline namespace v14_2_0 {
      */
     int tmap_update(const std::string& oid, bufferlist& cmdbl);
 
-    int omap_get_vals(const std::string& oid,
-                      const std::string& start_after,
-                      uint64_t max_return,
-                      std::map<std::string, bufferlist> *out_vals);
-    int omap_get_vals2(const std::string& oid,
-		       const std::string& start_after,
-		       uint64_t max_return,
-		       std::map<std::string, bufferlist> *out_vals,
-		       bool *pmore);
-    int omap_get_vals(const std::string& oid,
-                      const std::string& start_after,
-                      const std::string& filter_prefix,
-                      uint64_t max_return,
-                      std::map<std::string, bufferlist> *out_vals);
-    int omap_get_vals2(const std::string& oid,
-		       const std::string& start_after,
-		       const std::string& filter_prefix,
-		       uint64_t max_return,
-		       std::map<std::string, bufferlist> *out_vals,
-		       bool *pmore);
-    int omap_get_keys(const std::string& oid,
-                      const std::string& start_after,
-                      uint64_t max_return,
-                      std::set<std::string> *out_keys);
-    int omap_get_keys2(const std::string& oid,
-		       const std::string& start_after,
-		       uint64_t max_return,
-		       std::set<std::string> *out_keys,
-		       bool *pmore);
-    int omap_get_header(const std::string& oid,
-                        bufferlist *bl);
-    int omap_get_vals_by_keys(const std::string& oid,
-                              const std::set<std::string>& keys,
-                              std::map<std::string, bufferlist> *vals);
-    int omap_set(const std::string& oid,
-                 const std::map<std::string, bufferlist>& map);
-    int omap_set_header(const std::string& oid,
-                        const bufferlist& bl);
+    int omap_get_vals(const std::string& oid, const std::string& start_after, uint64_t max_return,
+                      std::map<std::string, bufferlist>* out_vals);
+    int omap_get_vals2(const std::string& oid, const std::string& start_after, uint64_t max_return,
+                       std::map<std::string, bufferlist>* out_vals, bool* pmore);
+    int omap_get_vals(const std::string& oid, const std::string& start_after, const std::string& filter_prefix,
+                      uint64_t max_return, std::map<std::string, bufferlist>* out_vals);
+    int omap_get_vals2(const std::string& oid, const std::string& start_after, const std::string& filter_prefix,
+                       uint64_t max_return, std::map<std::string, bufferlist>* out_vals, bool* pmore);
+    int omap_get_keys(const std::string& oid, const std::string& start_after, uint64_t max_return,
+                      std::set<std::string>* out_keys);
+    int omap_get_keys2(const std::string& oid, const std::string& start_after, uint64_t max_return,
+                       std::set<std::string>* out_keys, bool* pmore);
+    int omap_get_header(const std::string& oid, bufferlist* bl);
+    int omap_get_vals_by_keys(const std::string& oid, const std::set<std::string>& keys,
+                              std::map<std::string, bufferlist>* vals);
+    int omap_set(const std::string& oid, const std::map<std::string, bufferlist>& map);
+    int omap_set_header(const std::string& oid, const bufferlist& bl);
     int omap_clear(const std::string& oid);
-    int omap_rm_keys(const std::string& oid,
-                     const std::set<std::string>& keys);
+    int omap_rm_keys(const std::string& oid, const std::set<std::string>& keys);
 
     void snap_set_read(snap_t seq);
     int selfmanaged_snap_set_write_ctx(snap_t seq, std::vector<snap_t>& snaps);
 
     // Create a snapshot with a given name
-    int snap_create(const char *snapname);
+    int snap_create(const char* snapname);
 
     // Look up a snapshot by name.
     // Returns 0 on success; error code otherwise
-    int snap_lookup(const char *snapname, snap_t *snap);
+    int snap_lookup(const char* snapname, snap_t* snap);
 
     // Gets a timestamp for a snap
-    int snap_get_stamp(snap_t snapid, time_t *t);
+    int snap_get_stamp(snap_t snapid, time_t* t);
 
     // Gets the name of a snap
-    int snap_get_name(snap_t snapid, std::string *s);
+    int snap_get_name(snap_t snapid, std::string* s);
 
     // Remove a snapshot from this pool
-    int snap_remove(const char *snapname);
+    int snap_remove(const char* snapname);
 
-    int snap_list(std::vector<snap_t> *snaps);
+    int snap_list(std::vector<snap_t>* snaps);
 
-    int snap_rollback(const std::string& oid, const char *snapname);
+    int snap_rollback(const std::string& oid, const char* snapname);
 
     // Deprecated name kept for backward compatibility - same as snap_rollback()
-    int rollback(const std::string& oid, const char *snapname)
-      __attribute__ ((deprecated));
+    int rollback(const std::string& oid, const char* snapname) __attribute__((deprecated));
 
-    int selfmanaged_snap_create(uint64_t *snapid);
-    void aio_selfmanaged_snap_create(uint64_t *snapid, AioCompletion *c);
+    int selfmanaged_snap_create(uint64_t* snapid);
+    void aio_selfmanaged_snap_create(uint64_t* snapid, AioCompletion* c);
 
     int selfmanaged_snap_remove(uint64_t snapid);
-    void aio_selfmanaged_snap_remove(uint64_t snapid, AioCompletion *c);
+    void aio_selfmanaged_snap_remove(uint64_t snapid, AioCompletion* c);
 
     int selfmanaged_snap_rollback(const std::string& oid, uint64_t snapid);
 
     // Advisory locking on rados objects.
-    int lock_exclusive(const std::string &oid, const std::string &name,
-		       const std::string &cookie,
-		       const std::string &description,
-		       struct timeval * duration, uint8_t flags);
+    int lock_exclusive(const std::string& oid, const std::string& name, const std::string& cookie,
+                       const std::string& description, struct timeval* duration, uint8_t flags);
 
-    int lock_shared(const std::string &oid, const std::string &name,
-		    const std::string &cookie, const std::string &tag,
-		    const std::string &description,
-		    struct timeval * duration, uint8_t flags);
+    int lock_shared(const std::string& oid, const std::string& name, const std::string& cookie, const std::string& tag,
+                    const std::string& description, struct timeval* duration, uint8_t flags);
 
-    int unlock(const std::string &oid, const std::string &name,
-	       const std::string &cookie);
+    int unlock(const std::string& oid, const std::string& name, const std::string& cookie);
 
-    int break_lock(const std::string &oid, const std::string &name,
-		   const std::string &client, const std::string &cookie);
+    int break_lock(const std::string& oid, const std::string& name, const std::string& client,
+                   const std::string& cookie);
 
-    int list_lockers(const std::string &oid, const std::string &name,
-		     int *exclusive,
-		     std::string *tag,
-		     std::list<librados::locker_t> *lockers);
+    int list_lockers(const std::string& oid, const std::string& name, int* exclusive, std::string* tag,
+                     std::list<librados::locker_t>* lockers);
 
 
     /// Start enumerating objects for a pool. Errors are thrown as exceptions.
-    NObjectIterator nobjects_begin(const bufferlist &filter=bufferlist());
+    NObjectIterator nobjects_begin(const bufferlist& filter = bufferlist());
     /// Start enumerating objects for a pool starting from a hash position.
     /// Errors are thrown as exceptions.
-    NObjectIterator nobjects_begin(uint32_t start_hash_position,
-                                   const bufferlist &filter=bufferlist());
+    NObjectIterator nobjects_begin(uint32_t start_hash_position, const bufferlist& filter = bufferlist());
     /// Start enumerating objects for a pool starting from cursor. Errors are
     /// thrown as exceptions.
-    NObjectIterator nobjects_begin(const librados::ObjectCursor& cursor,
-                                   const bufferlist &filter=bufferlist());
+    NObjectIterator nobjects_begin(const librados::ObjectCursor& cursor, const bufferlist& filter = bufferlist());
     /// Iterator indicating the end of a pool
     const NObjectIterator& nobjects_end() const;
 
@@ -985,23 +931,15 @@ inline namespace v14_2_0 {
     ObjectCursor object_list_end();
 
     /// Check whether a cursor is at the end of a pool
-    bool object_list_is_end(const ObjectCursor &oc);
+    bool object_list_is_end(const ObjectCursor& oc);
 
     /// List some objects between two cursors
-    int object_list(const ObjectCursor &start, const ObjectCursor &finish,
-                    const size_t result_count,
-                    const bufferlist &filter,
-                    std::vector<ObjectItem> *result,
-                    ObjectCursor *next);
+    int object_list(const ObjectCursor& start, const ObjectCursor& finish, const size_t result_count,
+                    const bufferlist& filter, std::vector<ObjectItem>* result, ObjectCursor* next);
 
     /// Generate cursors that include the N out of Mth slice of the pool
-    void object_list_slice(
-        const ObjectCursor start,
-        const ObjectCursor finish,
-        const size_t n,
-        const size_t m,
-        ObjectCursor *split_start,
-        ObjectCursor *split_finish);
+    void object_list_slice(const ObjectCursor start, const ObjectCursor finish, const size_t n, const size_t m,
+                           ObjectCursor* split_start, ObjectCursor* split_finish);
 
     /**
      * List available hit set objects
@@ -1010,8 +948,7 @@ inline namespace v14_2_0 {
      * @param c [in] completion
      * @param pls [out] list of available intervals
      */
-    int hit_set_list(uint32_t hash, AioCompletion *c,
-		     std::list< std::pair<time_t, time_t> > *pls);
+    int hit_set_list(uint32_t hash, AioCompletion* c, std::list<std::pair<time_t, time_t> >* pls);
 
     /**
      * Retrieve hit set for a given hash, and time
@@ -1021,13 +958,11 @@ inline namespace v14_2_0 {
      * @param stamp [in] time interval that falls within the hit set's interval
      * @param pbl [out] buffer to store the result in
      */
-    int hit_set_get(uint32_t hash, AioCompletion *c, time_t stamp,
-		    bufferlist *pbl);
+    int hit_set_get(uint32_t hash, AioCompletion* c, time_t stamp, bufferlist* pbl);
 
     uint64_t get_last_version();
 
-    int aio_read(const std::string& oid, AioCompletion *c,
-		 bufferlist *pbl, size_t len, uint64_t off);
+    int aio_read(const std::string& oid, AioCompletion* c, bufferlist* pbl, size_t len, uint64_t off);
     /**
      * Asynchronously read from an object at a particular snapshot
      *
@@ -1046,11 +981,9 @@ inline namespace v14_2_0 {
      * @param snapid the id of the snapshot to read from
      * @returns 0 on success, negative error code on failure
      */
-    int aio_read(const std::string& oid, AioCompletion *c,
-		 bufferlist *pbl, size_t len, uint64_t off, uint64_t snapid);
-    int aio_sparse_read(const std::string& oid, AioCompletion *c,
-			std::map<uint64_t,uint64_t> *m, bufferlist *data_bl,
-			size_t len, uint64_t off);
+    int aio_read(const std::string& oid, AioCompletion* c, bufferlist* pbl, size_t len, uint64_t off, uint64_t snapid);
+    int aio_sparse_read(const std::string& oid, AioCompletion* c, std::map<uint64_t, uint64_t>* m, bufferlist* data_bl,
+                        size_t len, uint64_t off);
     /**
      * Asynchronously read existing extents from an object at a
      * particular snapshot
@@ -1073,9 +1006,8 @@ inline namespace v14_2_0 {
      * @param snapid the id of the snapshot to read from
      * @returns 0 on success, negative error code on failure
      */
-    int aio_sparse_read(const std::string& oid, AioCompletion *c,
-			std::map<uint64_t,uint64_t> *m, bufferlist *data_bl,
-			size_t len, uint64_t off, uint64_t snapid);
+    int aio_sparse_read(const std::string& oid, AioCompletion* c, std::map<uint64_t, uint64_t>* m, bufferlist* data_bl,
+                        size_t len, uint64_t off, uint64_t snapid);
     /**
      * Asynchronously compare an on-disk object range with a buffer
      *
@@ -1086,17 +1018,11 @@ inline namespace v14_2_0 {
      * @returns 0 on success, negative error code on failure,
      *  (-MAX_ERRNO - mismatch_off) on mismatch
      */
-    int aio_cmpext(const std::string& oid,
-		   librados::AioCompletion *c,
-		   uint64_t off,
-		   bufferlist& cmp_bl);
-    int aio_write(const std::string& oid, AioCompletion *c, const bufferlist& bl,
-		  size_t len, uint64_t off);
-    int aio_append(const std::string& oid, AioCompletion *c, const bufferlist& bl,
-		  size_t len);
-    int aio_write_full(const std::string& oid, AioCompletion *c, const bufferlist& bl);
-    int aio_writesame(const std::string& oid, AioCompletion *c, const bufferlist& bl,
-		      size_t write_len, uint64_t off);
+    int aio_cmpext(const std::string& oid, librados::AioCompletion* c, uint64_t off, bufferlist& cmp_bl);
+    int aio_write(const std::string& oid, AioCompletion* c, const bufferlist& bl, size_t len, uint64_t off);
+    int aio_append(const std::string& oid, AioCompletion* c, const bufferlist& bl, size_t len);
+    int aio_write_full(const std::string& oid, AioCompletion* c, const bufferlist& bl);
+    int aio_writesame(const std::string& oid, AioCompletion* c, const bufferlist& bl, size_t write_len, uint64_t off);
 
     /**
      * Asynchronously remove an object
@@ -1111,8 +1037,8 @@ inline namespace v14_2_0 {
      * @returns 0 on success, -EROFS if the io context specifies a snap_seq
      * other than SNAP_HEAD
      */
-    int aio_remove(const std::string& oid, AioCompletion *c);
-    int aio_remove(const std::string& oid, AioCompletion *c, int flags);
+    int aio_remove(const std::string& oid, AioCompletion* c);
+    int aio_remove(const std::string& oid, AioCompletion* c, int flags);
 
     /**
      * Wait for all currently pending aio writes to be safe.
@@ -1129,13 +1055,13 @@ inline namespace v14_2_0 {
      * @param c what to do when the writes are safe
      * @returns 0 on success, negative error code on failure
      */
-    int aio_flush_async(AioCompletion *c);
-    int aio_getxattr(const std::string& oid, AioCompletion *c, const char *name, bufferlist& bl);
-    int aio_getxattrs(const std::string& oid, AioCompletion *c, std::map<std::string, bufferlist>& attrset);
-    int aio_setxattr(const std::string& oid, AioCompletion *c, const char *name, bufferlist& bl);
-    int aio_rmxattr(const std::string& oid, AioCompletion *c, const char *name);
-    int aio_stat(const std::string& oid, AioCompletion *c, uint64_t *psize, time_t *pmtime);
-    int aio_stat2(const std::string& oid, AioCompletion *c, uint64_t *psize, struct timespec *pts);
+    int aio_flush_async(AioCompletion* c);
+    int aio_getxattr(const std::string& oid, AioCompletion* c, const char* name, bufferlist& bl);
+    int aio_getxattrs(const std::string& oid, AioCompletion* c, std::map<std::string, bufferlist>& attrset);
+    int aio_setxattr(const std::string& oid, AioCompletion* c, const char* name, bufferlist& bl);
+    int aio_rmxattr(const std::string& oid, AioCompletion* c, const char* name);
+    int aio_stat(const std::string& oid, AioCompletion* c, uint64_t* psize, time_t* pmtime);
+    int aio_stat2(const std::string& oid, AioCompletion* c, uint64_t* psize, struct timespec* pts);
 
     /**
      * Cancel aio operation
@@ -1143,24 +1069,23 @@ inline namespace v14_2_0 {
      * @param c completion handle
      * @returns 0 on success, negative error code on failure
      */
-    int aio_cancel(AioCompletion *c);
+    int aio_cancel(AioCompletion* c);
 
-    int aio_exec(const std::string& oid, AioCompletion *c, const char *cls, const char *method,
-	         bufferlist& inbl, bufferlist *outbl);
+    int aio_exec(const std::string& oid, AioCompletion* c, const char* cls, const char* method, bufferlist& inbl,
+                 bufferlist* outbl);
 
     /*
      * asynchronous version of unlock
      */
-    int aio_unlock(const std::string &oid, const std::string &name,
-	           const std::string &cookie, AioCompletion *c);
+    int aio_unlock(const std::string& oid, const std::string& name, const std::string& cookie, AioCompletion* c);
 
     // compound object operations
-    int operate(const std::string& oid, ObjectWriteOperation *op);
-    int operate(const std::string& oid, ObjectWriteOperation *op, int flags);
-    int operate(const std::string& oid, ObjectReadOperation *op, bufferlist *pbl);
-    int operate(const std::string& oid, ObjectReadOperation *op, bufferlist *pbl, int flags);
-    int aio_operate(const std::string& oid, AioCompletion *c, ObjectWriteOperation *op);
-    int aio_operate(const std::string& oid, AioCompletion *c, ObjectWriteOperation *op, int flags);
+    int operate(const std::string& oid, ObjectWriteOperation* op);
+    int operate(const std::string& oid, ObjectWriteOperation* op, int flags);
+    int operate(const std::string& oid, ObjectReadOperation* op, bufferlist* pbl);
+    int operate(const std::string& oid, ObjectReadOperation* op, bufferlist* pbl, int flags);
+    int aio_operate(const std::string& oid, AioCompletion* c, ObjectWriteOperation* op);
+    int aio_operate(const std::string& oid, AioCompletion* c, ObjectWriteOperation* op, int flags);
     /**
      * Schedule an async write operation with explicit snapshot parameters
      *
@@ -1175,43 +1100,29 @@ inline namespace v14_2_0 {
      * @param snaps currently existing selfmanaged snapshot ids for this object
      * @returns 0 on success, negative error code on failure
      */
-    int aio_operate(const std::string& oid, AioCompletion *c,
-		    ObjectWriteOperation *op, snap_t seq,
-		    std::vector<snap_t>& snaps);
-    int aio_operate(const std::string& oid, AioCompletion *c,
-        ObjectWriteOperation *op, snap_t seq,
-        std::vector<snap_t>& snaps,
-        const blkin_trace_info *trace_info);
-    int aio_operate(const std::string& oid, AioCompletion *c,
-        ObjectWriteOperation *op, snap_t seq,
-        std::vector<snap_t>& snaps, int flags,
-        const blkin_trace_info *trace_info);
-    int aio_operate(const std::string& oid, AioCompletion *c,
-		    ObjectReadOperation *op, bufferlist *pbl);
+    int aio_operate(const std::string& oid, AioCompletion* c, ObjectWriteOperation* op, snap_t seq,
+                    std::vector<snap_t>& snaps);
+    int aio_operate(const std::string& oid, AioCompletion* c, ObjectWriteOperation* op, snap_t seq,
+                    std::vector<snap_t>& snaps, const blkin_trace_info* trace_info);
+    int aio_operate(const std::string& oid, AioCompletion* c, ObjectWriteOperation* op, snap_t seq,
+                    std::vector<snap_t>& snaps, int flags, const blkin_trace_info* trace_info);
+    int aio_operate(const std::string& oid, AioCompletion* c, ObjectReadOperation* op, bufferlist* pbl);
 
-    int aio_operate(const std::string& oid, AioCompletion *c,
-		    ObjectReadOperation *op, snap_t snapid, int flags,
-		    bufferlist *pbl)
-      __attribute__ ((deprecated));
+    int aio_operate(const std::string& oid, AioCompletion* c, ObjectReadOperation* op, snap_t snapid, int flags,
+                    bufferlist* pbl) __attribute__((deprecated));
 
-    int aio_operate(const std::string& oid, AioCompletion *c,
-		    ObjectReadOperation *op, int flags,
-		    bufferlist *pbl);
-    int aio_operate(const std::string& oid, AioCompletion *c,
-        ObjectReadOperation *op, int flags,
-        bufferlist *pbl, const blkin_trace_info *trace_info);
+    int aio_operate(const std::string& oid, AioCompletion* c, ObjectReadOperation* op, int flags, bufferlist* pbl);
+    int aio_operate(const std::string& oid, AioCompletion* c, ObjectReadOperation* op, int flags, bufferlist* pbl,
+                    const blkin_trace_info* trace_info);
 
     // watch/notify
-    int watch2(const std::string& o, uint64_t *handle,
-	       librados::WatchCtx2 *ctx);
-    int watch3(const std::string& o, uint64_t *handle,
-	       librados::WatchCtx2 *ctx, uint32_t timeout);
-    int aio_watch(const std::string& o, AioCompletion *c, uint64_t *handle,
-	       librados::WatchCtx2 *ctx);
-    int aio_watch2(const std::string& o, AioCompletion *c, uint64_t *handle,
-	       librados::WatchCtx2 *ctx, uint32_t timeout);
+    int watch2(const std::string& o, uint64_t* handle, librados::WatchCtx2* ctx);
+    int watch3(const std::string& o, uint64_t* handle, librados::WatchCtx2* ctx, uint32_t timeout);
+    int aio_watch(const std::string& o, AioCompletion* c, uint64_t* handle, librados::WatchCtx2* ctx);
+    int aio_watch2(const std::string& o, AioCompletion* c, uint64_t* handle, librados::WatchCtx2* ctx,
+                   uint32_t timeout);
     int unwatch2(uint64_t handle);
-    int aio_unwatch(uint64_t handle, AioCompletion *c);
+    int aio_unwatch(uint64_t handle, AioCompletion* c);
     /**
      * Send a notify event to watchers
      *
@@ -1233,31 +1144,30 @@ inline namespace v14_2_0 {
      *
      *
      */
-    int notify2(const std::string& o,   ///< object
-		bufferlist& bl,         ///< optional broadcast payload
-		uint64_t timeout_ms,    ///< timeout (in ms)
-		bufferlist *pbl);       ///< reply buffer
+    int notify2(const std::string& o,      ///< object
+                bufferlist& bl,            ///< optional broadcast payload
+                uint64_t timeout_ms,       ///< timeout (in ms)
+                bufferlist* pbl);          ///< reply buffer
     int aio_notify(const std::string& o,   ///< object
-                   AioCompletion *c,       ///< completion when notify completes
+                   AioCompletion* c,       ///< completion when notify completes
                    bufferlist& bl,         ///< optional broadcast payload
                    uint64_t timeout_ms,    ///< timeout (in ms)
-                   bufferlist *pbl);       ///< reply buffer
-   /*
-    * Decode a notify response into acks and timeout vectors.
-    */
-    void decode_notify_response(bufferlist &bl,
-                                std::vector<librados::notify_ack_t> *acks,
-                                std::vector<librados::notify_timeout_t> *timeouts);
+                   bufferlist* pbl);       ///< reply buffer
+                                           /*
+                                            * Decode a notify response into acks and timeout vectors.
+                                            */
+    void decode_notify_response(bufferlist& bl, std::vector<librados::notify_ack_t>* acks,
+                                std::vector<librados::notify_timeout_t>* timeouts);
 
-    int list_watchers(const std::string& o, std::list<obj_watch_t> *out_watchers);
-    int list_snaps(const std::string& o, snap_set_t *out_snaps);
+    int list_watchers(const std::string& o, std::list<obj_watch_t>* out_watchers);
+    int list_snaps(const std::string& o, snap_set_t* out_snaps);
     void set_notify_timeout(uint32_t timeout);
 
     /// acknowledge a notify we received.
-    void notify_ack(const std::string& o, ///< watched object
-		    uint64_t notify_id,   ///< notify id
-		    uint64_t cookie,      ///< our watch handle
-		    bufferlist& bl);      ///< optional reply payload
+    void notify_ack(const std::string& o,   ///< watched object
+                    uint64_t notify_id,     ///< notify id
+                    uint64_t cookie,        ///< our watch handle
+                    bufferlist& bl);        ///< optional reply payload
 
     /***
      * check on watch validity
@@ -1276,12 +1186,10 @@ inline namespace v14_2_0 {
     int watch_check(uint64_t cookie);
 
     // old, deprecated versions
-    int watch(const std::string& o, uint64_t ver, uint64_t *cookie,
-	      librados::WatchCtx *ctx) __attribute__ ((deprecated));
-    int notify(const std::string& o, uint64_t ver, bufferlist& bl)
-      __attribute__ ((deprecated));
-    int unwatch(const std::string& o, uint64_t cookie)
-      __attribute__ ((deprecated));
+    int watch(const std::string& o, uint64_t ver, uint64_t* cookie, librados::WatchCtx* ctx)
+        __attribute__((deprecated));
+    int notify(const std::string& o, uint64_t ver, bufferlist& bl) __attribute__((deprecated));
+    int unwatch(const std::string& o, uint64_t cookie) __attribute__((deprecated));
 
     /**
      * Set allocation hint for an object
@@ -1295,13 +1203,9 @@ inline namespace v14_2_0 {
      * @param expected_write_size expected size of writes to the object, in bytes
      * @returns 0 on success, negative error code on failure
      */
-    int set_alloc_hint(const std::string& o,
-                       uint64_t expected_object_size,
-                       uint64_t expected_write_size);
-    int set_alloc_hint2(const std::string& o,
-			uint64_t expected_object_size,
-			uint64_t expected_write_size,
-			uint32_t flags);
+    int set_alloc_hint(const std::string& o, uint64_t expected_object_size, uint64_t expected_write_size);
+    int set_alloc_hint2(const std::string& o, uint64_t expected_object_size, uint64_t expected_write_size,
+                        uint32_t flags);
 
     // assert version for next sync operations
     void set_assert_version(uint64_t ver);
@@ -1324,131 +1228,109 @@ inline namespace v14_2_0 {
     int64_t get_id();
 
     // deprecated versions
-    uint32_t get_object_hash_position(const std::string& oid)
-      __attribute__ ((deprecated));
-    uint32_t get_object_pg_hash_position(const std::string& oid)
-      __attribute__ ((deprecated));
+    uint32_t get_object_hash_position(const std::string& oid) __attribute__((deprecated));
+    uint32_t get_object_pg_hash_position(const std::string& oid) __attribute__((deprecated));
 
-    int get_object_hash_position2(const std::string& oid, uint32_t *hash_position);
-    int get_object_pg_hash_position2(const std::string& oid, uint32_t *pg_hash_position);
+    int get_object_hash_position2(const std::string& oid, uint32_t* hash_position);
+    int get_object_pg_hash_position2(const std::string& oid, uint32_t* pg_hash_position);
 
     config_t cct();
 
-    void set_osdmap_full_try()
-      __attribute__ ((deprecated));
-    void unset_osdmap_full_try()
-      __attribute__ ((deprecated));
+    void set_osdmap_full_try() __attribute__((deprecated));
+    void unset_osdmap_full_try() __attribute__((deprecated));
 
     bool get_pool_full_try();
     void set_pool_full_try();
     void unset_pool_full_try();
 
     int application_enable(const std::string& app_name, bool force);
-    int application_enable_async(const std::string& app_name,
-                                 bool force, PoolAsyncCompletion *c);
-    int application_list(std::set<std::string> *app_names);
-    int application_metadata_get(const std::string& app_name,
-                                 const std::string &key,
-                                 std::string *value);
-    int application_metadata_set(const std::string& app_name,
-                                 const std::string &key,
-                                 const std::string& value);
-    int application_metadata_remove(const std::string& app_name,
-                                    const std::string &key);
-    int application_metadata_list(const std::string& app_name,
-                                  std::map<std::string, std::string> *values);
+    int application_enable_async(const std::string& app_name, bool force, PoolAsyncCompletion* c);
+    int application_list(std::set<std::string>* app_names);
+    int application_metadata_get(const std::string& app_name, const std::string& key, std::string* value);
+    int application_metadata_set(const std::string& app_name, const std::string& key, const std::string& value);
+    int application_metadata_remove(const std::string& app_name, const std::string& key);
+    int application_metadata_list(const std::string& app_name, std::map<std::string, std::string>* values);
 
-  private:
+private:
     /* You can only get IoCtx instances from Rados */
-    IoCtx(IoCtxImpl *io_ctx_impl_);
+    IoCtx(IoCtxImpl* io_ctx_impl_);
 
-    friend class Rados; // Only Rados can use our private constructor to create IoCtxes.
-    friend class libradosstriper::RadosStriper; // Striper needs to see our IoCtxImpl
-    friend class ObjectWriteOperation;  // copy_from needs to see our IoCtxImpl
-    friend class ObjectReadOperation;  // set_chunk needs to see our IoCtxImpl
+    friend class Rados;                           // Only Rados can use our private constructor to create IoCtxes.
+    friend class libradosstriper::RadosStriper;   // Striper needs to see our IoCtxImpl
+    friend class ObjectWriteOperation;            // copy_from needs to see our IoCtxImpl
+    friend class ObjectReadOperation;             // set_chunk needs to see our IoCtxImpl
 
-    IoCtxImpl *io_ctx_impl;
-  };
+    IoCtxImpl* io_ctx_impl;
+};
 
-  struct CEPH_RADOS_API PlacementGroup {
+struct CEPH_RADOS_API PlacementGroup
+{
     PlacementGroup();
     PlacementGroup(const PlacementGroup&);
     ~PlacementGroup();
     bool parse(const char*);
     std::unique_ptr<PlacementGroupImpl> impl;
-  };
+};
 
-  CEPH_RADOS_API std::ostream& operator<<(std::ostream&, const PlacementGroup&);
+CEPH_RADOS_API std::ostream& operator<<(std::ostream&, const PlacementGroup&);
 
-  class CEPH_RADOS_API Rados
-  {
-  public:
-    static void version(int *major, int *minor, int *extra);
+class CEPH_RADOS_API Rados
+{
+public:
+    static void version(int* major, int* minor, int* extra);
 
     Rados();
     explicit Rados(IoCtx& ioctx);
     ~Rados();
-    static void from_rados_t(rados_t cluster, Rados &rados);
+    static void from_rados_t(rados_t cluster, Rados& rados);
 
-    int init(const char * const id);
-    int init2(const char * const name, const char * const clustername,
-	      uint64_t flags);
+    int init(const char* const id);
+    int init2(const char* const name, const char* const clustername, uint64_t flags);
     int init_with_context(config_t cct_);
     config_t cct();
     int connect();
     void shutdown();
     int watch_flush();
     int aio_watch_flush(AioCompletion*);
-    int conf_read_file(const char * const path) const;
-    int conf_parse_argv(int argc, const char ** argv) const;
-    int conf_parse_argv_remainder(int argc, const char ** argv,
-				  const char ** remargv) const;
-    int conf_parse_env(const char *env) const;
-    int conf_set(const char *option, const char *value);
-    int conf_get(const char *option, std::string &val);
+    int conf_read_file(const char* const path) const;
+    int conf_parse_argv(int argc, const char** argv) const;
+    int conf_parse_argv_remainder(int argc, const char** argv, const char** remargv) const;
+    int conf_parse_env(const char* env) const;
+    int conf_set(const char* option, const char* value);
+    int conf_get(const char* option, std::string& val);
 
-    int service_daemon_register(
-      const std::string& service,  ///< service name (e.g., 'rgw')
-      const std::string& name,     ///< daemon name (e.g., 'gwfoo')
-      const std::map<std::string,std::string>& metadata); ///< static metadata about daemon
-    int service_daemon_update_status(
-      std::map<std::string,std::string>&& status);
+    int service_daemon_register(const std::string& service,                            ///< service name (e.g., 'rgw')
+                                const std::string& name,                               ///< daemon name (e.g., 'gwfoo')
+                                const std::map<std::string, std::string>& metadata);   ///< static metadata about daemon
+    int service_daemon_update_status(std::map<std::string, std::string>&& status);
 
-    int pool_create(const char *name);
-    int pool_create(const char *name, uint64_t auid)
-      __attribute__ ((deprecated));
-    int pool_create(const char *name, uint64_t auid, uint8_t crush_rule)
-      __attribute__ ((deprecated));
-    int pool_create_with_rule(const char *name, uint8_t crush_rule);
-    int pool_create_async(const char *name, PoolAsyncCompletion *c);
-    int pool_create_async(const char *name, uint64_t auid, PoolAsyncCompletion *c)
-      __attribute__ ((deprecated));
-    int pool_create_async(const char *name, uint64_t auid, uint8_t crush_rule, PoolAsyncCompletion *c)
-      __attribute__ ((deprecated));
-    int pool_create_with_rule_async(const char *name, uint8_t crush_rule, PoolAsyncCompletion *c);
+    int pool_create(const char* name);
+    int pool_create(const char* name, uint64_t auid) __attribute__((deprecated));
+    int pool_create(const char* name, uint64_t auid, uint8_t crush_rule) __attribute__((deprecated));
+    int pool_create_with_rule(const char* name, uint8_t crush_rule);
+    int pool_create_async(const char* name, PoolAsyncCompletion* c);
+    int pool_create_async(const char* name, uint64_t auid, PoolAsyncCompletion* c) __attribute__((deprecated));
+    int pool_create_async(const char* name, uint64_t auid, uint8_t crush_rule, PoolAsyncCompletion* c)
+        __attribute__((deprecated));
+    int pool_create_with_rule_async(const char* name, uint8_t crush_rule, PoolAsyncCompletion* c);
     int pool_get_base_tier(int64_t pool, int64_t* base_tier);
-    int pool_delete(const char *name);
-    int pool_delete_async(const char *name, PoolAsyncCompletion *c);
-    int64_t pool_lookup(const char *name);
-    int pool_reverse_lookup(int64_t id, std::string *name);
+    int pool_delete(const char* name);
+    int pool_delete_async(const char* name, PoolAsyncCompletion* c);
+    int64_t pool_lookup(const char* name);
+    int pool_reverse_lookup(int64_t id, std::string* name);
 
     uint64_t get_instance_id();
 
     int get_min_compatible_osd(int8_t* require_osd_release);
-    int get_min_compatible_client(int8_t* min_compat_client,
-                                  int8_t* require_min_compat_client);
+    int get_min_compatible_client(int8_t* min_compat_client, int8_t* require_min_compat_client);
 
-    int mon_command(std::string cmd, const bufferlist& inbl,
-		    bufferlist *outbl, std::string *outs);
-    int mgr_command(std::string cmd, const bufferlist& inbl,
-		    bufferlist *outbl, std::string *outs);
-    int osd_command(int osdid, std::string cmd, const bufferlist& inbl,
-                    bufferlist *outbl, std::string *outs);
-    int pg_command(const char *pgstr, std::string cmd, const bufferlist& inbl,
-                   bufferlist *outbl, std::string *outs);
+    int mon_command(std::string cmd, const bufferlist& inbl, bufferlist* outbl, std::string* outs);
+    int mgr_command(std::string cmd, const bufferlist& inbl, bufferlist* outbl, std::string* outs);
+    int osd_command(int osdid, std::string cmd, const bufferlist& inbl, bufferlist* outbl, std::string* outs);
+    int pg_command(const char* pgstr, std::string cmd, const bufferlist& inbl, bufferlist* outbl, std::string* outs);
 
-    int ioctx_create(const char *name, IoCtx &pioctx);
-    int ioctx_create2(int64_t pool_id, IoCtx &pioctx);
+    int ioctx_create(const char* name, IoCtx& pioctx);
+    int ioctx_create2(int64_t pool_id, IoCtx& pioctx);
 
     // Features useful for test cases
     void test_blocklist_self(bool set);
@@ -1456,20 +1338,16 @@ inline namespace v14_2_0 {
     /* pool info */
     int pool_list(std::list<std::string>& v);
     int pool_list2(std::list<std::pair<int64_t, std::string> >& v);
-    int get_pool_stats(std::list<std::string>& v,
-		       stats_map& result);
+    int get_pool_stats(std::list<std::string>& v, stats_map& result);
     /// deprecated; use simpler form.  categories no longer supported.
-    int get_pool_stats(std::list<std::string>& v,
-		       std::map<std::string, stats_map>& stats);
+    int get_pool_stats(std::list<std::string>& v, std::map<std::string, stats_map>& stats);
     /// deprecated; categories no longer supported
-    int get_pool_stats(std::list<std::string>& v,
-                       std::string& category,
-		       std::map<std::string, stats_map>& stats);
+    int get_pool_stats(std::list<std::string>& v, std::string& category, std::map<std::string, stats_map>& stats);
     /// check if pool has selfmanaged snaps
     bool get_pool_is_selfmanaged_snaps_mode(const std::string& poolname);
 
     int cluster_stat(cluster_stat_t& result);
-    int cluster_fsid(std::string *fsid);
+    int cluster_fsid(std::string* fsid);
 
     /**
      * List inconsistent placement groups in the given pool
@@ -1477,8 +1355,7 @@ inline namespace v14_2_0 {
      * @param pool_id the pool id
      * @param pgs [out] the inconsistent PGs
      */
-    int get_inconsistent_pgs(int64_t pool_id,
-                             std::vector<PlacementGroup>* pgs);
+    int get_inconsistent_pgs(int64_t pool_id, std::vector<PlacementGroup>* pgs);
     /**
      * List the inconsistent objects found in a given PG by last scrub
      *
@@ -1491,12 +1368,8 @@ inline namespace v14_2_0 {
      * @returns if a non-zero @c interval is specified, will return -EAGAIN i
      *          the current interval begin epoch is different.
      */
-    int get_inconsistent_objects(const PlacementGroup& pg,
-                                 const object_id_t &start_after,
-                                 unsigned max_return,
-                                 AioCompletion *c,
-                                 std::vector<inconsistent_obj_t>* objects,
-                                 uint32_t* interval);
+    int get_inconsistent_objects(const PlacementGroup& pg, const object_id_t& start_after, unsigned max_return,
+                                 AioCompletion* c, std::vector<inconsistent_obj_t>* objects, uint32_t* interval);
     /**
      * List the inconsistent snapsets found in a given PG by last scrub
      *
@@ -1509,18 +1382,13 @@ inline namespace v14_2_0 {
      * @returns if a non-zero @c interval is specified, will return -EAGAIN i
      *          the current interval begin epoch is different.
      */
-    int get_inconsistent_snapsets(const PlacementGroup& pg,
-                                  const object_id_t &start_after,
-                                  unsigned max_return,
-                                  AioCompletion *c,
-                                  std::vector<inconsistent_snapset_t>* snapset,
-                                  uint32_t* interval);
+    int get_inconsistent_snapsets(const PlacementGroup& pg, const object_id_t& start_after, unsigned max_return,
+                                  AioCompletion* c, std::vector<inconsistent_snapset_t>* snapset, uint32_t* interval);
 
     /// get/wait for the most recent osdmap
     int wait_for_latest_osdmap();
 
-    int blocklist_add(const std::string& client_address,
-                      uint32_t expire_seconds);
+    int blocklist_add(const std::string& client_address, uint32_t expire_seconds);
 
     std::string get_addrs() const;
 
@@ -1530,27 +1398,26 @@ inline namespace v14_2_0 {
      * It is up to the caller to release the completion handler, even if the pool_create_async()
      * and/or pool_delete_async() fails and does not send the async request
      */
-    static PoolAsyncCompletion *pool_async_create_completion();
+    static PoolAsyncCompletion* pool_async_create_completion();
 
-   // -- aio --
-    static AioCompletion *aio_create_completion();
-    static AioCompletion *aio_create_completion(void *cb_arg, callback_t cb_complete,
-						callback_t cb_safe)
-      __attribute__ ((deprecated));
-    static AioCompletion *aio_create_completion(void *cb_arg, callback_t cb_complete);
+    // -- aio --
+    static AioCompletion* aio_create_completion();
+    static AioCompletion* aio_create_completion(void* cb_arg, callback_t cb_complete, callback_t cb_safe)
+        __attribute__((deprecated));
+    static AioCompletion* aio_create_completion(void* cb_arg, callback_t cb_complete);
 
-    friend std::ostream& operator<<(std::ostream &oss, const Rados& r);
-  private:
+    friend std::ostream& operator<<(std::ostream& oss, const Rados& r);
+
+private:
     friend class neorados::RADOS;
 
     // We don't allow assignment or copying
     Rados(const Rados& rhs);
     const Rados& operator=(const Rados& rhs);
-    RadosClient *client;
-  };
+    RadosClient* client;
+};
 
-} // namespace v14_2_0
-} // namespace librados
+}   // namespace v14_2_0
+}   // namespace librados
 
 #endif
-

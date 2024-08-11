@@ -13,7 +13,7 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -23,7 +23,7 @@ function run() {
 function TEST_failure_log() {
     local dir=$1
 
-    cat > $dir/test_failure.log << EOF
+    cat >$dir/test_failure.log <<EOF
 This is a fake log file
 *
 *

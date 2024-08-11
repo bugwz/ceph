@@ -16,11 +16,11 @@ set -ex
 
 set -e
 expect_failure() {
-	if "$@"; then return 1; else return 0; fi
+    if "$@"; then return 1; else return 0; fi
 }
 
 ignore_failure() {
-	if "$@"; then return 0; else return 0; fi
+    if "$@"; then return 0; else return 0; fi
 }
 
 ceph fs subvolume create cephfs sub_0
@@ -39,13 +39,12 @@ ceph osd set-nearfull-ratio 0.16
 ceph osd set-backfillfull-ratio 0.18
 
 timeout=30
-while [ $timeout -gt 0 ]
-do
-  health=$(ceph health detail)
-  [[ $health = *"OSD_FULL"* ]] && echo "OSD is full" && break
-  echo "Wating for osd to be full: $timeout"
-  sleep 1
-  let "timeout-=1"
+while [ $timeout -gt 0 ]; do
+    health=$(ceph health detail)
+    [[ $health = *"OSD_FULL"* ]] && echo "OSD is full" && break
+    echo "Wating for osd to be full: $timeout"
+    sleep 1
+    let "timeout-=1"
 done
 
 #Take snapshot

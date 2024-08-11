@@ -6,20 +6,18 @@
 namespace crimson::common {
 PerfCountersCollection::PerfCountersCollection()
 {
-  perf_collection = std::make_unique<PerfCountersCollectionImpl>();
+    perf_collection = std::make_unique<PerfCountersCollectionImpl>();
 }
 PerfCountersCollection::~PerfCountersCollection()
 {
-  perf_collection->clear();
+    perf_collection->clear();
 }
 
-PerfCountersCollectionImpl* PerfCountersCollection:: get_perf_collection()
+PerfCountersCollectionImpl* PerfCountersCollection::get_perf_collection()
 {
-  return perf_collection.get();
+    return perf_collection.get();
 }
 
 PerfCountersCollection::ShardedPerfCountersCollection PerfCountersCollection::sharded_perf_coll;
 
-}
-
-
+}   // namespace crimson::common

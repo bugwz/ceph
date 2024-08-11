@@ -14,31 +14,34 @@
  *
  */
 
+#include "ErasureCodePluginClay.h"
+
+#include "ErasureCodeClay.h"
 #include "ceph_ver.h"
 #include "common/debug.h"
-#include "ErasureCodePluginClay.h"
-#include "ErasureCodeClay.h"
 
 #define dout_subsys ceph_subsys_osd
 #undef dout_prefix
 #define dout_prefix _prefix(_dout)
 
-int ErasureCodePluginClay::factory(const std::string &directory,
-				   ceph::ErasureCodeProfile &profile,
-				   ceph::ErasureCodeInterfaceRef *erasure_code,
-				   std::ostream *ss) {
-  auto interface = std::make_unique<ErasureCodeClay>(directory);
-  if (int r = interface->init(profile, ss); r) {
-    return r;
-  }
-  *erasure_code = ceph::ErasureCodeInterfaceRef(interface.release());
-  return 0;
+int ErasureCodePluginClay::factory(const std::string& directory, ceph::ErasureCodeProfile& profile,
+                                   ceph::ErasureCodeInterfaceRef* erasure_code, std::ostream* ss)
+{
+    auto interface = std::make_unique<ErasureCodeClay>(directory);
+    if (int r = interface->init(profile, ss); r) {
+        return r;
+    }
+    *erasure_code = ceph::ErasureCodeInterfaceRef(interface.release());
+    return 0;
 };
 
-const char *__erasure_code_version() { return CEPH_GIT_NICE_VER; }
-
-int __erasure_code_init(char *plugin_name, char *directory)
+const char* __erasure_code_version()
 {
-  auto& instance = ceph::ErasureCodePluginRegistry::instance();
-  return instance.add(plugin_name, new ErasureCodePluginClay());
+    return CEPH_GIT_NICE_VER;
+}
+
+int __erasure_code_init(char* plugin_name, char* directory)
+{
+    auto& instance = ceph::ErasureCodePluginRegistry::instance();
+    return instance.add(plugin_name, new ErasureCodePluginClay());
 }

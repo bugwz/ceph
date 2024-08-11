@@ -20,52 +20,41 @@
 
 pthread_mutex_t g_system_test_settings_lock = PTHREAD_MUTEX_INITIALIZER;
 
-SysTestSettings& SysTestSettings::
-inst()
+SysTestSettings& SysTestSettings::inst()
 {
-  pthread_mutex_lock(&g_system_test_settings_lock);
-  if (!m_inst)
-    m_inst = new SysTestSettings();
-  pthread_mutex_unlock(&g_system_test_settings_lock);
-  return *m_inst;
+    pthread_mutex_lock(&g_system_test_settings_lock);
+    if (!m_inst) m_inst = new SysTestSettings();
+    pthread_mutex_unlock(&g_system_test_settings_lock);
+    return *m_inst;
 }
 
-bool SysTestSettings::
-use_threads() const
+bool SysTestSettings::use_threads() const
 {
-  #ifdef _WIN32
-  // We can't use multiple processes on Windows for the time being.
-  // We'd need a mechanism for spawning those procecesses and also handle
-  // the inter-process communication.
-  return true;
-  #else
-  return m_use_threads;
-  #endif
+#ifdef _WIN32
+    // We can't use multiple processes on Windows for the time being.
+    // We'd need a mechanism for spawning those procecesses and also handle
+    // the inter-process communication.
+    return true;
+#else
+    return m_use_threads;
+#endif
 }
 
-std::string SysTestSettings::
-get_log_name(const std::string &suffix) const
+std::string SysTestSettings::get_log_name(const std::string& suffix) const
 {
-  if (m_log_file_base.empty())
-    return "";
-  std::ostringstream oss;
-  oss << m_log_file_base << "." << suffix;
-  return oss.str();
+    if (m_log_file_base.empty()) return "";
+    std::ostringstream oss;
+    oss << m_log_file_base << "." << suffix;
+    return oss.str();
 }
 
-SysTestSettings* SysTestSettings::
-m_inst = NULL;
+SysTestSettings* SysTestSettings::m_inst = NULL;
 
-SysTestSettings::
-SysTestSettings()
+SysTestSettings::SysTestSettings()
 {
-  m_use_threads = !!getenv("USE_THREADS");
-  const char *lfb = getenv("LOG_FILE_BASE");
-  if (lfb)
-    m_log_file_base.assign(lfb);
+    m_use_threads = !!getenv("USE_THREADS");
+    const char* lfb = getenv("LOG_FILE_BASE");
+    if (lfb) m_log_file_base.assign(lfb);
 }
 
-SysTestSettings::
-~SysTestSettings()
-{
-}
+SysTestSettings::~SysTestSettings() {}

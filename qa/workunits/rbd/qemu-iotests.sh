@@ -10,7 +10,6 @@ testlist='001 002 003 004 005 008 009 010 011 021 025 032 033'
 git clone https://github.com/qemu/qemu.git
 cd qemu
 
-
 if grep -iqE '(bionic|focal)' /etc/os-release; then
     # Bionic requires a matching test harness
     git checkout v2.11.0
@@ -25,8 +24,7 @@ fi
 cd tests/qemu-iotests
 mkdir bin
 # qemu-iotests expects a binary called just 'qemu' to be available
-if [ -x '/usr/bin/qemu-system-x86_64' ]
-then
+if [ -x '/usr/bin/qemu-system-x86_64' ]; then
     QEMU='/usr/bin/qemu-system-x86_64'
 
     # Bionic (v2.11.0) tests expect all tools in current directory

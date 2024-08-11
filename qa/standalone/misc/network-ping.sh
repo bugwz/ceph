@@ -14,7 +14,7 @@ function run() {
     CEPH_ARGS+="--debug_heartbeat_testing_span=5 "
     CEPH_ARGS+="--osd_heartbeat_interval=1 "
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -75,7 +75,6 @@ function TEST_network_ping_test1() {
     CEPH_ARGS='' ceph daemon $(get_asok_path mgr.x) dump_osd_network 0 | tee $dir/json
     test "$(cat $dir/json | jq '.entries | length')" = "12" || return 1
     test "$(cat $dir/json | jq '.threshold')" = "0" || return 1
-
 
     # Wait another 10 cycles to get "15 minute interval"
     sleep 50

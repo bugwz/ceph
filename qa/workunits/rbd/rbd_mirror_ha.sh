@@ -9,37 +9,34 @@ RBD_MIRROR_INSTANCES=${RBD_MIRROR_INSTANCES:-7}
 
 setup
 
-is_leader()
-{
+is_leader() {
     local instance=$1
     local pool=$2
 
     test -n "${pool}" || pool=${POOL}
 
     admin_daemon "${CLUSTER1}:${instance}" \
-		 rbd mirror status ${pool} ${CLUSTER2}${PEER_CLUSTER_SUFFIX} |
-	grep '"leader": true'
+        rbd mirror status ${pool} ${CLUSTER2}${PEER_CLUSTER_SUFFIX} \
+        | grep '"leader": true'
 }
 
-wait_for_leader()
-{
+wait_for_leader() {
     local s instance
 
     for s in 1 1 2 4 4 4 4 4 8 8 8 8 16 16 32 64; do
-	sleep $s
-	for instance in `seq 0 ${LAST_MIRROR_INSTANCE}`; do
-	    is_leader ${instance} || continue
-	    LEADER=${instance}
-	    return 0
-	done
+        sleep $s
+        for instance in $(seq 0 ${LAST_MIRROR_INSTANCE}); do
+            is_leader ${instance} || continue
+            LEADER=${instance}
+            return 0
+        done
     done
 
     LEADER=
     return 1
 }
 
-release_leader()
-{
+release_leader() {
     local pool=$1
     local cmd="rbd mirror leader release"
 
@@ -48,36 +45,34 @@ release_leader()
     admin_daemon "${CLUSTER1}:${LEADER}" ${cmd}
 }
 
-wait_for_leader_released()
-{
+wait_for_leader_released() {
     local i
 
     test -n "${LEADER}"
-    for i in `seq 10`; do
-	is_leader ${LEADER} || return 0
-	sleep 1
+    for i in $(seq 10); do
+        is_leader ${LEADER} || return 0
+        sleep 1
     done
 
     return 1
 }
 
-test_replay()
-{
+test_replay() {
     local image
 
     for image; do
-	wait_for_image_replay_started ${CLUSTER1}:${LEADER} ${POOL} ${image}
-	write_image ${CLUSTER2} ${POOL} ${image} 100
-	wait_for_replay_complete ${CLUSTER1}:${LEADER} ${CLUSTER2} ${POOL} \
-				 ${image}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying' \
-                                    'primary_position' \
-                                    "${MIRROR_USER_ID_PREFIX}${LEADER} on $(hostname -s)"
-	if [ -z "${RBD_MIRROR_USE_RBD_MIRROR}" ]; then
-	    wait_for_status_in_pool_dir ${CLUSTER2} ${POOL} ${image} \
-					'down+unknown'
-	fi
-	compare_images ${POOL} ${image}
+        wait_for_image_replay_started ${CLUSTER1}:${LEADER} ${POOL} ${image}
+        write_image ${CLUSTER2} ${POOL} ${image} 100
+        wait_for_replay_complete ${CLUSTER1}:${LEADER} ${CLUSTER2} ${POOL} \
+            ${image}
+        wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying' \
+            'primary_position' \
+            "${MIRROR_USER_ID_PREFIX}${LEADER} on $(hostname -s)"
+        if [ -z "${RBD_MIRROR_USE_RBD_MIRROR}" ]; then
+            wait_for_status_in_pool_dir ${CLUSTER2} ${POOL} ${image} \
+                'down+unknown'
+        fi
+        compare_images ${POOL} ${image}
     done
 }
 

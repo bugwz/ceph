@@ -5,7 +5,7 @@
  *
  * Copyright (c) 2018 SUSE LLC.
  * Author: Daniel Oliveira <doliveira@suse.com>
- * 
+ *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License version 2.1, as published by the Free Software
@@ -16,22 +16,19 @@
 #ifndef KRB_SESSION_HANDLER_HPP
 #define KRB_SESSION_HANDLER_HPP
 
-#include "auth/AuthSessionHandler.h"
-#include "auth/Auth.h"
-
 #include "KrbProtocol.hpp"
-#include <errno.h>
-#include <sstream>
-
+#include "auth/Auth.h"
+#include "auth/AuthSessionHandler.h"
 #include "common/config.h"
 #include "include/ceph_features.h"
 #include "msg/Message.h"
- 
+
+#include <errno.h>
+#include <sstream>
+
 #define dout_subsys ceph_subsys_auth
 
-struct KrbSessionHandler : DummyAuthSessionHandler {
-};
+struct KrbSessionHandler : DummyAuthSessionHandler
+{};
 
-#endif    //-- KRB_SESSION_HANDLER_HPP
-
-
+#endif   //-- KRB_SESSION_HANDLER_HPP

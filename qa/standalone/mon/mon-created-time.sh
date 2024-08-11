@@ -24,7 +24,7 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -38,11 +38,11 @@ function TEST_mon_created_time() {
 
     ceph mon dump || return 1
 
-    if test "$(ceph mon dump 2>/dev/null | sed -n '/created/p' | awk '{print $NF}')"x = ""x ; then
+    if test "$(ceph mon dump 2>/dev/null | sed -n '/created/p' | awk '{print $NF}')"x = ""x; then
         return 1
     fi
 
-    if test "$(ceph mon dump 2>/dev/null | sed -n '/created/p' | awk '{print $NF}')"x = "0.000000"x ; then
+    if test "$(ceph mon dump 2>/dev/null | sed -n '/created/p' | awk '{print $NF}')"x = "0.000000"x; then
         return 1
     fi
 }

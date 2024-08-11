@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-ed /usr/share/ceph-ansible/group_vars/osds << EOF
+ed /usr/share/ceph-ansible/group_vars/osds <<EOF
 $
 /^devices:
 .+1

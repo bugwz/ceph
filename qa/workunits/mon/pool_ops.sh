@@ -2,45 +2,42 @@
 
 set -ex
 
-function expect_false()
-{
-	set -x
-	if "$@"; then return 1; else return 0; fi
+function expect_false() {
+    set -x
+    if "$@"; then return 1; else return 0; fi
 }
 
-function get_config_value_or_die()
-{
-  local pool_name config_opt raw val
+function get_config_value_or_die() {
+    local pool_name config_opt raw val
 
-  pool_name=$1
-  config_opt=$2
+    pool_name=$1
+    config_opt=$2
 
-  raw="`$SUDO ceph osd pool get $pool_name $config_opt 2>/dev/null`"
-  if [[ $? -ne 0 ]]; then
-    echo "error obtaining config opt '$config_opt' from '$pool_name': $raw"
-    exit 1
-  fi
+    raw="$($SUDO ceph osd pool get $pool_name $config_opt 2>/dev/null)"
+    if [[ $? -ne 0 ]]; then
+        echo "error obtaining config opt '$config_opt' from '$pool_name': $raw"
+        exit 1
+    fi
 
-  raw=`echo $raw | sed -e 's/[{} "]//g'`
-  val=`echo $raw | cut -f2 -d:`
+    raw=$(echo $raw | sed -e 's/[{} "]//g')
+    val=$(echo $raw | cut -f2 -d:)
 
-  echo "$val"
-  return 0
+    echo "$val"
+    return 0
 }
 
-function expect_config_value()
-{
-  local pool_name config_opt expected_val val
-  pool_name=$1
-  config_opt=$2
-  expected_val=$3
+function expect_config_value() {
+    local pool_name config_opt expected_val val
+    pool_name=$1
+    config_opt=$2
+    expected_val=$3
 
-  val=$(get_config_value_or_die $pool_name $config_opt)
+    val=$(get_config_value_or_die $pool_name $config_opt)
 
-  if [[ "$val" != "$expected_val" ]]; then
-    echo "expected '$expected_val', got '$val'"
-    exit 1
-  fi
+    if [[ "$val" != "$expected_val" ]]; then
+        echo "expected '$expected_val', got '$val'"
+        exit 1
+    fi
 }
 
 # pg_num min/max
@@ -110,5 +107,3 @@ ceph osd pool delete fooo fooo --yes-i-really-really-mean-it
 ceph osd pool delete fuggg fuggg --yes-i-really-really-mean-it
 
 echo OK
-
-

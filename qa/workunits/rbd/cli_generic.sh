@@ -20,8 +20,7 @@ if ceph osd dump | grep ^pool | grep "'rbd'" | grep tier; then
 fi
 
 remove_images() {
-    for img in $IMGS
-    do
+    for img in $IMGS; do
         (rbd snap purge $img || true) >/dev/null 2>&1
         (rbd rm $img || true) >/dev/null 2>&1
     done
@@ -46,7 +45,7 @@ test_others() {
     rbd resize testimg1 --size=256 --allow-shrink
     rbd export testimg1 /tmp/img2
     rbd snap create testimg1 --snap=snap1
-    rbd resize testimg1 --size=128 && exit 1 || true   # shrink should fail
+    rbd resize testimg1 --size=128 && exit 1 || true # shrink should fail
     rbd resize testimg1 --size=128 --allow-shrink
     rbd export testimg1 /tmp/img3
 
@@ -196,21 +195,21 @@ test_ls() {
 
     # test that many images can be shown by ls
     for i in $(seq -w 00 99); do
-	rbd create image.$i -s 1
+        rbd create image.$i -s 1
     done
     rbd ls | wc -l | grep 100
     rbd ls -l | grep image | wc -l | grep 100
     for i in $(seq -w 00 99); do
-	rbd rm image.$i
+        rbd rm image.$i
     done
 
     for i in $(seq -w 00 99); do
-	rbd create image.$i --image-format 2 -s 1
+        rbd create image.$i --image-format 2 -s 1
     done
     rbd ls | wc -l | grep 100
-    rbd ls -l | grep image |  wc -l | grep 100
+    rbd ls -l | grep image | wc -l | grep 100
     for i in $(seq -w 00 99); do
-	rbd rm image.$i
+        rbd rm image.$i
     done
 }
 
@@ -218,7 +217,7 @@ test_remove() {
     echo "testing remove..."
     remove_images
 
-    rbd remove "NOT_EXIST" && exit 1 || true	# remove should fail
+    rbd remove "NOT_EXIST" && exit 1 || true # remove should fail
     rbd create --image-format 1 -s 1 test1
     rbd rm test1
     rbd ls | wc -l | grep "^0$"
@@ -239,25 +238,25 @@ test_remove() {
 
     if [ $tiered -eq 0 ]; then
         # remove with header missing
-	rbd create --image-format 2 -s 1 test2
-	HEADER=$(rados -p rbd ls | grep '^rbd_header')
-	rados -p rbd rm $HEADER
-	rbd rm test2
-	rbd ls | wc -l | grep "^0$"
+        rbd create --image-format 2 -s 1 test2
+        HEADER=$(rados -p rbd ls | grep '^rbd_header')
+        rados -p rbd rm $HEADER
+        rbd rm test2
+        rbd ls | wc -l | grep "^0$"
 
         # remove with id missing
-	rbd create --image-format 2 -s 1 test2
-	rados -p rbd rm rbd_id.test2
-	rbd rm test2
-	rbd ls | wc -l | grep "^0$"
+        rbd create --image-format 2 -s 1 test2
+        rados -p rbd rm rbd_id.test2
+        rbd rm test2
+        rbd ls | wc -l | grep "^0$"
 
         # remove with header and id missing
-	rbd create --image-format 2 -s 1 test2
-	HEADER=$(rados -p rbd ls | grep '^rbd_header')
-	rados -p rbd rm $HEADER
-	rados -p rbd rm rbd_id.test2
-	rbd rm test2
-	rbd ls | wc -l | grep "^0$"
+        rbd create --image-format 2 -s 1 test2
+        HEADER=$(rados -p rbd ls | grep '^rbd_header')
+        rados -p rbd rm $HEADER
+        rados -p rbd rm rbd_id.test2
+        rbd rm test2
+        rbd ls | wc -l | grep "^0$"
     fi
 
     # remove with rbd_children object missing (and, by extension,
@@ -295,13 +294,11 @@ test_locking() {
     rbd lock add test1 id2 --shared tag
     rbd lock list test1 | grep ' 3 '
     rbd lock list test1 | tail -n 1 | awk '{print $2, $1;}' | xargs rbd lock remove test1
-    if rbd info test1 | grep -qE "features:.*exclusive"
-    then
-      # new locking functionality requires all locks to be released
-      while [ -n "$(rbd lock list test1)" ]
-      do
-        rbd lock list test1 | tail -n 1 | awk '{print $2, $1;}' | xargs rbd lock remove test1
-      done
+    if rbd info test1 | grep -qE "features:.*exclusive"; then
+        # new locking functionality requires all locks to be released
+        while [ -n "$(rbd lock list test1)" ]; do
+            rbd lock list test1 | tail -n 1 | awk '{print $2, $1;}' | xargs rbd lock remove test1
+        done
     fi
     rbd rm test1
 }
@@ -368,8 +365,8 @@ test_pool_image_args() {
     rm -f /tmp/empty /tmp/empty@snap
     ceph osd pool delete test test --yes-i-really-really-mean-it
 
-    for f in foo test1 test10 test12 test2 test3 ; do
-	rbd rm $f
+    for f in foo test1 test10 test12 test2 test3; do
+        rbd rm $f
     done
 }
 
@@ -426,11 +423,11 @@ test_trash() {
     rbd trash ls -l | grep 'test1.*USER.*'
     rbd trash ls -l | grep -v 'protected until'
 
-    ID=`rbd trash ls | cut -d ' ' -f 1`
+    ID=$(rbd trash ls | cut -d ' ' -f 1)
     rbd trash rm $ID
 
     rbd trash mv test2
-    ID=`rbd trash ls | cut -d ' ' -f 1`
+    ID=$(rbd trash ls | cut -d ' ' -f 1)
     rbd info --image-id $ID | grep "rbd image 'test2'"
 
     rbd trash restore $ID
@@ -456,7 +453,7 @@ test_trash() {
     rbd trash ls -l | grep 'test1.*USER.*'
     rbd trash ls -l | grep -v 'protected until'
 
-    ID=`rbd trash ls | cut -d ' ' -f 1`
+    ID=$(rbd trash ls | cut -d ' ' -f 1)
     rbd snap ls --image-id $ID | grep -v 'SNAPID' | wc -l | grep 1
     rbd snap ls --image-id $ID | grep '.*snap1.*'
 
@@ -510,7 +507,7 @@ test_purge() {
     rbd trash ls | wc -l | grep 0
 
     rbd create $RBD_CREATE_ARGS --size 256 testimg1
-    rbd snap create testimg1@snap  # pin testimg1
+    rbd snap create testimg1@snap # pin testimg1
     rbd create $RBD_CREATE_ARGS --size 256 testimg2
     rbd create $RBD_CREATE_ARGS --size 256 testimg3
     rbd trash mv testimg1
@@ -527,7 +524,7 @@ test_purge() {
 
     rbd create $RBD_CREATE_ARGS --size 256 testimg1
     rbd create $RBD_CREATE_ARGS --size 256 testimg2
-    rbd snap create testimg2@snap  # pin testimg2
+    rbd snap create testimg2@snap # pin testimg2
     rbd create $RBD_CREATE_ARGS --size 256 testimg3
     rbd trash mv testimg1
     rbd trash mv testimg2
@@ -544,7 +541,7 @@ test_purge() {
     rbd create $RBD_CREATE_ARGS --size 256 testimg1
     rbd create $RBD_CREATE_ARGS --size 256 testimg2
     rbd create $RBD_CREATE_ARGS --size 256 testimg3
-    rbd snap create testimg3@snap  # pin testimg3
+    rbd snap create testimg3@snap # pin testimg3
     rbd trash mv testimg1
     rbd trash mv testimg2
     rbd trash mv testimg3
@@ -596,7 +593,7 @@ test_purge() {
     rbd clone --rbd-default-clone-format=2 testimg1@snap testimg2
     rbd snap rm testimg1@snap
     rbd create $RBD_CREATE_ARGS --size 256 testimg3
-    rbd snap create testimg3@snap  # pin testimg3
+    rbd snap create testimg3@snap # pin testimg3
     rbd snap create testimg2@snap
     rbd clone --rbd-default-clone-format=2 testimg2@snap testimg4
     rbd clone --rbd-default-clone-format=2 testimg2@snap testimg5
@@ -667,7 +664,7 @@ test_purge() {
     rbd clone --rbd-default-clone-format=2 testimg1@snap testimg2
     rbd snap rm testimg1@snap
     rbd create $RBD_CREATE_ARGS --size 256 testimg3
-    rbd snap create testimg3@snap  # pin testimg3
+    rbd snap create testimg3@snap # pin testimg3
     rbd snap create testimg2@snap
     rbd clone --rbd-default-clone-format=2 testimg2@snap testimg4
     rbd clone --rbd-default-clone-format=2 testimg2@snap testimg5
@@ -802,19 +799,16 @@ test_thick_provision() {
     rbd create $RBD_CREATE_ARGS --thick-provision -s 64M test1
     count=0
     ret=""
-    while [ $count -lt 10 ]
-    do
-        rbd du|grep test1|tr -s " "|cut -d " " -f 4-5|grep '^64 MiB' && ret=$?
-        if [ "$ret" = "0" ]
-        then
-            break;
+    while [ $count -lt 10 ]; do
+        rbd du | grep test1 | tr -s " " | cut -d " " -f 4-5 | grep '^64 MiB' && ret=$?
+        if [ "$ret" = "0" ]; then
+            break
         fi
-        count=`expr $count + 1`
+        count=$(expr $count + 1)
         sleep 2
     done
     rbd du
-    if [ "$ret" != "0" ]
-    then
+    if [ "$ret" != "0" ]; then
         exit 1
     fi
     rbd rm test1
@@ -824,19 +818,16 @@ test_thick_provision() {
     rbd create $RBD_CREATE_ARGS --thick-provision -s 4G test1
     count=0
     ret=""
-    while [ $count -lt 10 ]
-    do
-        rbd du|grep test1|tr -s " "|cut -d " " -f 4-5|grep '^4 GiB' && ret=$?
-        if [ "$ret" = "0" ]
-        then
-            break;
+    while [ $count -lt 10 ]; do
+        rbd du | grep test1 | tr -s " " | cut -d " " -f 4-5 | grep '^4 GiB' && ret=$?
+        if [ "$ret" = "0" ]; then
+            break
         fi
-        count=`expr $count + 1`
+        count=$(expr $count + 1)
         sleep 2
     done
     rbd du
-    if [ "$ret" != "0" ]
-    then
+    if [ "$ret" != "0" ]; then
         exit 1
     fi
     rbd rm test1
@@ -896,7 +887,7 @@ test_namespace() {
     rbd group rm rbd/test1/group1
 
     rbd trash move rbd/test1/image1
-    ID=`rbd trash --namespace test1 ls | cut -d ' ' -f 1`
+    ID=$(rbd trash --namespace test1 ls | cut -d ' ' -f 1)
     rbd trash rm rbd/test1/${ID}
 
     rbd remove rbd/test1/image2
@@ -911,8 +902,8 @@ test_namespace() {
 get_migration_state() {
     local image=$1
 
-    rbd --format xml status $image |
-        $XMLSTARLET sel -t -v '//status/migration/state'
+    rbd --format xml status $image \
+        | $XMLSTARLET sel -t -v '//status/migration/state'
 }
 
 test_migration() {
@@ -973,7 +964,7 @@ test_migration() {
     # testing trash
     rbd migration prepare test1
     expect_fail rbd trash mv test1
-    ID=`rbd trash ls -a | cut -d ' ' -f 1`
+    ID=$(rbd trash ls -a | cut -d ' ' -f 1)
     expect_fail rbd trash rm $ID
     expect_fail rbd trash restore $ID
     rbd migration abort test1
@@ -989,7 +980,7 @@ test_migration() {
     rbd clone test1@snap2 clone_v2 --rbd_default_clone_format=2
     rbd info clone_v1 | fgrep 'parent: rbd/test1@snap1'
     rbd info clone_v2 | fgrep 'parent: rbd/test1@snap2'
-    rbd info clone_v2 |grep 'op_features: clone-child'
+    rbd info clone_v2 | grep 'op_features: clone-child'
     test "$(rbd export clone_v1 - | md5sum)" = "${md5sum}"
     test "$(rbd export clone_v2 - | md5sum)" = "${md5sum}"
     test "$(rbd children test1@snap1)" = "rbd/clone_v1"
@@ -1147,16 +1138,16 @@ test_trash_purge_schedule() {
     rbd trash purge schedule rm -p rbd2/ns1
     test "$(rbd trash purge schedule ls -p rbd2 -R --format json)" = "[]"
 
-    for i in `seq 12`; do
-        test "$(rbd trash purge schedule status --format xml |
-            $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd' && break
+    for i in $(seq 12); do
+        test "$(rbd trash purge schedule status --format xml \
+            | $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd' && break
         sleep 10
     done
     rbd trash purge schedule status
-    test "$(rbd trash purge schedule status --format xml |
-        $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd'
-    test "$(rbd trash purge schedule status -p rbd --format xml |
-        $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd'
+    test "$(rbd trash purge schedule status --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd'
+    test "$(rbd trash purge schedule status -p rbd --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd'
 
     rbd trash purge schedule add 2d 00:17
     rbd trash purge schedule ls | grep 'every 2d starting at 00:17'
@@ -1164,37 +1155,37 @@ test_trash_purge_schedule() {
     expect_fail rbd trash purge schedule ls -p rbd2
     rbd trash purge schedule ls -p rbd2 -R | grep 'every 2d starting at 00:17'
     rbd trash purge schedule ls -p rbd2/ns1 -R | grep 'every 2d starting at 00:17'
-    test "$(rbd trash purge schedule ls -R -p rbd2/ns1 --format xml |
-        $XMLSTARLET sel -t -v '//schedules/schedule/pool')" = "-"
-    test "$(rbd trash purge schedule ls -R -p rbd2/ns1 --format xml |
-        $XMLSTARLET sel -t -v '//schedules/schedule/namespace')" = "-"
-    test "$(rbd trash purge schedule ls -R -p rbd2/ns1 --format xml |
-        $XMLSTARLET sel -t -v '//schedules/schedule/items/item/start_time')" = "00:17:00"
+    test "$(rbd trash purge schedule ls -R -p rbd2/ns1 --format xml \
+        | $XMLSTARLET sel -t -v '//schedules/schedule/pool')" = "-"
+    test "$(rbd trash purge schedule ls -R -p rbd2/ns1 --format xml \
+        | $XMLSTARLET sel -t -v '//schedules/schedule/namespace')" = "-"
+    test "$(rbd trash purge schedule ls -R -p rbd2/ns1 --format xml \
+        | $XMLSTARLET sel -t -v '//schedules/schedule/items/item/start_time')" = "00:17:00"
 
-    for i in `seq 12`; do
-        rbd trash purge schedule status --format xml |
-            $XMLSTARLET sel -t -v '//scheduled/item/pool' | grep 'rbd2' && break
+    for i in $(seq 12); do
+        rbd trash purge schedule status --format xml \
+            | $XMLSTARLET sel -t -v '//scheduled/item/pool' | grep 'rbd2' && break
         sleep 10
     done
     rbd trash purge schedule status
-    rbd trash purge schedule status --format xml |
-        $XMLSTARLET sel -t -v '//scheduled/item/pool' | grep 'rbd2'
-    echo $(rbd trash purge schedule status --format xml |
-        $XMLSTARLET sel -t -v '//scheduled/item/pool') | grep 'rbd rbd2 rbd2'
-    test "$(rbd trash purge schedule status -p rbd --format xml |
-        $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd'
-    test "$(echo $(rbd trash purge schedule status -p rbd2 --format xml |
-        $XMLSTARLET sel -t -v '//scheduled/item/pool'))" = 'rbd2 rbd2'
+    rbd trash purge schedule status --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled/item/pool' | grep 'rbd2'
+    echo $(rbd trash purge schedule status --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled/item/pool') | grep 'rbd rbd2 rbd2'
+    test "$(rbd trash purge schedule status -p rbd --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled/item/pool')" = 'rbd'
+    test "$(echo $(rbd trash purge schedule status -p rbd2 --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled/item/pool'))" = 'rbd2 rbd2'
 
-    test "$(echo $(rbd trash purge schedule ls -R --format xml |
-        $XMLSTARLET sel -t -v '//schedules/schedule/items'))" = "2d00:17:00 1d01:30:00"
+    test "$(echo $(rbd trash purge schedule ls -R --format xml \
+        | $XMLSTARLET sel -t -v '//schedules/schedule/items'))" = "2d00:17:00 1d01:30:00"
 
     rbd trash purge schedule add 1d
     rbd trash purge schedule ls | grep 'every 2d starting at 00:17'
     rbd trash purge schedule ls | grep 'every 1d'
 
-    rbd trash purge schedule ls -R --format xml |
-        $XMLSTARLET sel -t -v '//schedules/schedule/items' | grep '2d00:17'
+    rbd trash purge schedule ls -R --format xml \
+        | $XMLSTARLET sel -t -v '//schedules/schedule/items' | grep '2d00:17'
 
     rbd trash purge schedule rm 1d
     rbd trash purge schedule ls | grep 'every 2d starting at 00:17'
@@ -1210,7 +1201,7 @@ test_trash_purge_schedule() {
         rbd trash purge schedule list -p rbd2 -R | grep 'every 1m'
         rbd trash purge schedule list -p rbd2/ns1 -R | grep 'every 1m'
 
-        for i in `seq 12`; do
+        for i in $(seq 12); do
             rbd trash ls rbd2/ns1 | wc -l | grep '^1$' || break
             sleep 10
         done
@@ -1259,13 +1250,13 @@ test_mirror_snapshot_schedule() {
 
     rbd create $RBD_CREATE_ARGS -s 1 rbd2/ns1/test1
 
-    test "$(rbd mirror image status rbd2/ns1/test1 |
-        grep -c mirror.primary)" = '0'
+    test "$(rbd mirror image status rbd2/ns1/test1 \
+        | grep -c mirror.primary)" = '0'
 
     rbd mirror image enable rbd2/ns1/test1 snapshot
 
-    test "$(rbd mirror image status rbd2/ns1/test1 |
-        grep -c mirror.primary)" = '1'
+    test "$(rbd mirror image status rbd2/ns1/test1 \
+        | grep -c mirror.primary)" = '1'
 
     rbd mirror snapshot schedule add -p rbd2/ns1 --image test1 1m
     expect_fail rbd mirror snapshot schedule ls
@@ -1276,14 +1267,14 @@ test_mirror_snapshot_schedule() {
     rbd mirror snapshot schedule ls -p rbd2/ns1 -R | grep 'rbd2 *ns1 *test1 *every 1m'
     test "$(rbd mirror snapshot schedule ls -p rbd2/ns1 --image test1)" = 'every 1m'
 
-    for i in `seq 12`; do
-        test "$(rbd mirror image status rbd2/ns1/test1 |
-            grep -c mirror.primary)" -gt '1' && break
+    for i in $(seq 12); do
+        test "$(rbd mirror image status rbd2/ns1/test1 \
+            | grep -c mirror.primary)" -gt '1' && break
         sleep 10
     done
 
-    test "$(rbd mirror image status rbd2/ns1/test1 |
-        grep -c mirror.primary)" -gt '1'
+    test "$(rbd mirror image status rbd2/ns1/test1 \
+        | grep -c mirror.primary)" -gt '1'
 
     # repeat with kicked in schedule, see https://tracker.ceph.com/issues/53915
     expect_fail rbd mirror snapshot schedule ls
@@ -1295,24 +1286,24 @@ test_mirror_snapshot_schedule() {
     test "$(rbd mirror snapshot schedule ls -p rbd2/ns1 --image test1)" = 'every 1m'
 
     rbd mirror snapshot schedule status
-    test "$(rbd mirror snapshot schedule status --format xml |
-        $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
-    test "$(rbd mirror snapshot schedule status -p rbd2 --format xml |
-        $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
-    test "$(rbd mirror snapshot schedule status -p rbd2/ns1 --format xml |
-        $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
-    test "$(rbd mirror snapshot schedule status -p rbd2/ns1 --image test1 --format xml |
-        $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
+    test "$(rbd mirror snapshot schedule status --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
+    test "$(rbd mirror snapshot schedule status -p rbd2 --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
+    test "$(rbd mirror snapshot schedule status -p rbd2/ns1 --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
+    test "$(rbd mirror snapshot schedule status -p rbd2/ns1 --image test1 --format xml \
+        | $XMLSTARLET sel -t -v '//scheduled_images/image/image')" = 'rbd2/ns1/test1'
 
     rbd mirror image demote rbd2/ns1/test1
-    for i in `seq 12`; do
+    for i in $(seq 12); do
         rbd mirror snapshot schedule status | grep 'rbd2/ns1/test1' || break
         sleep 10
     done
     rbd mirror snapshot schedule status | expect_fail grep 'rbd2/ns1/test1'
 
     rbd mirror image promote rbd2/ns1/test1
-    for i in `seq 12`; do
+    for i in $(seq 12); do
         rbd mirror snapshot schedule status | grep 'rbd2/ns1/test1' && break
         sleep 10
     done
@@ -1339,7 +1330,7 @@ test_mirror_snapshot_schedule() {
     test "$(rbd mirror snapshot schedule ls -p rbd2/ns1 --image test1)" = 'every 1m'
 
     rbd rm rbd2/ns1/test1
-    for i in `seq 12`; do
+    for i in $(seq 12); do
         rbd mirror snapshot schedule status | grep 'rbd2/ns1/test1' || break
         sleep 10
     done
@@ -1378,24 +1369,24 @@ test_perf_image_iostat() {
     done
 
     # test specifying pool spec via spec syntax
-    test "$(rbd perf image iostat --format json rbd1 |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test2'
-    test "$(rbd perf image iostat --format json rbd1/ns |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test3'
-    test "$(rbd perf image iostat --format json --rbd-default-pool rbd1 /ns |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test3'
+    test "$(rbd perf image iostat --format json rbd1 \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test2'
+    test "$(rbd perf image iostat --format json rbd1/ns \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test3'
+    test "$(rbd perf image iostat --format json --rbd-default-pool rbd1 /ns \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test3'
 
     # test specifying pool spec via options
-    test "$(rbd perf image iostat --format json --pool rbd2 |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test4'
-    test "$(rbd perf image iostat --format json --pool rbd2 --namespace ns |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test5'
-    test "$(rbd perf image iostat --format json --rbd-default-pool rbd2 --namespace ns |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test5'
+    test "$(rbd perf image iostat --format json --pool rbd2 \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test4'
+    test "$(rbd perf image iostat --format json --pool rbd2 --namespace ns \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test5'
+    test "$(rbd perf image iostat --format json --rbd-default-pool rbd2 --namespace ns \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test5'
 
     # test omitting pool spec (-> GLOBAL_POOL_KEY)
-    test "$(rbd perf image iostat --format json |
-        jq -r 'map(.image) | sort | join(" ")')" = 'test1 test2 test3 test4 test5'
+    test "$(rbd perf image iostat --format json \
+        | jq -r 'map(.image) | sort | join(" ")')" = 'test1 test2 test3 test4 test5'
 
     for pid in "${BENCH_PIDS[@]}"; do
         kill $pid
@@ -1418,8 +1409,8 @@ test_mirror_pool_peer_bootstrap_create() {
     rbd pool init rbd2
     rbd mirror pool enable rbd2 pool
 
-    readarray -t MON_ADDRS < <(ceph mon dump |
-        sed -n 's/^[0-9]: \(.*\) mon\.[a-z]$/\1/p')
+    readarray -t MON_ADDRS < <(ceph mon dump \
+        | sed -n 's/^[0-9]: \(.*\) mon\.[a-z]$/\1/p')
 
     # check that all monitors make it to the token even if only one
     # valid monitor is specified
@@ -1427,17 +1418,17 @@ test_mirror_pool_peer_bootstrap_create() {
     MON_HOST="${MON_ADDRS[0]},$BAD_MON_ADDR"
     TOKEN="$(rbd mirror pool peer bootstrap create \
         --mon-host "$MON_HOST" rbd1 | base64 -d)"
-    TOKEN_FSID="$(jq -r '.fsid' <<< "$TOKEN")"
-    TOKEN_CLIENT_ID="$(jq -r '.client_id' <<< "$TOKEN")"
-    TOKEN_KEY="$(jq -r '.key' <<< "$TOKEN")"
-    TOKEN_MON_HOST="$(jq -r '.mon_host' <<< "$TOKEN")"
+    TOKEN_FSID="$(jq -r '.fsid' <<<"$TOKEN")"
+    TOKEN_CLIENT_ID="$(jq -r '.client_id' <<<"$TOKEN")"
+    TOKEN_KEY="$(jq -r '.key' <<<"$TOKEN")"
+    TOKEN_MON_HOST="$(jq -r '.mon_host' <<<"$TOKEN")"
 
     test "$TOKEN_FSID" = "$(ceph fsid)"
     test "$TOKEN_KEY" = "$(ceph auth get-key client.$TOKEN_CLIENT_ID)"
     for addr in "${MON_ADDRS[@]}"; do
-        fgrep "$addr" <<< "$TOKEN_MON_HOST"
+        fgrep "$addr" <<<"$TOKEN_MON_HOST"
     done
-    expect_fail fgrep "$BAD_MON_ADDR" <<< "$TOKEN_MON_HOST"
+    expect_fail fgrep "$BAD_MON_ADDR" <<<"$TOKEN_MON_HOST"
 
     # check that the token does not change, including across pools
     test "$(rbd mirror pool peer bootstrap create \

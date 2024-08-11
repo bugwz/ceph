@@ -8,4 +8,4 @@
 #
 
 ./make-dist $1
-rpmbuild -D"_sourcedir `pwd`" -D"_specdir `pwd`" -D"_srcrpmdir `pwd`" -bs ceph.spec
+rpmbuild -D"_sourcedir $(pwd)" -D"_specdir $(pwd)" -D"_srcrpmdir $(pwd)" -bs ceph.spec

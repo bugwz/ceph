@@ -8,7 +8,7 @@ set -ex
 branch=$1
 [ -z "$1" ] && branch=master
 port=$2
-[ -z "$2" ] && port=8000   # this is vstart's default
+[ -z "$2" ] && port=8000 # this is vstart's default
 
 ##
 
@@ -38,4 +38,3 @@ cd ../..
 rm -rf $dir
 
 echo OK.
-

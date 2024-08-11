@@ -26,8 +26,7 @@ export CEPH_ASOK_DIR="$CEPH_DIR/out"
 
 export MGR_PYTHON_PATH=$CEPH_ROOT/src/pybind/mgr
 
-function vstart_setup()
-{
+function vstart_setup() {
     rm -fr $CEPH_DEV_DIR $CEPH_OUT_DIR
     mkdir -p $CEPH_DEV_DIR
     trap "teardown $CEPH_DIR" EXIT
@@ -45,8 +44,8 @@ function vstart_setup()
     export CEPH_CONF=$CEPH_DIR/ceph.conf
 
     crit=$(expr 100 - $(ceph-conf --show-config-value mon_data_avail_crit))
-    if [ $(df . | perl -ne 'print if(s/.*\s(\d+)%.*/\1/)') -ge $crit ] ; then
-        df . 
+    if [ $(df . | perl -ne 'print if(s/.*\s(\d+)%.*/\1/)') -ge $crit ]; then
+        df .
         cat <<EOF
 error: not enough free disk space for mon to run
 The mon will shutdown with a message such as 
@@ -59,8 +58,7 @@ EOF
     fi
 }
 
-function main()
-{
+function main() {
     teardown $CEPH_DIR
     vstart_setup || return 1
     if CEPH_CONF=$CEPH_DIR/ceph.conf "$@"; then

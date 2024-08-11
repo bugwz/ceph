@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 #Generic create pool use crush rule  test
 #
 
@@ -17,7 +16,7 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         $func $dir || return 1
     done
 }
@@ -32,27 +31,25 @@ function TEST_pool_create() {
 
     local rulename=testrule
     local poolname=rulepool
-    local var=`ceph osd crush rule dump|grep -w ruleset|sed -n '$p'|grep -o '[0-9]\+'`
-    var=`expr  $var + 1 `
+    local var=$(ceph osd crush rule dump | grep -w ruleset | sed -n '$p' | grep -o '[0-9]\+')
+    var=$(expr $var + 1)
     ceph osd getcrushmap -o "$dir/map1"
     crushtool -d "$dir/map1" -o "$dir/map1.txt"
 
     local minsize=0
     local maxsize=1
     sed -i '/# end crush map/i\rule '$rulename' {\n ruleset \'$var'\n type replicated\n min_size \'$minsize'\n max_size \'$maxsize'\n step take default\n step choose firstn 0 type osd\n step emit\n }\n' "$dir/map1.txt"
-    crushtool  -c "$dir/map1.txt" -o "$dir/map1.bin"
+    crushtool -c "$dir/map1.txt" -o "$dir/map1.bin"
     ceph osd setcrushmap -i "$dir/map1.bin"
     ceph osd pool create $poolname 200 $rulename 2>"$dir/rev"
     local result=$(cat "$dir/rev" | grep "Error EINVAL: pool size")
 
-    if [ "$result" = "" ];
-    then
-      ceph osd pool delete  $poolname $poolname  --yes-i-really-really-mean-it
-      ceph osd crush rule rm $rulename
-      return 1
+    if [ "$result" = "" ]; then
+        ceph osd pool delete $poolname $poolname --yes-i-really-really-mean-it
+        ceph osd crush rule rm $rulename
+        return 1
     fi
     ceph osd crush rule rm $rulename
 }
 
 main testpoolcreate
-

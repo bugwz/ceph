@@ -12,17 +12,16 @@ cleanup() {
     rm -f $KEYRING
 }
 
-expect_false()
-{
-	set -x
-	if "$@"; then return 1; else return 0; fi
+expect_false() {
+    set -x
+    if "$@"; then return 1; else return 0; fi
 }
 
 create_pool_op() {
-  ID=$1
-  POOL=$2
+    ID=$1
+    POOL=$2
 
-  cat << EOF | CEPH_ARGS="-k $KEYRING" python3
+    cat <<EOF | CEPH_ARGS="-k $KEYRING" python3
 import rados
 
 cluster = rados.Rados(conffile="", rados_id="${ID}")
@@ -32,10 +31,10 @@ EOF
 }
 
 delete_pool_op() {
-  ID=$1
-  POOL=$2
+    ID=$1
+    POOL=$2
 
-  cat << EOF | CEPH_ARGS="-k $KEYRING" python3
+    cat <<EOF | CEPH_ARGS="-k $KEYRING" python3
 import rados
 
 cluster = rados.Rados(conffile="", rados_id="${ID}")
@@ -45,11 +44,11 @@ EOF
 }
 
 create_pool_snap_op() {
-  ID=$1
-  POOL=$2
-  SNAP=$3
+    ID=$1
+    POOL=$2
+    SNAP=$3
 
-  cat << EOF | CEPH_ARGS="-k $KEYRING" python3
+    cat <<EOF | CEPH_ARGS="-k $KEYRING" python3
 import rados
 
 cluster = rados.Rados(conffile="", rados_id="${ID}")
@@ -61,11 +60,11 @@ EOF
 }
 
 remove_pool_snap_op() {
-  ID=$1
-  POOL=$2
-  SNAP=$3
+    ID=$1
+    POOL=$2
+    SNAP=$3
 
-  cat << EOF | CEPH_ARGS="-k $KEYRING" python3
+    cat <<EOF | CEPH_ARGS="-k $KEYRING" python3
 import rados
 
 cluster = rados.Rados(conffile="", rados_id="${ID}")
@@ -76,10 +75,9 @@ ioctx.remove_snap("${SNAP}")
 EOF
 }
 
-test_pool_op()
-{
-    ceph auth get-or-create client.mon_read mon 'allow r' >> $KEYRING
-    ceph auth get-or-create client.mon_write mon 'allow *' >> $KEYRING
+test_pool_op() {
+    ceph auth get-or-create client.mon_read mon 'allow r' >>$KEYRING
+    ceph auth get-or-create client.mon_write mon 'allow *' >>$KEYRING
 
     expect_false create_pool_op mon_read pool1
     create_pool_op mon_write pool1
@@ -94,13 +92,13 @@ test_pool_op()
     delete_pool_op mon_write pool1
 }
 
-key=`ceph auth get-or-create-key client.poolaccess1 mon 'allow r' osd 'allow *'`
+key=$(ceph auth get-or-create-key client.poolaccess1 mon 'allow r' osd 'allow *')
 rados --id poolaccess1 --key $key -p rbd ls
 
-key=`ceph auth get-or-create-key client.poolaccess2 mon 'allow r' osd 'allow * pool=nopool'`
+key=$(ceph auth get-or-create-key client.poolaccess2 mon 'allow r' osd 'allow * pool=nopool')
 expect_false rados --id poolaccess2 --key $key -p rbd ls
 
-key=`ceph auth get-or-create-key client.poolaccess3 mon 'allow r' osd 'allow rw pool=nopool'`
+key=$(ceph auth get-or-create-key client.poolaccess3 mon 'allow r' osd 'allow rw pool=nopool')
 expect_false rados --id poolaccess3 --key $key -p rbd ls
 
 test_pool_op

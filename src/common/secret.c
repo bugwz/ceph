@@ -12,75 +12,73 @@
  *
  */
 
-#include <string.h>
-#include <stdio.h>
-#include <unistd.h>
+#include "common/armor.h"
+#include "common/safe_io.h"
+#include "include/compat.h"
+
 #include <errno.h>
 #include <fcntl.h>
 #include <keyutils.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
-#include "include/compat.h"
-#include "common/armor.h"
-#include "common/safe_io.h"
-
-int read_secret_from_file(const char *filename, char *secret, size_t max_len)
+int read_secret_from_file(const char* filename, char* secret, size_t max_len)
 {
-  char *end;
-  int fd;
-  int len;
+    char* end;
+    int fd;
+    int len;
 
-  fd = open(filename, O_RDONLY);
-  if (fd < 0) {
-    perror("unable to read secretfile");
-    return -errno;
-  }
-  len = safe_read(fd, secret, max_len);
-  if (len <= 0) {
-    perror("unable to read secret from file");
+    fd = open(filename, O_RDONLY);
+    if (fd < 0) {
+        perror("unable to read secretfile");
+        return -errno;
+    }
+    len = safe_read(fd, secret, max_len);
+    if (len <= 0) {
+        perror("unable to read secret from file");
+        close(fd);
+        return len ? len : -ENODATA;
+    }
+    end = secret;
+    while (end < secret + len && *end && *end != '\n' && *end != '\r') end++;
+    *end = '\0';
     close(fd);
-    return len ? len : -ENODATA;
-  }
-  end = secret;
-  while (end < secret + len && *end && *end != '\n' && *end != '\r')
-    end++;
-  *end = '\0';
-  close(fd);
 
-  return 0;
+    return 0;
 }
 
-int set_kernel_secret(const char *secret, const char *key_name)
+int set_kernel_secret(const char* secret, const char* key_name)
 {
-  /* try to submit key to kernel via the keys api */
-  key_serial_t serial;
-  int ret;
-  int secret_len = strlen(secret);
-  char payload[((secret_len * 3) / 4) + 4];
+    /* try to submit key to kernel via the keys api */
+    key_serial_t serial;
+    int ret;
+    int secret_len = strlen(secret);
+    char payload[((secret_len * 3) / 4) + 4];
 
-  if (!secret_len) {
-    fprintf(stderr, "secret is empty.\n");
-    return -EINVAL;
-  }
+    if (!secret_len) {
+        fprintf(stderr, "secret is empty.\n");
+        return -EINVAL;
+    }
 
-  ret = ceph_unarmor(payload, payload+sizeof(payload), secret, secret+secret_len);
-  if (ret < 0) {
-    char error_buf[80];
-    fprintf(stderr, "secret is not valid base64: %s.\n",
-	    ceph_strerror_r(-ret, error_buf, sizeof(error_buf)));
+    ret = ceph_unarmor(payload, payload + sizeof(payload), secret, secret + secret_len);
+    if (ret < 0) {
+        char error_buf[80];
+        fprintf(stderr, "secret is not valid base64: %s.\n", ceph_strerror_r(-ret, error_buf, sizeof(error_buf)));
+        return ret;
+    }
+
+    serial = add_key("ceph", key_name, payload, ret, KEY_SPEC_PROCESS_KEYRING);
+    if (serial == -1) {
+        ret = -errno;
+    }
+
     return ret;
-  }
-
-  serial = add_key("ceph", key_name, payload, ret, KEY_SPEC_PROCESS_KEYRING);
-  if (serial == -1) {
-    ret = -errno;
-  }
-
-  return ret;
 }
 
-int is_kernel_secret(const char *key_name)
+int is_kernel_secret(const char* key_name)
 {
-  key_serial_t serial;
-  serial = request_key("ceph", key_name, NULL, KEY_SPEC_USER_KEYRING);
-  return serial != -1;
+    key_serial_t serial;
+    serial = request_key("ceph", key_name, NULL, KEY_SPEC_USER_KEYRING);
+    return serial != -1;
 }

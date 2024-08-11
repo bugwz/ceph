@@ -31,7 +31,7 @@ eval set -- "$opts"
 
 while true; do
     case "$1" in
-        -a|--archive-dir)
+        -a | --archive-dir)
             archive_dir=$2
             shift 2
             ;;
@@ -55,7 +55,7 @@ while true; do
             classical=true
             shift
             ;;
-        -h|--help)
+        -h | --help)
             usage $prog_name
             return 0
             ;;
@@ -97,13 +97,13 @@ if ! $use_existing; then
     fi
     if $classical; then
         MDS=0 MGR=1 OSD=3 MON=1 $source_dir/src/vstart.sh -n -X \
-           --without-dashboard
+            --without-dashboard
     else
         MDS=0 MGR=1 OSD=3 MON=1 $source_dir/src/vstart.sh -n -X \
-           --without-dashboard --memstore \
-           -o "memstore_device_bytes=34359738368" \
-           --crimson --nodaemon --redirect-output \
-           --osd-args "--memory 4G"
+            --without-dashboard --memstore \
+            -o "memstore_device_bytes=34359738368" \
+            --crimson --nodaemon --redirect-output \
+            --osd-args "--memory 4G"
     fi
     cd - || exit
 fi
@@ -125,8 +125,8 @@ done
 if ! $use_existing; then
     cd $build_dir || exit
     if $classical; then
-      $source_dir/src/stop.sh
+        $source_dir/src/stop.sh
     else
-      $source_dir/src/stop.sh --crimson
+        $source_dir/src/stop.sh --crimson
     fi
 fi

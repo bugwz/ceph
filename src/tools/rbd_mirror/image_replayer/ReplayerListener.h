@@ -8,14 +8,15 @@ namespace rbd {
 namespace mirror {
 namespace image_replayer {
 
-struct ReplayerListener {
-  virtual ~ReplayerListener() {}
+struct ReplayerListener
+{
+    virtual ~ReplayerListener() {}
 
-  virtual void handle_notification() = 0;
+    virtual void handle_notification() = 0;
 };
 
-} // namespace image_replayer
-} // namespace mirror
-} // namespace rbd
+}   // namespace image_replayer
+}   // namespace mirror
+}   // namespace rbd
 
-#endif // RBD_MIRROR_IMAGE_REPLAYER_REPLAYER_LISTENER_H
+#endif   // RBD_MIRROR_IMAGE_REPLAYER_REPLAYER_LISTENER_H

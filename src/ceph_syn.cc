@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
  * Ceph - scalable distributed file system
@@ -7,98 +7,87 @@
  *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
- * License version 2.1, as published by the Free Software 
+ * License version 2.1, as published by the Free Software
  * Foundation.  See file COPYING.
- * 
+ *
  */
 
-#include <sys/stat.h>
-#include <iostream>
-#include <string>
-
-#include "common/config.h"
-
-#include "common/async/context_pool.h"
-#include "client/SyntheticClient.h"
 #include "client/Client.h"
-
+#include "client/SyntheticClient.h"
+#include "common/Timer.h"
+#include "common/async/context_pool.h"
+#include "common/ceph_argparse.h"
+#include "common/config.h"
+#include "common/pick_address.h"
+#include "global/global_init.h"
+#include "mon/MonClient.h"
 #include "msg/Messenger.h"
 
-#include "mon/MonClient.h"
-
-#include "common/Timer.h"
-#include "global/global_init.h"
-#include "common/ceph_argparse.h"
-#include "common/pick_address.h"
-
-#include <sys/types.h>
 #include <fcntl.h>
+#include <iostream>
+#include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 extern int syn_filer_flags;
 
-int main(int argc, const char **argv, char *envp[]) 
+int main(int argc, const char** argv, char* envp[])
 {
-  //cerr << "ceph-syn starting" << std::endl;
-  vector<const char*> args;
-  argv_to_vec(argc, argv, args);
+    // cerr << "ceph-syn starting" << std::endl;
+    vector<const char*> args;
+    argv_to_vec(argc, argv, args);
 
-  auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
-			 CODE_ENVIRONMENT_UTILITY, 0);
-  common_init_finish(g_ceph_context);
+    auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, 0);
+    common_init_finish(g_ceph_context);
 
-  parse_syn_options(args);   // for SyntheticClient
+    parse_syn_options(args);   // for SyntheticClient
 
-  pick_addresses(g_ceph_context, CEPH_PICK_ADDRESS_PUBLIC);
+    pick_addresses(g_ceph_context, CEPH_PICK_ADDRESS_PUBLIC);
 
-  // get monmap
-  ceph::async::io_context_pool  poolctx(1);
-  MonClient mc(g_ceph_context, poolctx);
-  if (mc.build_initial_monmap() < 0)
-    return -1;
+    // get monmap
+    ceph::async::io_context_pool poolctx(1);
+    MonClient mc(g_ceph_context, poolctx);
+    if (mc.build_initial_monmap() < 0) return -1;
 
-  list<Client*> clients;
-  list<SyntheticClient*> synclients;
-  vector<Messenger*> messengers{static_cast<unsigned>(num_client), nullptr};
-  vector<MonClient*> mclients{static_cast<unsigned>(num_client), nullptr};
+    list<Client*> clients;
+    list<SyntheticClient*> synclients;
+    vector<Messenger*> messengers{static_cast<unsigned>(num_client), nullptr};
+    vector<MonClient*> mclients{static_cast<unsigned>(num_client), nullptr};
 
-  cout << "ceph-syn: starting " << num_client << " syn client(s)" << std::endl;
-  for (int i=0; i<num_client; i++) {
-    messengers[i] = Messenger::create_client_messenger(g_ceph_context,
-						       "synclient");
-    mclients[i] = new MonClient(g_ceph_context, poolctx);
-    mclients[i]->build_initial_monmap();
-    auto client = new StandaloneClient(messengers[i], mclients[i], poolctx);
-    client->set_filer_flags(syn_filer_flags);
-    SyntheticClient *syn = new SyntheticClient(client);
-    clients.push_back(client);
-    synclients.push_back(syn);
-    messengers[i]->start();
-  }
+    cout << "ceph-syn: starting " << num_client << " syn client(s)" << std::endl;
+    for (int i = 0; i < num_client; i++) {
+        messengers[i] = Messenger::create_client_messenger(g_ceph_context, "synclient");
+        mclients[i] = new MonClient(g_ceph_context, poolctx);
+        mclients[i]->build_initial_monmap();
+        auto client = new StandaloneClient(messengers[i], mclients[i], poolctx);
+        client->set_filer_flags(syn_filer_flags);
+        SyntheticClient* syn = new SyntheticClient(client);
+        clients.push_back(client);
+        synclients.push_back(syn);
+        messengers[i]->start();
+    }
 
-  for (list<SyntheticClient*>::iterator p = synclients.begin(); 
-       p != synclients.end();
-       ++p)
-    (*p)->start_thread();
+    for (list<SyntheticClient*>::iterator p = synclients.begin(); p != synclients.end(); ++p) (*p)->start_thread();
 
-  poolctx.stop();
+    poolctx.stop();
 
-  //cout << "waiting for client(s) to finish" << std::endl;
-  while (!clients.empty()) {
-    Client *client = clients.front();
-    SyntheticClient *syn = synclients.front();
-    clients.pop_front();
-    synclients.pop_front();
-    syn->join_thread();
-    delete syn;
-    delete client;
-  }
+    // cout << "waiting for client(s) to finish" << std::endl;
+    while (!clients.empty()) {
+        Client* client = clients.front();
+        SyntheticClient* syn = synclients.front();
+        clients.pop_front();
+        synclients.pop_front();
+        syn->join_thread();
+        delete syn;
+        delete client;
+    }
 
-  for (int i = 0; i < num_client; ++i) {
-    // wait for messenger to finish
-    delete mclients[i];
-    messengers[i]->shutdown();
-    messengers[i]->wait();
-    delete messengers[i];
-  }
-  return 0;
+    for (int i = 0; i < num_client; ++i) {
+        // wait for messenger to finish
+        delete mclients[i];
+        messengers[i]->shutdown();
+        messengers[i]->wait();
+        delete messengers[i];
+    }
+    return 0;
 }

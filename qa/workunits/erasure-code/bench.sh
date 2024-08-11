@@ -93,8 +93,8 @@ function packetsize() {
     local vector_wordsize=$3
     local size=$4
 
-    local p=$(( ($size / $k / $w / $vector_wordsize ) * $vector_wordsize))
-    if [ $p -gt 3100 ] ; then
+    local p=$((($size / $k / $w / $vector_wordsize) * $vector_wordsize))
+    if [ $p -gt 3100 ]; then
         p=3100
     fi
     echo $p
@@ -115,12 +115,12 @@ function bench_run() {
     local isa2technique_cauchy='cauchy'
     local jerasure2technique_vandermonde='reed_sol_van'
     local jerasure2technique_cauchy='cauchy_good'
-    for technique in ${TECHNIQUES} ; do
-        for plugin in ${PLUGINS} ; do
+    for technique in ${TECHNIQUES}; do
+        for plugin in ${PLUGINS}; do
             eval technique_parameter=\$${plugin}2technique_${technique}
             echo "serie encode_${technique}_${plugin}"
-            for k in $ks ; do
-                for m in ${k2ms[$k]} ; do
+            for k in $ks; do
+                for m in ${k2ms[$k]}; do
                     bench $plugin $k $m encode $(($TOTAL_SIZE / $SIZE)) $SIZE 0 \
                         --parameter packetsize=$(packetsize $k $w $VECTOR_WORDSIZE $SIZE) \
                         ${PARAMETERS} \
@@ -130,16 +130,16 @@ function bench_run() {
             done
         done
     done
-    for technique in ${TECHNIQUES} ; do
-        for plugin in ${PLUGINS} ; do
+    for technique in ${TECHNIQUES}; do
+        for plugin in ${PLUGINS}; do
             eval technique_parameter=\$${plugin}2technique_${technique}
             echo "serie decode_${technique}_${plugin}"
-            for k in $ks ; do
-                for m in ${k2ms[$k]} ; do
+            for k in $ks; do
+                for m in ${k2ms[$k]}; do
                     echo
-                    for erasures in $(seq 1 $m) ; do
+                    for erasures in $(seq 1 $m); do
                         bench $plugin $k $m decode $(($TOTAL_SIZE / $SIZE)) $SIZE $erasures \
-                            --parameter packetsize=$(packetsize $k $w $VECTOR_WORDSIZE  $SIZE) \
+                            --parameter packetsize=$(packetsize $k $w $VECTOR_WORDSIZE $SIZE) \
                             ${PARAMETERS} \
                             --parameter technique=$technique_parameter
                     done
@@ -151,18 +151,18 @@ function bench_run() {
 
 function fplot() {
     local serie
-    bench_run | while read seconds total plugin k m workload iteration size erasures rest ; do 
-        if [ -z $seconds ] ; then
+    bench_run | while read seconds total plugin k m workload iteration size erasures rest; do
+        if [ -z $seconds ]; then
             echo null,
-        elif [ $seconds = serie ] ; then
-            if [ "$serie" ] ; then
+        elif [ $seconds = serie ]; then
+            if [ "$serie" ]; then
                 echo '];'
             fi
-            local serie=`echo $total | sed 's/cauchy_\([0-9]\)/cauchy_good_\1/g'`
+            local serie=$(echo $total | sed 's/cauchy_\([0-9]\)/cauchy_good_\1/g')
             echo "var $serie = ["
         else
             local x
-            if [ $workload = encode ] ; then
+            if [ $workload = encode ]; then
                 x=$k/$m
             else
                 x=$k/$m/$erasures
@@ -178,7 +178,7 @@ function main() {
     bench_run
 }
 
-if [ "$1" = fplot ] ; then
+if [ "$1" = fplot ]; then
     "$@"
 else
     main

@@ -29,7 +29,7 @@ function in_jenkins() {
 function run() {
     # to prevent OSD EMFILE death on tests, make sure ulimit >= 1024
     $DRY_RUN ulimit -n $(ulimit -Hn)
-    if [ $(ulimit -n) -lt 1024 ];then
+    if [ $(ulimit -n) -lt 1024 ]; then
         echo "***ulimit -n too small, better bigger than 1024 for test***"
         return 1
     fi
@@ -53,12 +53,12 @@ function run() {
 }
 
 function main() {
-    if [[ $EUID -eq 0 ]] ; then
+    if [[ $EUID -eq 0 ]]; then
         echo "For best results, run this script as a normal user configured"
         echo "with the ability to run commands as root via sudo."
     fi
     echo -n "Checking hostname sanity... "
-    if $DRY_RUN hostname --fqdn >/dev/null 2>&1 ; then
+    if $DRY_RUN hostname --fqdn >/dev/null 2>&1; then
         echo "OK"
     else
         echo "NOT OK"

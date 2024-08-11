@@ -39,7 +39,7 @@ function run() {
 
     export -n CEPH_CLI_TEST_DUP_COMMAND
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -56,98 +56,88 @@ function TEST_recover_unexpected() {
 
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    for o in $(seq 0 $(expr $OSDS - 1))
-    do
+    for o in $(seq 0 $(expr $OSDS - 1)); do
         run_osd $dir $o
     done
 
-    for i in $(seq 1 $POOLS)
-    do
+    for i in $(seq 1 $POOLS); do
         create_pool test$i $PGS $PGS
     done
 
     wait_for_clean || return 1
 
     dd if=/dev/urandom of=datafile bs=4k count=2
-    for i in $(seq 1 $POOLS)
-    do
-       for j in $(seq 1 $OBJS)
-       do
-	       rados -p test$i put obj$j datafile
-       done
+    for i in $(seq 1 $POOLS); do
+        for j in $(seq 1 $OBJS); do
+            rados -p test$i put obj$j datafile
+        done
     done
     rm datafile
 
     ceph osd set noscrub
     ceph osd set nodeep-scrub
 
-    for qpg in $(ceph pg dump pgs --format=json-pretty | jq '.pg_stats[].pgid')
-    do
-	primary=$(ceph pg dump pgs --format=json | jq ".pg_stats[] | select(.pgid == $qpg) | .acting_primary")
-	eval pg=$qpg   # strip quotes around qpg
-	ceph tell $pg scrub
+    for qpg in $(ceph pg dump pgs --format=json-pretty | jq '.pg_stats[].pgid'); do
+        primary=$(ceph pg dump pgs --format=json | jq ".pg_stats[] | select(.pgid == $qpg) | .acting_primary")
+        eval pg=$qpg # strip quotes around qpg
+        ceph tell $pg scrub
     done
 
     ceph pg dump pgs
 
     max=$(CEPH_ARGS='' ceph daemon $(get_asok_path osd.0) dump_scrub_reservations | jq '.osd_max_scrubs')
-    if [ $max != $MAX_SCRUBS];
-    then
-	echo "ERROR: Incorrect osd_max_scrubs from dump_scrub_reservations"
-	return 1
+    if [ $max != $MAX_SCRUBS]; then
+        echo "ERROR: Incorrect osd_max_scrubs from dump_scrub_reservations"
+        return 1
     fi
 
     ceph osd unset noscrub
 
     ok=false
-    for i in $(seq 0 300)
-    do
-	ceph pg dump pgs
-	if ceph pg dump pgs | grep scrubbing; then
-	    ok=true
-	    break
-	fi
-	sleep 1
+    for i in $(seq 0 300); do
+        ceph pg dump pgs
+        if ceph pg dump pgs | grep scrubbing; then
+            ok=true
+            break
+        fi
+        sleep 1
     done
     if test $ok = "false"; then
-	echo "ERROR: Test set-up failed no scrubbing"
-	return 1
+        echo "ERROR: Test set-up failed no scrubbing"
+        return 1
     fi
 
     local total=0
     local zerocount=0
     local maxzerocount=3
-    while(true)
-    do
-	pass=0
-	for o in $(seq 0 $(expr $OSDS - 1))
-	do
-		CEPH_ARGS='' ceph daemon $(get_asok_path osd.$o) dump_scrub_reservations
-		scrubs=$(CEPH_ARGS='' ceph daemon $(get_asok_path osd.$o) dump_scrub_reservations | jq '.scrubs_local + .scrubs_remote')
-		if [ $scrubs -gt $MAX_SCRUBS ]; then
-		    echo "ERROR: More than $MAX_SCRUBS currently reserved"
-		    return 1
-	        fi
-		pass=$(expr $pass + $scrubs)
+    while (true); do
+        pass=0
+        for o in $(seq 0 $(expr $OSDS - 1)); do
+            CEPH_ARGS='' ceph daemon $(get_asok_path osd.$o) dump_scrub_reservations
+            scrubs=$(CEPH_ARGS='' ceph daemon $(get_asok_path osd.$o) dump_scrub_reservations | jq '.scrubs_local + .scrubs_remote')
+            if [ $scrubs -gt $MAX_SCRUBS ]; then
+                echo "ERROR: More than $MAX_SCRUBS currently reserved"
+                return 1
+            fi
+            pass=$(expr $pass + $scrubs)
         done
-	if [ $pass = "0" ]; then
-	    zerocount=$(expr $zerocount + 1)
-	fi
-	if [ $zerocount -gt $maxzerocount ]; then
-	    break
-	fi
-	total=$(expr $total + $pass)
-	sleep $(expr $SCRUB_SLEEP \* 2)
+        if [ $pass = "0" ]; then
+            zerocount=$(expr $zerocount + 1)
+        fi
+        if [ $zerocount -gt $maxzerocount ]; then
+            break
+        fi
+        total=$(expr $total + $pass)
+        sleep $(expr $SCRUB_SLEEP \* 2)
     done
 
     # Check that there are no more scrubs
-    for i in $(seq 0 5)
-    do
+    for i in $(seq 0 5); do
         if ceph pg dump pgs | grep scrubbing; then
-	    echo "ERROR: Extra scrubs after test completion...not expected"
-	    return 1
+            echo "ERROR: Extra scrubs after test completion...not expected"
+            return 1
         fi
-	sleep $SCRUB_SLEEP
+        sleep $SCRUB_SLEEP
     done
 
     echo $total total reservations seen
@@ -157,13 +147,12 @@ function TEST_recover_unexpected() {
     # than once.
     actual_reservations=$(expr $PGS \* $POOLS \* $POOL_SIZE)
     if [ $total -lt $actual_reservations ]; then
-	echo "ERROR: Unexpectedly low amount of scrub reservations seen during test"
-	return 1
+        echo "ERROR: Unexpectedly low amount of scrub reservations seen during test"
+        return 1
     fi
 
     return 0
 }
-
 
 main osd-scrub-dump "$@"
 

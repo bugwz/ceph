@@ -10,41 +10,35 @@ set -ex
 # Functions
 #
 
-create_group()
-{
+create_group() {
     local group_name=$1
 
     rbd group create $group_name
 }
 
-list_groups()
-{
+list_groups() {
     rbd group list
 }
 
-check_group_exists()
-{
+check_group_exists() {
     local group_name=$1
     list_groups | grep $group_name
 }
 
-remove_group()
-{
+remove_group() {
     local group_name=$1
 
     rbd group remove $group_name
 }
 
-rename_group()
-{
+rename_group() {
     local src_name=$1
     local dest_name=$2
 
     rbd group rename $src_name $dest_name
 }
 
-check_group_does_not_exist()
-{
+check_group_does_not_exist() {
     local group_name=$1
     for v in $(list_groups); do
         if [ "$v" == "$group_name" ]; then
@@ -54,34 +48,29 @@ check_group_does_not_exist()
     return 0
 }
 
-create_image()
-{
+create_image() {
     local image_name=$1
     rbd create --size 10M $image_name
 }
 
-remove_image()
-{
+remove_image() {
     local image_name=$1
     rbd remove $image_name
 }
 
-add_image_to_group()
-{
+add_image_to_group() {
     local image_name=$1
     local group_name=$2
     rbd group image add $group_name $image_name
 }
 
-remove_image_from_group()
-{
+remove_image_from_group() {
     local image_name=$1
     local group_name=$2
     rbd group image remove $group_name $image_name
 }
 
-check_image_in_group()
-{
+check_image_in_group() {
     local image_name=$1
     local group_name=$2
     for v in $(rbd group image list $group_name); do
@@ -93,8 +82,7 @@ check_image_in_group()
     return 1
 }
 
-check_image_not_in_group()
-{
+check_image_not_in_group() {
     local image_name=$1
     local group_name=$2
     for v in $(rbd group image list $group_name); do
@@ -106,80 +94,70 @@ check_image_not_in_group()
     return 0
 }
 
-create_snapshot()
-{
+create_snapshot() {
     local group_name=$1
     local snap_name=$2
     rbd group snap create $group_name@$snap_name
 }
 
-create_snapshots()
-{
+create_snapshots() {
     local group_name=$1
     local snap_name=$2
     local snap_count=$3
-    for i in `seq 1 $snap_count`; do
+    for i in $(seq 1 $snap_count); do
         rbd group snap create $group_name@$snap_name$i
     done
 }
 
-remove_snapshot()
-{
+remove_snapshot() {
     local group_name=$1
     local snap_name=$2
     rbd group snap remove $group_name@$snap_name
 }
 
-remove_snapshots()
-{
+remove_snapshots() {
     local group_name=$1
     local snap_name=$2
     local snap_count=$3
-    for i in `seq 1 $snap_count`; do
+    for i in $(seq 1 $snap_count); do
         rbd group snap remove $group_name@$snap_name$i
     done
 }
 
-rename_snapshot()
-{
+rename_snapshot() {
     local group_name=$1
     local snap_name=$2
     local new_snap_name=$3
     rbd group snap rename $group_name@$snap_name $new_snap_name
 }
 
-list_snapshots()
-{
+list_snapshots() {
     local group_name=$1
     rbd group snap list $group_name
 }
 
-rollback_snapshot()
-{
+rollback_snapshot() {
     local group_name=$1
     local snap_name=$2
     rbd group snap rollback $group_name@$snap_name
 }
 
-check_snapshot_in_group()
-{
+check_snapshot_in_group() {
     local group_name=$1
     local snap_name=$2
     list_snapshots $group_name | grep $snap_name
 }
 
-check_snapshots_count_in_group()
-{
+check_snapshots_count_in_group() {
     local group_name=$1
     local snap_name=$2
     local expected_count=$3
     local actual_count
     actual_count=$(list_snapshots $group_name | grep -c $snap_name)
-    (( actual_count == expected_count ))
+    ((actual_count == expected_count))
 }
 
-check_snapshot_not_in_group()
-{
+check_snapshot_not_in_group() {
     local group_name=$1
     local snap_name=$2
     for v in $(list_snapshots $group_name | awk '{print $1}'); do

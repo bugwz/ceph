@@ -4,12 +4,12 @@
 #ifndef CEPHFS_MIRROR_INSTANCE_WATCHER_H
 #define CEPHFS_MIRROR_INSTANCE_WATCHER_H
 
-#include <string_view>
-
+#include "Watcher.h"
 #include "common/ceph_mutex.h"
 #include "include/Context.h"
 #include "include/rados/librados.hpp"
-#include "Watcher.h"
+
+#include <string_view>
 
 class ContextWQ;
 
@@ -19,67 +19,69 @@ namespace mirror {
 // watch directory update notifications via per daemon rados
 // object and invoke listener callback.
 
-class InstanceWatcher : public Watcher {
+class InstanceWatcher : public Watcher
+{
 public:
-  struct Listener {
-    virtual ~Listener() {
+    struct Listener
+    {
+        virtual ~Listener() {}
+
+        virtual void acquire_directory(string_view dir_path) = 0;
+        virtual void release_directory(string_view dir_path) = 0;
+    };
+
+    static InstanceWatcher* create(librados::IoCtx& ioctx, Listener& listener, ContextWQ* work_queue)
+    {
+        return new InstanceWatcher(ioctx, listener, work_queue);
     }
 
-    virtual void acquire_directory(string_view dir_path) = 0;
-    virtual void release_directory(string_view dir_path) = 0;
-  };
+    InstanceWatcher(librados::IoCtx& ioctx, Listener& listener, ContextWQ* work_queue);
+    ~InstanceWatcher();
 
-  static InstanceWatcher *create(librados::IoCtx &ioctx,
-                                 Listener &listener, ContextWQ *work_queue) {
-    return new InstanceWatcher(ioctx, listener, work_queue);
-  }
+    void init(Context* on_finish);
+    void shutdown(Context* on_finish);
 
-  InstanceWatcher(librados::IoCtx &ioctx, Listener &listener, ContextWQ *work_queue);
-  ~InstanceWatcher();
+    void handle_notify(uint64_t notify_id, uint64_t handle, uint64_t notifier_id, bufferlist& bl) override;
+    void handle_rewatch_complete(int r) override;
 
-  void init(Context *on_finish);
-  void shutdown(Context *on_finish);
+    bool is_blocklisted()
+    {
+        std::scoped_lock locker(m_lock);
+        return m_blocklisted;
+    }
 
-  void handle_notify(uint64_t notify_id, uint64_t handle,
-                     uint64_t notifier_id, bufferlist& bl) override;
-  void handle_rewatch_complete(int r) override;
-
-  bool is_blocklisted() {
-    std::scoped_lock locker(m_lock);
-    return m_blocklisted;
-  }
-
-  bool is_failed() {
-    std::scoped_lock locker(m_lock);
-    return m_failed;
-  }
+    bool is_failed()
+    {
+        std::scoped_lock locker(m_lock);
+        return m_failed;
+    }
 
 private:
-  librados::IoCtx &m_ioctx;
-  Listener &m_listener;
-  ContextWQ *m_work_queue;
+    librados::IoCtx& m_ioctx;
+    Listener& m_listener;
+    ContextWQ* m_work_queue;
 
-  ceph::mutex m_lock;
-  Context *m_on_init_finish = nullptr;
-  Context *m_on_shutdown_finish = nullptr;
+    ceph::mutex m_lock;
+    Context* m_on_init_finish = nullptr;
+    Context* m_on_shutdown_finish = nullptr;
 
-  bool m_blocklisted = false;
-  bool m_failed = false;
+    bool m_blocklisted = false;
+    bool m_failed = false;
 
-  void create_instance();
-  void handle_create_instance(int r);
+    void create_instance();
+    void handle_create_instance(int r);
 
-  void register_watcher();
-  void handle_register_watcher(int r);
+    void register_watcher();
+    void handle_register_watcher(int r);
 
-  void remove_instance();
-  void handle_remove_instance(int r);
+    void remove_instance();
+    void handle_remove_instance(int r);
 
-  void unregister_watcher();
-  void handle_unregister_watcher(int r);
+    void unregister_watcher();
+    void handle_unregister_watcher(int r);
 };
 
-} // namespace mirror
-} // namespace cephfs
+}   // namespace mirror
+}   // namespace cephfs
 
-#endif // CEPHFS_MIRROR_INSTANCE_WATCHER_H
+#endif   // CEPHFS_MIRROR_INSTANCE_WATCHER_H

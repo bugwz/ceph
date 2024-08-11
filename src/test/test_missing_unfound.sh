@@ -9,10 +9,9 @@ TEST_POOL=rbd
 sleep 20
 
 ./init-ceph stop osd.1
-./ceph osd down 1   # faster
+./ceph osd down 1 # faster
 
-for f in `seq 1 100`
-do
+for f in $(seq 1 100); do
     ./rados -c ./ceph.conf -p $TEST_POOL put test_$f /etc/passwd
 done
 
@@ -25,5 +24,3 @@ rm dev/osd0/current/*/test_*
 
 # ...and see how we fare!
 ./init-ceph start osd.1
-
-

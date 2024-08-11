@@ -35,8 +35,8 @@ function run() {
 
     timeout 360 ceph --mon-host-override $MONA mon stat || return 1
     # check that MONB is indeed a peon
-    ceph --admin-daemon $(get_asok_path mon.b) mon_status |
-       grep '"peon"' || return 1
+    ceph --admin-daemon $(get_asok_path mon.b) mon_status \
+        | grep '"peon"' || return 1
     # when the leader ( MONA ) is used, there is no message forwarding
     ceph --mon-host-override $MONA osd pool create POOL1 12
     CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.a) log flush || return 1

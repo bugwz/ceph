@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-mount () { :; }
-umount () { :; }
+mount() { :; }
+umount() { :; }
 
 list="\
 abiword.control
@@ -2045,7 +2045,7 @@ mount /mnt/ceph-fuse
 mkdir test-1774
 cd test-1774
 for f in $list; do
-  touch $f
+    touch $f
 done
 
 cd

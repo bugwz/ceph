@@ -6,12 +6,12 @@ source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
 arch=$(uname -m)
 
 case $arch in
-    i[[3456]]86*|x86_64*|amd64*)
+    i[[3456]]86* | x86_64* | amd64*)
         legacy_jerasure_plugins=(jerasure_generic jerasure_sse3 jerasure_sse4)
         legacy_shec_plugins=(shec_generic shec_sse3 shec_sse4)
         plugins=(jerasure shec lrc isa)
         ;;
-    aarch64*|arm*)
+    aarch64* | arm*)
         legacy_jerasure_plugins=(jerasure_generic jerasure_neon)
         legacy_shec_plugins=(shec_generic shec_neon)
         plugins=(jerasure shec lrc)
@@ -32,7 +32,7 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         $func $dir || return 1
     done
 }
@@ -43,7 +43,7 @@ function TEST_preload_warning() {
     for plugin in ${legacy_jerasure_plugins[*]} ${legacy_shec_plugins[*]}; do
         setup $dir || return 1
         run_mon $dir a --osd_erasure_code_plugins="${plugin}" || return 1
-	run_mgr $dir x || return 1
+        run_mgr $dir x || return 1
         CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.a) log flush || return 1
         run_osd $dir 0 --osd_erasure_code_plugins="${plugin}" || return 1
         CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.0) log flush || return 1
@@ -60,7 +60,7 @@ function TEST_preload_no_warning() {
     for plugin in ${plugins[*]}; do
         setup $dir || return 1
         run_mon $dir a --osd_erasure_code_plugins="${plugin}" || return 1
-	run_mgr $dir x || return 1
+        run_mgr $dir x || return 1
         CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.a) log flush || return 1
         run_osd $dir 0 --osd_erasure_code_plugins="${plugin}" || return 1
         CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.0) log flush || return 1
@@ -94,7 +94,7 @@ function TEST_ec_profile_warning() {
     setup $dir || return 1
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    for id in $(seq 0 2) ; do
+    for id in $(seq 0 2); do
         run_osd $dir $id || return 1
     done
     create_rbd_pool || return 1

@@ -19,26 +19,20 @@
 
 class ObjectStoreTool : public RadosDump
 {
-  public:
+public:
     ObjectStoreTool(int file_fd, bool dry_run)
-      : RadosDump(file_fd, dry_run)
+        : RadosDump(file_fd, dry_run)
     {}
 
-    int dump_export(Formatter *formatter);
-    int do_import(ObjectStore *store, OSDSuperblock& sb, bool force,
-		  std::string pgidstr);
-    int do_export(CephContext *cct, ObjectStore *fs, coll_t coll, spg_t pgid,
-          pg_info_t &info, epoch_t map_epoch, __u8 struct_ver,
-          const OSDSuperblock& superblock,
-          PastIntervals &past_intervals);
-    int dump_object(Formatter *formatter,
-				bufferlist &bl);
-    int get_object(
-      ObjectStore *store, OSDriver& driver, SnapMapper& mapper, coll_t coll,
-      bufferlist &bl, OSDMap &curmap, bool *skipped_objects);
-    int export_file(
-        ObjectStore *store, coll_t cid, ghobject_t &obj);
-    int export_files(ObjectStore *store, coll_t coll);
+    int dump_export(Formatter* formatter);
+    int do_import(ObjectStore* store, OSDSuperblock& sb, bool force, std::string pgidstr);
+    int do_export(CephContext* cct, ObjectStore* fs, coll_t coll, spg_t pgid, pg_info_t& info, epoch_t map_epoch,
+                  __u8 struct_ver, const OSDSuperblock& superblock, PastIntervals& past_intervals);
+    int dump_object(Formatter* formatter, bufferlist& bl);
+    int get_object(ObjectStore* store, OSDriver& driver, SnapMapper& mapper, coll_t coll, bufferlist& bl,
+                   OSDMap& curmap, bool* skipped_objects);
+    int export_file(ObjectStore* store, coll_t cid, ghobject_t& obj);
+    int export_files(ObjectStore* store, coll_t coll);
 };
 
-#endif // CEPH_OBJECSTORE_TOOL_H_
+#endif   // CEPH_OBJECSTORE_TOOL_H_

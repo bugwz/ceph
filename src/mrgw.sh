@@ -46,9 +46,9 @@ logfile=$run_root/out/radosgw.${port}.log
 "$vstart_path"/mstop.sh "$name" radosgw "$port"
 
 "$vstart_path"/mrun "$name" ceph -c "$run_root"/ceph.conf \
-	-k "$run_root"/keyring auth get-or-create client.rgw."$port" mon \
-	'allow rw' osd 'allow rwx' mgr 'allow rw' >> "$run_root"/keyring
+    -k "$run_root"/keyring auth get-or-create client.rgw."$port" mon \
+    'allow rw' osd 'allow rwx' mgr 'allow rw' >>"$run_root"/keyring
 
 "$vstart_path"/mrun "$name" radosgw --rgw-frontends="$rgw_frontend $port_param $set_frontend_threads $cert_param" \
-	-n client.rgw."$port" --pid-file="$pidfile" \
-	--admin-socket="$asokfile" "$@" --log-file="$logfile"
+    -n client.rgw."$port" --pid-file="$pidfile" \
+    --admin-socket="$asokfile" "$@" --log-file="$logfile"

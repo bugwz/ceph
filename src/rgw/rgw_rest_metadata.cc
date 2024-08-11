@@ -13,309 +13,309 @@
  *
  */
 
-#include "include/page.h"
-
-#include "rgw_rest.h"
-#include "rgw_op.h"
-#include "rgw_rest_s3.h"
 #include "rgw_rest_metadata.h"
-#include "rgw_client_io.h"
-#include "rgw_mdlog_types.h"
-#include "rgw_sal_rados.h"
+
 #include "common/errno.h"
 #include "common/strtol.h"
-#include "rgw/rgw_b64.h"
 #include "include/ceph_assert.h"
+#include "include/page.h"
+#include "rgw/rgw_b64.h"
+#include "rgw_client_io.h"
+#include "rgw_mdlog_types.h"
+#include "rgw_op.h"
+#include "rgw_rest.h"
+#include "rgw_rest_s3.h"
+#include "rgw_sal_rados.h"
 
 #define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys  ceph_subsys_rgw
 
-static inline void frame_metadata_key(req_state *s, string& out) {
-  bool exists;
-  string key = s->info.args.get("key", &exists);
+static inline void frame_metadata_key(req_state* s, string& out)
+{
+    bool exists;
+    string key = s->info.args.get("key", &exists);
 
-  string section;
-  if (!s->init_state.url_bucket.empty()) {
-    section = s->init_state.url_bucket;
-  } else {
-    section = key;
-    key.clear();
-  }
-
-  out = section;
-
-  if (!key.empty()) {
-    out += string(":") + key;
-  }
-}
-
-void RGWOp_Metadata_Get::execute(optional_yield y) {
-  string metadata_key;
-
-  frame_metadata_key(s, metadata_key);
-
-  auto meta_mgr = store->ctl()->meta.mgr;
-
-  /* Get keys */
-  op_ret = meta_mgr->get(metadata_key, s->formatter, s->yield, s);
-  if (op_ret < 0) {
-    ldpp_dout(s, 5) << "ERROR: can't get key: " << cpp_strerror(op_ret) << dendl;
-    return;
-  }
-
-  op_ret = 0;
-}
-
-void RGWOp_Metadata_Get_Myself::execute(optional_yield y) {
-  string owner_id;
-
-  owner_id = s->owner.get_id().to_str();
-  s->info.args.append("key", owner_id);
-
-  return RGWOp_Metadata_Get::execute(y);
-}
-
-void RGWOp_Metadata_List::execute(optional_yield y) {
-  string marker;
-  ldpp_dout(this, 16) << __func__
-		    << " raw marker " << s->info.args.get("marker")
-		    << dendl;
-
-  try {
-    marker = s->info.args.get("marker");
-    if (!marker.empty()) {
-      marker = rgw::from_base64(marker);
+    string section;
+    if (!s->init_state.url_bucket.empty()) {
+        section = s->init_state.url_bucket;
     }
-    ldpp_dout(this, 16) << __func__
-	     << " marker " << marker << dendl;
-  } catch (...) {
-    marker = std::string("");
-  }
-
-  bool max_entries_specified;
-  string max_entries_str =
-    s->info.args.get("max-entries", &max_entries_specified);
-
-  bool extended_response = (max_entries_specified); /* for backward compatibility, if max-entries is not specified
-                                                    we will send the old response format */
-  uint64_t max_entries = 0;
-
-  if (max_entries_specified) {
-    string err;
-    max_entries = (unsigned)strict_strtol(max_entries_str.c_str(), 10, &err);
-    if (!err.empty()) {
-      ldpp_dout(this, 5) << "Error parsing max-entries " << max_entries_str << dendl;
-      op_ret = -EINVAL;
-      return;
+    else {
+        section = key;
+        key.clear();
     }
-  }
 
-  string metadata_key;
+    out = section;
 
-  frame_metadata_key(s, metadata_key);
-  /* List keys */
-  void *handle;
-  int max = 1000;
+    if (!key.empty()) {
+        out += string(":") + key;
+    }
+}
 
-  /* example markers:
-     marker = "3:b55a9110:root::bu_9:head";
-     marker = "3:b9a8b2a6:root::sorry_janefonda_890:head";
-     marker = "3:bf885d8f:root::sorry_janefonda_665:head";
-  */
+void RGWOp_Metadata_Get::execute(optional_yield y)
+{
+    string metadata_key;
 
-  op_ret = store->ctl()->meta.mgr->list_keys_init(s, metadata_key, marker, &handle);
-  if (op_ret < 0) {
-    ldpp_dout(this, 5) << "ERROR: can't get key: " << cpp_strerror(op_ret) << dendl;
-    return;
-  }
+    frame_metadata_key(s, metadata_key);
 
-  bool truncated;
-  uint64_t count = 0;
+    auto meta_mgr = store->ctl()->meta.mgr;
 
-  if (extended_response) {
-    s->formatter->open_object_section("result");
-  }
-
-  s->formatter->open_array_section("keys");
-
-  auto meta_mgr = store->ctl()->meta.mgr;
-
-  uint64_t left;
-  do {
-    list<string> keys;
-    left = (max_entries_specified ? max_entries - count : max);
-    op_ret = meta_mgr->list_keys_next(handle, left, keys, &truncated);
+    /* Get keys */
+    op_ret = meta_mgr->get(metadata_key, s->formatter, s->yield, s);
     if (op_ret < 0) {
-      ldpp_dout(this, 5) << "ERROR: lists_keys_next(): " << cpp_strerror(op_ret)
-	      << dendl;
-      return;
+        ldpp_dout(s, 5) << "ERROR: can't get key: " << cpp_strerror(op_ret) << dendl;
+        return;
     }
 
-    for (list<string>::iterator iter = keys.begin(); iter != keys.end();
-	 ++iter) {
-      s->formatter->dump_string("key", *iter);
-      ++count;
-    }
-
-  } while (truncated && left > 0);
-
-  s->formatter->close_section();
-
-  if (extended_response) {
-    encode_json("truncated", truncated, s->formatter);
-    encode_json("count", count, s->formatter);
-    if (truncated) {
-      string esc_marker =
-	rgw::to_base64(meta_mgr->get_marker(handle));
-      encode_json("marker", esc_marker, s->formatter);
-    }
-    s->formatter->close_section();
-  }
-  meta_mgr->list_keys_complete(handle);
-
-  op_ret = 0;
+    op_ret = 0;
 }
 
-int RGWOp_Metadata_Put::get_data(bufferlist& bl) {
-  size_t cl = 0;
-  char *data;
-  int read_len;
+void RGWOp_Metadata_Get_Myself::execute(optional_yield y)
+{
+    string owner_id;
 
-  if (s->length)
-    cl = atoll(s->length);
-  if (cl) {
-    data = (char *)malloc(cl + 1);
-    if (!data) {
-       return -ENOMEM;
+    owner_id = s->owner.get_id().to_str();
+    s->info.args.append("key", owner_id);
+
+    return RGWOp_Metadata_Get::execute(y);
+}
+
+void RGWOp_Metadata_List::execute(optional_yield y)
+{
+    string marker;
+    ldpp_dout(this, 16) << __func__ << " raw marker " << s->info.args.get("marker") << dendl;
+
+    try {
+        marker = s->info.args.get("marker");
+        if (!marker.empty()) {
+            marker = rgw::from_base64(marker);
+        }
+        ldpp_dout(this, 16) << __func__ << " marker " << marker << dendl;
     }
-    read_len = recv_body(s, data, cl);
-    if (cl != (size_t)read_len) {
-      ldpp_dout(this, 10) << "recv_body incomplete" << dendl;
+    catch (...) {
+        marker = std::string("");
     }
-    if (read_len < 0) {
-      free(data);
-      return read_len;
+
+    bool max_entries_specified;
+    string max_entries_str = s->info.args.get("max-entries", &max_entries_specified);
+
+    bool extended_response = (max_entries_specified); /* for backward compatibility, if max-entries is not specified
+                                                      we will send the old response format */
+    uint64_t max_entries = 0;
+
+    if (max_entries_specified) {
+        string err;
+        max_entries = (unsigned)strict_strtol(max_entries_str.c_str(), 10, &err);
+        if (!err.empty()) {
+            ldpp_dout(this, 5) << "Error parsing max-entries " << max_entries_str << dendl;
+            op_ret = -EINVAL;
+            return;
+        }
     }
-    bl.append(data, read_len);
-  } else {
-    int chunk_size = CEPH_PAGE_SIZE;
-    const char *enc = s->info.env->get("HTTP_TRANSFER_ENCODING");
-    if (!enc || strcmp(enc, "chunked")) {
-      return -ERR_LENGTH_REQUIRED;
+
+    string metadata_key;
+
+    frame_metadata_key(s, metadata_key);
+    /* List keys */
+    void* handle;
+    int max = 1000;
+
+    /* example markers:
+       marker = "3:b55a9110:root::bu_9:head";
+       marker = "3:b9a8b2a6:root::sorry_janefonda_890:head";
+       marker = "3:bf885d8f:root::sorry_janefonda_665:head";
+    */
+
+    op_ret = store->ctl()->meta.mgr->list_keys_init(s, metadata_key, marker, &handle);
+    if (op_ret < 0) {
+        ldpp_dout(this, 5) << "ERROR: can't get key: " << cpp_strerror(op_ret) << dendl;
+        return;
     }
-    data = (char *)malloc(chunk_size);
-    if (!data) {
-      return -ENOMEM;
+
+    bool truncated;
+    uint64_t count = 0;
+
+    if (extended_response) {
+        s->formatter->open_object_section("result");
     }
+
+    s->formatter->open_array_section("keys");
+
+    auto meta_mgr = store->ctl()->meta.mgr;
+
+    uint64_t left;
     do {
-      read_len = recv_body(s, data, chunk_size);
-      if (read_len < 0) {
-	free(data);
-	return read_len;
-      }
-      bl.append(data, read_len);
-    } while (read_len == chunk_size);
-  }
+        list<string> keys;
+        left = (max_entries_specified ? max_entries - count : max);
+        op_ret = meta_mgr->list_keys_next(handle, left, keys, &truncated);
+        if (op_ret < 0) {
+            ldpp_dout(this, 5) << "ERROR: lists_keys_next(): " << cpp_strerror(op_ret) << dendl;
+            return;
+        }
 
-  free(data);
-  return 0;
-}
+        for (list<string>::iterator iter = keys.begin(); iter != keys.end(); ++iter) {
+            s->formatter->dump_string("key", *iter);
+            ++count;
+        }
 
-static bool string_to_sync_type(const string& sync_string,
-                                RGWMDLogSyncType& type) {
-  if (sync_string.compare("update-by-version") == 0)
-    type = APPLY_UPDATES;
-  else if (sync_string.compare("update-by-timestamp") == 0)
-    type = APPLY_NEWER;
-  else if (sync_string.compare("always") == 0)
-    type = APPLY_ALWAYS;
-  else
-    return false;
-  return true;
-}
+    } while (truncated && left > 0);
 
-void RGWOp_Metadata_Put::execute(optional_yield y) {
-  bufferlist bl;
-  string metadata_key;
+    s->formatter->close_section();
 
-  op_ret = get_data(bl);
-  if (op_ret < 0) {
-    return;
-  }
-
-  op_ret = do_aws4_auth_completion();
-  if (op_ret < 0) {
-    return;
-  }
-
-  frame_metadata_key(s, metadata_key);
-
-  RGWMDLogSyncType sync_type = RGWMDLogSyncType::APPLY_ALWAYS;
-
-  bool mode_exists = false;
-  string mode_string = s->info.args.get("update-type", &mode_exists);
-  if (mode_exists) {
-    bool parsed = string_to_sync_type(mode_string,
-                                      sync_type);
-    if (!parsed) {
-      op_ret = -EINVAL;
-      return;
+    if (extended_response) {
+        encode_json("truncated", truncated, s->formatter);
+        encode_json("count", count, s->formatter);
+        if (truncated) {
+            string esc_marker = rgw::to_base64(meta_mgr->get_marker(handle));
+            encode_json("marker", esc_marker, s->formatter);
+        }
+        s->formatter->close_section();
     }
-  }
+    meta_mgr->list_keys_complete(handle);
 
-  op_ret = store->ctl()->meta.mgr->put(metadata_key, bl, s->yield, s, sync_type,
-				       false, &ondisk_version);
-  if (op_ret < 0) {
-    ldpp_dout(s, 5) << "ERROR: can't put key: " << cpp_strerror(op_ret) << dendl;
-    return;
-  }
-  // translate internal codes into return header
-  if (op_ret == STATUS_NO_APPLY)
-    update_status = "skipped";
-  else if (op_ret == STATUS_APPLIED)
-    update_status = "applied";
+    op_ret = 0;
 }
 
-void RGWOp_Metadata_Put::send_response() {
-  int op_return_code = op_ret;
-  if ((op_ret == STATUS_NO_APPLY) || (op_ret == STATUS_APPLIED))
-    op_return_code = STATUS_NO_CONTENT;
-  set_req_state_err(s, op_return_code);
-  dump_errno(s);
-  stringstream ver_stream;
-  ver_stream << "ver:" << ondisk_version.ver
-	     <<",tag:" << ondisk_version.tag;
-  dump_header_if_nonempty(s, "RGWX_UPDATE_STATUS", update_status);
-  dump_header_if_nonempty(s, "RGWX_UPDATE_VERSION", ver_stream.str());
-  end_header(s);
+int RGWOp_Metadata_Put::get_data(bufferlist& bl)
+{
+    size_t cl = 0;
+    char* data;
+    int read_len;
+
+    if (s->length) cl = atoll(s->length);
+    if (cl) {
+        data = (char*)malloc(cl + 1);
+        if (!data) {
+            return -ENOMEM;
+        }
+        read_len = recv_body(s, data, cl);
+        if (cl != (size_t)read_len) {
+            ldpp_dout(this, 10) << "recv_body incomplete" << dendl;
+        }
+        if (read_len < 0) {
+            free(data);
+            return read_len;
+        }
+        bl.append(data, read_len);
+    }
+    else {
+        int chunk_size = CEPH_PAGE_SIZE;
+        const char* enc = s->info.env->get("HTTP_TRANSFER_ENCODING");
+        if (!enc || strcmp(enc, "chunked")) {
+            return -ERR_LENGTH_REQUIRED;
+        }
+        data = (char*)malloc(chunk_size);
+        if (!data) {
+            return -ENOMEM;
+        }
+        do {
+            read_len = recv_body(s, data, chunk_size);
+            if (read_len < 0) {
+                free(data);
+                return read_len;
+            }
+            bl.append(data, read_len);
+        } while (read_len == chunk_size);
+    }
+
+    free(data);
+    return 0;
 }
 
-void RGWOp_Metadata_Delete::execute(optional_yield y) {
-  string metadata_key;
-
-  frame_metadata_key(s, metadata_key);
-  op_ret = store->ctl()->meta.mgr->remove(metadata_key, s->yield, s);
-  if (op_ret < 0) {
-    ldpp_dout(s, 5) << "ERROR: can't remove key: " << cpp_strerror(op_ret) << dendl;
-    return;
-  }
-  op_ret = 0;
+static bool string_to_sync_type(const string& sync_string, RGWMDLogSyncType& type)
+{
+    if (sync_string.compare("update-by-version") == 0)
+        type = APPLY_UPDATES;
+    else if (sync_string.compare("update-by-timestamp") == 0)
+        type = APPLY_NEWER;
+    else if (sync_string.compare("always") == 0)
+        type = APPLY_ALWAYS;
+    else
+        return false;
+    return true;
 }
 
-RGWOp *RGWHandler_Metadata::op_get() {
-  if (s->info.args.exists("myself"))
-    return new RGWOp_Metadata_Get_Myself;
-  if (s->info.args.exists("key"))
-    return new RGWOp_Metadata_Get;
-  else
-    return new RGWOp_Metadata_List;
+void RGWOp_Metadata_Put::execute(optional_yield y)
+{
+    bufferlist bl;
+    string metadata_key;
+
+    op_ret = get_data(bl);
+    if (op_ret < 0) {
+        return;
+    }
+
+    op_ret = do_aws4_auth_completion();
+    if (op_ret < 0) {
+        return;
+    }
+
+    frame_metadata_key(s, metadata_key);
+
+    RGWMDLogSyncType sync_type = RGWMDLogSyncType::APPLY_ALWAYS;
+
+    bool mode_exists = false;
+    string mode_string = s->info.args.get("update-type", &mode_exists);
+    if (mode_exists) {
+        bool parsed = string_to_sync_type(mode_string, sync_type);
+        if (!parsed) {
+            op_ret = -EINVAL;
+            return;
+        }
+    }
+
+    op_ret = store->ctl()->meta.mgr->put(metadata_key, bl, s->yield, s, sync_type, false, &ondisk_version);
+    if (op_ret < 0) {
+        ldpp_dout(s, 5) << "ERROR: can't put key: " << cpp_strerror(op_ret) << dendl;
+        return;
+    }
+    // translate internal codes into return header
+    if (op_ret == STATUS_NO_APPLY)
+        update_status = "skipped";
+    else if (op_ret == STATUS_APPLIED)
+        update_status = "applied";
 }
 
-RGWOp *RGWHandler_Metadata::op_put() {
-  return new RGWOp_Metadata_Put;
+void RGWOp_Metadata_Put::send_response()
+{
+    int op_return_code = op_ret;
+    if ((op_ret == STATUS_NO_APPLY) || (op_ret == STATUS_APPLIED)) op_return_code = STATUS_NO_CONTENT;
+    set_req_state_err(s, op_return_code);
+    dump_errno(s);
+    stringstream ver_stream;
+    ver_stream << "ver:" << ondisk_version.ver << ",tag:" << ondisk_version.tag;
+    dump_header_if_nonempty(s, "RGWX_UPDATE_STATUS", update_status);
+    dump_header_if_nonempty(s, "RGWX_UPDATE_VERSION", ver_stream.str());
+    end_header(s);
 }
 
-RGWOp *RGWHandler_Metadata::op_delete() {
-  return new RGWOp_Metadata_Delete;
+void RGWOp_Metadata_Delete::execute(optional_yield y)
+{
+    string metadata_key;
+
+    frame_metadata_key(s, metadata_key);
+    op_ret = store->ctl()->meta.mgr->remove(metadata_key, s->yield, s);
+    if (op_ret < 0) {
+        ldpp_dout(s, 5) << "ERROR: can't remove key: " << cpp_strerror(op_ret) << dendl;
+        return;
+    }
+    op_ret = 0;
 }
 
+RGWOp* RGWHandler_Metadata::op_get()
+{
+    if (s->info.args.exists("myself")) return new RGWOp_Metadata_Get_Myself;
+    if (s->info.args.exists("key"))
+        return new RGWOp_Metadata_Get;
+    else
+        return new RGWOp_Metadata_List;
+}
+
+RGWOp* RGWHandler_Metadata::op_put()
+{
+    return new RGWOp_Metadata_Put;
+}
+
+RGWOp* RGWHandler_Metadata::op_delete()
+{
+    return new RGWOp_Metadata_Delete;
+}

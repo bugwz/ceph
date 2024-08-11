@@ -26,7 +26,7 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         $func $dir || return 1
     done
 }
@@ -135,9 +135,8 @@ function TEST_balancer2() {
     setup $dir || return 1
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    for i in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $i || return 1
+    for i in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $i || return 1
     done
 
     ceph osd set-require-min-compat-client luminous
@@ -152,14 +151,12 @@ function TEST_balancer2() {
 
     # Wait up to 2 minutes
     OK=no
-    for i in $(seq 1 25)
-    do
-      sleep 5
-      if grep -q "Optimization plan is almost perfect" $dir/mgr.x.log
-      then
-        OK=yes
-        break
-      fi
+    for i in $(seq 1 25); do
+        sleep 5
+        if grep -q "Optimization plan is almost perfect" $dir/mgr.x.log; then
+            OK=yes
+            break
+        fi
     done
     test $OK = "yes" || return 1
     # Plan is found, but PGs still need to move
@@ -182,15 +179,13 @@ function TEST_balancer2() {
 
     # Wait up to 2 minutes
     OK=no
-    for i in $(seq 1 25)
-    do
-      sleep 5
-      COUNT=$(grep "Optimization plan is almost perfect" $dir/mgr.x.log | wc -l)
-      if test $COUNT = "2"
-      then
-        OK=yes
-        break
-      fi
+    for i in $(seq 1 25); do
+        sleep 5
+        COUNT=$(grep "Optimization plan is almost perfect" $dir/mgr.x.log | wc -l)
+        if test $COUNT = "2"; then
+            OK=yes
+            break
+        fi
     done
     test $OK = "yes" || return 1
     # Plan is found, but PGs still need to move

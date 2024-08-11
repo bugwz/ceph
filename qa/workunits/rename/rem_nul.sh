@@ -26,4 +26,3 @@ dotest 'a' 'a' 'b' 4
 
 # all different
 dotest 'a' 'b' 'c' 5
-

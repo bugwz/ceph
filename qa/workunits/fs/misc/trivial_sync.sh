@@ -3,5 +3,5 @@
 set -e
 
 mkdir foo
-echo foo > bar
+echo foo >bar
 sync

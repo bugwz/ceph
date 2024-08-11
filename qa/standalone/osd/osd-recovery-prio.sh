@@ -28,17 +28,16 @@ function run() {
     CEPH_ARGS+="--mon-host=$CEPH_MON --osd_max_backfills=1 --debug_reserver=20"
     export objects=200
     export poolprefix=test
-    export FORCE_PRIO="255"    # See OSD_RECOVERY_PRIORITY_FORCED
-    export NORMAL_PRIO="190"   # See OSD_RECOVERY_PRIORITY_BASE + 10
+    export FORCE_PRIO="255"  # See OSD_RECOVERY_PRIORITY_FORCED
+    export NORMAL_PRIO="190" # See OSD_RECOVERY_PRIORITY_BASE + 10
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
     done
 }
-
 
 function TEST_recovery_priority() {
     local dir=$1
@@ -50,15 +49,13 @@ function TEST_recovery_priority() {
     run_mgr $dir x || return 1
     export CEPH_ARGS
 
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $osd || return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $osd || return 1
     done
 
-    for p in $(seq 1 $pools)
-    do
-      create_pool "${poolprefix}$p" 1 1
-      ceph osd pool set "${poolprefix}$p" size 2
+    for p in $(seq 1 $pools); do
+        create_pool "${poolprefix}$p" 1 1
+        ceph osd pool set "${poolprefix}$p" size 2
     done
     sleep 5
 
@@ -83,46 +80,39 @@ function TEST_recovery_priority() {
     local POOLNUM3
     local pool3
 
-    for p in $(seq 1 $pools)
-    do
-      ceph pg map ${p}.0 --format=json | jq '.acting[]' > $dir/acting
-      local test_osd1=$(head -1 $dir/acting)
-      local test_osd2=$(tail -1 $dir/acting)
-      if [ -z "$PG1" ];
-      then
-        PG1="${p}.0"
-        POOLNUM1=$p
-        pool1="${poolprefix}$p"
-        chk_osd1_1=$test_osd1
-        chk_osd1_2=$test_osd2
-      elif [ -z "$PG2" -a $chk_osd1_1 = $test_osd1 -a $chk_osd1_2 != $test_osd2 ];
-      then
-        PG2="${p}.0"
-        POOLNUM2=$p
-        pool2="${poolprefix}$p"
-        chk_osd2=$test_osd2
-      elif [ -n "$PG2" -a $chk_osd1_1 = $test_osd1 -a $chk_osd1_2 != $test_osd2 -a "$chk_osd2" != $test_osd2 ];
-      then
-        PG3="${p}.0"
-        POOLNUM3=$p
-        pool3="${poolprefix}$p"
-        break
-      fi
+    for p in $(seq 1 $pools); do
+        ceph pg map ${p}.0 --format=json | jq '.acting[]' >$dir/acting
+        local test_osd1=$(head -1 $dir/acting)
+        local test_osd2=$(tail -1 $dir/acting)
+        if [ -z "$PG1" ]; then
+            PG1="${p}.0"
+            POOLNUM1=$p
+            pool1="${poolprefix}$p"
+            chk_osd1_1=$test_osd1
+            chk_osd1_2=$test_osd2
+        elif [ -z "$PG2" -a $chk_osd1_1 = $test_osd1 -a $chk_osd1_2 != $test_osd2 ]; then
+            PG2="${p}.0"
+            POOLNUM2=$p
+            pool2="${poolprefix}$p"
+            chk_osd2=$test_osd2
+        elif [ -n "$PG2" -a $chk_osd1_1 = $test_osd1 -a $chk_osd1_2 != $test_osd2 -a "$chk_osd2" != $test_osd2 ]; then
+            PG3="${p}.0"
+            POOLNUM3=$p
+            pool3="${poolprefix}$p"
+            break
+        fi
     done
     rm -f $dir/acting
 
-    if [ "$pool2" = "" -o "pool3" = "" ];
-    then
-      echo "Failure to find appropirate PGs"
-      return 1
+    if [ "$pool2" = "" -o "pool3" = "" ]; then
+        echo "Failure to find appropirate PGs"
+        return 1
     fi
 
-    for p in $(seq 1 $pools)
-    do
-      if [ $p != $POOLNUM1 -a $p != $POOLNUM2 -a $p != $POOLNUM3 ];
-      then
-        delete_pool ${poolprefix}$p
-      fi
+    for p in $(seq 1 $pools); do
+        if [ $p != $POOLNUM1 -a $p != $POOLNUM2 -a $p != $POOLNUM3 ]; then
+            delete_pool ${poolprefix}$p
+        fi
     done
 
     ceph osd pool set $pool2 size 1 --yes-i-really-mean-it
@@ -131,13 +121,11 @@ function TEST_recovery_priority() {
 
     dd if=/dev/urandom of=$dir/data bs=1M count=10
     p=1
-    for pname in $pool1 $pool2 $pool3
-    do
-      for i in $(seq 1 $objects)
-      do
-	rados -p ${pname} put obj${i}-p${p} $dir/data
-      done
-      p=$(expr $p + 1)
+    for pname in $pool1 $pool2 $pool3; do
+        for i in $(seq 1 $objects); do
+            rados -p ${pname} put obj${i}-p${p} $dir/data
+        done
+        p=$(expr $p + 1)
     done
 
     local otherosd=$(get_not_primary $pool1 obj1-p1)
@@ -155,16 +143,15 @@ function TEST_recovery_priority() {
     CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations || return 1
 
     # 3. Item is in progress, adjust priority with no higher priority waiting
-    for i in $(seq 1 $max_tries)
-    do
-      if ! ceph pg force-recovery $PG3 2>&1 | grep -q "doesn't require recovery"; then
-        break
-      fi
-      if [ "$i" = "$max_tries" ]; then
-        echo "ERROR: Didn't appear to be able to force-recovery"
-        ERRORS=$(expr $ERRORS + 1)
-      fi
-      sleep 2
+    for i in $(seq 1 $max_tries); do
+        if ! ceph pg force-recovery $PG3 2>&1 | grep -q "doesn't require recovery"; then
+            break
+        fi
+        if [ "$i" = "$max_tries" ]; then
+            echo "ERROR: Didn't appear to be able to force-recovery"
+            ERRORS=$(expr $ERRORS + 1)
+        fi
+        sleep 2
     done
     flush_pg_stats || return 1
     CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations || return 1
@@ -178,52 +165,47 @@ function TEST_recovery_priority() {
     ceph osd pool set $pool2 size 2
     sleep 2
     flush_pg_stats || return 1
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/out || return 1
+    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations >$dir/out || return 1
     cat $dir/out
     ceph pg dump pgs
 
     PRIO=$(cat $dir/out | jq "(.local_reservations.queues[].items[] | select(.item == \"${PG1}\")).prio")
-    if [ "$PRIO" != "$NORMAL_PRIO" ];
-    then
-      echo "The normal PG ${PG1} doesn't have prio $NORMAL_PRIO queued waiting"
-      ERRORS=$(expr $ERRORS + 1)
+    if [ "$PRIO" != "$NORMAL_PRIO" ]; then
+        echo "The normal PG ${PG1} doesn't have prio $NORMAL_PRIO queued waiting"
+        ERRORS=$(expr $ERRORS + 1)
     fi
 
     # Using eval will strip double-quotes from item
     eval ITEM=$(cat $dir/out | jq '.local_reservations.in_progress[0].item')
-    if [ "$ITEM" != ${PG3} ];
-    then
-      echo "The first force-recovery PG $PG3 didn't become the in progress item"
-      ERRORS=$(expr $ERRORS + 1)
-    else
-      PRIO=$(cat $dir/out | jq '.local_reservations.in_progress[0].prio')
-      if [ "$PRIO" != $FORCE_PRIO ];
-      then
-        echo "The first force-recovery PG ${PG3} doesn't have prio $FORCE_PRIO"
+    if [ "$ITEM" != ${PG3} ]; then
+        echo "The first force-recovery PG $PG3 didn't become the in progress item"
         ERRORS=$(expr $ERRORS + 1)
-      fi
+    else
+        PRIO=$(cat $dir/out | jq '.local_reservations.in_progress[0].prio')
+        if [ "$PRIO" != $FORCE_PRIO ]; then
+            echo "The first force-recovery PG ${PG3} doesn't have prio $FORCE_PRIO"
+            ERRORS=$(expr $ERRORS + 1)
+        fi
     fi
 
     # 1. Item is queued, re-queue with new priority
-    for i in $(seq 1 $max_tries)
-    do
-      if ! ceph pg force-recovery $PG2 2>&1 | grep -q "doesn't require recovery"; then
-        break
-      fi
-      if [ "$i" = "$max_tries" ]; then
-        echo "ERROR: Didn't appear to be able to force-recovery"
-        ERRORS=$(expr $ERRORS + 1)
-      fi
-      sleep 2
+    for i in $(seq 1 $max_tries); do
+        if ! ceph pg force-recovery $PG2 2>&1 | grep -q "doesn't require recovery"; then
+            break
+        fi
+        if [ "$i" = "$max_tries" ]; then
+            echo "ERROR: Didn't appear to be able to force-recovery"
+            ERRORS=$(expr $ERRORS + 1)
+        fi
+        sleep 2
     done
     sleep 2
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/out || return 1
+    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations >$dir/out || return 1
     cat $dir/out
     PRIO=$(cat $dir/out | jq "(.local_reservations.queues[].items[] | select(.item == \"${PG2}\")).prio")
-    if [ "$PRIO" != "$FORCE_PRIO" ];
-    then
-      echo "The second force-recovery PG ${PG2} doesn't have prio $FORCE_PRIO"
-      ERRORS=$(expr $ERRORS + 1)
+    if [ "$PRIO" != "$FORCE_PRIO" ]; then
+        echo "The second force-recovery PG ${PG2} doesn't have prio $FORCE_PRIO"
+        ERRORS=$(expr $ERRORS + 1)
     fi
     flush_pg_stats || return 1
 
@@ -232,27 +214,24 @@ function TEST_recovery_priority() {
     ceph pg cancel-force-recovery $PG3 || return 1
     sleep 2
     #ceph osd set norecover
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/out || return 1
+    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations >$dir/out || return 1
     cat $dir/out
     PRIO=$(cat $dir/out | jq "(.local_reservations.queues[].items[] | select(.item == \"${PG3}\")).prio")
-    if [ "$PRIO" != "$NORMAL_PRIO" ];
-    then
-      echo "After cancel-recovery PG ${PG3} doesn't have prio $NORMAL_PRIO"
-      ERRORS=$(expr $ERRORS + 1)
+    if [ "$PRIO" != "$NORMAL_PRIO" ]; then
+        echo "After cancel-recovery PG ${PG3} doesn't have prio $NORMAL_PRIO"
+        ERRORS=$(expr $ERRORS + 1)
     fi
 
     eval ITEM=$(cat $dir/out | jq '.local_reservations.in_progress[0].item')
-    if [ "$ITEM" != ${PG2} ];
-    then
-      echo "The force-recovery PG $PG2 didn't become the in progress item"
-      ERRORS=$(expr $ERRORS + 1)
-    else
-      PRIO=$(cat $dir/out | jq '.local_reservations.in_progress[0].prio')
-      if [ "$PRIO" != $FORCE_PRIO ];
-      then
-        echo "The first force-recovery PG ${PG2} doesn't have prio $FORCE_PRIO"
+    if [ "$ITEM" != ${PG2} ]; then
+        echo "The force-recovery PG $PG2 didn't become the in progress item"
         ERRORS=$(expr $ERRORS + 1)
-      fi
+    else
+        PRIO=$(cat $dir/out | jq '.local_reservations.in_progress[0].prio')
+        if [ "$PRIO" != $FORCE_PRIO ]; then
+            echo "The first force-recovery PG ${PG2} doesn't have prio $FORCE_PRIO"
+            ERRORS=$(expr $ERRORS + 1)
+        fi
     fi
 
     ceph pg cancel-force-recovery $PG2 || return 1
@@ -264,27 +243,24 @@ function TEST_recovery_priority() {
     ceph pg force-recovery $PG3 || return 1
     sleep 2
 
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/out || return 1
+    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations >$dir/out || return 1
     cat $dir/out
     PRIO=$(cat $dir/out | jq "(.local_reservations.queues[].items[] | select(.item == \"${PG2}\")).prio")
-    if [ "$PRIO" != "$NORMAL_PRIO" ];
-    then
-      echo "After cancel-force-recovery PG ${PG3} doesn't have prio $NORMAL_PRIO"
-      ERRORS=$(expr $ERRORS + 1)
+    if [ "$PRIO" != "$NORMAL_PRIO" ]; then
+        echo "After cancel-force-recovery PG ${PG3} doesn't have prio $NORMAL_PRIO"
+        ERRORS=$(expr $ERRORS + 1)
     fi
 
     eval ITEM=$(cat $dir/out | jq '.local_reservations.in_progress[0].item')
-    if [ "$ITEM" != ${PG3} ];
-    then
-      echo "The force-recovery PG $PG3 didn't get promoted to an in progress item"
-      ERRORS=$(expr $ERRORS + 1)
-    else
-      PRIO=$(cat $dir/out | jq '.local_reservations.in_progress[0].prio')
-      if [ "$PRIO" != $FORCE_PRIO ];
-      then
-        echo "The force-recovery PG ${PG2} doesn't have prio $FORCE_PRIO"
+    if [ "$ITEM" != ${PG3} ]; then
+        echo "The force-recovery PG $PG3 didn't get promoted to an in progress item"
         ERRORS=$(expr $ERRORS + 1)
-      fi
+    else
+        PRIO=$(cat $dir/out | jq '.local_reservations.in_progress[0].prio')
+        if [ "$PRIO" != $FORCE_PRIO ]; then
+            echo "The force-recovery PG ${PG2} doesn't have prio $FORCE_PRIO"
+            ERRORS=$(expr $ERRORS + 1)
+        fi
     fi
 
     ceph osd unset noout
@@ -296,11 +272,10 @@ function TEST_recovery_priority() {
 
     CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_pgstate_history
 
-    if [ $ERRORS != "0" ];
-    then
-      echo "$ERRORS error(s) found"
+    if [ $ERRORS != "0" ]; then
+        echo "$ERRORS error(s) found"
     else
-      echo TEST PASSED
+        echo TEST PASSED
     fi
 
     delete_pool $pool1
@@ -328,15 +303,13 @@ function TEST_recovery_pool_priority() {
     run_mgr $dir x || return 1
     export CEPH_ARGS
 
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $osd || return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $osd || return 1
     done
 
-    for p in $(seq 1 $pools)
-    do
-      create_pool "${poolprefix}$p" 1 1
-      ceph osd pool set "${poolprefix}$p" size 2
+    for p in $(seq 1 $pools); do
+        create_pool "${poolprefix}$p" 1 1
+        ceph osd pool set "${poolprefix}$p" size 2
     done
     sleep 5
 
@@ -358,42 +331,36 @@ function TEST_recovery_pool_priority() {
     local chk_osd2_1
     local chk_osd2_2
 
-    for p in $(seq 1 $pools)
-    do
-      ceph pg map ${p}.0 --format=json | jq '.acting[]' > $dir/acting
-      local test_osd1=$(head -1 $dir/acting)
-      local test_osd2=$(tail -1 $dir/acting)
-      if [ -z "$PG1" ];
-      then
-        PG1="${p}.0"
-        POOLNUM1=$p
-        pool1="${poolprefix}$p"
-        chk_osd1_1=$test_osd1
-        chk_osd1_2=$test_osd2
-      elif [ $chk_osd1_1 != $test_osd1 ];
-      then
-        PG2="${p}.0"
-        POOLNUM2=$p
-        pool2="${poolprefix}$p"
-        chk_osd2_1=$test_osd1
-        chk_osd2_2=$test_osd2
-        break
-      fi
+    for p in $(seq 1 $pools); do
+        ceph pg map ${p}.0 --format=json | jq '.acting[]' >$dir/acting
+        local test_osd1=$(head -1 $dir/acting)
+        local test_osd2=$(tail -1 $dir/acting)
+        if [ -z "$PG1" ]; then
+            PG1="${p}.0"
+            POOLNUM1=$p
+            pool1="${poolprefix}$p"
+            chk_osd1_1=$test_osd1
+            chk_osd1_2=$test_osd2
+        elif [ $chk_osd1_1 != $test_osd1 ]; then
+            PG2="${p}.0"
+            POOLNUM2=$p
+            pool2="${poolprefix}$p"
+            chk_osd2_1=$test_osd1
+            chk_osd2_2=$test_osd2
+            break
+        fi
     done
     rm -f $dir/acting
 
-    if [ "$pool2" = "" ];
-    then
-      echo "Failure to find appropirate PGs"
-      return 1
+    if [ "$pool2" = "" ]; then
+        echo "Failure to find appropirate PGs"
+        return 1
     fi
 
-    for p in $(seq 1 $pools)
-    do
-      if [ $p != $POOLNUM1 -a $p != $POOLNUM2 ];
-      then
-        delete_pool ${poolprefix}$p
-      fi
+    for p in $(seq 1 $pools); do
+        if [ $p != $POOLNUM1 -a $p != $POOLNUM2 ]; then
+            delete_pool ${poolprefix}$p
+        fi
     done
 
     pool1_extra_prio=1
@@ -409,13 +376,11 @@ function TEST_recovery_pool_priority() {
 
     dd if=/dev/urandom of=$dir/data bs=1M count=10
     p=1
-    for pname in $pool1 $pool2
-    do
-      for i in $(seq 1 $objects)
-      do
-	rados -p ${pname} put obj${i}-p${p} $dir/data
-      done
-      p=$(expr $p + 1)
+    for pname in $pool1 $pool2; do
+        for i in $(seq 1 $objects); do
+            rados -p ${pname} put obj${i}-p${p} $dir/data
+        done
+        p=$(expr $p + 1)
     done
 
     local otherosd=$(get_not_primary $pool1 obj1-p1)
@@ -432,98 +397,86 @@ function TEST_recovery_pool_priority() {
     # Wait for recovery to start
     set -o pipefail
     count=0
-    while(true)
-    do
-      if test $(ceph --format json pg dump pgs |
-	      jq '.pg_stats | .[] | .state | contains("recovering")' | grep -c true) == "2"
-      then
-        break
-      fi
-      sleep 2
-      if test "$count" -eq "10"
-      then
-        echo "Recovery never started on both PGs"
-        return 1
-      fi
-      count=$(expr $count + 1)
+    while (true); do
+        if test $(ceph --format json pg dump pgs \
+            | jq '.pg_stats | .[] | .state | contains("recovering")' | grep -c true) == "2"; then
+            break
+        fi
+        sleep 2
+        if test "$count" -eq "10"; then
+            echo "Recovery never started on both PGs"
+            return 1
+        fi
+        count=$(expr $count + 1)
     done
     set +o pipefail
     ceph pg dump pgs
 
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/dump.${chk_osd1_1}.out
+    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations >$dir/dump.${chk_osd1_1}.out
     echo osd.${chk_osd1_1}
     cat $dir/dump.${chk_osd1_1}.out
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_2}) dump_recovery_reservations > $dir/dump.${chk_osd1_2}.out
+    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_2}) dump_recovery_reservations >$dir/dump.${chk_osd1_2}.out
     echo osd.${chk_osd1_2}
     cat $dir/dump.${chk_osd1_2}.out
 
     # Using eval will strip double-quotes from item
     eval ITEM=$(cat $dir/dump.${chk_osd1_1}.out | jq '.local_reservations.in_progress[0].item')
-    if [ "$ITEM" != ${PG1} ];
-    then
-      echo "The primary PG for $pool1 didn't become the in progress item"
-      ERRORS=$(expr $ERRORS + 1)
-    else
-      PRIO=$(cat $dir/dump.${chk_osd1_1}.out | jq '.local_reservations.in_progress[0].prio')
-      if [ "$PRIO" != $pool1_prio ];
-      then
-        echo "The primary PG ${PG1} doesn't have prio $pool1_prio"
+    if [ "$ITEM" != ${PG1} ]; then
+        echo "The primary PG for $pool1 didn't become the in progress item"
         ERRORS=$(expr $ERRORS + 1)
-      fi
+    else
+        PRIO=$(cat $dir/dump.${chk_osd1_1}.out | jq '.local_reservations.in_progress[0].prio')
+        if [ "$PRIO" != $pool1_prio ]; then
+            echo "The primary PG ${PG1} doesn't have prio $pool1_prio"
+            ERRORS=$(expr $ERRORS + 1)
+        fi
     fi
 
     # Using eval will strip double-quotes from item
     eval ITEM=$(cat $dir/dump.${chk_osd1_2}.out | jq '.remote_reservations.in_progress[0].item')
-    if [ "$ITEM" != ${PG1} ];
-    then
-      echo "The primary PG for $pool1 didn't become the in progress item on remote"
-      ERRORS=$(expr $ERRORS + 1)
-    else
-      PRIO=$(cat $dir/dump.${chk_osd1_2}.out | jq '.remote_reservations.in_progress[0].prio')
-      if [ "$PRIO" != $pool1_prio ];
-      then
-        echo "The primary PG ${PG1} doesn't have prio $pool1_prio on remote"
+    if [ "$ITEM" != ${PG1} ]; then
+        echo "The primary PG for $pool1 didn't become the in progress item on remote"
         ERRORS=$(expr $ERRORS + 1)
-      fi
+    else
+        PRIO=$(cat $dir/dump.${chk_osd1_2}.out | jq '.remote_reservations.in_progress[0].prio')
+        if [ "$PRIO" != $pool1_prio ]; then
+            echo "The primary PG ${PG1} doesn't have prio $pool1_prio on remote"
+            ERRORS=$(expr $ERRORS + 1)
+        fi
     fi
 
     # Using eval will strip double-quotes from item
     eval ITEM=$(cat $dir/dump.${chk_osd2_1}.out | jq '.local_reservations.in_progress[0].item')
-    if [ "$ITEM" != ${PG2} ];
-    then
-      echo "The primary PG for $pool2 didn't become the in progress item"
-      ERRORS=$(expr $ERRORS + 1)
-    else
-      PRIO=$(cat $dir/dump.${chk_osd2_1}.out | jq '.local_reservations.in_progress[0].prio')
-      if [ "$PRIO" != $pool2_prio ];
-      then
-        echo "The primary PG ${PG2} doesn't have prio $pool2_prio"
+    if [ "$ITEM" != ${PG2} ]; then
+        echo "The primary PG for $pool2 didn't become the in progress item"
         ERRORS=$(expr $ERRORS + 1)
-      fi
+    else
+        PRIO=$(cat $dir/dump.${chk_osd2_1}.out | jq '.local_reservations.in_progress[0].prio')
+        if [ "$PRIO" != $pool2_prio ]; then
+            echo "The primary PG ${PG2} doesn't have prio $pool2_prio"
+            ERRORS=$(expr $ERRORS + 1)
+        fi
     fi
 
     # Using eval will strip double-quotes from item
     eval ITEM=$(cat $dir/dump.${chk_osd2_2}.out | jq '.remote_reservations.in_progress[0].item')
-    if [ "$ITEM" != ${PG2} ];
-    then
-      echo "The primary PG $PG2 didn't become the in progress item on remote"
-      ERRORS=$(expr $ERRORS + 1)
-    else
-      PRIO=$(cat $dir/dump.${chk_osd2_2}.out | jq '.remote_reservations.in_progress[0].prio')
-      if [ "$PRIO" != $pool2_prio ];
-      then
-        echo "The primary PG ${PG2} doesn't have prio $pool2_prio on remote"
+    if [ "$ITEM" != ${PG2} ]; then
+        echo "The primary PG $PG2 didn't become the in progress item on remote"
         ERRORS=$(expr $ERRORS + 1)
-      fi
+    else
+        PRIO=$(cat $dir/dump.${chk_osd2_2}.out | jq '.remote_reservations.in_progress[0].prio')
+        if [ "$PRIO" != $pool2_prio ]; then
+            echo "The primary PG ${PG2} doesn't have prio $pool2_prio on remote"
+            ERRORS=$(expr $ERRORS + 1)
+        fi
     fi
 
     wait_for_clean || return 1
 
-    if [ $ERRORS != "0" ];
-    then
-      echo "$ERRORS error(s) found"
+    if [ $ERRORS != "0" ]; then
+        echo "$ERRORS error(s) found"
     else
-      echo TEST PASSED
+        echo TEST PASSED
     fi
 
     delete_pool $pool1

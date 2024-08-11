@@ -15,7 +15,7 @@ cleanup() {
 }
 
 setup_tempdir() {
-    TEMPDIR=`mktemp -d`
+    TEMPDIR=$(mktemp -d)
 }
 
 cleanup_tempdir() {
@@ -57,19 +57,17 @@ remove_image() {
 }
 
 remove_images() {
-    for image in ${IMAGES}
-    do
+    for image in ${IMAGES}; do
         remove_image ${image}
     done
 }
 
-show_diff()
-{
+show_diff() {
     local file1=$1
     local file2=$2
 
-    xxd "${file1}" > "${file1}.xxd"
-    xxd "${file2}" > "${file2}.xxd"
+    xxd "${file1}" >"${file1}.xxd"
+    xxd "${file2}" >"${file2}.xxd"
     sdiff -s "${file1}.xxd" "${file2}.xxd" | head -n 64
     rm -f "${file1}.xxd" "${file2}.xxd"
 }
@@ -80,8 +78,7 @@ compare_images() {
     local ret=0
 
     export_raw_image ${dst_image}
-    if ! cmp "${TEMPDIR}/${src_image}" "${TEMPDIR}/${dst_image}"
-    then
+    if ! cmp "${TEMPDIR}/${src_image}" "${TEMPDIR}/${dst_image}"; then
         show_diff "${TEMPDIR}/${src_image}" "${TEMPDIR}/${dst_image}"
         ret=1
     fi
@@ -96,7 +93,7 @@ test_import_native_format() {
     rbd migration abort ${dest_image}
 
     local pool_id=$(ceph osd pool ls detail --format xml | xmlstarlet sel -t -v "//pools/pool[pool_name='rbd']/pool_id")
-    cat > ${TEMPDIR}/spec.json <<EOF
+    cat >${TEMPDIR}/spec.json <<EOF
 {
   "type": "native",
   "pool_id": ${pool_id},
@@ -108,7 +105,7 @@ EOF
     cat ${TEMPDIR}/spec.json
 
     rbd migration prepare --import-only \
-	--source-spec-path ${TEMPDIR}/spec.json ${dest_image}
+        --source-spec-path ${TEMPDIR}/spec.json ${dest_image}
 
     compare_images "${base_image}@1" "${dest_image}@1"
     compare_images "${base_image}@2" "${dest_image}@2"
@@ -151,7 +148,7 @@ test_import_qcow_format() {
     fi
     qemu-img info -f qcow ${TEMPDIR}/${base_image}.qcow
 
-    cat > ${TEMPDIR}/spec.json <<EOF
+    cat >${TEMPDIR}/spec.json <<EOF
 {
   "type": "qcow",
   "stream": {
@@ -221,7 +218,7 @@ test_import_qcow2_format() {
 
     qemu-img info -f qcow2 ${TEMPDIR}/${base_image}.qcow2
 
-    cat > ${TEMPDIR}/spec.json <<EOF
+    cat >${TEMPDIR}/spec.json <<EOF
 {
   "type": "qcow",
   "stream": {
@@ -267,7 +264,7 @@ test_import_raw_format() {
     local base_image=$1
     local dest_image=$2
 
-    cat > ${TEMPDIR}/spec.json <<EOF
+    cat >${TEMPDIR}/spec.json <<EOF
 {
   "type": "raw",
   "stream": {
@@ -279,12 +276,12 @@ EOF
     cat ${TEMPDIR}/spec.json
 
     cat ${TEMPDIR}/spec.json | rbd migration prepare --import-only \
-	--source-spec-path - ${dest_image}
+        --source-spec-path - ${dest_image}
     compare_images ${base_image} ${dest_image}
     rbd migration abort ${dest_image}
 
     rbd migration prepare --import-only \
-	--source-spec-path ${TEMPDIR}/spec.json ${dest_image}
+        --source-spec-path ${TEMPDIR}/spec.json ${dest_image}
     rbd migration execute ${dest_image}
     rbd migration commit ${dest_image}
 
@@ -292,7 +289,7 @@ EOF
 
     remove_image "${dest_image}"
 
-    cat > ${TEMPDIR}/spec.json <<EOF
+    cat >${TEMPDIR}/spec.json <<EOF
 {
   "type": "raw",
   "stream": {

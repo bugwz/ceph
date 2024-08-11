@@ -2,9 +2,9 @@
 
 # set -e -x
 
-. "`dirname $0`/test-rgw-common.sh"
+. "$(dirname $0)/test-rgw-common.sh"
 
-temp_prefix="/tmp/`basename $0`-$$"
+temp_prefix="/tmp/$(basename $0)-$$"
 
 short=${temp_prefix}-short
 short_w_blank=${temp_prefix}-short-w-blank

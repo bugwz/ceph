@@ -40,7 +40,7 @@ TYPE_FEATUREFUL(MDSMap)
 TYPE_FEATUREFUL(MDSMap::mds_info_t)
 
 #include "mds/FSMap.h"
-//TYPE_FEATUREFUL(Filesystem)
+// TYPE_FEATUREFUL(Filesystem)
 TYPE_FEATUREFUL(FSMap)
 
 #include "mds/Capability.h"
@@ -108,4 +108,4 @@ TYPE_FEATUREFUL_NOCOPY(ETableServer)
 
 #include "mds/events/EUpdate.h"
 TYPE_FEATUREFUL_NOCOPY(EUpdate)
-#endif // WITH_CEPHFS
+#endif   // WITH_CEPHFS

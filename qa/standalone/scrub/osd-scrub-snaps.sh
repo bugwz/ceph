@@ -34,7 +34,7 @@ function run() {
 
     export -n CEPH_CLI_TEST_DUP_COMMAND
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
-    for func in $funcs ; do
+    for func in $funcs; do
         setup $dir || return 1
         $func $dir || return 1
         teardown $dir || return 1
@@ -53,8 +53,8 @@ function create_scenario() {
     rados -p $poolname put obj1 $TESTDATA
     rados -p $poolname put obj5 $TESTDATA
     rados -p $poolname put obj3 $TESTDATA
-    for i in `seq 6 14`
-     do rados -p $poolname put obj${i} $TESTDATA
+    for i in $(seq 6 14); do
+        rados -p $poolname put obj${i} $TESTDATA
     done
 
     SNAP=2
@@ -100,12 +100,12 @@ function create_scenario() {
     JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --op list obj5 | grep \"snapid\":1)"
     OBJ5SAVE="$JSON"
     # Starts with a snapmap
-    ceph-kvstore-tool bluestore-kv $dir/${osd} list 2> /dev/null > $dir/drk.log
+    ceph-kvstore-tool bluestore-kv $dir/${osd} list 2>/dev/null >$dir/drk.log
     grep SNA_ $dir/drk.log
     grep "^[pm].*SNA_.*[.]1[.]obj5[.][.]$" $dir/drk.log || return 1
     ceph-objectstore-tool --data-path $dir/${osd} --rmtype nosnapmap "$JSON" remove || return 1
     # Check that snapmap is stil there
-    ceph-kvstore-tool bluestore-kv $dir/${osd} list 2> /dev/null > $dir/drk.log
+    ceph-kvstore-tool bluestore-kv $dir/${osd} list 2>/dev/null >$dir/drk.log
     grep SNA_ $dir/drk.log
     grep "^[pm].*SNA_.*[.]1[.]obj5[.][.]$" $dir/drk.log || return 1
     rm -f $dir/drk.log
@@ -122,13 +122,13 @@ function create_scenario() {
     ceph-objectstore-tool --data-path $dir/${osd} "$JSON" remove || return 1
 
     # Starts with a snapmap
-    ceph-kvstore-tool bluestore-kv $dir/${osd} list 2> /dev/null > $dir/drk.log
+    ceph-kvstore-tool bluestore-kv $dir/${osd} list 2>/dev/null >$dir/drk.log
     grep SNA_ $dir/drk.log
     grep "^[pm].*SNA_.*[.]7[.]obj16[.][.]$" $dir/drk.log || return 1
     JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --op list obj16 | grep \"snapid\":7)"
     ceph-objectstore-tool --data-path $dir/${osd} --rmtype snapmap "$JSON" remove || return 1
     # Check that snapmap is now removed
-    ceph-kvstore-tool bluestore-kv $dir/${osd} list 2> /dev/null > $dir/drk.log
+    ceph-kvstore-tool bluestore-kv $dir/${osd} list 2>/dev/null >$dir/drk.log
     grep SNA_ $dir/drk.log
     ! grep "^[pm].*SNA_.*[.]7[.]obj16[.][.]$" $dir/drk.log || return 1
     rm -f $dir/drk.log
@@ -160,7 +160,7 @@ function create_scenario() {
     JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj14)"
     ceph-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset size || return 1
 
-    echo "garbage" > $dir/bad
+    echo "garbage" >$dir/bad
     JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj15)"
     ceph-objectstore-tool --data-path $dir/${osd} "$JSON" set-attr snapset $dir/bad || return 1
     rm -f $dir/bad
@@ -177,9 +177,8 @@ function TEST_scrub_snaps() {
 
     run_mon $dir a --osd_pool_default_size=$OSDS || return 1
     run_mgr $dir x || return 1
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $osd || return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $osd || return 1
     done
 
     # All scrubs done manually.  Don't want any unexpected scheduled scrubs.
@@ -192,8 +191,7 @@ function TEST_scrub_snaps() {
     poolid=$(ceph osd dump | grep "^pool.*[']test[']" | awk '{ print $2 }')
 
     dd if=/dev/urandom of=$TESTDATA bs=1032 count=1
-    for i in `seq 1 $OBJS`
-    do
+    for i in $(seq 1 $OBJS); do
         rados -p $poolname put obj${i} $TESTDATA
     done
 
@@ -203,44 +201,43 @@ function TEST_scrub_snaps() {
 
     rm -f $TESTDATA
 
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      activate_osd $dir $osd || return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        activate_osd $dir $osd || return 1
     done
 
     wait_for_clean || return 1
 
     local pgid="${poolid}.0"
-    if ! pg_scrub "$pgid" ; then
+    if ! pg_scrub "$pgid"; then
         return 1
     fi
 
     test "$(grep "_scan_snaps start" $dir/osd.${primary}.log | wc -l)" = "2" || return 1
 
-    rados list-inconsistent-pg $poolname > $dir/json || return 1
+    rados list-inconsistent-pg $poolname >$dir/json || return 1
     # Check pg count
     test $(jq '. | length' $dir/json) = "1" || return 1
     # Check pgid
     test $(jq -r '.[0]' $dir/json) = $pgid || return 1
 
-    rados list-inconsistent-obj $pgid > $dir/json || return 1
+    rados list-inconsistent-obj $pgid >$dir/json || return 1
 
     # The injected snapshot errors with a single copy pool doesn't
     # see object errors because all the issues are detected by
     # comparing copies.
-    jq "$jqfilter" << EOF | python3 -c "$sortkeys" > $dir/checkcsjson
+    jq "$jqfilter" <<EOF | python3 -c "$sortkeys" >$dir/checkcsjson
 {
     "epoch": 17,
     "inconsistents": []
 }
 EOF
 
-    jq "$jqfilter" $dir/json | python3 -c "$sortkeys" > $dir/csjson
+    jq "$jqfilter" $dir/json | python3 -c "$sortkeys" >$dir/csjson
     multidiff $dir/checkcsjson $dir/csjson || test $getjson = "yes" || return 1
 
-    rados list-inconsistent-snapset $pgid > $dir/json || return 1
+    rados list-inconsistent-snapset $pgid >$dir/json || return 1
 
-    jq "$jqfilter" << EOF | python3 -c "$sortkeys" > $dir/checkcsjson
+    jq "$jqfilter" <<EOF | python3 -c "$sortkeys" >$dir/checkcsjson
 {
   "inconsistents": [
     {
@@ -619,52 +616,44 @@ EOF
 }
 EOF
 
-    jq "$jqfilter" $dir/json | python3 -c "$sortkeys" > $dir/csjson
+    jq "$jqfilter" $dir/json | python3 -c "$sortkeys" >$dir/csjson
     multidiff $dir/checkcsjson $dir/csjson || test $getjson = "yes" || return 1
-    if test $getjson = "yes"
-    then
-        jq '.' $dir/json > save1.json
+    if test $getjson = "yes"; then
+        jq '.' $dir/json >save1.json
     fi
 
-    if test "$LOCALRUN" = "yes" && which jsonschema > /dev/null;
-    then
-      jsonschema -i $dir/json $CEPH_ROOT/doc/rados/command/list-inconsistent-snap.json || return 1
+    if test "$LOCALRUN" = "yes" && which jsonschema >/dev/null; then
+        jsonschema -i $dir/json $CEPH_ROOT/doc/rados/command/list-inconsistent-snap.json || return 1
     fi
 
     pidfiles=$(find $dir 2>/dev/null | grep 'osd[^/]*\.pid')
     pids=""
-    for pidfile in ${pidfiles}
-    do
+    for pidfile in ${pidfiles}; do
         pids+="$(cat $pidfile) "
     done
 
     ERRORS=0
 
-    for i in `seq 1 7`
-    do
+    for i in $(seq 1 7); do
         rados -p $poolname rmsnap snap$i
     done
     sleep 5
     local -i loop=0
-    while ceph pg dump pgs | grep -q snaptrim;
-    do
-        if ceph pg dump pgs | grep -q snaptrim_error;
-        then
+    while ceph pg dump pgs | grep -q snaptrim; do
+        if ceph pg dump pgs | grep -q snaptrim_error; then
             break
         fi
         sleep 2
         loop+=1
-        if (( $loop >= 10 )) ; then
+        if (($loop >= 10)); then
             ERRORS=$(expr $ERRORS + 1)
             break
         fi
     done
     ceph pg dump pgs
 
-    for pid in $pids
-    do
-        if ! kill -0 $pid
-        then
+    for pid in $pids; do
+        if ! kill -0 $pid; then
             echo "OSD Crash occurred"
             ERRORS=$(expr $ERRORS + 1)
         fi
@@ -697,17 +686,14 @@ EOF
     err_strings[21]="log_channel[(]cluster[)] log [[]ERR[]] : scrub [0-9]*[.]0 .*:::obj15:head : can't decode 'snapset' attr "
     err_strings[22]="log_channel[(]cluster[)] log [[]ERR[]] : osd[.][0-9]* found snap mapper error on pg 1.0 oid 1:461f8b5e:::obj16:7 snaps missing in mapper, should be: 1,2,3,4,5,6,7 was  r -2...repaired"
 
-    for err_string in "${err_strings[@]}"
-    do
-        if ! grep "$err_string" $dir/osd.${primary}.log > /dev/null;
-        then
+    for err_string in "${err_strings[@]}"; do
+        if ! grep "$err_string" $dir/osd.${primary}.log >/dev/null; then
             echo "Missing log message '$err_string'"
             ERRORS=$(expr $ERRORS + 1)
         fi
     done
 
-    if [ $ERRORS != "0" ];
-    then
+    if [ $ERRORS != "0" ]; then
         echo "TEST FAILED WITH $ERRORS ERRORS"
         return 1
     fi
@@ -727,9 +713,8 @@ function _scrub_snaps_multi() {
 
     run_mon $dir a --osd_pool_default_size=$OSDS || return 1
     run_mgr $dir x || return 1
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      run_osd $dir $osd || return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        run_osd $dir $osd || return 1
     done
 
     # All scrubs done manually.  Don't want any unexpected scheduled scrubs.
@@ -742,8 +727,7 @@ function _scrub_snaps_multi() {
     poolid=$(ceph osd dump | grep "^pool.*[']test[']" | awk '{ print $2 }')
 
     dd if=/dev/urandom of=$TESTDATA bs=1032 count=1
-    for i in `seq 1 $OBJS`
-    do
+    for i in $(seq 1 $OBJS); do
         rados -p $poolname put obj${i} $TESTDATA
     done
 
@@ -754,22 +738,21 @@ function _scrub_snaps_multi() {
 
     rm -f $TESTDATA
 
-    for osd in $(seq 0 $(expr $OSDS - 1))
-    do
-      activate_osd $dir $osd || return 1
+    for osd in $(seq 0 $(expr $OSDS - 1)); do
+        activate_osd $dir $osd || return 1
     done
 
     wait_for_clean || return 1
 
     local pgid="${poolid}.0"
-    if ! pg_scrub "$pgid" ; then
+    if ! pg_scrub "$pgid"; then
         return 1
     fi
 
     test "$(grep "_scan_snaps start" $dir/osd.${primary}.log | wc -l)" -gt "3" || return 1
     test "$(grep "_scan_snaps start" $dir/osd.${replica}.log | wc -l)" -gt "3" || return 1
 
-    rados list-inconsistent-pg $poolname > $dir/json || return 1
+    rados list-inconsistent-pg $poolname >$dir/json || return 1
     # Check pg count
     test $(jq '. | length' $dir/json) = "1" || return 1
     # Check pgid
@@ -777,22 +760,21 @@ function _scrub_snaps_multi() {
 
     rados list-inconsistent-obj $pgid --format=json-pretty
 
-    rados list-inconsistent-snapset $pgid > $dir/json || return 1
+    rados list-inconsistent-snapset $pgid >$dir/json || return 1
 
     # Since all of the snapshots on the primary is consistent there are no errors here
-    if [ $which = "replica" ];
-    then
+    if [ $which = "replica" ]; then
         scruberrors="20"
-        jq "$jqfilter" << EOF | python3 -c "$sortkeys" > $dir/checkcsjson
+        jq "$jqfilter" <<EOF | python3 -c "$sortkeys" >$dir/checkcsjson
 {
     "epoch": 23,
     "inconsistents": []
 }
 EOF
 
-else
+    else
         scruberrors="30"
-        jq "$jqfilter" << EOF | python3 -c "$sortkeys" > $dir/checkcsjson
+        jq "$jqfilter" <<EOF | python3 -c "$sortkeys" >$dir/checkcsjson
 {
     "epoch": 23,
     "inconsistents": [
@@ -1044,24 +1026,21 @@ else
     ]
 }
 EOF
-fi
-
-    jq "$jqfilter" $dir/json | python3 -c "$sortkeys" > $dir/csjson
-    multidiff $dir/checkcsjson $dir/csjson || test $getjson = "yes" || return 1
-    if test $getjson = "yes"
-    then
-        jq '.' $dir/json > save1.json
     fi
 
-    if test "$LOCALRUN" = "yes" && which jsonschema > /dev/null;
-    then
-      jsonschema -i $dir/json $CEPH_ROOT/doc/rados/command/list-inconsistent-snap.json || return 1
+    jq "$jqfilter" $dir/json | python3 -c "$sortkeys" >$dir/csjson
+    multidiff $dir/checkcsjson $dir/csjson || test $getjson = "yes" || return 1
+    if test $getjson = "yes"; then
+        jq '.' $dir/json >save1.json
+    fi
+
+    if test "$LOCALRUN" = "yes" && which jsonschema >/dev/null; then
+        jsonschema -i $dir/json $CEPH_ROOT/doc/rados/command/list-inconsistent-snap.json || return 1
     fi
 
     pidfiles=$(find $dir 2>/dev/null | grep 'osd[^/]*\.pid')
     pids=""
-    for pidfile in ${pidfiles}
-    do
+    for pidfile in ${pidfiles}; do
         pids+="$(cat $pidfile) "
     done
 
@@ -1069,23 +1048,19 @@ fi
 
     # When removing snapshots with a corrupt replica, it crashes.
     # See http://tracker.ceph.com/issues/23875
-    if [ $which = "primary" ];
-    then
-        for i in `seq 1 7`
-        do
+    if [ $which = "primary" ]; then
+        for i in $(seq 1 7); do
             rados -p $poolname rmsnap snap$i
         done
         sleep 5
         local -i loop=0
-        while ceph pg dump pgs | grep -q snaptrim;
-        do
-            if ceph pg dump pgs | grep -q snaptrim_error;
-            then
+        while ceph pg dump pgs | grep -q snaptrim; do
+            if ceph pg dump pgs | grep -q snaptrim_error; then
                 break
             fi
             sleep 2
             loop+=1
-            if (( $loop >= 10 )) ; then
+            if (($loop >= 10)); then
                 ERRORS=$(expr $ERRORS + 1)
                 break
             fi
@@ -1093,10 +1068,8 @@ fi
     fi
     ceph pg dump pgs
 
-    for pid in $pids
-    do
-        if ! kill -0 $pid
-        then
+    for pid in $pids; do
+        if ! kill -0 $pid; then
             echo "OSD Crash occurred"
             ERRORS=$(expr $ERRORS + 1)
         fi
@@ -1114,10 +1087,8 @@ fi
     err_strings[6]="log_channel[(]cluster[)] log [[]ERR[]] : [0-9]*[.]0 shard [0-1] .*:::obj1:head : missing"
     err_strings[7]="log_channel[(]cluster[)] log [[]ERR[]] : [0-9]*[.]0 scrub ${scruberrors} errors"
 
-    for err_string in "${err_strings[@]}"
-    do
-        if ! grep "$err_string" $dir/osd.${primary}.log > /dev/null;
-        then
+    for err_string in "${err_strings[@]}"; do
+        if ! grep "$err_string" $dir/osd.${primary}.log >/dev/null; then
             echo "Missing log message '$err_string'"
             ERRORS=$(expr $ERRORS + 1)
         fi
@@ -1127,17 +1098,14 @@ fi
     declare -a rep_err_strings
     osd=$(eval echo \$$which)
     rep_err_strings[0]="log_channel[(]cluster[)] log [[]ERR[]] : osd[.][0-9]* found snap mapper error on pg 1.0 oid 1:461f8b5e:::obj16:7 snaps missing in mapper, should be: 1,2,3,4,5,6,7 was  r -2...repaired"
-    for err_string in "${rep_err_strings[@]}"
-    do
-        if ! grep "$err_string" $dir/osd.${osd}.log > /dev/null;
-        then
+    for err_string in "${rep_err_strings[@]}"; do
+        if ! grep "$err_string" $dir/osd.${osd}.log >/dev/null; then
             echo "Missing log message '$err_string'"
             ERRORS=$(expr $ERRORS + 1)
         fi
     done
 
-    if [ $ERRORS != "0" ];
-    then
+    if [ $ERRORS != "0" ]; then
         echo "TEST FAILED WITH $ERRORS ERRORS"
         return 1
     fi
