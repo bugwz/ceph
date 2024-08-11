@@ -11,7 +11,7 @@ EOF
 
 rm -f mm
 monmaptool --create mm \
-	--add a 127.0.0.1:6789
+    --add a 127.0.0.1:6789
 
 rm -f keyring
 ceph-authtool --create-keyring keyring --gen-key -n client.admin
@@ -29,11 +29,11 @@ ceph-mon -c conf -i d --mkfs --monmap mm --mon-data $cwd/mon.d -k keyring
 ceph-mon -c conf -i d --mon-data $cwd/mon.d
 
 while true; do
-	ceph -c conf -k keyring --monmap mm health
-	if ceph -c conf -k keyring --monmap mm mon stat | grep 'quorum 0,1'; then
-		break
-	fi
-	sleep 1
+    ceph -c conf -k keyring --monmap mm health
+    if ceph -c conf -k keyring --monmap mm mon stat | grep 'quorum 0,1'; then
+        break
+    fi
+    sleep 1
 done
 
 # again
@@ -42,11 +42,11 @@ ceph-mon -c conf -i e --mkfs --monmap mm --mon-data $cwd/mon.e -k keyring
 ceph-mon -c conf -i e --mon-data $cwd/mon.e
 
 while true; do
-	ceph -c conf -k keyring --monmap mm health
-	if ceph -c conf -k keyring --monmap mm mon stat | grep 'quorum 0,1,2'; then
-		break
-	fi
-	sleep 1
+    ceph -c conf -k keyring --monmap mm health
+    if ceph -c conf -k keyring --monmap mm mon stat | grep 'quorum 0,1,2'; then
+        break
+    fi
+    sleep 1
 done
 
 killall ceph-mon

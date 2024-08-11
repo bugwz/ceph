@@ -4,8 +4,8 @@ fname=$1
 [ -z "$fname" ] && exit
 
 [ -e $fname ] || {
-	echo "file no found: $fname"
-	exit
+    echo "file no found: $fname"
+    exit
 }
 
 name="$(nm $fname | grep __cls_name__ | sed 's/.*__cls_name__//g' | head -1)"
@@ -23,8 +23,8 @@ arch=""
 [ $(echo "$fl" | grep -c x86-64) -gt 0 ] && arch="x86-64"
 
 [ -z "$arch" ] && {
-	echo "lib architecture not identified"
-	exit
+    echo "lib architecture not identified"
+    exit
 }
 
 $(dirname $0)/ceph class add $name $ver $arch --in-data=$fname

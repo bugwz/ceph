@@ -6,18 +6,18 @@ SHELL_FILE_EXTENSIONS=("*.sh")
 
 # 格式化 C++ 文件
 for ext in "${FILE_EXTENSIONS[@]}"; do
-	find . -type f -name "$ext" | while read -r file; do
-		echo "$(realpath "$file")"
-		clang-format -i "$file"
-	done
+    find . -type f -name "$ext" | while read -r file; do
+        echo "$(realpath "$file")"
+        clang-format -i "$file"
+    done
 done
 
 # 格式化 Shell 文件
 for ext in "${SHELL_FILE_EXTENSIONS[@]}"; do
-	find . -type f -name "$ext" | while read -r file; do
-		echo "$(realpath "$file")"
-		shfmt -w "$file"
-	done
+    find . -type f -name "$ext" | while read -r file; do
+        echo "$(realpath "$file")"
+        shfmt -i 4 -ci -bn -w "$file"
+    done
 done
 
 echo "All files have been formatted."

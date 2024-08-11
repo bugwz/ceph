@@ -109,7 +109,7 @@ struct is_trivially_copy_constructible<std::vector<T, A>> : std::is_trivially_co
 /// \exclude
 #define TL_EXPECTED_11_CONSTEXPR
 #else
-/// \exclude
+    /// \exclude
 #define TL_EXPECTED_11_CONSTEXPR constexpr
 #endif
 

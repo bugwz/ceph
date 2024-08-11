@@ -10,7 +10,7 @@ set -ex
 
 set -e
 expect_failure() {
-	if "$@"; then return 1; else return 0; fi
+    if "$@"; then return 1; else return 0; fi
 }
 
 ceph fs subvolume create cephfs sub_0
@@ -29,11 +29,11 @@ ceph osd set-backfillfull-ratio 0.18
 
 timeout=30
 while [ $timeout -gt 0 ]; do
-	health=$(ceph health detail)
-	[[ $health = *"OSD_FULL"* ]] && echo "OSD is full" && break
-	echo "Wating for osd to be full: $timeout"
-	sleep 1
-	let "timeout-=1"
+    health=$(ceph health detail)
+    [[ $health = *"OSD_FULL"* ]] && echo "OSD is full" && break
+    echo "Wating for osd to be full: $timeout"
+    sleep 1
+    let "timeout-=1"
 done
 
 #For debugging
@@ -51,10 +51,10 @@ expect_failure ceph fs subvolume info cephfs sub_0
 trashdir=$CEPH_MNT/volumes/_deleting
 timeout=30
 while [ $timeout -gt 0 ]; do
-	[ -z "$(sudo ls -A $trashdir)" ] && echo "Trash directory $trashdir is empty" && break
-	echo "Wating for trash dir to be empty: $timeout"
-	sleep 1
-	let "timeout-=1"
+    [ -z "$(sudo ls -A $trashdir)" ] && echo "Trash directory $trashdir is empty" && break
+    echo "Wating for trash dir to be empty: $timeout"
+    sleep 1
+    let "timeout-=1"
 done
 
 #Set the ratios back for other full tests to run

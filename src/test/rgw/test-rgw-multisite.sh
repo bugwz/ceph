@@ -32,18 +32,18 @@ echo realm_status=$output
 
 i=2
 while [ $i -le $num_clusters ]; do
-	x $(start_ceph_cluster c$i) -n
+    x $(start_ceph_cluster c$i) -n
 
-	# create new zone, start rgw
-	init_zone_in_existing_zg c$i $realm_name $zg ${zg}-${i} 8001 $((8000 + $i)) $zone_port $system_access_key $system_secret
-	x $(rgw c$i $((8000 + $i)))
+    # create new zone, start rgw
+    init_zone_in_existing_zg c$i $realm_name $zg ${zg}-${i} 8001 $((8000 + $i)) $zone_port $system_access_key $system_secret
+    x $(rgw c$i $((8000 + $i)))
 
-	i=$((i + 1))
+    i=$((i + 1))
 done
 
 i=2
 while [ $i -le $num_clusters ]; do
-	wait_for_meta_sync c1 c$i $realm_name
+    wait_for_meta_sync c1 c$i $realm_name
 
-	i=$((i + 1))
+    i=$((i + 1))
 done

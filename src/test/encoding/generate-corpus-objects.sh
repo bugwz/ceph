@@ -51,8 +51,8 @@ echo 'importing'
 ../src/test/encoding/import.sh $p $v ../ceph-object-corpus/archive
 
 for d in ../ceph-object-corpus/archive/$v/objects/*; do
-	echo prune $d
-	../ceph-object-corpus/bin/prune.sh $d 25
+    echo prune $d
+    ../ceph-object-corpus/bin/prune.sh $d 25
 done
 
 echo 'done'

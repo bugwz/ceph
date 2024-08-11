@@ -7,7 +7,7 @@ sudo ./edit_ansible_hosts.sh $cephnodes
 mkdir ceph-ansible-keys
 cd /usr/share/ceph-ansible/group_vars/
 if [ -f ~/ip_info ]; then
-	source ~/ip_info
+    source ~/ip_info
 fi
 mon_intf=${mon_intf:-'eno1'}
 pub_netw=${pub_netw:-'10.8.128.0\/21'}

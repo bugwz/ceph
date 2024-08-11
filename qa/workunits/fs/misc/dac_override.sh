@@ -1,7 +1,7 @@
 #!/bin/sh -x
 
 expect_failure() {
-	if "$@"; then return 1; else return 0; fi
+    if "$@"; then return 1; else return 0; fi
 }
 
 set -e

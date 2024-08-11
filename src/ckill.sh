@@ -2,10 +2,10 @@
 
 # fsid
 if [ -e fsid ]; then
-	fsid=$(cat fsid)
+    fsid=$(cat fsid)
 else
-	echo 'no fsid file, so no cluster?'
-	exit 0
+    echo 'no fsid file, so no cluster?'
+    exit 0
 fi
 echo "fsid $fsid"
 

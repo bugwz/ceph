@@ -24,7 +24,7 @@ sudo systemctl restart rbdmap.service
 
 echo "TEST: ensure that /usr/bin/rbdmap runs to completion"
 until sudo systemctl status rbdmap.service | grep 'active (exited)'; do
-	sleep 0.5
+    sleep 0.5
 done
 
 echo "TEST: assert that rbdmap has not logged anything since TIMESTAMP"

@@ -8,16 +8,16 @@ CEPHADM=${CEPHADM_SRC_DIR}/cephadm
 # this is a pretty weak test, unfortunately, since the
 # package may also be in the base OS.
 function test_install_uninstall() {
-	(sudo apt update &&
-		sudo apt -y install cephadm &&
-		sudo $CEPHADM install &&
-		sudo apt -y remove cephadm) ||
-		(sudo yum -y install cephadm &&
-			sudo $CEPHADM install &&
-			sudo yum -y remove cephadm) ||
-		(sudo dnf -y install cephadm &&
-			sudo $CEPHADM install &&
-			sudo dnf -y remove cephadm)
+    (sudo apt update \
+        && sudo apt -y install cephadm \
+        && sudo $CEPHADM install \
+        && sudo apt -y remove cephadm) \
+        || (sudo yum -y install cephadm \
+            && sudo $CEPHADM install \
+            && sudo yum -y remove cephadm) \
+        || (sudo dnf -y install cephadm \
+            && sudo $CEPHADM install \
+            && sudo dnf -y remove cephadm)
 }
 
 sudo $CEPHADM -v add-repo --release octopus

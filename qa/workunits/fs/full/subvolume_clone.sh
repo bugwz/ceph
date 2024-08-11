@@ -21,11 +21,11 @@ set -ex
 
 set -e
 ignore_failure() {
-	if "$@"; then return 0; else return 0; fi
+    if "$@"; then return 0; else return 0; fi
 }
 
 expect_failure() {
-	if "$@"; then return 1; else return 0; fi
+    if "$@"; then return 1; else return 0; fi
 }
 
 NUM_CLONES=10
@@ -66,11 +66,11 @@ for i in $(eval echo {1..$NUM_CLONES}); do ceph fs subvolume snapshot clone ceph
 # Wait for osd is full
 timeout=90
 while [ $timeout -gt 0 ]; do
-	health=$(ceph health detail)
-	[[ $health = *"OSD_FULL"* ]] && echo "OSD is full" && break
-	echo "Wating for osd to be full: $timeout"
-	sleep 1
-	let "timeout-=1"
+    health=$(ceph health detail)
+    [[ $health = *"OSD_FULL"* ]] && echo "OSD is full" && break
+    echo "Wating for osd to be full: $timeout"
+    sleep 1
+    let "timeout-=1"
 done
 
 # For debugging
@@ -80,17 +80,17 @@ ceph osd df
 
 # Check clone status, this should not crash
 for i in $(eval echo {1..$NUM_CLONES}); do
-	ignore_failure ceph fs clone status cephfs clone_$i >/tmp/out_${PID}_file 2>/tmp/error_${PID}_file
-	cat /tmp/error_${PID}_file
-	if grep "complete" /tmp/out_${PID}_file; then
-		echo "The clone_$i is completed"
-	else
-		#in-progress/pending clones, No traceback should be found in stderr
-		echo clone_$i in PENDING/IN-PROGRESS
-		expect_failure sudo grep "Traceback" /tmp/error_${PID}_file
-		#config file should not be truncated and GLOBAL section should be found
-		sudo grep "GLOBAL" $CEPH_MNT/volumes/_nogroup/clone_$i/.meta
-	fi
+    ignore_failure ceph fs clone status cephfs clone_$i >/tmp/out_${PID}_file 2>/tmp/error_${PID}_file
+    cat /tmp/error_${PID}_file
+    if grep "complete" /tmp/out_${PID}_file; then
+        echo "The clone_$i is completed"
+    else
+        #in-progress/pending clones, No traceback should be found in stderr
+        echo clone_$i in PENDING/IN-PROGRESS
+        expect_failure sudo grep "Traceback" /tmp/error_${PID}_file
+        #config file should not be truncated and GLOBAL section should be found
+        sudo grep "GLOBAL" $CEPH_MNT/volumes/_nogroup/clone_$i/.meta
+    fi
 done
 
 # Hard cleanup

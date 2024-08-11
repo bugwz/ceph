@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 die() {
-	echo ${@}
-	exit 1
+    echo ${@}
+    exit 1
 }
 
 usage() {
-	cat <<EOF
+    cat <<EOF
 $0: sets up a chroot environment for building the ceph server
 usage:
 -h                      Show this message
@@ -20,26 +20,26 @@ EOF
 }
 
 cleanup() {
-	umount -l "${INSTALL_DIR}/mnt/tmp"
-	umount -l "${INSTALL_DIR}/proc"
-	umount -l "${INSTALL_DIR}/sys"
+    umount -l "${INSTALL_DIR}/mnt/tmp"
+    umount -l "${INSTALL_DIR}/proc"
+    umount -l "${INSTALL_DIR}/sys"
 }
 
 INSTALL_DIR=
 SRC_DIR=
 while getopts “hr:s:” OPTION; do
-	case $OPTION in
-	h)
-		usage
-		exit 1
-		;;
-	r) INSTALL_DIR=$OPTARG ;;
-	s) SRC_DIR=$OPTARG ;;
-	?)
-		usage
-		exit
-		;;
-	esac
+    case $OPTION in
+        h)
+            usage
+            exit 1
+            ;;
+        r) INSTALL_DIR=$OPTARG ;;
+        s) SRC_DIR=$OPTARG ;;
+        ?)
+            usage
+            exit
+            ;;
+    esac
 done
 
 [ $EUID -eq 0 ] || die "This script uses chroot, which requires root permissions."

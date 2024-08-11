@@ -13,10 +13,10 @@ dest_dir="$archive/$ver/objects"
 [ -d "$dest_dir" ] || mkdir "$dest_dir"
 
 for f in $(find $src -type f); do
-	n=$(basename $f)
-	type=$(echo $n | sed 's/__.*//')
-	md=$(md5sum $f | awk '{print $1}')
+    n=$(basename $f)
+    type=$(echo $n | sed 's/__.*//')
+    md=$(md5sum $f | awk '{print $1}')
 
-	[ -d "$dest_dir/$type" ] || mkdir $dest_dir/$type
-	[ -e "$dest_dir/$type/$md" ] || cp $f $dest_dir/$type/$md
+    [ -d "$dest_dir/$type" ] || mkdir $dest_dir/$type
+    [ -e "$dest_dir/$type/$md" ] || cp $f $dest_dir/$type/$md
 done

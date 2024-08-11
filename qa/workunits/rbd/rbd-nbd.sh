@@ -12,108 +12,108 @@ DATA=
 DEV=
 
 _sudo() {
-	local cmd
+    local cmd
 
-	if [ $(id -u) -eq 0 ]; then
-		"$@"
-		return $?
-	fi
+    if [ $(id -u) -eq 0 ]; then
+        "$@"
+        return $?
+    fi
 
-	# Look for the command in the user path. If it fails run it as is,
-	# supposing it is in sudo path.
-	cmd=$(which $1 2>/dev/null) || cmd=$1
-	shift
-	sudo -nE "${cmd}" "$@"
+    # Look for the command in the user path. If it fails run it as is,
+    # supposing it is in sudo path.
+    cmd=$(which $1 2>/dev/null) || cmd=$1
+    shift
+    sudo -nE "${cmd}" "$@"
 }
 
 setup() {
-	local ns x
+    local ns x
 
-	if [ -e CMakeCache.txt ]; then
-		# running under cmake build dir
+    if [ -e CMakeCache.txt ]; then
+        # running under cmake build dir
 
-		CEPH_SRC=$(readlink -f $(dirname $0)/../../../src)
-		CEPH_ROOT=${PWD}
-		CEPH_BIN=${CEPH_ROOT}/bin
+        CEPH_SRC=$(readlink -f $(dirname $0)/../../../src)
+        CEPH_ROOT=${PWD}
+        CEPH_BIN=${CEPH_ROOT}/bin
 
-		export LD_LIBRARY_PATH=${CEPH_ROOT}/lib:${LD_LIBRARY_PATH}
-		export PYTHONPATH=${PYTHONPATH}:${CEPH_SRC}/pybind:${CEPH_ROOT}/lib/cython_modules/lib.3
-		PATH=${CEPH_BIN}:${PATH}
-	fi
+        export LD_LIBRARY_PATH=${CEPH_ROOT}/lib:${LD_LIBRARY_PATH}
+        export PYTHONPATH=${PYTHONPATH}:${CEPH_SRC}/pybind:${CEPH_ROOT}/lib/cython_modules/lib.3
+        PATH=${CEPH_BIN}:${PATH}
+    fi
 
-	_sudo echo test sudo
+    _sudo echo test sudo
 
-	trap cleanup INT TERM EXIT
-	TEMPDIR=$(mktemp -d)
-	DATA=${TEMPDIR}/data
-	dd if=/dev/urandom of=${DATA} bs=1M count=${SIZE}
+    trap cleanup INT TERM EXIT
+    TEMPDIR=$(mktemp -d)
+    DATA=${TEMPDIR}/data
+    dd if=/dev/urandom of=${DATA} bs=1M count=${SIZE}
 
-	rbd namespace create ${POOL}/${NS}
+    rbd namespace create ${POOL}/${NS}
 
-	for ns in '' ${NS}; do
-		rbd --dest-pool ${POOL} --dest-namespace "${ns}" --no-progress import \
-			${DATA} ${IMAGE}
-	done
+    for ns in '' ${NS}; do
+        rbd --dest-pool ${POOL} --dest-namespace "${ns}" --no-progress import \
+            ${DATA} ${IMAGE}
+    done
 
-	# create another pool
-	ceph osd pool create ${ANOTHER_POOL} 8
-	rbd pool init ${ANOTHER_POOL}
+    # create another pool
+    ceph osd pool create ${ANOTHER_POOL} 8
+    rbd pool init ${ANOTHER_POOL}
 }
 
 function cleanup() {
-	local ns s
+    local ns s
 
-	set +e
+    set +e
 
-	mount | fgrep ${TEMPDIR}/mnt && _sudo umount -f ${TEMPDIR}/mnt
+    mount | fgrep ${TEMPDIR}/mnt && _sudo umount -f ${TEMPDIR}/mnt
 
-	rm -Rf ${TEMPDIR}
-	if [ -n "${DEV}" ]; then
-		_sudo rbd device --device-type nbd unmap ${DEV}
-	fi
+    rm -Rf ${TEMPDIR}
+    if [ -n "${DEV}" ]; then
+        _sudo rbd device --device-type nbd unmap ${DEV}
+    fi
 
-	for ns in '' ${NS}; do
-		if rbd -p ${POOL} --namespace "${ns}" status ${IMAGE} 2>/dev/null; then
-			for s in 0.5 1 2 4 8 16 32; do
-				sleep $s
-				rbd -p ${POOL} --namespace "${ns}" status ${IMAGE} |
-					grep 'Watchers: none' && break
-			done
-			rbd -p ${POOL} --namespace "${ns}" snap purge ${IMAGE}
-			rbd -p ${POOL} --namespace "${ns}" remove ${IMAGE}
-		fi
-	done
-	rbd namespace remove ${POOL}/${NS}
+    for ns in '' ${NS}; do
+        if rbd -p ${POOL} --namespace "${ns}" status ${IMAGE} 2>/dev/null; then
+            for s in 0.5 1 2 4 8 16 32; do
+                sleep $s
+                rbd -p ${POOL} --namespace "${ns}" status ${IMAGE} \
+                    | grep 'Watchers: none' && break
+            done
+            rbd -p ${POOL} --namespace "${ns}" snap purge ${IMAGE}
+            rbd -p ${POOL} --namespace "${ns}" remove ${IMAGE}
+        fi
+    done
+    rbd namespace remove ${POOL}/${NS}
 
-	# cleanup/reset default pool
-	rbd config global rm global rbd_default_pool
-	ceph osd pool delete ${ANOTHER_POOL} ${ANOTHER_POOL} --yes-i-really-really-mean-it
+    # cleanup/reset default pool
+    rbd config global rm global rbd_default_pool
+    ceph osd pool delete ${ANOTHER_POOL} ${ANOTHER_POOL} --yes-i-really-really-mean-it
 }
 
 function expect_false() {
-	if "$@"; then return 1; else return 0; fi
+    if "$@"; then return 1; else return 0; fi
 }
 
 function get_pid() {
-	local pool=$1
-	local ns=$2
+    local pool=$1
+    local ns=$2
 
-	PID=$(rbd device --device-type nbd --format xml list | $XMLSTARLET sel -t -v \
-		"//devices/device[pool='${pool}'][namespace='${ns}'][image='${IMAGE}'][device='${DEV}']/id")
-	test -n "${PID}" || return 1
-	ps -p ${PID} -C rbd-nbd
+    PID=$(rbd device --device-type nbd --format xml list | $XMLSTARLET sel -t -v \
+        "//devices/device[pool='${pool}'][namespace='${ns}'][image='${IMAGE}'][device='${DEV}']/id")
+    test -n "${PID}" || return 1
+    ps -p ${PID} -C rbd-nbd
 }
 
 unmap_device() {
-	local args=$1
-	local pid=$2
+    local args=$1
+    local pid=$2
 
-	_sudo rbd device --device-type nbd unmap ${args}
-	rbd device --device-type nbd list | expect_false grep "^${pid}\\b" || return 1
-	ps -C rbd-nbd | expect_false grep "^ *${pid}\\b" || return 1
+    _sudo rbd device --device-type nbd unmap ${args}
+    rbd device --device-type nbd list | expect_false grep "^${pid}\\b" || return 1
+    ps -C rbd-nbd | expect_false grep "^ *${pid}\\b" || return 1
 
-	# workaround possible race between unmap and following map
-	sleep 0.5
+    # workaround possible race between unmap and following map
+    sleep 0.5
 }
 
 #
@@ -126,7 +126,7 @@ setup
 expect_false rbd-nbd
 expect_false rbd-nbd INVALIDCMD
 if [ $(id -u) -ne 0 ]; then
-	expect_false rbd device --device-type nbd map ${IMAGE}
+    expect_false rbd device --device-type nbd map ${IMAGE}
 fi
 expect_false _sudo rbd device --device-type nbd map INVALIDIMAGE
 expect_false _sudo rbd-nbd --device INVALIDDEV map ${IMAGE}
@@ -159,17 +159,17 @@ _sudo dd if=${DATA} of=${DEV} bs=1M oflag=direct
 [ "$(dd if=${DATA} bs=1M | md5sum)" = "$(rbd -p ${POOL} --no-progress export ${IMAGE} - | md5sum)" ]
 
 # trim test
-provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-	$XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
-used=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-	$XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
+provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
+used=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
 [ "${used}" -eq "${provisioned}" ]
 _sudo mkfs.ext4 -E discard ${DEV} # better idea?
 sync
-provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-	$XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
-used=$(rbd -p ${POOL} --format xml du ${IMAGE} |
-	$XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
+provisioned=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/provisioned_size" -v .)
+used=$(rbd -p ${POOL} --format xml du ${IMAGE} \
+    | $XMLSTARLET sel -t -m "//stats/images/image/used_size" -v .)
 [ "${used}" -lt "${provisioned}" ]
 
 # resize test
@@ -190,7 +190,7 @@ test ${blocks2} -eq ${blocks}
 unmap_device ${DEV} ${PID}
 DEV=$(_sudo rbd --device-type nbd map --read-only ${POOL}/${IMAGE})
 PID=$(rbd device --device-type nbd list | awk -v pool=${POOL} -v img=${IMAGE} -v dev=${DEV} \
-	'$2 == pool && $3 == img && $5 == dev {print $1}')
+    '$2 == pool && $3 == img && $5 == dev {print $1}')
 test -n "${PID}"
 ps -p ${PID} -C rbd-nbd
 
@@ -204,7 +204,7 @@ get_pid ${POOL}
 
 _sudo dd if=${DATA} of=${DEV} bs=1M oflag=direct
 expect_false timeout 10 \
-	rbd bench ${IMAGE} --io-type write --io-size=1024 --io-total=1024
+    rbd bench ${IMAGE} --io-type write --io-size=1024 --io-total=1024
 unmap_device ${DEV} ${PID}
 DEV=
 rbd bench ${IMAGE} --io-type write --io-size=1024 --io-total=1024
@@ -250,10 +250,10 @@ unmap_device ${POOL}/${IMAGE} ${pid}
 
 # map/unmap test with just image name and expect image to come from default pool
 if [ "${POOL}" = "rbd" ]; then
-	DEV=$(_sudo rbd device --device-type nbd map ${IMAGE})
-	get_pid ${POOL}
-	unmap_device ${IMAGE} ${PID}
-	DEV=
+    DEV=$(_sudo rbd device --device-type nbd map ${IMAGE})
+    get_pid ${POOL}
+    unmap_device ${IMAGE} ${PID}
+    DEV=
 fi
 
 # map/unmap test with just image name after changing default pool
@@ -272,8 +272,8 @@ DEV=$(_sudo rbd device --device-type nbd map ${POOL}/${IMAGE})
 get_pid ${POOL}
 _sudo kill ${PID}
 for i in $(seq 10); do
-	rbd device --device-type nbd list | expect_false grep "^${PID} *${POOL} *${IMAGE}" && break
-	sleep 1
+    rbd device --device-type nbd list | expect_false grep "^${PID} *${POOL} *${IMAGE}" && break
+    sleep 1
 done
 rbd device --device-type nbd list | expect_false grep "^${PID} *${POOL} *${IMAGE}"
 
@@ -324,11 +324,11 @@ _sudo dd if=${DATA} of=${DEV} bs=1M count=1 oflag=direct
 unmap_device ${DEV} ${PID}
 LOG_FILE=${TEMPDIR}/rbd-nbd.log
 if [ -n "${CEPH_SRC}" ]; then
-	QUIESCE_HOOK=${CEPH_SRC}/tools/rbd_nbd/rbd-nbd_quiesce
-	DEV=$(_sudo rbd device --device-type nbd map --quiesce --quiesce-hook ${QUIESCE_HOOK} \
-		${POOL}/${IMAGE} --log-file=${LOG_FILE})
+    QUIESCE_HOOK=${CEPH_SRC}/tools/rbd_nbd/rbd-nbd_quiesce
+    DEV=$(_sudo rbd device --device-type nbd map --quiesce --quiesce-hook ${QUIESCE_HOOK} \
+        ${POOL}/${IMAGE} --log-file=${LOG_FILE})
 else
-	DEV=$(_sudo rbd device --device-type nbd map --quiesce ${POOL}/${IMAGE} --log-file=${LOG_FILE})
+    DEV=$(_sudo rbd device --device-type nbd map --quiesce ${POOL}/${IMAGE} --log-file=${LOG_FILE})
 fi
 get_pid ${POOL}
 _sudo mkfs ${DEV}
@@ -351,17 +351,17 @@ _sudo rbd device detach ${POOL}/${IMAGE} --device-type nbd
 expect_false get_pid ${POOL}
 expect_false _sudo rbd device attach --device ${DEV} ${POOL}/${IMAGE} --device-type nbd
 if [ -n "${COOKIE}" ]; then
-	_sudo rbd device attach --device ${DEV} --cookie ${COOKIE} ${POOL}/${IMAGE} --device-type nbd
+    _sudo rbd device attach --device ${DEV} --cookie ${COOKIE} ${POOL}/${IMAGE} --device-type nbd
 else
-	_sudo rbd device attach --device ${DEV} ${POOL}/${IMAGE} --device-type nbd --force
+    _sudo rbd device attach --device ${DEV} ${POOL}/${IMAGE} --device-type nbd --force
 fi
 get_pid ${POOL}
 _sudo rbd device detach ${DEV} --device-type nbd
 expect_false get_pid ${POOL}
 if [ -n "${COOKIE}" ]; then
-	_sudo rbd device attach --device ${DEV} --cookie ${COOKIE} ${POOL}/${IMAGE} --device-type nbd
+    _sudo rbd device attach --device ${DEV} --cookie ${COOKIE} ${POOL}/${IMAGE} --device-type nbd
 else
-	_sudo rbd device attach --device ${DEV} ${POOL}/${IMAGE} --device-type nbd --force
+    _sudo rbd device attach --device ${DEV} ${POOL}/${IMAGE} --device-type nbd --force
 fi
 get_pid ${POOL}
 ls ${TEMPDIR}/mnt/
@@ -371,11 +371,11 @@ _sudo umount ${TEMPDIR}/mnt
 unmap_device ${DEV} ${PID}
 # if kernel supports cookies
 if [ -n "${COOKIE}" ]; then
-	OUT=$(_sudo rbd device --device-type nbd --show-cookie --cookie "abc de" --options try-netlink map ${POOL}/${IMAGE})
-	read DEV ANOTHER_COOKIE <<<"${OUT}"
-	get_pid ${POOL}
-	test "${ANOTHER_COOKIE}" = "abc de"
-	unmap_device ${DEV} ${PID}
+    OUT=$(_sudo rbd device --device-type nbd --show-cookie --cookie "abc de" --options try-netlink map ${POOL}/${IMAGE})
+    read DEV ANOTHER_COOKIE <<<"${OUT}"
+    get_pid ${POOL}
+    test "${ANOTHER_COOKIE}" = "abc de"
+    unmap_device ${DEV} ${PID}
 fi
 
 # test discard granularity with journaling
@@ -397,10 +397,10 @@ _sudo blkdiscard --offset 512 --length 8192 ${DEV}
 tries=0
 queue_length=$(rbd journal inspect --pool ${POOL} --image ${IMAGE} | awk '/entries inspected/ {print $1}')
 while [ ${tries} -lt 10 ] && [ ${queue_length} -gt 0 ]; do
-	rbd journal inspect --pool ${POOL} --image ${IMAGE} --verbose
-	sleep 1
-	queue_length=$(rbd journal inspect --pool ${POOL} --image ${IMAGE} | awk '/entries inspected/ {print $1}')
-	tries=$((tries + 1))
+    rbd journal inspect --pool ${POOL} --image ${IMAGE} --verbose
+    sleep 1
+    queue_length=$(rbd journal inspect --pool ${POOL} --image ${IMAGE} | awk '/entries inspected/ {print $1}')
+    tries=$((tries + 1))
 done
 [ ${queue_length} -eq 0 ]
 unmap_device ${DEV} ${PID}

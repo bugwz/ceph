@@ -2,13 +2,13 @@
 export NPROC=$(sysctl -n hw.ncpu)
 
 if [ x"$1"x = x"--deps"x ]; then
-	sudo ./install-deps.sh
+    sudo ./install-deps.sh
 fi
 
 if [ x"$CEPH_DEV"x != xx ]; then
-	BUILDOPTS="$BUILDOPTS V=1 VERBOSE=1"
-	CXX_FLAGS_DEBUG="-DCEPH_DEV"
-	C_FLAGS_DEBUG="-DCEPH_DEV"
+    BUILDOPTS="$BUILDOPTS V=1 VERBOSE=1"
+    CXX_FLAGS_DEBUG="-DCEPH_DEV"
+    C_FLAGS_DEBUG="-DCEPH_DEV"
 fi
 
 #   To test with a new release Clang, use with cmake:
@@ -27,38 +27,38 @@ CMAKE_C_FLAGS_DEBUG="$C_FLAGS_DEBUG $COMPILE_FLAGS"
 
 echo Keeping the old build
 if [ -d ${BUILD_DIR}.old ]; then
-	sudo mv ${BUILD_DIR}.old ${BUILD_DIR}.del
-	sudo rm -rf ${BUILD_DIR}.del &
+    sudo mv ${BUILD_DIR}.old ${BUILD_DIR}.del
+    sudo rm -rf ${BUILD_DIR}.del &
 fi
 if [ -d ${BUILD_DIR} ]; then
-	sudo mv ${BUILD_DIR} ${BUILD_DIR}.old
+    sudo mv ${BUILD_DIR} ${BUILD_DIR}.old
 fi
 
 mkdir ${BUILD_DIR}
 ./do_cmake.sh "$*" \
-	-D WITH_CCACHE=ON \
-	-D CMAKE_BUILD_TYPE=Debug \
-	-D CMAKE_CXX_FLAGS_DEBUG="$CMAKE_CXX_FLAGS_DEBUG" \
-	-D CMAKE_C_FLAGS_DEBUG="$CMAKE_C_FLAGS_DEBUG" \
-	-D ENABLE_GIT_VERSION=OFF \
-	-D WITH_RADOSGW_AMQP_ENDPOINT=OFF \
-	-D WITH_RADOSGW_KAFKA_ENDPOINT=OFF \
-	-D WITH_SYSTEM_BOOST=ON \
-	-D WITH_SYSTEM_NPM=ON \
-	-D WITH_LTTNG=OFF \
-	-D WITH_BABELTRACE=OFF \
-	-D WITH_SEASTAR=OFF \
-	-D WITH_FUSE=ON \
-	-D WITH_KRBD=OFF \
-	-D WITH_XFS=OFF \
-	-D WITH_KVS=ON \
-	-D CEPH_MAN_DIR=man \
-	-D WITH_LIBCEPHFS=OFF \
-	-D WITH_CEPHFS=OFF \
-	-D WITH_MGR=YES \
-	-D WITH_RDMA=OFF \
-	-D WITH_SPDK=OFF \
-	2>&1 | tee cmake.log
+    -D WITH_CCACHE=ON \
+    -D CMAKE_BUILD_TYPE=Debug \
+    -D CMAKE_CXX_FLAGS_DEBUG="$CMAKE_CXX_FLAGS_DEBUG" \
+    -D CMAKE_C_FLAGS_DEBUG="$CMAKE_C_FLAGS_DEBUG" \
+    -D ENABLE_GIT_VERSION=OFF \
+    -D WITH_RADOSGW_AMQP_ENDPOINT=OFF \
+    -D WITH_RADOSGW_KAFKA_ENDPOINT=OFF \
+    -D WITH_SYSTEM_BOOST=ON \
+    -D WITH_SYSTEM_NPM=ON \
+    -D WITH_LTTNG=OFF \
+    -D WITH_BABELTRACE=OFF \
+    -D WITH_SEASTAR=OFF \
+    -D WITH_FUSE=ON \
+    -D WITH_KRBD=OFF \
+    -D WITH_XFS=OFF \
+    -D WITH_KVS=ON \
+    -D CEPH_MAN_DIR=man \
+    -D WITH_LIBCEPHFS=OFF \
+    -D WITH_CEPHFS=OFF \
+    -D WITH_MGR=YES \
+    -D WITH_RDMA=OFF \
+    -D WITH_SPDK=OFF \
+    2>&1 | tee cmake.log
 
 echo -n "start building: "
 date
@@ -74,18 +74,18 @@ ctest -j $CPUS || RETEST=1
 echo "Testing result, retest: = " $RETEST
 
 if [ $RETEST -eq 1 ]; then
-	# make sure no leftovers are there
-	killall ceph-osd || true
-	killall ceph-mgr || true
-	killall ceph-mds || true
-	killall ceph-mon || true
-	# clean up after testing
-	rm -rf td/* /tmp/td src/test/td/* || true
-	rm -rf /tmp/ceph-asok.* || true
-	rm -rf /tmp/cores.* || true
-	rm -rf /tmp/*.core || true
+    # make sure no leftovers are there
+    killall ceph-osd || true
+    killall ceph-mgr || true
+    killall ceph-mds || true
+    killall ceph-mon || true
+    # clean up after testing
+    rm -rf td/* /tmp/td src/test/td/* || true
+    rm -rf /tmp/ceph-asok.* || true
+    rm -rf /tmp/cores.* || true
+    rm -rf /tmp/*.core || true
 
-	ctest --output-on-failure --rerun-failed
+    ctest --output-on-failure --rerun-failed
 fi
 
 STATUS=$?

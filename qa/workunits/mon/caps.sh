@@ -9,26 +9,26 @@ exit_on_error=1
 [[ ! -z $TEST_EXIT_ON_ERROR ]] && exit_on_error=$TEST_EXIT_ON_ERROR
 
 if [ $(uname) = FreeBSD ]; then
-	ETIMEDOUT=60
+    ETIMEDOUT=60
 else
-	ETIMEDOUT=110
+    ETIMEDOUT=110
 fi
 
 expect() {
-	cmd=$1
-	expected_ret=$2
+    cmd=$1
+    expected_ret=$2
 
-	echo $cmd
-	eval $cmd >&/dev/null
-	ret=$?
+    echo $cmd
+    eval $cmd >&/dev/null
+    ret=$?
 
-	if [[ $ret -ne $expected_ret ]]; then
-		echo "Error: Expected return $expected_ret, got $ret"
-		[[ $exit_on_error -eq 1 ]] && exit 1
-		return 1
-	fi
+    if [[ $ret -ne $expected_ret ]]; then
+        echo "Error: Expected return $expected_ret, got $ret"
+        [[ $exit_on_error -eq 1 ]] && exit 1
+        return 1
+    fi
 
-	return 0
+    return 0
 }
 
 expect "ceph auth get-or-create client.bazar > $tmp.bazar.keyring" 0

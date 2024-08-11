@@ -11,29 +11,29 @@ git clone https://github.com/qemu/qemu.git
 cd qemu
 
 if grep -iqE '(bionic|focal)' /etc/os-release; then
-	# Bionic requires a matching test harness
-	git checkout v2.11.0
+    # Bionic requires a matching test harness
+    git checkout v2.11.0
 elif grep -iqE '(xenial|platform:el8)' /etc/os-release; then
-	# Xenial requires a recent test harness
-	git checkout v2.3.0
+    # Xenial requires a recent test harness
+    git checkout v2.3.0
 else
-	# use v2.2.0-rc3 (last released version that handles all the tests
-	git checkout 2528043f1f299e0e88cb026f1ca7c40bbb4e1f80
+    # use v2.2.0-rc3 (last released version that handles all the tests
+    git checkout 2528043f1f299e0e88cb026f1ca7c40bbb4e1f80
 fi
 
 cd tests/qemu-iotests
 mkdir bin
 # qemu-iotests expects a binary called just 'qemu' to be available
 if [ -x '/usr/bin/qemu-system-x86_64' ]; then
-	QEMU='/usr/bin/qemu-system-x86_64'
+    QEMU='/usr/bin/qemu-system-x86_64'
 
-	# Bionic (v2.11.0) tests expect all tools in current directory
-	ln -s $QEMU qemu
-	ln -s /usr/bin/qemu-img
-	ln -s /usr/bin/qemu-io
-	ln -s /usr/bin/qemu-nbd
+    # Bionic (v2.11.0) tests expect all tools in current directory
+    ln -s $QEMU qemu
+    ln -s /usr/bin/qemu-img
+    ln -s /usr/bin/qemu-io
+    ln -s /usr/bin/qemu-nbd
 else
-	QEMU='/usr/libexec/qemu-kvm'
+    QEMU='/usr/libexec/qemu-kvm'
 fi
 ln -s $QEMU bin/qemu
 

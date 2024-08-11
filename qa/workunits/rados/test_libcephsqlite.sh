@@ -11,31 +11,31 @@ pool="$1"
 ns="$(basename $0)"
 
 function sqlite {
-	background="$1"
-	if [ "$background" = b ]; then
-		shift
-	fi
-	a=$(cat)
-	printf "%s" "$a" >&2
-	# We're doing job control gymnastics here to make sure that sqlite3 is the
-	# main process (i.e. the process group leader) in the background, not a bash
-	# function or job pipeline.
-	sqlite3 -cmd '.output /dev/null' -cmd '.load libcephsqlite.so' -cmd 'pragma journal_mode = PERSIST' -cmd ".open file:///$pool:$ns/baz.db?vfs=ceph" -cmd '.output stdout' <<<"$a" &
-	if [ "$background" != b ]; then
-		wait
-	fi
+    background="$1"
+    if [ "$background" = b ]; then
+        shift
+    fi
+    a=$(cat)
+    printf "%s" "$a" >&2
+    # We're doing job control gymnastics here to make sure that sqlite3 is the
+    # main process (i.e. the process group leader) in the background, not a bash
+    # function or job pipeline.
+    sqlite3 -cmd '.output /dev/null' -cmd '.load libcephsqlite.so' -cmd 'pragma journal_mode = PERSIST' -cmd ".open file:///$pool:$ns/baz.db?vfs=ceph" -cmd '.output stdout' <<<"$a" &
+    if [ "$background" != b ]; then
+        wait
+    fi
 }
 
 function striper {
-	rados --pool=$pool --namespace="$ns" --striper "$@"
+    rados --pool=$pool --namespace="$ns" --striper "$@"
 }
 
 function repeat {
-	n=$1
-	shift
-	for ((i = 0; i < "$n"; ++i)); do
-		echo "$*"
-	done
+    n=$1
+    shift
+    for ((i = 0; i < "$n"; ++i)); do
+        echo "$*"
+    done
 }
 
 striper rm baz.db || true

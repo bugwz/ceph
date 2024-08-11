@@ -2,13 +2,13 @@
 set -ex
 
 function cleanup() {
-	rbd snap purge foo || :
-	rbd rm foo || :
-	rbd snap purge foo.copy || :
-	rbd rm foo.copy || :
-	rbd snap purge foo.copy2 || :
-	rbd rm foo.copy2 || :
-	rm -f foo.diff foo.out
+    rbd snap purge foo || :
+    rbd rm foo || :
+    rbd snap purge foo.copy || :
+    rbd rm foo.copy || :
+    rbd snap purge foo.copy2 || :
+    rbd rm foo.copy2 || :
+    rm -f foo.diff foo.out
 }
 
 cleanup
@@ -43,8 +43,8 @@ rbd export foo.copy foo.out
 copy=$(md5sum foo.out | awk '{print $1}')
 
 if [ "$orig" != "$copy" ]; then
-	echo does not match
-	exit 1
+    echo does not match
+    exit 1
 fi
 
 cleanup

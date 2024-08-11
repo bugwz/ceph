@@ -6,22 +6,22 @@ KEYRING=$(mktemp)
 trap cleanup EXIT ERR HUP INT QUIT
 
 cleanup() {
-	(ceph auth del client.mon_read || true) >/dev/null 2>&1
-	(ceph auth del client.mon_write || true) >/dev/null 2>&1
+    (ceph auth del client.mon_read || true) >/dev/null 2>&1
+    (ceph auth del client.mon_write || true) >/dev/null 2>&1
 
-	rm -f $KEYRING
+    rm -f $KEYRING
 }
 
 expect_false() {
-	set -x
-	if "$@"; then return 1; else return 0; fi
+    set -x
+    if "$@"; then return 1; else return 0; fi
 }
 
 create_pool_op() {
-	ID=$1
-	POOL=$2
+    ID=$1
+    POOL=$2
 
-	cat <<EOF | CEPH_ARGS="-k $KEYRING" python3
+    cat <<EOF | CEPH_ARGS="-k $KEYRING" python3
 import rados
 
 cluster = rados.Rados(conffile="", rados_id="${ID}")
@@ -31,10 +31,10 @@ EOF
 }
 
 delete_pool_op() {
-	ID=$1
-	POOL=$2
+    ID=$1
+    POOL=$2
 
-	cat <<EOF | CEPH_ARGS="-k $KEYRING" python3
+    cat <<EOF | CEPH_ARGS="-k $KEYRING" python3
 import rados
 
 cluster = rados.Rados(conffile="", rados_id="${ID}")
@@ -44,11 +44,11 @@ EOF
 }
 
 create_pool_snap_op() {
-	ID=$1
-	POOL=$2
-	SNAP=$3
+    ID=$1
+    POOL=$2
+    SNAP=$3
 
-	cat <<EOF | CEPH_ARGS="-k $KEYRING" python3
+    cat <<EOF | CEPH_ARGS="-k $KEYRING" python3
 import rados
 
 cluster = rados.Rados(conffile="", rados_id="${ID}")
@@ -60,11 +60,11 @@ EOF
 }
 
 remove_pool_snap_op() {
-	ID=$1
-	POOL=$2
-	SNAP=$3
+    ID=$1
+    POOL=$2
+    SNAP=$3
 
-	cat <<EOF | CEPH_ARGS="-k $KEYRING" python3
+    cat <<EOF | CEPH_ARGS="-k $KEYRING" python3
 import rados
 
 cluster = rados.Rados(conffile="", rados_id="${ID}")
@@ -76,20 +76,20 @@ EOF
 }
 
 test_pool_op() {
-	ceph auth get-or-create client.mon_read mon 'allow r' >>$KEYRING
-	ceph auth get-or-create client.mon_write mon 'allow *' >>$KEYRING
+    ceph auth get-or-create client.mon_read mon 'allow r' >>$KEYRING
+    ceph auth get-or-create client.mon_write mon 'allow *' >>$KEYRING
 
-	expect_false create_pool_op mon_read pool1
-	create_pool_op mon_write pool1
+    expect_false create_pool_op mon_read pool1
+    create_pool_op mon_write pool1
 
-	expect_false create_pool_snap_op mon_read pool1 snap1
-	create_pool_snap_op mon_write pool1 snap1
+    expect_false create_pool_snap_op mon_read pool1 snap1
+    create_pool_snap_op mon_write pool1 snap1
 
-	expect_false remove_pool_snap_op mon_read pool1 snap1
-	remove_pool_snap_op mon_write pool1 snap1
+    expect_false remove_pool_snap_op mon_read pool1 snap1
+    remove_pool_snap_op mon_write pool1 snap1
 
-	expect_false delete_pool_op mon_read pool1
-	delete_pool_op mon_write pool1
+    expect_false delete_pool_op mon_read pool1
+    delete_pool_op mon_write pool1
 }
 
 key=$(ceph auth get-or-create-key client.poolaccess1 mon 'allow r' osd 'allow *')

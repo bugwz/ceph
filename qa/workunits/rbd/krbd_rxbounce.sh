@@ -12,11 +12,11 @@ OP_SIZE=16384
 
 DEV=$(sudo rbd map img)
 {
-	for ((i = 0; i < $NUM_OBJECTS; i++)); do
-		echo pwrite -b $OP_SIZE -S $i $((i * OBJECT_SIZE)) $OP_SIZE
-	done
-	echo fsync
-	echo quit
+    for ((i = 0; i < $NUM_OBJECTS; i++)); do
+        echo pwrite -b $OP_SIZE -S $i $((i * OBJECT_SIZE)) $OP_SIZE
+    done
+    echo fsync
+    echo quit
 } | xfs_io $DEV
 sudo rbd unmap $DEV
 

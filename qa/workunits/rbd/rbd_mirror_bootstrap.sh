@@ -28,7 +28,7 @@ testlog "TEST: verify rx-only direction"
 rbd --cluster ${CLUSTER2} --pool ${POOL} mirror pool info --format json | jq -e '.peers[0].direction == "rx-only"'
 # tx-only peer is added asynchronously by mirror_peer_ping class method
 while ! rbd --cluster ${CLUSTER1} --pool ${POOL} mirror pool info --format json | jq -e '.peers | length > 0'; do
-	sleep 1
+    sleep 1
 done
 rbd --cluster ${CLUSTER1} --pool ${POOL} mirror pool info --format json | jq -e '.peers[0].direction == "tx-only"'
 

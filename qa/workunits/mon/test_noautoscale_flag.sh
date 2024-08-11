@@ -5,8 +5,8 @@ unset CEPH_CLI_TEST_DUP_COMMAND
 NUM_POOLS=$(ceph osd pool ls | wc -l)
 
 if [ "$NUM_POOLS" -gt 0 ]; then
-	echo "test requires no preexisting pools"
-	exit 1
+    echo "test requires no preexisting pools"
+    exit 1
 fi
 
 ceph osd pool set noautoscale

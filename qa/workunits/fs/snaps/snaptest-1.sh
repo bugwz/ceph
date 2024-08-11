@@ -12,8 +12,8 @@ now=$(ls)
 then=$(ls .snap/snap1)
 rmdir .snap/snap1
 if [ "$now" = "$then" ]; then
-	echo live and snap contents are identical?
-	false
+    echo live and snap contents are identical?
+    false
 fi
 
 # do it again

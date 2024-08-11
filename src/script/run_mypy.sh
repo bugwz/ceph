@@ -30,7 +30,7 @@ mypy --config-file="$MYPY_INI" $(find * -name '*.py' | grep -v -e venv -e tox -e
 popd
 
 SORT_MYPY=$(
-	cat <<-EOF
+    cat <<-EOF
 		#!/bin/python3
 		import re
 		from collections import namedtuple

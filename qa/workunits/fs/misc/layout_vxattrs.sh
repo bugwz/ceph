@@ -6,9 +6,9 @@ set -ex
 datapool=
 dir=.
 while true; do
-	echo $dir
-	datapool=$(getfattr -n ceph.dir.layout.pool $dir --only-values) && break
-	dir=$dir/..
+    echo $dir
+    datapool=$(getfattr -n ceph.dir.layout.pool $dir --only-values) && break
+    dir=$dir/..
 done
 
 # file

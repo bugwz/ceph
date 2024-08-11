@@ -3,8 +3,8 @@
 usage="usage: $0 <name> [vstart options]..\n"
 
 usage_exit() {
-	printf "$usage"
-	exit
+    printf "$usage"
+    exit
 }
 
 [ $# -lt 1 ] && usage_exit
@@ -16,34 +16,34 @@ vstart_path=$(dirname $0)
 
 root_path=$(dirname $0)
 root_path=$( (
-	cd $root_path
-	pwd
+    cd $root_path
+    pwd
 ))
 
 [ -z "$BUILD_DIR" ] && BUILD_DIR=build
 
 if [ -e CMakeCache.txt ]; then
-	root_path=$PWD
+    root_path=$PWD
 elif [ -e $root_path/../${BUILD_DIR}/CMakeCache.txt ]; then
-	cd $root_path/../${BUILD_DIR}
-	root_path=$PWD
+    cd $root_path/../${BUILD_DIR}
+    root_path=$PWD
 fi
 RUN_ROOT_PATH=${root_path}/run
 
 mkdir -p $RUN_ROOT_PATH
 
 if [ -z "$CLUSTERS_LIST" ]; then
-	CLUSTERS_LIST=$RUN_ROOT_PATH/.clusters.list
+    CLUSTERS_LIST=$RUN_ROOT_PATH/.clusters.list
 fi
 
 if [ ! -f $CLUSTERS_LIST ]; then
-	touch $CLUSTERS_LIST
+    touch $CLUSTERS_LIST
 fi
 
 pos=$(grep -n -w $instance $CLUSTERS_LIST)
 if [ $? -ne 0 ]; then
-	echo $instance >>$CLUSTERS_LIST
-	pos=$(grep -n -w $instance $CLUSTERS_LIST)
+    echo $instance >>$CLUSTERS_LIST
+    pos=$(grep -n -w $instance $CLUSTERS_LIST)
 fi
 
 pos=$(echo $pos | cut -d: -f1)

@@ -1,14 +1,14 @@
 #!/bin/sh -ex
 
 if ! id -u | grep -q '^0$'; then
-	echo "not root, re-running self via sudo"
-	sudo PATH=$PATH TYPE=$TYPE $0
-	exit 0
+    echo "not root, re-running self via sudo"
+    sudo PATH=$PATH TYPE=$TYPE $0
+    exit 0
 fi
 
 expect_false() {
-	set -x
-	if "$@"; then return 1; else return 0; fi
+    set -x
+    if "$@"; then return 1; else return 0; fi
 }
 
 COT=ceph-objectstore-tool
@@ -29,8 +29,8 @@ $COT --no-mon-config --op mkfs --data-path $DATA --type $TYPE
 $COT --no-mon-config --op fuse --data-path $DATA --mountpoint $MNT &
 
 while ! test -e $MNT/type; do
-	echo waiting for $MNT/type to appear
-	sleep 1
+    echo waiting for $MNT/type to appear
+    sleep 1
 done
 
 umask 0
@@ -92,17 +92,17 @@ test ! -s $MNT/meta/all/#-1:7b3f43c4:::osd_superblock:0#/data
 mkdir --mode 0003 $MNT/0.0_head
 grep -q 00000000 $MNT/0.0_head/bitwise_hash_start
 if [ "$TYPE" = "bluestore" ]; then
-	cat $MNT/0.0_head/bitwise_hash_bits
-	grep -q 3 $MNT/0.0_head/bitwise_hash_bits
-	grep -q 1fffffff $MNT/0.0_head/bitwise_hash_end
+    cat $MNT/0.0_head/bitwise_hash_bits
+    grep -q 3 $MNT/0.0_head/bitwise_hash_bits
+    grep -q 1fffffff $MNT/0.0_head/bitwise_hash_end
 fi
 test -d $MNT/0.0_head/all
 
 mkdir --mode 0003 $MNT/0.1_head
 grep -q 80000000 $MNT/0.1_head/bitwise_hash_start
 if [ "$TYPE" = "bluestore" ]; then
-	grep -q 3 $MNT/0.1_head/bitwise_hash_bits
-	grep -q 9fffffff $MNT/0.1_head/bitwise_hash_end
+    grep -q 3 $MNT/0.1_head/bitwise_hash_bits
+    grep -q 9fffffff $MNT/0.1_head/bitwise_hash_end
 fi
 
 # create pg object
@@ -111,7 +111,7 @@ mkdir $MNT/0.0_head/all/#0:10000000:::foo:head#/
 
 # verify pg bounds check
 if [ "$TYPE" = "bluestore" ]; then
-	expect_false mkdir $MNT/0.0_head/all/#0:20000000:::bar:head#/
+    expect_false mkdir $MNT/0.0_head/all/#0:20000000:::bar:head#/
 fi
 
 # remove a collection

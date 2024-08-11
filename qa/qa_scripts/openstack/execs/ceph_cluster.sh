@@ -3,8 +3,8 @@ set -f
 
 echo $OS_CEPH_ISO
 if [[ $# -ne 4 ]]; then
-	echo "Usage: ceph_cluster mon.0 osd.0 osd.1 osd.2"
-	exit -1
+    echo "Usage: ceph_cluster mon.0 osd.0 osd.1 osd.2"
+    exit -1
 fi
 allsites=$*
 mon=$1
@@ -30,21 +30,21 @@ ceph-deploy install --osd ${allsites}
 ceph-deploy mon create-initial
 sudo service ceph -a start osd
 for d in b c d; do
-	for m in $osds; do
-		ceph-deploy disk zap ${m}:sd${d}
-	done
-	for m in $osds; do
-		ceph-deploy osd prepare ${m}:sd${d}
-	done
-	for m in $osds; do
-		ceph-deploy osd activate ${m}:sd${d}1:sd${d}2
-	done
+    for m in $osds; do
+        ceph-deploy disk zap ${m}:sd${d}
+    done
+    for m in $osds; do
+        ceph-deploy osd prepare ${m}:sd${d}
+    done
+    for m in $osds; do
+        ceph-deploy osd activate ${m}:sd${d}1:sd${d}2
+    done
 done
 
 sudo ./ceph-pool-create.sh
 
 hchk=$(sudo ceph health)
 while [[ $hchk != 'HEALTH_OK' ]]; do
-	sleep 30
-	hchk=$(sudo ceph health)
+    sleep 30
+    hchk=$(sudo ceph health)
 done

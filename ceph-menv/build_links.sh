@@ -9,8 +9,8 @@ mkdir -p $DIR/bin
 
 echo $PWD
 for f in $(ls $ROOT/build/bin); do
-	echo $f
-	ln -sf ../mdo.sh $DIR/bin/$f
+    echo $f
+    ln -sf ../mdo.sh $DIR/bin/$f
 done
 
 echo "MRUN_CEPH_ROOT=$ROOT" >$DIR/.menvroot

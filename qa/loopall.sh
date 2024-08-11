@@ -14,13 +14,13 @@ PATH="$basedir/src:$PATH"
 cd $testdir
 
 while true; do
-	for test in $(cd $basedir/workunits && find . -executable -type f | $basedir/../src/script/permute); do
-		echo "------ running test $test ------"
-		pwd
-		[ -d $test ] && rm -r $test
-		mkdir -p $test
-		mkdir -p $(dirname $logdir/$test.log)
-		test -e $logdir/$test.log && rm $logdir/$test.log
-		sh -c "cd $test && $basedir/workunits/$test" 2>&1 | tee $logdir/$test.log
-	done
+    for test in $(cd $basedir/workunits && find . -executable -type f | $basedir/../src/script/permute); do
+        echo "------ running test $test ------"
+        pwd
+        [ -d $test ] && rm -r $test
+        mkdir -p $test
+        mkdir -p $(dirname $logdir/$test.log)
+        test -e $logdir/$test.log && rm $logdir/$test.log
+        sh -c "cd $test && $basedir/workunits/$test" 2>&1 | tee $logdir/$test.log
+    done
 done

@@ -8,7 +8,7 @@ ceph osd pool set-quota $p max_objects 10
 ceph osd pool application enable $p rados
 
 for f in $(seq 1 10); do
-	rados -p $p put obj$f /etc/passwd
+    rados -p $p put obj$f /etc/passwd
 done
 
 sleep 30
@@ -48,7 +48,7 @@ ceph osd pool set-quota $pp max_objects 10
 sleep 30
 
 for f in $(seq 1 10); do
-	rados -p $pp put obj$f /etc/passwd
+    rados -p $pp put obj$f /etc/passwd
 done
 
 sleep 30

@@ -39,17 +39,17 @@ GUEST_IP_OFFSET="${GUEST_IP_OFFSET:-100}"
 #############################
 
 if [ $# -gt 1 ]; then
-	echo "" >&2
-	echo "Usage: $(basename $0) [guest_id]" >&2
-	echo "" >&2
-	echo "    guest_id is a small integer (default 1)" >&2
-	echo "    (each UML instance needs a distinct guest_id)" >&2
-	echo "" >&2
-	exit 1
+    echo "" >&2
+    echo "Usage: $(basename $0) [guest_id]" >&2
+    echo "" >&2
+    echo "    guest_id is a small integer (default 1)" >&2
+    echo "    (each UML instance needs a distinct guest_id)" >&2
+    echo "" >&2
+    exit 1
 elif [ $# -eq 1 ]; then
-	GUEST_ID="$1"
+    GUEST_ID="$1"
 else
-	GUEST_ID=1
+    GUEST_ID=1
 fi
 
 # This will be what the guest host calls itself.
@@ -58,8 +58,8 @@ GUEST_HOSTNAME="uml-${GUEST_ID}"
 # This is the path to the boot disk image used by UML.
 DISK_IMAGE_A="${CEPH_TOP}/ceph-client/uml.${GUEST_ID}"
 if [ ! -f "${DISK_IMAGE_A}" ]; then
-	echo "root disk image not found (or not a file)" >&2
-	exit 2
+    echo "root disk image not found (or not a file)" >&2
+    exit 2
 fi
 
 # Hostid 1 uses tun/tap device tap1, hostid 2 uses tap2, etc.
@@ -78,7 +78,7 @@ TAP_IFUPDOWN_CONFIG="/tmp/interface-${TAP}"
 # Also compute BITS, which is the network prefix length used.
 # The NETMASK is then computed using that BITS value.
 eval $(
-	ip addr show virbr0 | awk '
+    ip addr show virbr0 | awk '
 /inet/ {
 	split($2, a, "/")
 	printf("HOST_IP=%s\n", a[1]);
@@ -90,8 +90,8 @@ eval $(
 
 # Use bc to avoid 32-bit wrap when computing netmask
 eval $(
-	echo -n "NETMASK="
-	bc <<! | fmt | sed 's/ /./g'
+    echo -n "NETMASK="
+    bc <<! | fmt | sed 's/ /./g'
 m = 2 ^ 32 - 2 ^ (32 - ${BITS})
 for (p = 24; p >= 0; p = p - 8)
     m / (2 ^ p) % 256
@@ -101,7 +101,7 @@ for (p = 24; p >= 0; p = p - 8)
 # Now use the netmask and the host IP to compute the subnet address
 # and from that the guest IP address to use.
 eval $(
-	awk '
+    awk '
 function from_quad(addr,  a, val, i) {
 	if (split(addr, a, ".") != 4)
 		exit(1);	# address not in dotted quad format
@@ -197,10 +197,10 @@ EnD_Of_sUdO
 
 # Finally ready to launch the UML instance.
 ./linux \
-	umid="${GUEST_HOSTNAME}" \
-	ubda="${DISK_IMAGE_A}" \
-	eth0="tuntap,${TAP}" \
-	mem=1024M
+    umid="${GUEST_HOSTNAME}" \
+    ubda="${DISK_IMAGE_A}" \
+    eth0="tuntap,${TAP}" \
+    mem=1024M
 
 # When we're done, clean up.  Bring down the tap interface and
 # delete the config file.

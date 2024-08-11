@@ -16,8 +16,8 @@ iochild=$!
 # give client time to lock and start reading/writing
 LOCKS='[]'
 while [ "$LOCKS" == '[]' ]; do
-	LOCKS=$(rbd lock list $IMAGE --format json)
-	sleep 1
+    LOCKS=$(rbd lock list $IMAGE --format json)
+    sleep 1
 done
 
 clientaddr=$(rbd lock list $IMAGE | tail -1 | awk '{print $NF;}')
@@ -30,10 +30,10 @@ ceph osd blocklist add $clientaddr || exit 1
 wait $iochild
 rbdrw_exitcode=$?
 if [ $rbdrw_exitcode != 108 ]; then
-	echo "wrong exitcode from rbdrw: $rbdrw_exitcode"
-	exit 1
+    echo "wrong exitcode from rbdrw: $rbdrw_exitcode"
+    exit 1
 else
-	echo "rbdrw stopped with ESHUTDOWN"
+    echo "rbdrw stopped with ESHUTDOWN"
 fi
 
 set -e

@@ -15,10 +15,10 @@ port=$2
 [ -z "$BUILD_DIR" ] && BUILD_DIR=build
 
 if [ -e CMakeCache.txt ]; then
-	BIN_PATH=$PWD/bin
+    BIN_PATH=$PWD/bin
 elif [ -e $root_path/../${BUILD_DIR}/CMakeCache.txt ]; then
-	cd $root_path/../${BUILD_DIR}
-	BIN_PATH=$PWD/bin
+    cd $root_path/../${BUILD_DIR}
+    BIN_PATH=$PWD/bin
 fi
 PATH=$PATH:$BIN_PATH
 

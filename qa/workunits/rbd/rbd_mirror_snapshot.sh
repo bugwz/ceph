@@ -25,7 +25,7 @@ write_image ${CLUSTER2} ${POOL} ${image} 100
 wait_for_replay_complete ${CLUSTER1} ${CLUSTER2} ${POOL} ${image}
 wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
 if [ -z "${RBD_MIRROR_USE_RBD_MIRROR}" ]; then
-	wait_for_status_in_pool_dir ${CLUSTER2} ${POOL} ${image} 'down+unknown'
+    wait_for_status_in_pool_dir ${CLUSTER2} ${POOL} ${image} 'down+unknown'
 fi
 compare_images ${POOL} ${image}
 compare_image_meta ${CLUSTER1} ${POOL} ${image} "key1" "value1"
@@ -41,7 +41,7 @@ wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image1}
 wait_for_replay_complete ${CLUSTER1} ${CLUSTER2} ${POOL} ${image1}
 wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+replaying'
 if [ -z "${RBD_MIRROR_USE_RBD_MIRROR}" ]; then
-	wait_for_status_in_pool_dir ${CLUSTER2} ${POOL} ${image1} 'down+unknown'
+    wait_for_status_in_pool_dir ${CLUSTER2} ${POOL} ${image1} 'down+unknown'
 fi
 compare_images ${POOL} ${image1}
 
@@ -53,73 +53,73 @@ wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
 compare_images ${POOL} ${image}
 
 if [ -z "${RBD_MIRROR_USE_RBD_MIRROR}" ]; then
-	testlog "TEST: stop/start/restart mirror via admin socket"
-	all_admin_daemons ${CLUSTER1} rbd mirror stop
-	wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image}
-	wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image1}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+stopped'
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+stopped'
+    testlog "TEST: stop/start/restart mirror via admin socket"
+    all_admin_daemons ${CLUSTER1} rbd mirror stop
+    wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image}
+    wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image1}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+stopped'
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+stopped'
 
-	all_admin_daemons ${CLUSTER1} rbd mirror start
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image1}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+replaying'
+    all_admin_daemons ${CLUSTER1} rbd mirror start
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image1}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+replaying'
 
-	all_admin_daemons ${CLUSTER1} rbd mirror restart
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image1}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+replaying'
+    all_admin_daemons ${CLUSTER1} rbd mirror restart
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image1}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+replaying'
 
-	all_admin_daemons ${CLUSTER1} rbd mirror stop
-	wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image}
-	wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image1}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+stopped'
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+stopped'
+    all_admin_daemons ${CLUSTER1} rbd mirror stop
+    wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image}
+    wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image1}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+stopped'
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+stopped'
 
-	all_admin_daemons ${CLUSTER1} rbd mirror restart
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image1}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+replaying'
+    all_admin_daemons ${CLUSTER1} rbd mirror restart
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image1}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+replaying'
 
-	all_admin_daemons ${CLUSTER1} rbd mirror stop ${POOL} ${CLUSTER2}${PEER_CLUSTER_SUFFIX}
-	wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image}
-	wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image1}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+stopped'
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+stopped'
+    all_admin_daemons ${CLUSTER1} rbd mirror stop ${POOL} ${CLUSTER2}${PEER_CLUSTER_SUFFIX}
+    wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image}
+    wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image1}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+stopped'
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+stopped'
 
-	admin_daemons ${CLUSTER1} rbd mirror start ${POOL}/${image}
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
+    admin_daemons ${CLUSTER1} rbd mirror start ${POOL}/${image}
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
 
-	all_admin_daemons ${CLUSTER1} rbd mirror start ${POOL} ${CLUSTER2}${PEER_CLUSTER_SUFFIX}
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image1}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+replaying'
+    all_admin_daemons ${CLUSTER1} rbd mirror start ${POOL} ${CLUSTER2}${PEER_CLUSTER_SUFFIX}
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image1}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+replaying'
 
-	admin_daemons ${CLUSTER1} rbd mirror restart ${POOL}/${image}
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
+    admin_daemons ${CLUSTER1} rbd mirror restart ${POOL}/${image}
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
 
-	all_admin_daemons ${CLUSTER1} rbd mirror restart ${POOL} ${CLUSTER2}${PEER_CLUSTER_SUFFIX}
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image1}
+    all_admin_daemons ${CLUSTER1} rbd mirror restart ${POOL} ${CLUSTER2}${PEER_CLUSTER_SUFFIX}
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image1}
 
-	all_admin_daemons ${CLUSTER1} rbd mirror stop ${POOL} ${CLUSTER2}${PEER_CLUSTER_SUFFIX}
-	wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image}
-	wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image1}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+stopped'
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+stopped'
+    all_admin_daemons ${CLUSTER1} rbd mirror stop ${POOL} ${CLUSTER2}${PEER_CLUSTER_SUFFIX}
+    wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image}
+    wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image1}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+stopped'
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+stopped'
 
-	all_admin_daemons ${CLUSTER1} rbd mirror restart ${POOL} ${CLUSTER2}${PEER_CLUSTER_SUFFIX}
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image1}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+replaying'
+    all_admin_daemons ${CLUSTER1} rbd mirror restart ${POOL} ${CLUSTER2}${PEER_CLUSTER_SUFFIX}
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image1}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image1} 'up+replaying'
 
-	flush ${CLUSTER1}
-	all_admin_daemons ${CLUSTER1} rbd mirror status
+    flush ${CLUSTER1}
+    all_admin_daemons ${CLUSTER1} rbd mirror status
 fi
 
 remove_image_retry ${CLUSTER2} ${POOL} ${image1}
@@ -222,24 +222,24 @@ compare_images ${POOL} ${image}
 
 testlog "TEST: failover / failback loop"
 for i in $(seq 1 20); do
-	demote_image ${CLUSTER2} ${POOL} ${image}
-	wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+unknown'
-	wait_for_status_in_pool_dir ${CLUSTER2} ${POOL} ${image} 'up+unknown'
-	promote_image ${CLUSTER1} ${POOL} ${image}
-	wait_for_image_replay_started ${CLUSTER2} ${POOL} ${image}
-	wait_for_replay_complete ${CLUSTER2} ${CLUSTER1} ${POOL} ${image}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+stopped'
-	wait_for_status_in_pool_dir ${CLUSTER2} ${POOL} ${image} 'up+replaying'
-	demote_image ${CLUSTER1} ${POOL} ${image}
-	wait_for_image_replay_stopped ${CLUSTER2} ${POOL} ${image}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+unknown'
-	wait_for_status_in_pool_dir ${CLUSTER2} ${POOL} ${image} 'up+unknown'
-	promote_image ${CLUSTER2} ${POOL} ${image}
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
-	wait_for_replay_complete ${CLUSTER1} ${CLUSTER2} ${POOL} ${image}
-	wait_for_status_in_pool_dir ${CLUSTER2} ${POOL} ${image} 'up+stopped'
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
+    demote_image ${CLUSTER2} ${POOL} ${image}
+    wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+unknown'
+    wait_for_status_in_pool_dir ${CLUSTER2} ${POOL} ${image} 'up+unknown'
+    promote_image ${CLUSTER1} ${POOL} ${image}
+    wait_for_image_replay_started ${CLUSTER2} ${POOL} ${image}
+    wait_for_replay_complete ${CLUSTER2} ${CLUSTER1} ${POOL} ${image}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+stopped'
+    wait_for_status_in_pool_dir ${CLUSTER2} ${POOL} ${image} 'up+replaying'
+    demote_image ${CLUSTER1} ${POOL} ${image}
+    wait_for_image_replay_stopped ${CLUSTER2} ${POOL} ${image}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+unknown'
+    wait_for_status_in_pool_dir ${CLUSTER2} ${POOL} ${image} 'up+unknown'
+    promote_image ${CLUSTER2} ${POOL} ${image}
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
+    wait_for_replay_complete ${CLUSTER1} ${CLUSTER2} ${POOL} ${image}
+    wait_for_status_in_pool_dir ${CLUSTER2} ${POOL} ${image} 'up+stopped'
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
 done
 # check that demote (or other mirror snapshots) don't pile up
 test "$(count_mirror_snaps ${CLUSTER1} ${POOL} ${image})" -le 3
@@ -291,10 +291,10 @@ remove_image_retry ${CLUSTER2} ${POOL} ${clone_image}
 
 testlog " - clone v1"
 clone_image_and_enable_mirror ${CLUSTER1} ${PARENT_POOL} ${parent_image} \
-	${parent_snap} ${POOL} ${clone_image}1
+    ${parent_snap} ${POOL} ${clone_image}1
 
 clone_image_and_enable_mirror ${CLUSTER2} ${PARENT_POOL} ${parent_image} \
-	${parent_snap} ${POOL} ${clone_image}_v1 snapshot --rbd-default-clone-format 1
+    ${parent_snap} ${POOL} ${clone_image}_v1 snapshot --rbd-default-clone-format 1
 test $(get_clone_format ${CLUSTER2} ${POOL} ${clone_image}_v1) = 1
 wait_for_image_replay_started ${CLUSTER1} ${POOL} ${clone_image}_v1
 test $(get_clone_format ${CLUSTER1} ${POOL} ${clone_image}_v1) = 1
@@ -308,7 +308,7 @@ parent_snap=snap_v2
 create_snapshot ${CLUSTER2} ${PARENT_POOL} ${parent_image} ${parent_snap}
 mirror_image_snapshot ${CLUSTER2} ${PARENT_POOL} ${parent_image}
 clone_image_and_enable_mirror ${CLUSTER2} ${PARENT_POOL} ${parent_image} \
-	${parent_snap} ${POOL} ${clone_image}_v2 snapshot --rbd-default-clone-format 2
+    ${parent_snap} ${POOL} ${clone_image}_v2 snapshot --rbd-default-clone-format 2
 test $(get_clone_format ${CLUSTER2} ${POOL} ${clone_image}_v2) = 2
 wait_for_image_replay_started ${CLUSTER1} ${POOL} ${clone_image}_v2
 test $(get_clone_format ${CLUSTER1} ${POOL} ${clone_image}_v2) = 2
@@ -327,7 +327,7 @@ create_snapshot ${CLUSTER2} ${PARENT_POOL} ${parent_image} ${parent_snap}
 mirror_image_snapshot ${CLUSTER2} ${PARENT_POOL} ${parent_image}
 wait_for_snap_present ${CLUSTER1} ${PARENT_POOL} ${parent_image} ${parent_snap}
 clone_image_and_enable_mirror ${CLUSTER1} ${PARENT_POOL} ${parent_image} \
-	${parent_snap} ${POOL} ${clone_image}_v2 snapshot --rbd-default-clone-format 2
+    ${parent_snap} ${POOL} ${clone_image}_v2 snapshot --rbd-default-clone-format 2
 remove_snapshot ${CLUSTER2} ${PARENT_POOL} ${parent_image} ${parent_snap}
 test_snap_removed_from_trash ${CLUSTER2} ${PARENT_POOL} ${parent_image} ${parent_snap}
 mirror_image_snapshot ${CLUSTER2} ${PARENT_POOL} ${parent_image}
@@ -361,35 +361,35 @@ image3=test3
 image4=test4
 image5=test5
 for i in ${image2} ${image3} ${image4} ${image5}; do
-	create_image_and_enable_mirror ${CLUSTER2} ${POOL} ${i}
-	write_image ${CLUSTER2} ${POOL} ${i} 100
-	create_snapshot ${CLUSTER2} ${POOL} ${i} 'snap1'
-	create_snapshot ${CLUSTER2} ${POOL} ${i} 'snap2'
-	if [ "${i}" = "${image4}" ] || [ "${i}" = "${image5}" ]; then
-		protect_snapshot ${CLUSTER2} ${POOL} ${i} 'snap1'
-		protect_snapshot ${CLUSTER2} ${POOL} ${i} 'snap2'
-	fi
-	write_image ${CLUSTER2} ${POOL} ${i} 100
-	mirror_image_snapshot ${CLUSTER2} ${POOL} ${i}
-	wait_for_image_present ${CLUSTER1} ${POOL} ${i} 'present'
-	wait_for_snap_present ${CLUSTER1} ${POOL} ${i} 'snap2'
+    create_image_and_enable_mirror ${CLUSTER2} ${POOL} ${i}
+    write_image ${CLUSTER2} ${POOL} ${i} 100
+    create_snapshot ${CLUSTER2} ${POOL} ${i} 'snap1'
+    create_snapshot ${CLUSTER2} ${POOL} ${i} 'snap2'
+    if [ "${i}" = "${image4}" ] || [ "${i}" = "${image5}" ]; then
+        protect_snapshot ${CLUSTER2} ${POOL} ${i} 'snap1'
+        protect_snapshot ${CLUSTER2} ${POOL} ${i} 'snap2'
+    fi
+    write_image ${CLUSTER2} ${POOL} ${i} 100
+    mirror_image_snapshot ${CLUSTER2} ${POOL} ${i}
+    wait_for_image_present ${CLUSTER1} ${POOL} ${i} 'present'
+    wait_for_snap_present ${CLUSTER1} ${POOL} ${i} 'snap2'
 done
 
 set_pool_mirror_mode ${CLUSTER2} ${POOL} 'image'
 for i in ${image2} ${image4}; do
-	disable_mirror ${CLUSTER2} ${POOL} ${i}
+    disable_mirror ${CLUSTER2} ${POOL} ${i}
 done
 
 unprotect_snapshot ${CLUSTER2} ${POOL} ${image5} 'snap1'
 unprotect_snapshot ${CLUSTER2} ${POOL} ${image5} 'snap2'
 for i in ${image3} ${image5}; do
-	remove_snapshot ${CLUSTER2} ${POOL} ${i} 'snap1'
-	remove_snapshot ${CLUSTER2} ${POOL} ${i} 'snap2'
-	remove_image_retry ${CLUSTER2} ${POOL} ${i}
+    remove_snapshot ${CLUSTER2} ${POOL} ${i} 'snap1'
+    remove_snapshot ${CLUSTER2} ${POOL} ${i} 'snap2'
+    remove_image_retry ${CLUSTER2} ${POOL} ${i}
 done
 
 for i in ${image2} ${image3} ${image4} ${image5}; do
-	wait_for_image_present ${CLUSTER1} ${POOL} ${i} 'deleted'
+    wait_for_image_present ${CLUSTER1} ${POOL} ${i} 'deleted'
 done
 
 testlog "TEST: snapshot rename"
@@ -397,7 +397,7 @@ snap_name='snap_rename'
 enable_mirror ${CLUSTER2} ${POOL} ${image2}
 create_snapshot ${CLUSTER2} ${POOL} ${image2} "${snap_name}_0"
 for i in $(seq 1 20); do
-	rename_snapshot ${CLUSTER2} ${POOL} ${image2} "${snap_name}_$(expr ${i} - 1)" "${snap_name}_${i}"
+    rename_snapshot ${CLUSTER2} ${POOL} ${image2} "${snap_name}_$(expr ${i} - 1)" "${snap_name}_${i}"
 done
 mirror_image_snapshot ${CLUSTER2} ${POOL} ${image2}
 wait_for_snap_present ${CLUSTER1} ${POOL} ${image2} "${snap_name}_${i}"
@@ -405,7 +405,7 @@ wait_for_snap_present ${CLUSTER1} ${POOL} ${image2} "${snap_name}_${i}"
 unprotect_snapshot ${CLUSTER2} ${POOL} ${image4} 'snap1'
 unprotect_snapshot ${CLUSTER2} ${POOL} ${image4} 'snap2'
 for i in ${image2} ${image4}; do
-	remove_image_retry ${CLUSTER2} ${POOL} ${i}
+    remove_image_retry ${CLUSTER2} ${POOL} ${i}
 done
 
 testlog "TEST: disable mirror while daemon is stopped"
@@ -413,7 +413,7 @@ stop_mirrors ${CLUSTER1}
 stop_mirrors ${CLUSTER2}
 disable_mirror ${CLUSTER2} ${POOL} ${image}
 if [ -z "${RBD_MIRROR_USE_RBD_MIRROR}" ]; then
-	test_image_present ${CLUSTER1} ${POOL} ${image} 'present'
+    test_image_present ${CLUSTER1} ${POOL} ${image} 'present'
 fi
 start_mirrors ${CLUSTER1}
 wait_for_image_present ${CLUSTER1} ${POOL} ${image} 'deleted'
@@ -466,17 +466,17 @@ wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
 compare_images ${POOL} ${image}
 
 if [ -z "${RBD_MIRROR_USE_RBD_MIRROR}" ]; then
-	testlog "TEST: image resync while replayer is stopped"
-	admin_daemons ${CLUSTER1} rbd mirror stop ${POOL}/${image}
-	wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image}
-	request_resync_image ${CLUSTER1} ${POOL} ${image} image_id
-	admin_daemons ${CLUSTER1} rbd mirror start ${POOL}/${image}
-	wait_for_image_present ${CLUSTER1} ${POOL} ${image} 'deleted' ${image_id}
-	admin_daemons ${CLUSTER1} rbd mirror start ${POOL}/${image}
-	wait_for_image_present ${CLUSTER1} ${POOL} ${image} 'present'
-	wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
-	wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
-	compare_images ${POOL} ${image}
+    testlog "TEST: image resync while replayer is stopped"
+    admin_daemons ${CLUSTER1} rbd mirror stop ${POOL}/${image}
+    wait_for_image_replay_stopped ${CLUSTER1} ${POOL} ${image}
+    request_resync_image ${CLUSTER1} ${POOL} ${image} image_id
+    admin_daemons ${CLUSTER1} rbd mirror start ${POOL}/${image}
+    wait_for_image_present ${CLUSTER1} ${POOL} ${image} 'deleted' ${image_id}
+    admin_daemons ${CLUSTER1} rbd mirror start ${POOL}/${image}
+    wait_for_image_present ${CLUSTER1} ${POOL} ${image} 'present'
+    wait_for_image_replay_started ${CLUSTER1} ${POOL} ${image}
+    wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${image} 'up+replaying'
+    compare_images ${POOL} ${image}
 fi
 
 testlog "TEST: request image resync while daemon is offline"
@@ -510,8 +510,8 @@ wait_for_image_in_omap ${CLUSTER1} ${POOL}
 wait_for_image_in_omap ${CLUSTER2} ${POOL}
 
 if [ -z "${RBD_MIRROR_USE_RBD_MIRROR}" ]; then
-	# teuthology will trash the daemon
-	testlog "TEST: no blocklists"
-	CEPH_ARGS='--id admin' ceph --cluster ${CLUSTER1} osd blocklist ls 2>&1 | grep -q "listed 0 entries"
-	CEPH_ARGS='--id admin' ceph --cluster ${CLUSTER2} osd blocklist ls 2>&1 | grep -q "listed 0 entries"
+    # teuthology will trash the daemon
+    testlog "TEST: no blocklists"
+    CEPH_ARGS='--id admin' ceph --cluster ${CLUSTER1} osd blocklist ls 2>&1 | grep -q "listed 0 entries"
+    CEPH_ARGS='--id admin' ceph --cluster ${CLUSTER2} osd blocklist ls 2>&1 | grep -q "listed 0 entries"
 fi

@@ -12,7 +12,7 @@ EOF
 rm -f mm
 ip=$(host $(hostname) | awk '{print $4}')
 monmaptool --create mm \
-	--add a $ip:6779
+    --add a $ip:6779
 
 rm -f keyring
 ceph-authtool --create-keyring keyring --gen-key -n client.admin
@@ -29,11 +29,11 @@ ceph-mon -c conf -i d --mkfs --monmap mm --mon-data $cwd/mon.d -k keyring
 ceph-mon -c conf -i d --mon-data $cwd/mon.d --public-network 127.0.0.1/32
 
 while true; do
-	ceph -c conf -k keyring --monmap mm health
-	if ceph -c conf -k keyring --monmap mm mon stat | grep 'quorum 0,1'; then
-		break
-	fi
-	sleep 1
+    ceph -c conf -k keyring --monmap mm health
+    if ceph -c conf -k keyring --monmap mm mon stat | grep 'quorum 0,1'; then
+        break
+    fi
+    sleep 1
 done
 
 killall ceph-mon

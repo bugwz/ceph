@@ -18,8 +18,8 @@ sudo ip link set veth1-ext up
 # interface and set up NAT.  In case of multiple default routes,
 # just pick the first one.
 if [[ $(sysctl -n net.ipv4.ip_forward) -eq 0 ]]; then
-	sudo iptables -P FORWARD DROP
-	sudo sysctl -w net.ipv4.ip_forward=1
+    sudo iptables -P FORWARD DROP
+    sudo sysctl -w net.ipv4.ip_forward=1
 fi
 IFACE="$(ip route list 0.0.0.0/0 | head -n 1 | cut -d ' ' -f 5)"
 sudo iptables -A FORWARD -i veth1-ext -o "$IFACE" -j ACCEPT

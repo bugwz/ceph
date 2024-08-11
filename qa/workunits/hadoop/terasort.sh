@@ -12,8 +12,8 @@ num_records=100000
 
 # bail if $TESTDIR is not set as this test will fail in that scenario
 [ -z $TESTDIR ] && {
-	echo "\$TESTDIR needs to be set, but is not. Exiting."
-	exit 1
+    echo "\$TESTDIR needs to be set, but is not. Exiting."
+    exit 1
 }
 
 # if HADOOP_PREFIX is not set, use default
@@ -32,11 +32,11 @@ $HADOOP_PREFIX/bin/hadoop fs -rm -r $INPUT $OUTPUT $REPORT || true
 #-Dyarn.app.mapreduce.am.resource.mb=1024 \
 #-Dmapred.map.tasks=64 \
 $HADOOP_PREFIX/bin/hadoop jar \
-	$HADOOP_PREFIX/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
-	teragen \
-	-Dmapred.map.tasks=9 \
-	$num_records \
-	$INPUT
+    $HADOOP_PREFIX/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
+    teragen \
+    -Dmapred.map.tasks=9 \
+    $num_records \
+    $INPUT
 
 # Run the sort job
 #
@@ -54,10 +54,10 @@ $HADOOP_PREFIX/bin/hadoop jar \
 #-Dmapred.reduce.tasks=100 \
 #-Dmapreduce.terasort.output.replication=1 \
 $HADOOP_PREFIX/bin/hadoop jar \
-	$HADOOP_PREFIX/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
-	terasort \
-	-Dmapred.reduce.tasks=10 \
-	$INPUT $OUTPUT
+    $HADOOP_PREFIX/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
+    terasort \
+    -Dmapred.reduce.tasks=10 \
+    $INPUT $OUTPUT
 
 # Validate the sorted data
 #
@@ -71,9 +71,9 @@ $HADOOP_PREFIX/bin/hadoop jar \
 #-Dyarn.app.mapreduce.am.resource.mb=1024 \
 #-Dmapred.reduce.tasks=1 \
 $HADOOP_PREFIX/bin/hadoop jar \
-	$HADOOP_PREFIX/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
-	teravalidate \
-	-Dmapred.reduce.tasks=1 \
-	$OUTPUT $REPORT
+    $HADOOP_PREFIX/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
+    teravalidate \
+    -Dmapred.reduce.tasks=1 \
+    $OUTPUT $REPORT
 
 exit 0

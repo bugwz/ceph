@@ -18,18 +18,18 @@ INVALID="$INVALID" $PYTHON_EXECUTABLE $1 2>${STDERR_FILE}
 retVal=$?
 
 if [ $retVal -ne 0 ]; then
-	echo "Failed test: Unexpected failure from running Python script"
-	echo "Below is output of stderr captured:"
-	$cat "${STDERR_FILE}"
-	exit $retVal
+    echo "Failed test: Unexpected failure from running Python script"
+    echo "Below is output of stderr captured:"
+    $cat "${STDERR_FILE}"
+    exit $retVal
 fi
 
 $grep --quiet "$INVALID" ${STDERR_FILE}
 
 retVal=$?
 if [ $retVal -ne 0 ]; then
-	echo "Failed test: expected to find \"${INVALID}\" character in tmpfile: \"${STDERR_FILE}\""
-	echo "Below is output of stderr captured:"
-	$cat "${STDERR_FILE}"
+    echo "Failed test: expected to find \"${INVALID}\" character in tmpfile: \"${STDERR_FILE}\""
+    echo "Below is output of stderr captured:"
+    $cat "${STDERR_FILE}"
 fi
 exit $retVal

@@ -21,5 +21,5 @@ source $(dirname $0)/detect-build-env-vars.sh
 test $(uname) = FreeBSD
 
 CEPH_CLI_TEST_DUP_COMMAND=1 \
-	MON=1 OSD=3 MDS=0 MGR=1 CEPH_PORT=7206 $CEPH_ROOT/src/test/vstart_wrapper.sh \
-	$CEPH_ROOT/qa/workunits/rbd/rbd-ggate.sh
+    MON=1 OSD=3 MDS=0 MGR=1 CEPH_PORT=7206 $CEPH_ROOT/src/test/vstart_wrapper.sh \
+    $CEPH_ROOT/qa/workunits/rbd/rbd-ggate.sh

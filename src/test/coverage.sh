@@ -2,19 +2,19 @@
 set -e
 
 usage() {
-	printf '%s: usage: %s [-d srcdir] [-o output_basename] COMMAND [ARGS..]\n' "$(basename "$0")" "$(basename "$0")" 1>&2
-	exit 1
+    printf '%s: usage: %s [-d srcdir] [-o output_basename] COMMAND [ARGS..]\n' "$(basename "$0")" "$(basename "$0")" 1>&2
+    exit 1
 }
 
 OUTPUT_BASENAME=coverage
 SRCDIR=.
 
 while getopts "d:o:h" flag; do
-	case $flag in
-	d) SRCDIR=$OPTARG ;;
-	o) OUTPUT_BASENAME=$OPTARG ;;
-	*) usage ;;
-	esac
+    case $flag in
+        d) SRCDIR=$OPTARG ;;
+        o) OUTPUT_BASENAME=$OPTARG ;;
+        *) usage ;;
+    esac
 done
 
 shift $(($OPTIND - 1))

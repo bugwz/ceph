@@ -15,8 +15,8 @@ nova boot --image ${image_name} --flavor 1 ${image_name}-inst
 cinder_id=$(cinder list | grep ${image_name} | sed 's/^| //' | sed 's/ |.*//')
 chkr=$(cinder list | grep ${image_name}-volume | grep available)
 while [ -z "$chkr" ]; do
-	sleep 30
-	chkr=$(cinder list | grep ${image_name}-volume | grep available)
+    sleep 30
+    chkr=$(cinder list | grep ${image_name}-volume | grep available)
 done
 nova volume-attach ${image_name}-inst ${cinder_id} auto
 sleep 30

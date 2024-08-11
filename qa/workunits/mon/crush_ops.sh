@@ -3,8 +3,8 @@
 set -ex
 
 function expect_false() {
-	set -x
-	if "$@"; then return 1; else return 0; fi
+    set -x
+    if "$@"; then return 1; else return 0; fi
 }
 
 ceph osd crush dump
@@ -225,10 +225,10 @@ ceph osd crush weight-set rm-compat
 ceph osd crush weight-set create-compat
 ceph osd crush add-bucket r1 rack root=default
 for f in $(seq 1 32); do
-	ceph osd crush add-bucket h$f host rack=r1
+    ceph osd crush add-bucket h$f host rack=r1
 done
 for f in $(seq 1 32); do
-	ceph osd crush rm h$f
+    ceph osd crush rm h$f
 done
 ceph osd crush rm r1
 ceph osd crush weight-set rm-compat

@@ -15,7 +15,7 @@ mkdir tmp
 cd tmp
 
 for f in $mydir/*.ffsb; do
-	../ffsb-*/ffsb $f
+    ../ffsb-*/ffsb $f
 done
 cd ..
 rm -r tmp ffsb*

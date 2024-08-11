@@ -3,8 +3,8 @@
 set -ex
 
 expect_false() {
-	set -x
-	if "$@"; then return 1; else return 0; fi
+    set -x
+    if "$@"; then return 1; else return 0; fi
 }
 
 # create pools, set up tier relationship

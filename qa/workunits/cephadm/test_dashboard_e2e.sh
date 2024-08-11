@@ -6,41 +6,41 @@ DASHBOARD_FRONTEND_DIR=${SCRIPT_DIR}/../../../src/pybind/mgr/dashboard/frontend
 [ -z "$SUDO" ] && SUDO=sudo
 
 install_common() {
-	NODEJS_VERSION="16"
-	if grep -q debian /etc/*-release; then
-		$SUDO apt-get update
-		# https://github.com/nodesource/distributions#manual-installation
-		$SUDO apt-get install curl gpg
-		KEYRING=/usr/share/keyrings/nodesource.gpg
-		curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | gpg --dearmor | $SUDO tee "$KEYRING" >/dev/null
-		DISTRO="$(
-			source /etc/lsb-release
-			echo $DISTRIB_CODENAME
-		)"
-		VERSION="node_$NODEJS_VERSION.x"
-		echo "deb [signed-by=$KEYRING] https://deb.nodesource.com/$VERSION $DISTRO main" | $SUDO tee /etc/apt/sources.list.d/nodesource.list
-		echo "deb-src [signed-by=$KEYRING] https://deb.nodesource.com/$VERSION $DISTRO main" | $SUDO tee -a /etc/apt/sources.list.d/nodesource.list
-		$SUDO apt-get update
-		$SUDO apt-get install nodejs
-	elif grep -q rhel /etc/*-release; then
-		$SUDO yum module -y enable nodejs:$NODEJS_VERSION
-		$SUDO yum install -y jq npm
-	else
-		echo "Unsupported distribution."
-		exit 1
-	fi
+    NODEJS_VERSION="16"
+    if grep -q debian /etc/*-release; then
+        $SUDO apt-get update
+        # https://github.com/nodesource/distributions#manual-installation
+        $SUDO apt-get install curl gpg
+        KEYRING=/usr/share/keyrings/nodesource.gpg
+        curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | gpg --dearmor | $SUDO tee "$KEYRING" >/dev/null
+        DISTRO="$(
+            source /etc/lsb-release
+            echo $DISTRIB_CODENAME
+        )"
+        VERSION="node_$NODEJS_VERSION.x"
+        echo "deb [signed-by=$KEYRING] https://deb.nodesource.com/$VERSION $DISTRO main" | $SUDO tee /etc/apt/sources.list.d/nodesource.list
+        echo "deb-src [signed-by=$KEYRING] https://deb.nodesource.com/$VERSION $DISTRO main" | $SUDO tee -a /etc/apt/sources.list.d/nodesource.list
+        $SUDO apt-get update
+        $SUDO apt-get install nodejs
+    elif grep -q rhel /etc/*-release; then
+        $SUDO yum module -y enable nodejs:$NODEJS_VERSION
+        $SUDO yum install -y jq npm
+    else
+        echo "Unsupported distribution."
+        exit 1
+    fi
 }
 
 install_chrome() {
-	if grep -q debian /etc/*-release; then
-		$SUDO bash -c 'echo "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
-		curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | $SUDO apt-key add -
-		$SUDO apt-get update
-		$SUDO apt-get install -y google-chrome-stable
-		$SUDO apt-get install -y xvfb
-		$SUDO rm /etc/apt/sources.list.d/google-chrome.list
-	elif grep -q rhel /etc/*-release; then
-		$SUDO dd of=/etc/yum.repos.d/google-chrome.repo status=none <<EOF
+    if grep -q debian /etc/*-release; then
+        $SUDO bash -c 'echo "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
+        curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | $SUDO apt-key add -
+        $SUDO apt-get update
+        $SUDO apt-get install -y google-chrome-stable
+        $SUDO apt-get install -y xvfb
+        $SUDO rm /etc/apt/sources.list.d/google-chrome.list
+    elif grep -q rhel /etc/*-release; then
+        $SUDO dd of=/etc/yum.repos.d/google-chrome.repo status=none <<EOF
 [google-chrome]
 name=google-chrome
 baseurl=https://dl.google.com/linux/chrome/rpm/stable/\$basearch
@@ -48,25 +48,25 @@ enabled=1
 gpgcheck=1
 gpgkey=https://dl-ssl.google.com/linux/linux_signing_key.pub
 EOF
-		$SUDO yum install -y google-chrome-stable
-		$SUDO rm /etc/yum.repos.d/google-chrome.repo
-		# Cypress dependencies
-		$SUDO yum install -y xorg-x11-server-Xvfb gtk2-devel gtk3-devel libnotify-devel GConf2 nss.x86_64 libXScrnSaver alsa-lib
-	else
-		echo "Unsupported distribution."
-		exit 1
-	fi
+        $SUDO yum install -y google-chrome-stable
+        $SUDO rm /etc/yum.repos.d/google-chrome.repo
+        # Cypress dependencies
+        $SUDO yum install -y xorg-x11-server-Xvfb gtk2-devel gtk3-devel libnotify-devel GConf2 nss.x86_64 libXScrnSaver alsa-lib
+    else
+        echo "Unsupported distribution."
+        exit 1
+    fi
 }
 
 cypress_run() {
-	local specs="$1"
-	local timeout="$2"
-	local override_config="ignoreTestFiles=*.po.ts,retries=0,testFiles=${specs}"
+    local specs="$1"
+    local timeout="$2"
+    local override_config="ignoreTestFiles=*.po.ts,retries=0,testFiles=${specs}"
 
-	if [ x"$timeout" != "x" ]; then
-		override_config="${override_config},defaultCommandTimeout=${timeout}"
-	fi
-	npx cypress run --browser chrome --headless --config "$override_config"
+    if [ x"$timeout" != "x" ]; then
+        override_config="${override_config},defaultCommandTimeout=${timeout}"
+    fi
+    npx cypress run --browser chrome --headless --config "$override_config"
 }
 
 install_common

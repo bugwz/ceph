@@ -4,16 +4,16 @@
 
 cmd_no=0
 expect() {
-	cmd_no=$(($cmd_no + 1))
-	cmd="$1"
-	expected=$2
-	echo "[$cmd_no] $cmd"
-	eval $cmd
-	ret=$?
-	if [[ $ret -ne $expected ]]; then
-		echo "[$cmd_no] unexpected return '$ret', expected '$expected'"
-		exit 1
-	fi
+    cmd_no=$(($cmd_no + 1))
+    cmd="$1"
+    expected=$2
+    echo "[$cmd_no] $cmd"
+    eval $cmd
+    ret=$?
+    if [[ $ret -ne $expected ]]; then
+        echo "[$cmd_no] unexpected return '$ret', expected '$expected'"
+        exit 1
+    fi
 }
 
 ceph osd pool delete test test --yes-i-really-really-mean-it || true

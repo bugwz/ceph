@@ -12,7 +12,7 @@ sleep 20
 ./ceph osd down 1 # faster
 
 for f in $(seq 1 100); do
-	./rados -c ./ceph.conf -p $TEST_POOL put test_$f /etc/passwd
+    ./rados -c ./ceph.conf -p $TEST_POOL put test_$f /etc/passwd
 done
 
 # zap some objects on both replicas

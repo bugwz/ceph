@@ -3,23 +3,23 @@
 set -ex
 
 function expect_false() {
-	set -x
-	if "$@"; then return 1; else return 0; fi
+    set -x
+    if "$@"; then return 1; else return 0; fi
 }
 
 function write_file() {
-	set +x
-	for ((i = 1; i <= $2; i++)); do
-		dd if=/dev/zero of=$1 bs=1M count=1 conv=notrunc oflag=append 2>/dev/null >/dev/null
-		if [ $? != 0 ]; then
-			echo Try to write $(($i * 1048576))
-			set -x
-			return 1
-		fi
-		sleep 0.05
-	done
-	set -x
-	return 0
+    set +x
+    for ((i = 1; i <= $2; i++)); do
+        dd if=/dev/zero of=$1 bs=1M count=1 conv=notrunc oflag=append 2>/dev/null >/dev/null
+        if [ $? != 0 ]; then
+            echo Try to write $(($i * 1048576))
+            set -x
+            return 1
+        fi
+        sleep 0.05
+    done
+    set -x
+    return 0
 }
 
 mkdir quota-test

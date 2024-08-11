@@ -11,12 +11,12 @@ CONT_COUNT=$(echo ${ISCSI_CONT_IDS} | wc -w)
 test ${CONT_COUNT} -eq 2
 
 for i in ${ISCSI_CONT_IDS}; do
-	sudo podman exec ${i} /bin/sh -c 'for j in {0..20000}; do sleep 30 & done'
+    sudo podman exec ${i} /bin/sh -c 'for j in {0..20000}; do sleep 30 & done'
 done
 
 for i in ${ISCSI_CONT_IDS}; do
-	SLEEP_COUNT=$(sudo podman exec ${i} /bin/sh -c 'ps -ef | grep -c sleep')
-	test ${SLEEP_COUNT} -gt 20000
+    SLEEP_COUNT=$(sudo podman exec ${i} /bin/sh -c 'ps -ef | grep -c sleep')
+    test ${SLEEP_COUNT} -gt 20000
 done
 
 echo OK

@@ -7,33 +7,33 @@ old_value=""
 new_value=""
 
 wait_until_changed() {
-	name=$1
-	wait=0
-	while [ $wait -lt $timeout ]; do
-		new_value=$(getfattr --only-value -n ceph.dir.$name .)
-		[ $new_value == $old_value ] || return 0
-		sleep 1
-		wait=$(($wait + 1))
-	done
-	return 1
+    name=$1
+    wait=0
+    while [ $wait -lt $timeout ]; do
+        new_value=$(getfattr --only-value -n ceph.dir.$name .)
+        [ $new_value == $old_value ] || return 0
+        sleep 1
+        wait=$(($wait + 1))
+    done
+    return 1
 }
 
 check_rctime() {
-	old_sec=$(echo $old_value | cut -d. -f1)
-	old_nsec=$(echo $old_value | cut -d. -f2)
-	new_sec=$(echo $new_value | cut -d. -f1)
-	new_nsec=$(echo $new_value | cut -d. -f2)
-	[ "$old_sec" -lt "$new_sec" ] && return 0
-	[ "$old_sec" -gt "$new_sec" ] && return 1
-	[ "$old_nsec" -lt "$new_nsec" ] && return 0
-	return 1
+    old_sec=$(echo $old_value | cut -d. -f1)
+    old_nsec=$(echo $old_value | cut -d. -f2)
+    new_sec=$(echo $new_value | cut -d. -f1)
+    new_nsec=$(echo $new_value | cut -d. -f2)
+    [ "$old_sec" -lt "$new_sec" ] && return 0
+    [ "$old_sec" -gt "$new_sec" ] && return 1
+    [ "$old_nsec" -lt "$new_nsec" ] && return 0
+    return 1
 }
 
 # sync(3) does not make ceph-fuse flush dirty caps, because fuse kernel module
 # does not notify ceph-fuse about it. Use fsync(3) instead.
 fsync_path() {
-	cmd="import os; fd=os.open(\"$1\", os.O_RDONLY); os.fsync(fd); os.close(fd)"
-	python3 -c "$cmd"
+    cmd="import os; fd=os.open(\"$1\", os.O_RDONLY); os.fsync(fd); os.close(fd)"
+    python3 -c "$cmd"
 }
 
 set -e

@@ -22,58 +22,58 @@ SOURCES[us - west]="us-west.ceph.com"
 SOURCES[global]="download.ceph.com"
 
 function print_usage() {
-	echo "$0 [-q ] -s <source mirror> -t <target directory>"
+    echo "$0 [-q ] -s <source mirror> -t <target directory>"
 }
 
 while getopts ":qhs:t:" opt; do
-	case $opt in
-	q)
-		SILENT=1
-		;;
-	s)
-		SOURCE=$OPTARG
-		;;
-	t)
-		TARGET=$OPTARG
-		;;
-	h)
-		HELP=1
-		;;
-	\?)
-		print_usage
-		exit 1
-		;;
-	esac
+    case $opt in
+        q)
+            SILENT=1
+            ;;
+        s)
+            SOURCE=$OPTARG
+            ;;
+        t)
+            TARGET=$OPTARG
+            ;;
+        h)
+            HELP=1
+            ;;
+        \?)
+            print_usage
+            exit 1
+            ;;
+    esac
 done
 
 if [ ! -z "$HELP" ] || [ -z "$TARGET" ] || [ -z "$SOURCE" ]; then
-	print_usage
-	exit 1
+    print_usage
+    exit 1
 fi
 
 if [ ! -d "$TARGET" ]; then
-	echo "$TARGET is not a valid target directory"
-	exit 1
+    echo "$TARGET is not a valid target directory"
+    exit 1
 fi
 
 for i in "${!SOURCES[@]}"; do
-	if [ "$i" == "$SOURCE" ]; then
-		SOURCE_HOST=${SOURCES[$i]}
-	fi
+    if [ "$i" == "$SOURCE" ]; then
+        SOURCE_HOST=${SOURCES[$i]}
+    fi
 done
 
 if [ -z "$SOURCE_HOST" ]; then
-	echo -n "Please select one of the following sources:"
-	for i in "${!SOURCES[@]}"; do
-		echo -n " $i"
-	done
-	echo ""
-	exit 1
+    echo -n "Please select one of the following sources:"
+    for i in "${!SOURCES[@]}"; do
+        echo -n " $i"
+    done
+    echo ""
+    exit 1
 fi
 
 RSYNC_OPTS="--stats --progress"
 if [ $SILENT -eq 1 ]; then
-	RSYNC_OPTS="--quiet"
+    RSYNC_OPTS="--quiet"
 fi
 
 # We start a two-stage sync here for DEB and RPM
@@ -85,17 +85,17 @@ fi
 
 # Exclude all metadata files
 rsync ${RSYNC_OPTS} ${SOURCE_HOST}::ceph --recursive --times --links \
-	--hard-links \
-	--exclude Packages* \
-	--exclude Sources* \
-	--exclude Release* \
-	--exclude InRelease \
-	--exclude i18n/* \
-	--exclude ls-lR* \
-	--exclude repodata/* \
-	${TARGET}
+    --hard-links \
+    --exclude Packages* \
+    --exclude Sources* \
+    --exclude Release* \
+    --exclude InRelease \
+    --exclude i18n/* \
+    --exclude ls-lR* \
+    --exclude repodata/* \
+    ${TARGET}
 
 # Now also transfer the metadata and delete afterwards
 rsync ${RSYNC_OPTS} ${SOURCE_HOST}::ceph --recursive --times --links \
-	--hard-links --delete-after \
-	${TARGET}
+    --hard-links --delete-after \
+    ${TARGET}

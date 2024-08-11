@@ -4,14 +4,14 @@ POOL_NAME=rbd_test_validate_pool
 PG_NUM=32
 
 tear_down() {
-	ceph osd pool delete $POOL_NAME $POOL_NAME --yes-i-really-really-mean-it || true
+    ceph osd pool delete $POOL_NAME $POOL_NAME --yes-i-really-really-mean-it || true
 }
 
 set_up() {
-	tear_down
-	ceph osd pool create $POOL_NAME $PG_NUM
-	ceph osd pool mksnap $POOL_NAME snap
-	rbd pool init $POOL_NAME
+    tear_down
+    ceph osd pool create $POOL_NAME $PG_NUM
+    ceph osd pool mksnap $POOL_NAME snap
+    rbd pool init $POOL_NAME
 }
 
 trap tear_down EXIT HUP INT

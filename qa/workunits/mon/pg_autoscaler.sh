@@ -2,45 +2,45 @@
 
 NUM_OSDS=$(ceph osd ls | wc -l)
 if [ $NUM_OSDS -lt 6 ]; then
-	echo "test requires at least 6 OSDs"
-	exit 1
+    echo "test requires at least 6 OSDs"
+    exit 1
 fi
 
 NUM_POOLS=$(ceph osd pool ls | wc -l)
 if [ $NUM_POOLS -gt 0 ]; then
-	echo "test requires no preexisting pools"
-	exit 1
+    echo "test requires no preexisting pools"
+    exit 1
 fi
 
 function wait_for() {
-	local sec=$1
-	local cmd=$2
+    local sec=$1
+    local cmd=$2
 
-	while true; do
-		if bash -c "$cmd"; then
-			break
-		fi
-		sec=$(($sec - 1))
-		if [ $sec -eq 0 ]; then
-			echo failed
-			return 1
-		fi
-		sleep 1
-	done
-	return 0
+    while true; do
+        if bash -c "$cmd"; then
+            break
+        fi
+        sec=$(($sec - 1))
+        if [ $sec -eq 0 ]; then
+            echo failed
+            return 1
+        fi
+        sleep 1
+    done
+    return 0
 }
 
 function power2() { echo "x=l($1)/l(2); scale=0; 2^((x+0.5)/1)" | bc -l; }
 
 function eval_actual_expected_val() {
-	local actual_value=$1
-	local expected_value=$2
-	if [[ $actual_value = $expected_value ]]; then
-		echo "Success: " $actual_value "=" $expected_value
-	else
-		echo "Error: " $actual_value "!=" $expected_value
-		exit 1
-	fi
+    local actual_value=$1
+    local expected_value=$2
+    if [[ $actual_value = $expected_value ]]; then
+        echo "Success: " $actual_value "=" $expected_value
+    else
+        echo "Error: " $actual_value "!=" $expected_value
+        exit 1
+    fi
 }
 
 # enable

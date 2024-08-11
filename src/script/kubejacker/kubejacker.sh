@@ -13,9 +13,9 @@ BUILDPATH=$(pwd)
 REPO=${REPO:-"$1"}
 
 if [ -z "$REPO" ]; then
-	echo "ERROR: no \$REPO set!"
-	echo "Run a docker repository and set REPO to <hostname>:<port>"
-	exit -1
+    echo "ERROR: no \$REPO set!"
+    echo "Run a docker repository and set REPO to <hostname>:<port>"
+    exit -1
 fi
 
 # The output image name: this should match whatever is configured as
