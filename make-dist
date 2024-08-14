@@ -1,4 +1,35 @@
 #!/bin/bash -e
+# 
+# 主要内容是为 Ceph 项目构建一个包含所需依赖项和子模块的压缩包。脚本执行的主要步骤如下
+# 
+# 检查当前目录是否为 Git 仓库根目录 ：
+#   如果当前目录没有 .git 文件夹，则输出错误信息并退出。
+# 检查脚本路径中是否包含冒号 ：
+#   如果脚本路径中包含冒号，输出错误信息并退出。
+# 获取版本号 ：
+#   从命令行参数获取版本号，如果没有提供则从 Git 标签中获取。
+# 更新子模块 ：
+#   同步并更新 Git 子模块，如果失败则输出错误信息并退出。
+# 定义下载依赖项的函数 ：
+#   download_from：通用的下载函数，使用 wget 下载文件并验证 SHA256 校验和。
+#   download_boost、download_liburing、download_pmdk：分别下载并解压 Boost、Liburing 和 PMDK 库。
+# 构建 dashboard 前端 ：
+#   设置虚拟环境并安装 Node.js ，然后在 src/pybind/mgr/dashboard/frontend 目录中构建前端。
+# 生成 Rook Ceph 客户端 ：
+#   执行生成 Rook Ceph 客户端的脚本并打包结果。
+# 清理旧文件 ：
+#   删除旧的输出文件。
+# 创建新的压缩包 ：
+#   使用 git-archive-all.sh 创建包含项目所有文件的tar包。
+#   包含版本信息和 spec 文件。
+# 下载并打包依赖项 ：
+#   下载并打包 Boost、Liburing 和 PMDK 库。
+# 合并所有 tar 包 ：
+#   将所有生成的 tar 包合并为一个大包，并删除中间生成的小包。
+# 压缩最终的 tar 包 ：
+#   使用 bzip2 压缩生成的 tar 包。
+# 完成 ：
+#   输出完成信息。
 
 SCRIPTNAME="$(basename "${0}")"
 BASEDIR="$(readlink -f "$(dirname "${0}")")"
