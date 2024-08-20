@@ -1959,6 +1959,7 @@ void Server::journal_and_reply(MDRequestRef& mdr, CInode* in, CDentry* dn, LogEv
     early_reply(mdr, in, dn);
 
     mdr->committing = true;
+    // 提交日志
     submit_mdlog_entry(le, fin, mdr, __func__);
 
     if (mdr->client_request && mdr->client_request->is_queued_for_replay()) {
@@ -1972,6 +1973,7 @@ void Server::journal_and_reply(MDRequestRef& mdr, CInode* in, CDentry* dn, LogEv
     else if (mdr->did_early_reply)
         mds->locker->drop_rdlocks_for_early_reply(mdr.get());
     else
+        // 刷新日志
         mdlog->flush();
 }
 
@@ -7097,11 +7099,13 @@ public:
     }
 };
 
+// 远程删除
 void Server::_link_remote(MDRequestRef& mdr, bool inc, CDentry* dn, CInode* targeti)
 {
     dout(10) << "_link_remote " << (inc ? "link " : "unlink ") << *dn << " to " << *targeti << dendl;
 
     // 1. send LinkPrepare to dest (journal nlink++ prepare)
+    // 1. 发送 LinkPrepare 到目标 (日志 nlink++ 准备)
     mds_rank_t linkauth = targeti->authority().first;
     if (mdr->more()->witnessed.count(linkauth) == 0) {
         if (mds->is_cluster_degraded() && !mds->mdsmap->is_clientreplay_or_active_or_stopping(linkauth)) {
@@ -7164,6 +7168,7 @@ void Server::_link_remote(MDRequestRef& mdr, bool inc, CDentry* dn, CInode* targ
         dn->push_projected_linkage();
     }
 
+    // 记录日志并返回消息
     journal_and_reply(
         mdr, (inc ? targeti : nullptr), dn, le, new C_MDS_link_remote_finish(this, mdr, inc, dn, targeti));
 }
@@ -7676,6 +7681,9 @@ void Server::handle_client_unlink(MDRequestRef& mdr)
 
     if (straydn) straydn->first = mdcache->get_global_snaprealm()->get_newest_seq() + 1;
 
+    // 处理删除操作时涉及到快照领域（snaprealm）的逻辑
+    //
+    // 检查当前请求是否已经有了目标 srnode , 如果没有，则继续执行 
     if (!mdr->more()->desti_srnode) {
         if (in->is_projected_snaprealm_global()) {
             sr_t* new_srnode = in->prepare_new_srnode(0);
@@ -7700,6 +7708,7 @@ void Server::handle_client_unlink(MDRequestRef& mdr)
     }
 
     // yay!
+    // 如果 inode 是目录， 并且
     if (in->is_dir() && in->has_subtree_root_dirfrag()) {
         // subtree root auths need to be witnesses
         set<mds_rank_t> witnesses;
@@ -7720,11 +7729,14 @@ void Server::handle_client_unlink(MDRequestRef& mdr)
         if (!mdr->more()->waiting_on_peer.empty()) return;   // we're waiting for a witness.
     }
 
+    // 如果不是删除目录操作
     if (!rmdir && dnl->is_primary() && mdr->dn[0].size() == 1) mds->locker->create_lock_cache(mdr, diri);
 
     // ok!
+    // 该目录项是远程的，并且对应的 inode 没有被授权，则删除操作需要远程执行
     if (dnl->is_remote() && !dnl->get_inode()->is_auth())
         _link_remote(mdr, false, dn, dnl->get_inode());
+    // 否则本地执行即可
     else
         _unlink_local(mdr, dn, straydn);
 }
@@ -7748,10 +7760,12 @@ public:
     }
 };
 
+// 本地删除
 void Server::_unlink_local(MDRequestRef& mdr, CDentry* dn, CDentry* straydn)
 {
     dout(10) << "_unlink_local " << *dn << dendl;
 
+    // 获取 dnl 和 inode 信息
     CDentry::linkage_t* dnl = dn->get_projected_linkage();
     CInode* in = dnl->get_inode();
 
@@ -7760,6 +7774,7 @@ void Server::_unlink_local(MDRequestRef& mdr, CDentry* dn, CDentry* straydn)
     mdr->ls = mdlog->get_current_segment();
 
     // prepare log entry
+    // 准备日志条目
     EUpdate* le = new EUpdate(mdlog, "unlink_local");
     mdlog->start_entry(le);
     le->metablob.add_client_req(mdr->reqid, mdr->client_request->get_oldest_client_tid());
@@ -7776,6 +7791,7 @@ void Server::_unlink_local(MDRequestRef& mdr, CDentry* dn, CDentry* straydn)
     }
 
     // the unlinked dentry
+    // 预先使 dentry 变 dirty
     dn->pre_dirty();
 
     auto pi = in->project_inode(mdr);
@@ -7785,10 +7801,13 @@ void Server::_unlink_local(MDRequestRef& mdr, CDentry* dn, CDentry* straydn)
         pi.inode->stray_prior_path = std::move(t);
     }
     pi.inode->version = in->pre_dirty();
+    // 更新 inode 的 change time
     pi.inode->ctime = mdr->get_op_stamp();
     if (mdr->get_op_stamp() > pi.inode->rstat.rctime) pi.inode->rstat.rctime = mdr->get_op_stamp();
     pi.inode->change_attr++;
+    // inode 的 link 数量减一
     pi.inode->nlink--;
+    // 如果 inode 的 link 数量为 0 ，则将对应 inode 的状态设置为 orphan
     if (pi.inode->nlink == 0) in->state_set(CInode::STATE_ORPHAN);
 
     if (mdr->more()->desti_srnode) {
@@ -7815,6 +7834,7 @@ void Server::_unlink_local(MDRequestRef& mdr, CDentry* dn, CDentry* straydn)
         mdcache->journal_dirty_inode(mdr.get(), &le->metablob, in);
     }
 
+    // 变更 mdcache 中的信息
     mdcache->journal_cow_dentry(mdr.get(), &le->metablob, dn);
     le->metablob.add_null_dentry(dn, true);
 
@@ -7835,6 +7855,7 @@ void Server::_unlink_local(MDRequestRef& mdr, CDentry* dn, CDentry* straydn)
         mdcache->project_subtree_rename(in, dn->get_dir(), straydn->get_dir());
     }
 
+    // 记录日志并回复
     journal_and_reply(mdr, 0, dn, le, new C_MDS_unlink_local_finish(this, mdr, dn, straydn));
 }
 

@@ -369,6 +369,7 @@ public:
     static const int STATE_CLIENTWRITEABLE = (1 << 22);
 
     // orphan inode needs notification of releasing reference
+    // 孤立的 inode 需要在释放引用时通知
     static const int STATE_ORPHAN = STATE_NOTIFYREF;
 
     static const int MASK_STATE_EXPORTED = (STATE_DIRTY | STATE_NEEDSRECOVER | STATE_DIRTYPARENT | STATE_DIRTYPOOL |

@@ -808,6 +808,7 @@ void CInode::close_dirfrags()
     while (!dirfrags.empty()) close_dirfrag(dirfrags.begin()->first);
 }
 
+// 用于检查某个 CInode 对象是否包含子树根目录碎片（subtree root dirfrag）
 bool CInode::has_subtree_root_dirfrag(int auth)
 {
     if (num_subtree_roots > 0) {
