@@ -212,6 +212,7 @@ struct MarkEventOnDestruct
 
 /* If this function returns false, the mdr has been placed
  * on the appropriate wait list */
+/* 如果这个函数返回 false，说明 mdr 已经被放置在相应的等待列表中 */
 bool Locker::acquire_locks(MDRequestRef& mdr, MutationImpl::LockOpVec& lov, CInode* auth_pin_freeze,
                            bool auth_pin_nonblocking)
 {

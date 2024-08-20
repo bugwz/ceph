@@ -2292,6 +2292,7 @@ void Server::set_trace_dist(const ref_t<MClientReply>& reply, CInode* in, CDentr
     reply->set_trace(bl);
 }
 
+// mds 处理来自 client 的请求
 void Server::handle_client_request(const cref_t<MClientRequest>& req)
 {
     dout(4) << "handle_client_request " << *req << dendl;
@@ -2307,12 +2308,15 @@ void Server::handle_client_request(const cref_t<MClientRequest>& req)
 
     bool sessionclosed_isok = replay_unsafe_with_closed_session;
     // active session?
+    // 是否存在一个活跃的 session
     Session* session = 0;
     if (req->is_a_client()) {
+        // 获取 client 的 session 信息
         session = mds->get_session(req);
         if (!session) {
             dout(5) << "no session for " << req->get_source() << ", dropping" << dendl;
         }
+        // 判断 session 是否处于关闭状态
         else if ((session->is_closed() && (!mds->is_clientreplay() || !sessionclosed_isok)) || session->is_closing() ||
                  session->is_killing()) {
             dout(5) << "session closed|closing|killing, dropping" << dendl;
@@ -2340,9 +2344,12 @@ void Server::handle_client_request(const cref_t<MClientRequest>& req)
             if (!session->is_open()) return;
             // Don't send traceless reply if the completed request has created
             // new inode. Treat the request as lookup request instead.
+            // 如果已完成的请求创建了新的 inode，不要发送无痕迹的回复。
+            // 而是将该请求视为查找请求。
             if (req->is_replay() || ((created == inodeno_t() || !mds->is_clientreplay()) &&
                                      req->get_op() != CEPH_MDS_OP_OPEN && req->get_op() != CEPH_MDS_OP_CREATE)) {
                 dout(5) << "already completed " << req->get_reqid() << dendl;
+                // 创建一个 reply 消息
                 auto reply = make_message<MClientReply>(*req, 0);
                 if (created != inodeno_t()) {
                     bufferlist extra;
@@ -2412,6 +2419,7 @@ void Server::handle_client_request(const cref_t<MClientRequest>& req)
         req->releases.clear();
     }
 
+    // 分发客户端请求
     dispatch_client_request(mdr);
     return;
 }
@@ -2431,12 +2439,15 @@ void Server::handle_osd_map()
 void Server::dispatch_client_request(MDRequestRef& mdr)
 {
     // we shouldn't be waiting on anyone.
+    // 我们不应该在等待任何人。
     ceph_assert(!mdr->has_more() || mdr->more()->waiting_on_peer.empty());
 
     if (mdr->killed) {
         dout(10) << "request " << *mdr << " was killed" << dendl;
         // if the mdr is a "batch_op" and it has followers, pick a follower as
         // the new "head of the batch ops" and go on processing the new one.
+        // 如果 mdr 是一个 "batch_op" 并且它有后续操作，选择一个后续操作作为
+        // 新的 "batch ops 头" 并继续处理新的操作。
         if (mdr->is_batch_head()) {
             int mask = mdr->client_request->head.args.getattr.mask;
             auto it = mdr->batch_op_map->find(mask);
@@ -3053,6 +3064,12 @@ void Server::handle_peer_auth_pin_ack(MDRequestRef& mdr, const cref_t<MMDSPeerRe
  * Check whether we have permission to perform the operation specified
  * by mask on the given inode, based on the capability in the mdr's
  * session.
+ */
+/**
+ * 检查我们是否被允许完成请求
+ *
+ * 检查我们是否有权限基于会话中的mdr能力对给定的inode执行
+ * 由mask指定的操作。
  */
 bool Server::check_access(MDRequestRef& mdr, CInode* in, unsigned mask)
 {
@@ -7543,21 +7560,31 @@ void Server::handle_peer_link_prep_ack(MDRequestRef& mdr, const cref_t<MMDSPeerR
 
 
 // UNLINK
-
+// 删除文件或者目录的时候都会走到这里
+// 注意： 客户端在发起删除目录之前或获取对应目录中的所有子文件/文件，发起的操作会先删除子文件/目录，之后才会删除父目录
 void Server::handle_client_unlink(MDRequestRef& mdr)
 {
+    // 获取请求和客户端信息
     const cref_t<MClientRequest>& req = mdr->client_request;
     client_t client = mdr->get_client();
 
     // rmdir or unlink?
     bool rmdir = (req->get_op() == CEPH_MDS_OP_RMDIR);
 
+    // 如果是删除目录操作，则禁用锁缓存
+    // 删除目录操作涉及到多个复杂的步骤和状态检查。禁用锁缓存的主要原因是为了确保一致性和正确性。
     if (rmdir) mdr->disable_lock_cache();
+    // 锁定路径并获取目标 dentry 。如果未能成功获取，则返回。
+    // 从 dentry 中提取链接信息，并确保其非空，然后获取对应的 inode 。
+    // CDentry 表示一个目录项，它包含了文件或子目录在其父目录中的名称及其相关信息。
     CDentry* dn = rdlock_path_xlock_dentry(mdr, false, true);
     if (!dn) return;
 
+    // 这个方法用于从一个目录项中提取其链接信息。具体来说，它返回的是一个指向 linkage_t 类型对象的指针，
+    // 该对象包含了与该目录项所关联的一些重要元数据和状态。
     CDentry::linkage_t* dnl = dn->get_linkage(client, mdr);
     ceph_assert(!dnl->is_null());
+    // CInode 表示一个索引节点，它包含了关于文件或子目录本身的信息，如权限、大小、数据块位置等元数据。
     CInode* in = dnl->get_inode();
 
     if (rmdir) {
@@ -7569,21 +7596,28 @@ void Server::handle_client_unlink(MDRequestRef& mdr)
     dout(7) << "dn links to " << *in << dendl;
 
     // rmdir vs is_dir
+    // 如果对应的 inode 是一个 dir
     if (in->is_dir()) {
+        // 如果是删除目录的操作
         if (rmdir) {
             // do empty directory checks
+            // 执行空目录检查
+            // 如果对应的目录不为空，则返回报错
             if (_dir_is_nonempty_unlocked(mdr, in)) {
                 respond_to_request(mdr, -CEPHFS_ENOTEMPTY);
                 return;
             }
         }
+        // 如果不是执行的删除目录的操作，则报错返回
         else {
             dout(7) << "handle_client_unlink on dir " << *in << ", returning error" << dendl;
             respond_to_request(mdr, -CEPHFS_EISDIR);
             return;
         }
     }
+    // 如果对应的 inode 不是目录
     else {
+        // 但是执行的操作缺失删除目录的操作，则应该报错返回
         if (rmdir) {
             // unlink
             dout(7) << "handle_client_rmdir on non-dir " << *in << ", returning error" << dendl;
@@ -7592,14 +7626,17 @@ void Server::handle_client_unlink(MDRequestRef& mdr)
         }
     }
 
+    // 从当前 denry 中提取父级 inode
     CInode* diri = dn->get_dir()->get_inode();
     if ((!mdr->has_more() || mdr->more()->witnessed.empty())) {
+        // 检查对应的父目录是否具有可写权限
         if (!check_access(mdr, diri, MAY_WRITE)) return;
     }
 
     // -- create stray dentry? --
     CDentry* straydn = NULL;
     if (dnl->is_primary()) {
+        // 预处理 stray dentry
         straydn = prepare_stray_dentry(mdr, dnl->get_inode());
         if (!straydn) return;
         dout(10) << " straydn is " << *straydn << dendl;
@@ -7610,6 +7647,7 @@ void Server::handle_client_unlink(MDRequestRef& mdr)
     }
 
     // lock
+    // 如果 mdr 没有被加锁，则需要添加一系列的锁信息
     if (!(mdr->locking_state & MutationImpl::ALL_LOCKED)) {
         MutationImpl::LockOpVec lov;
 
@@ -7623,11 +7661,14 @@ void Server::handle_client_unlink(MDRequestRef& mdr)
             lov.add_xlock(&straydn->lock);
         }
 
+        // 获取上面添加的锁
         if (!mds->locker->acquire_locks(mdr, lov)) return;
 
+        // 更改 mdr 的锁状态
         mdr->locking_state |= MutationImpl::ALL_LOCKED;
     }
 
+    // 如果对应的 inode 是一个目录，并且该目录非空，则应该报错返回
     if (in->is_dir() && _dir_is_nonempty(mdr, in)) {
         respond_to_request(mdr, -CEPHFS_ENOTEMPTY);
         return;
@@ -8184,17 +8225,29 @@ void Server::_rmdir_rollback_finish(MDRequestRef& mdr, metareqid_t reqid, CDentr
  * the unlocked varient this is a fastpath check.  we can't really be
  * sure until we rdlock the filelock.
  */
+/** _dir_is_nonempty[_unlocked]
+ *
+ * 检查一个目录是否非空（即我们是否可以删除它）。
+ *
+ * 未锁定的变体是一个快速路径检查。在我们读取文件锁之前，
+ * 我们不能真正确定。
+ */
 bool Server::_dir_is_nonempty_unlocked(MDRequestRef& mdr, CInode* in)
 {
     dout(10) << "dir_is_nonempty_unlocked " << *in << dendl;
     ceph_assert(in->is_auth());
 
-    if (in->filelock.is_cached()) return false;   // there can be pending async create/unlink. don't know.
-    if (in->snaprealm && in->snaprealm->srnode.snaps.size()) return true;   // in a snapshot!
+    // there can be pending async create/unlink. don't know.
+    // 可能存在未处理的异步创建/删除操作。不确定。
+    if (in->filelock.is_cached()) return false;
+    // in a snapshot!
+    // 在一个快照中
+    if (in->snaprealm && in->snaprealm->srnode.snaps.size()) return true;
 
     auto&& ls = in->get_dirfrags();
     for (const auto& dir : ls) {
         // is the frag obviously non-empty?
+        // 这个片段显然是非空的吗？
         if (dir->is_auth()) {
             if (dir->get_projected_fnode()->fragstat.size()) {
                 dout(10) << "dir_is_nonempty_unlocked dirstat has " << dir->get_projected_fnode()->fragstat.size()
