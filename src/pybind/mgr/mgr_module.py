@@ -564,6 +564,10 @@ class Option(Dict):
     Helper class to declare options for MODULE_OPTIONS list.
     TODO: Replace with typing.TypedDict when in python_version >= 3.8
     """
+    """
+    辅助类用于声明 MODULE_OPTIONS 列表的选项。
+    TODO: 当 Python 版本 >= 3.8 时，用 typing.TypedDict 替换。
+    """
 
     def __init__(
             self,
@@ -629,6 +633,11 @@ class Command(dict):
         It also uses HandleCommandResult helper to return a wrapped a tuple of 3
         items.
         """
+        """
+        注册一个 CLICommand 处理器。它允许实例注册绑定的方法。在这种情况下，
+        mgr 实例不会传递，并且预计它在类实例中是可用的。
+        它还使用 HandleCommandResult 辅助函数返回一个包含 3 个项目的元组。
+        """
         cmd = CLICommand(prefix=self.prefix, perm=self['perm'])
         return cmd(self.returns_command_result(instance, self.handler))
 
@@ -692,6 +701,7 @@ class MgrModuleLoggingMixin(object):
         self._unconfigure_logging()
 
         # the ceph log handler is initialized only once
+        # Ceph 日志处理程序仅初始化一次
         self._mgr_log_handler = CPlusPlusHandler(self)
         self._cluster_log_handler = ClusterLogHandler(self)
         self._file_log_handler = FileHandler(self)
@@ -706,6 +716,7 @@ class MgrModuleLoggingMixin(object):
             self._root_logger.addHandler(self._cluster_log_handler)
 
         self._root_logger.setLevel(logging.NOTSET)
+        # 设置日志级别
         self._set_log_level(mgr_level, module_level, cluster_level)
 
     def _unconfigure_logging(self) -> None:
@@ -720,6 +731,7 @@ class MgrModuleLoggingMixin(object):
         self.log_to_file = False
         self.log_to_cluster = False
 
+    # 设置日志级别
     def _set_log_level(self,
                        mgr_level: str,
                        module_level: str,
@@ -809,6 +821,13 @@ class MgrStandbyModule(ceph_module.BaseMgrStandbyModule, MgrModuleLoggingMixin):
 
     They only have access to the mgrmap (for accessing service URI info
     from their active peer), and to configuration settings (read only).
+    """
+    """
+    备用模块只实现 serve 和 shutdown 方法，
+    它们不允许实现命令，并且它们不会接收任何通知。
+
+    它们只能访问 mgrmap （用于从其活动对等端访问服务 URI 信息），
+    以及配置设置（只读）。
     """
 
     MODULE_OPTIONS: List[Option] = []
@@ -995,6 +1014,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
     NONE = 1
 
     # Cluster log priorities
+    # 集群日志优先级
     class ClusterLogPrio(IntEnum):
         DEBUG = 0
         INFO = 1
@@ -1011,13 +1031,17 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
                 if 'type' in o:
                     # we'll assume the declared type matches the
                     # supplied default value's type.
+                    # 我们将假设声明的类型与提供的默认值类型匹配。
                     self.MODULE_OPTION_DEFAULTS[o['name']] = o['default']
                 else:
                     # module not declaring it's type, so normalize the
                     # default value to be a string for consistent behavior
                     # with default and user-supplied option values.
+                    # 模块未声明其类型，因此将默认值规范化为字符串
+                    # 以便在默认值和用户提供的选项值之间保持一致的行为。
                     self.MODULE_OPTION_DEFAULTS[o['name']] = str(o['default'])
 
+        # 配置日志
         mgr_level = cast(str, self.get_ceph_option("debug_mgr"))
         log_level = cast(str, self.get_module_option("log_level"))
         cluster_level = cast(str, self.get_module_option('log_to_cluster_level'))
@@ -1029,25 +1053,36 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
                                 log_to_file, log_to_cluster)
 
         # for backwards compatibility
+        # 为了向后兼容
         self._logger = self.getLogger()
 
-        self._db = None # type: Optional[sqlite3.Connection]
+        # type: Optional[sqlite3.Connection]
+        # # 类型: Optional[sqlite3.Connection]
+        self._db = None
 
         self._version = self._ceph_get_version()
 
         self._perf_schema_cache = None
 
         # Keep a librados instance for those that need it.
+        # 保留一个 librados 实例以供需要的地方使用。
         self._rados: Optional[rados.Rados] = None
 
         # this does not change over the lifetime of an active mgr
+        # 这在活动管理器的生命周期内不会改变
         self._mgr_ips: Optional[str] = None
 
+        # 初始化一个 db 锁
         self._db_lock = threading.Lock()
 
     def __del__(self) -> None:
         self._unconfigure_logging()
 
+    # 注册配置
+    # 
+    # 这段代码的作用是向 cls.MODULE_OPTIONS 列表中添加若干个 Option 对象，
+    # 每个对象都有不同的属性设置。这些选项主要与日志记录相关，包括日志级别、
+    # 是否记录到文件、是否记录到集群等。
     @classmethod
     def _register_options(cls, module_name: str) -> None:
         cls.MODULE_OPTIONS.append(
@@ -1066,8 +1101,13 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
                    enum_allowed=['info', 'debug', 'critical', 'error',
                                  'warning', '']))
 
+    # 注册命令
     @classmethod
     def _register_commands(cls, module_name: str) -> None:
+        # extend 方法：将一个可迭代对象中的所有元素添加到 COMMANDS 列表中
+        #
+        # 调用 CLICommand 类的 dump_cmd_list 方法（假设 CLICommand 是在其他地方定义的类），
+        # 该方法应该返回一个可迭代对象（如列表），其中包含要添加到 COMMANDS 列表中的命令。
         cls.COMMANDS.extend(CLICommand.dump_cmd_list())
 
     @property
@@ -1102,6 +1142,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         need = cast(int, self.get_ceph_option("osd_pool_default_size"))
         return ready >= need
 
+    # 重命名一个 pool
     @API.perm('w')
     @API.expose
     def rename_pool(self, srcpool: str, destpool: str) -> None:
@@ -1114,6 +1155,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         }
         self.check_mon_command(c)
 
+    # 创建一个 pool
     @API.perm('w')
     @API.expose
     def create_pool(self, pool: str) -> None:
@@ -1172,6 +1214,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
         db.execute(SQL, (version,))
 
+    # 设置 kv 数据
     def set_kv(self, key: str, value: Any) -> None:
         SQL = "INSERT OR REPLACE INTO MgrModuleKV (key, value) VALUES (?, ?);"
 
@@ -1182,6 +1225,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         with self._db_lock, self.db:
             self.db.execute(SQL, (key, value))
 
+    # 获取 kv 数据
     @API.expose
     def get_kv(self, key: str) -> Any:
         SQL = "SELECT value FROM MgrModuleKV WHERE key = ?;"
@@ -1246,6 +1290,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
                 self._db.close()
                 self._db = None
 
+    # 打开 db ， 这里的 db 是本地的 sqlite 数据库
     def open_db(self) -> Optional[sqlite3.Connection]:
         if not self.pool_exists(self.MGR_POOL_NAME):
             if not self.have_enough_osds():
@@ -1266,6 +1311,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
     @API.expose
     def db_ready(self) -> bool:
+        # 使用 with 语句来获取 _db_lock 锁。这通常用于确保在操作数据库时不会出现并发访问问题。
         with self._db_lock:
             try:
                 return self.db is not None
@@ -1290,6 +1336,11 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         """
         Get the release name of the Ceph version, e.g. 'nautilus' or 'octopus'.
         :return: Returns the release name of the Ceph version in lower case.
+        :rtype: str
+        """
+        """
+        获取 Ceph 版本的发布名称，例如 'nautilus' 或 'octopus'。
+        :return: 返回小写的 Ceph 版本的发布名称。
         :rtype: str
         """
         return self._ceph_get_release_name()
@@ -1319,6 +1370,16 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
                             "command" notifications this is set to the tag
                             ``from send_command``.
         """
+        """
+        由 ceph-mgr 服务调用，以通知 Python 插件有新的状态可用。此方法 *仅* 对列在模块类的
+        NOTIFY_TYPES 字符串列表成员中的 notify_types 调用。
+
+        :param notify_type: 指示通知类型的字符串，例如 osd_map、mon_map、fs_map、mon_status、
+               health、pg_summary、command、service_map
+        :param notify_id: 可能为空的字符串，可选地指定正在通知的实体。在 "command" 通知中，这将设置
+                          为 ``from send_command`` 标签。
+        """
+
         pass
 
     def _config_notify(self) -> None:
@@ -1362,6 +1423,12 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         of this function should block until ``shutdown`` is called.
 
         You *must* implement ``shutdown`` if you implement ``serve``
+        """
+        """
+        由 ceph-mgr 服务调用以启动由此 Python 插件提供的任何服务器。
+        此函数的实现应阻塞，直到调用 ``shutdown``。
+
+        如果实现了 ``serve``，则*必须*实现 ``shutdown``。
         """
         pass
 
@@ -1416,6 +1483,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
         return obj
 
+    # 转换 stat 类型为字符串
     def _stattype_to_str(self, stattype: int) -> str:
 
         typeonly = stattype & self.PERFCOUNTER_TYPE_MASK
@@ -1505,6 +1573,12 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         :param elems: the elements to be printed
         :param width: the width of the terminal
         """
+        """
+        类似于 ``get_pretty_row``，但添加了破折号，用作表格标题。
+
+        :param elems: 要打印的元素
+        :param width: 终端的宽度
+        """
         n = len(elems)
         column_width = int(width / n)
 
@@ -1561,6 +1635,11 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
         :return: str representing the major, minor, and patch RocksDB version numbers
         """
+        """
+        插件调用此函数以获取最新的 RocksDB 版本号。
+
+        :return: 表示 RocksDB 主要、次要和补丁版本号的字符串
+        """
         return self._ceph_get_rocksdb_version()
 
     @API.expose
@@ -1611,6 +1690,12 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         :return: a list of information about all servers
         :rtype: list
         """
+        """
+        类似于 ``get_server``，但提供所有服务器的信息（即在守护进程元数据中提到的所有唯一主机名）。
+
+        :return: 包含所有服务器信息的列表
+        :rtype: list
+        """
         return cast(List[ServerInfoT], self._ceph_get_server(None))
 
     def get_metadata(self,
@@ -1628,6 +1713,15 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         :param str svc_id: service id. convert OSD integer IDs to strings when
             calling this
         :rtype: dict, or None if no metadata found
+        """
+        """
+        获取特定服务的守护进程元数据。
+
+        ceph-mgr 异步获取元数据，因此在添加/删除服务时，有一段时间模块无法获取到元数据。如果没有可用的元数据，则返回 ``None``。
+
+        :param str svc_type: 服务类型（例如 'mds', 'osd', 'mon')
+        :param str svc_id: 服务 ID。调用此函数时, 将 OSD 整数 ID 转换为字符串
+        :rtype: dict, 如果没有找到元数据则返回 None
         """
         metadata = self._ceph_get_metadata(svc_type, svc_id)
         if not metadata:
@@ -1667,6 +1761,13 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         See send_command for general case.
 
         :return: status int, out std, err str
+        """
+        """
+        模块辅助工具，用于执行简单的同步 mon 命令。
+
+        一般情况请参见 send_command。
+
+        :return: 状态 int, 输出 std, 错误 str
         """
 
         t1 = time.time()
@@ -1908,6 +2009,9 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         """
         Retrieve the value of a persistent configuration setting
         """
+        """
+        获取持久化配置设置的值
+        """
         self._validate_module_option(key)
         return self._get_module_option(key, default)
 
@@ -1923,6 +2027,13 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         :param key: The configuration key, e.g. 'server_addr'.
         :param default: The default value to use when the
             returned value is ``None``. Defaults to ``None``.
+        """
+        """
+        获取指定模块的持久化配置设置的值。
+
+        :param module: 模块的名称，例如 'dashboard' 或 'telemetry'。
+        :param key: 配置键，例如 'server_addr'。
+        :param default: 当返回值为 ``None`` 时使用的默认值。默认值为 ``None``。
         """
         if module == self.module_name:
             self._validate_module_option(key)
@@ -2000,12 +2111,19 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         Set a value in this module's persistent key value store.
         If val is None, remove key from store
         """
+        """
+        设置一个值到此模块的持久化键值存储中。
+        如果 val 为 None, 则从存储中移除键。
+        """
         self._ceph_set_store(key, val)
 
     @API.expose
     def get_store(self, key: str, default: Optional[str] = None) -> Optional[str]:
         """
         Get a value from this module's persistent key value store
+        """
+        """
+        从此模块的持久键值存储中获取一个值
         """
         r = self._ceph_get_store(key)
         if r is None:
@@ -2360,6 +2478,12 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         pools).
 
         :param arguments: dict of key/value arguments to test
+        """
+        """
+        验证当前会话的权限是否允许使用提供的参数执行 py 服务或当前模块。
+        这提供了一种通用的方法来允许模块通过更细粒度的控制（例如池）进行限制。
+
+        :param arguments: 要测试的键/值参数字典
         """
         return self._ceph_is_authorized(arguments)
 

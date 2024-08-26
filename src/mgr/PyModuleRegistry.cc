@@ -38,11 +38,13 @@ std::set<std::string> obsolete_modules = {
     "orchestrator_cli",
 };
 
+// 初始化 python module
 void PyModuleRegistry::init()
 {
     std::lock_guard locker(lock);
 
     // Set up global python interpreter
+    // 设置全局的 Python 解释器
 #define WCHAR(s) L## #s
     Py_SetProgramName(const_cast<wchar_t*>(WCHAR(MGR_PYTHON_EXECUTABLE)));
 #undef WCHAR
@@ -52,45 +54,57 @@ void PyModuleRegistry::init()
     }
     PyImport_AppendInittab("ceph_module", PyModule::init_ceph_module);
     Py_InitializeEx(0);
+// 如果 python 的版本小鱼 3.9
 #if PY_VERSION_HEX < 0x03090000
     // Let CPython know that we will be calling it back from other
     // threads in future.
+    // 让 CPython 知道我们将在未来从其他线程回调它。
     if (!PyEval_ThreadsInitialized()) {
         PyEval_InitThreads();
     }
 #endif
     // Drop the GIL and remember the main thread state (current
     // thread state becomes NULL)
+    // 释放全局解释器锁（GIL）并记住主线程状态（当前线程状态变为NULL）
     pMainThreadState = PyEval_SaveThread();
     ceph_assert(pMainThreadState != nullptr);
 
     std::list<std::string> failed_modules;
 
+    // 获取 module 的目录
     const std::string module_path = g_conf().get_val<std::string>("mgr_module_path");
+    // 获取的是 module 名称列表
     auto module_names = probe_modules(module_path);
     // Load python code
+    // 加载 python 代码
     for (const auto& module_name : module_names) {
         dout(1) << "Loading python module '" << module_name << "'" << dendl;
 
         // Everything starts disabled, set enabled flag on module
         // when we see first MgrMap
+        // 一开始所有内容都是禁用的，当我们看到第一个 MgrMap 时，设置模块的启用标志
         auto mod = std::make_shared<PyModule>(module_name);
+        // 加载 module
         int r = mod->load(pMainThreadState);
         if (r != 0) {
             // Don't use handle_pyerror() here; we don't have the GIL
             // or the right thread state (this is deliberate).
+            // 不要在这里使用 handle_pyerror()；我们没有 GIL 或正确的线程状态（这是故意的）。
             derr << "Error loading module '" << module_name << "': " << cpp_strerror(r) << dendl;
             failed_modules.push_back(module_name);
             // Don't drop out here, load the other modules
+            // 不要在这里退出，加载其他模块
         }
 
         // Record the module even if the load failed, so that we can
         // report its loading error
+        // 即使加载失败也要记录模块，以便我们可以报告其加载错误
         modules[module_name] = std::move(mod);
     }
     if (module_names.empty()) {
         clog->error() << "No ceph-mgr modules found in " << module_path;
     }
+    // 最终打印加载失败的 modules
     if (!failed_modules.empty()) {
         clog->error() << "Failed to load ceph-mgr modules: "
                       << joinify(failed_modules.begin(), failed_modules.end(), std::string(", "));
@@ -268,19 +282,25 @@ void PyModuleRegistry::shutdown()
 
 std::vector<std::string> PyModuleRegistry::probe_modules(const std::string& path) const
 {
+    // 获取禁用的 modules 列表
     const auto opt = g_conf().get_val<std::string>("mgr_disabled_modules");
     const auto disabled_modules = ceph::split(opt);
 
+    // 遍历目录
     std::vector<std::string> modules;
     for (const auto& entry : fs::directory_iterator(path)) {
+        // 如果子项不是一个目录，则继续
         if (!fs::is_directory(entry)) {
             continue;
         }
+        // 获取目录名
         const std::string name = entry.path().filename();
+        // 判断是否为要禁用的 module
         if (std::count(disabled_modules.begin(), disabled_modules.end(), name)) {
             dout(10) << "ignoring disabled module " << name << dendl;
             continue;
         }
+        // 判断 module.py 文件是否存在，如果存在的话将 module 的 name 添加到 modules vector 中
         auto module_path = entry.path() / "module.py";
         if (fs::exists(module_path)) {
             modules.push_back(name);

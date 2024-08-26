@@ -307,6 +307,7 @@ PyObject* PyModule::init_ceph_logger()
     return py_logger;
 }
 
+// 初始化 ceph module
 PyObject* PyModule::init_ceph_module()
 {
     static PyMethodDef module_methods[] = {{nullptr, nullptr, 0, nullptr}};
@@ -331,11 +332,13 @@ PyObject* PyModule::init_ceph_module()
     return ceph_module;
 }
 
+// 加载指定的 module ， 传入的是 释放全局解释器锁（GIL）
 int PyModule::load(PyThreadState* pMainThreadState)
 {
     ceph_assert(pMainThreadState != nullptr);
 
     // Configure sub-interpreter
+    // 配置子解释器
     {
         SafeThreadState sts(pMainThreadState);
         Gil gil(sts);
@@ -349,9 +352,11 @@ int PyModule::load(PyThreadState* pMainThreadState)
             pMyThreadState.set(thread_state);
             // Some python modules do not cope with an unpopulated argv, so lets
             // fake one.  This step also picks up site-packages into sys.path.
+            // 一些 Python 模块无法处理空的 argv，所以我们来伪造一个。这一步还会将 site-packages 添加到 sys.path。
             const wchar_t* argv[] = {L"ceph-mgr"};
             PySys_SetArgv(1, (wchar_t**)argv);
             // Configure sys.path to include mgr_module_path
+            // 配置 sys.path 以包含 mgr_module_path
             string paths = (g_conf().get_val<std::string>("mgr_module_path") + ':' + get_site_packages() + ':');
             wstring sys_path(wstring(begin(paths), end(paths)) + Py_GetPath());
             PySys_SetPath(const_cast<wchar_t*>(sys_path.c_str()));
@@ -359,6 +364,7 @@ int PyModule::load(PyThreadState* pMainThreadState)
         }
     }
     // Environment is all good, import the external module
+    // 环境一切正常，导入外部模块
     {
         Gil gil(pMyThreadState);
 
@@ -369,6 +375,7 @@ int PyModule::load(PyThreadState* pMainThreadState)
             return r;
         }
 
+        // 加载命令
         r = load_commands();
         if (r != 0) {
             derr << "Missing or invalid COMMANDS attribute in module '" << module_name << "'" << dendl;
@@ -376,6 +383,7 @@ int PyModule::load(PyThreadState* pMainThreadState)
             return r;
         }
 
+        // 加载选项
         register_options(pClass);
         r = load_options();
         if (r != 0) {
@@ -389,6 +397,8 @@ int PyModule::load(PyThreadState* pMainThreadState)
         // We've imported the module and found a MgrModule subclass, at this
         // point the module is considered loaded.  It might still not be
         // runnable though, can_run populated later...
+        // 我们已经导入了模块并找到了一个 MgrModule 子类，此时模块被认为已经加载。
+        // 但是它可能仍然无法运行，can_run 会在之后被赋值...
         loaded = true;
 
         r = load_subclass_of("MgrStandbyModule", &pStandbyClass);
@@ -402,6 +412,9 @@ int PyModule::load(PyThreadState* pMainThreadState)
 
         // Populate can_run by interrogating the module's callback that
         // may check for dependencies etc
+        // 通过询问模块的回调函数来填充 can_run，
+        // 该回调函数可能会检查依赖关系等
+        // 调用 can_run 函数来判断是否可以运行
         PyObject* pCanRunTuple = PyObject_CallMethod(pClass, const_cast<char*>("can_run"), const_cast<char*>("()"));
         if (pCanRunTuple != nullptr) {
             if (PyTuple_Check(pCanRunTuple) && PyTuple_Size(pCanRunTuple) == 2) {
