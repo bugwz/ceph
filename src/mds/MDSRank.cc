@@ -3062,6 +3062,12 @@ void MDSRankDispatcher::handle_asok_command(
       dout(10) << "no depth limit when dirfrags dump_load" << dendl;
     }
     r = balancer->dump_loads(f, depth);
+  } else if (command == "dump hotspot dirs") {
+    std::lock_guard l(mds_lock);
+    balancer->dump_hot_dirs(f);
+  } else if (command == "dump hotspot files") {
+    std::lock_guard l(mds_lock);
+    balancer->dump_hot_inodes(f);
   } else if (command == "dump snaps") {
     std::lock_guard l(mds_lock);
     string server;
@@ -3762,6 +3768,8 @@ void MDSRank::create_logger()
                     "Inodes with capabilities");
     mds_plb.add_u64(l_mds_subtrees, "subtrees", "Subtrees");
     mds_plb.add_u64(l_mds_load_cent, "load_cent", "Load per cent");
+    mds_plb.add_u64(l_mds_hotspot_dirs, "hotspot_dirs", "Hotspot directories count");
+    mds_plb.add_u64(l_mds_hotspot_files, "hotspot_files", "Hotspot files count");
     mds_plb.add_u64_counter(l_mds_openino_dir_fetch, "openino_dir_fetch",
                             "OpenIno incomplete directory fetchings");
 

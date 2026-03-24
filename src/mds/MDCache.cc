@@ -412,6 +412,8 @@ void MDCache::remove_inode(CInode *o)
       base_inodes.erase(o);
   }
 
+  // Remove from hotspot file tracking before the CInode is destroyed.
+  mds->balancer->remove_hot_inode(o);
   // delete it
   ceph_assert(o->get_num_ref() == 0);
   delete o; 
@@ -7378,6 +7380,8 @@ void MDCache::trim_dirfrag(CDir *dir, CDir *con, expiremap& expiremap)
     }
   }
   
+  // Remove from hotspot tracking before the CDir is destroyed.
+  mds->balancer->remove_hot_dir(dir);
   in->close_dirfrag(dir->dirfrag().frag);
 }
 

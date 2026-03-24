@@ -19,6 +19,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "mdstypes.h" // for dirfrag_t, mds_load_t
@@ -82,6 +83,20 @@ public:
   void handle_mds_failure(mds_rank_t who);
 
   int dump_loads(Formatter *f, int64_t depth = -1) const;
+  void dump_hot_dirs(Formatter *f) const;
+  void dump_hot_inodes(Formatter *f) const;
+
+  /**
+   * Remove a directory from the hotspot tracking set.
+   * Must be called when a CDir is evicted from the cache to prevent stale pointers.
+   */
+  void remove_hot_dir(CDir *dir);
+
+  /**
+   * Remove an inode from the hotspot file tracking set.
+   * Must be called when a CInode is removed from the cache to prevent stale pointers.
+   */
+  void remove_hot_inode(CInode *in);
 
   bool get_bal_export_pin() const {
     return bal_export_pin;
@@ -191,5 +206,23 @@ private:
   // per-epoch state
   double my_load = 0;
   double target_load = 0;
+
+  // hotspot tracking: configurable Top-N limits
+  int64_t bal_hotspot_dirs_top_n;
+  int64_t bal_hotspot_files_top_n;
+
+  // hotspot directory tracking: Top-N most active directories
+  void update_hot_dirs(CDir *dir, double score);
+
+  // Sorted descending by score; allows efficient Top-N maintenance.
+  std::multimap<double, CDir*, std::greater<double>> hot_dirs_by_score;
+  // Reverse map from CDir* to its current score for O(1) lookup during updates.
+  std::unordered_map<CDir*, double> hot_dirs_map;
+
+  // hotspot file (inode) tracking: Top-N most active non-directory inodes
+  void update_hot_inodes(CInode *in, double score);
+
+  std::multimap<double, CInode*, std::greater<double>> hot_inodes_by_score;
+  std::unordered_map<CInode*, double> hot_inodes_map;
 };
 #endif
