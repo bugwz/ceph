@@ -213,6 +213,7 @@ private:
 
   // hotspot directory tracking: Top-N most active directories
   void update_hot_dirs(CDir *dir, double score);
+  void rescore_hot_dirs();
 
   // Sorted descending by score; allows efficient Top-N maintenance.
   std::multimap<double, CDir*, std::greater<double>> hot_dirs_by_score;
@@ -221,6 +222,7 @@ private:
 
   // hotspot file (inode) tracking: Top-N most active non-directory inodes
   void update_hot_inodes(CInode *in, double score);
+  void rescore_hot_inodes();
 
   std::multimap<double, CInode*, std::greater<double>> hot_inodes_by_score;
   std::unordered_map<CInode*, double> hot_inodes_map;

@@ -304,6 +304,8 @@ void MDBalancer::tick()
     bal_sample_interval) {
     dout(15) << "tick last_sample now " << now << dendl;
     last_sample = now;
+    rescore_hot_dirs();
+    rescore_hot_inodes();
   }
 
   // We can use duration_cast below, although the result is an int,
@@ -1725,4 +1727,32 @@ void MDBalancer::dump_hot_inodes(Formatter *f) const
     f->close_section();
   }
   f->close_section();
+}
+
+void MDBalancer::rescore_hot_dirs()
+{
+  hot_dirs_by_score.clear();
+  for (auto& [dir, score] : hot_dirs_map) {
+    score = dir->pop_me.meta_load();
+    hot_dirs_by_score.emplace(score, dir);
+  }
+  while ((int64_t)hot_dirs_by_score.size() > bal_hotspot_dirs_top_n) {
+    auto last = std::prev(hot_dirs_by_score.end());
+    hot_dirs_map.erase(last->second);
+    hot_dirs_by_score.erase(last);
+  }
+}
+
+void MDBalancer::rescore_hot_inodes()
+{
+  hot_inodes_by_score.clear();
+  for (auto& [in, score] : hot_inodes_map) {
+    score = in->pop.get(0).get() + in->pop.get(1).get();
+    hot_inodes_by_score.emplace(score, in);
+  }
+  while ((int64_t)hot_inodes_by_score.size() > bal_hotspot_files_top_n) {
+    auto last = std::prev(hot_inodes_by_score.end());
+    hot_inodes_map.erase(last->second);
+    hot_inodes_by_score.erase(last);
+  }
 }
