@@ -3062,10 +3062,10 @@ void MDSRankDispatcher::handle_asok_command(
       dout(10) << "no depth limit when dirfrags dump_load" << dendl;
     }
     r = balancer->dump_loads(f, depth);
-  } else if (command == "dump hotspot dirs") {
+  } else if (command == "dump hot dirs") {
     std::lock_guard l(mds_lock);
     balancer->dump_hot_dirs(f);
-  } else if (command == "dump hotspot files") {
+  } else if (command == "dump hot files") {
     std::lock_guard l(mds_lock);
     balancer->dump_hot_inodes(f);
   } else if (command == "dump snaps") {

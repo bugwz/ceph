@@ -182,11 +182,11 @@ class FSHotspotDirs:
     def get_hotspot_data(self, cmd):
         """Entry point for 'fs hotspot dirs' command."""
         return self._collect_and_aggregate(
-            cmd, 'dump hotspot dirs', 'hotspot_dirs',
+            cmd, 'dump hot dirs', 'hotspot_dirs',
             self._aggregate_dirs)
 
     def get_hotspot_files_data(self, cmd):
         """Entry point for 'fs hotspot files' command."""
         return self._collect_and_aggregate(
-            cmd, 'dump hotspot files', 'hotspot_files',
+            cmd, 'dump hot files', 'hotspot_files',
             self._aggregate_files)

@@ -1657,6 +1657,7 @@ void MDBalancer::remove_hot_dir(CDir *dir)
 
 void MDBalancer::dump_hot_dirs(Formatter *f) const
 {
+  f->open_object_section("result");
   f->dump_int("mds_rank", mds->get_nodeid());
   f->open_array_section("hotspot_dirs");
   for (auto& [score, dir] : hot_dirs_by_score) {
@@ -1665,7 +1666,8 @@ void MDBalancer::dump_hot_dirs(Formatter *f) const
     dir->dump_load(f);
     f->close_section();
   }
-  f->close_section();
+  f->close_section();  // hotspot_dirs
+  f->close_section();  // result
 }
 
 void MDBalancer::update_hot_inodes(CInode *in, double score)
@@ -1711,6 +1713,7 @@ void MDBalancer::remove_hot_inode(CInode *in)
 
 void MDBalancer::dump_hot_inodes(Formatter *f) const
 {
+  f->open_object_section("result");
   f->dump_int("mds_rank", mds->get_nodeid());
   f->open_array_section("hotspot_files");
   for (auto& [score, in] : hot_inodes_by_score) {
@@ -1726,7 +1729,8 @@ void MDBalancer::dump_hot_inodes(Formatter *f) const
     f->dump_float("pop_wr", in->pop.get(1).get());
     f->close_section();
   }
-  f->close_section();
+  f->close_section();  // hotspot_files
+  f->close_section();  // result
 }
 
 void MDBalancer::rescore_hot_dirs()

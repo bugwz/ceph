@@ -439,13 +439,13 @@ void MDSDaemon::set_up_admin_socket()
                                      asok_hook,
                                      "dump metadata loads");
   ceph_assert(r == 0);
-  r = admin_socket->register_command("dump hotspot dirs",
+  r = admin_socket->register_command("dump hot dirs",
                                      asok_hook,
-                                     "dump top hotspot directories by access score");
+                                     "dump top hot directories by access score");
   ceph_assert(r == 0);
-  r = admin_socket->register_command("dump hotspot files",
+  r = admin_socket->register_command("dump hot files",
                                      asok_hook,
-                                     "dump top hotspot files by access score");
+                                     "dump top hot files by access score");
   ceph_assert(r == 0);
   r = admin_socket->register_command("dump snaps name=server,type=CephChoices,strings=--server,req=false",
                                      asok_hook,
