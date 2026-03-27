@@ -3768,8 +3768,8 @@ void MDSRank::create_logger()
                     "Inodes with capabilities");
     mds_plb.add_u64(l_mds_subtrees, "subtrees", "Subtrees");
     mds_plb.add_u64(l_mds_load_cent, "load_cent", "Load per cent");
-    mds_plb.add_u64(l_mds_hotspot_dirs, "hotspot_dirs", "Hotspot directories count");
-    mds_plb.add_u64(l_mds_hotspot_files, "hotspot_files", "Hotspot files count");
+    mds_plb.add_u64(l_mds_hot_dirs, "hot_dirs", "Hot directories count");
+    mds_plb.add_u64(l_mds_hot_files, "hot_files", "Hot files count");
     mds_plb.add_u64_counter(l_mds_openino_dir_fetch, "openino_dir_fetch",
                             "OpenIno incomplete directory fetchings");
 

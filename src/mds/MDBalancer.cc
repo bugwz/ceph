@@ -101,8 +101,8 @@ MDBalancer::MDBalancer(MDSRank *m, Messenger *msgr, MonClient *monc) :
   bal_split_size = g_conf().get_val<int64_t>("mds_bal_split_size");
   bal_split_wr = g_conf().get_val<double>("mds_bal_split_wr");
   bal_unreplicate_threshold = g_conf().get_val<double>("mds_bal_unreplicate_threshold");
-  bal_hotspot_dirs_top_n = g_conf().get_val<int64_t>("mds_bal_hotspot_dirs_top_n");
-  bal_hotspot_files_top_n = g_conf().get_val<int64_t>("mds_bal_hotspot_files_top_n");
+  bal_hot_dir_num = g_conf().get_val<int64_t>("mds_bal_hot_dir_num");
+  bal_hot_file_num = g_conf().get_val<int64_t>("mds_bal_hot_file_num");
   num_bal_times = g_conf().get_val<int64_t>("mds_bal_max");
 }
 
@@ -138,20 +138,30 @@ void MDBalancer::handle_conf_change(const std::set<std::string>& changed, const 
     bal_split_wr = g_conf().get_val<double>("mds_bal_split_wr");
   if (changed.count("mds_bal_unreplicate_threshold"))
     bal_unreplicate_threshold = g_conf().get_val<double>("mds_bal_unreplicate_threshold");
-  if (changed.count("mds_bal_hotspot_dirs_top_n")) {
-    bal_hotspot_dirs_top_n = g_conf().get_val<int64_t>("mds_bal_hotspot_dirs_top_n");
-    while ((int64_t)hot_dirs_by_score.size() > bal_hotspot_dirs_top_n) {
-      auto last = std::prev(hot_dirs_by_score.end());
-      hot_dirs_map.erase(last->second);
-      hot_dirs_by_score.erase(last);
+  if (changed.count("mds_bal_hot_dir_num")) {
+    bal_hot_dir_num = g_conf().get_val<int64_t>("mds_bal_hot_dir_num");
+    if (bal_hot_dir_num == 0) {
+      hot_dirs_map.clear();
+      hot_dirs_by_score.clear();
+    } else {
+      while ((int64_t)hot_dirs_by_score.size() > bal_hot_dir_num) {
+        auto last = std::prev(hot_dirs_by_score.end());
+        hot_dirs_map.erase(last->second);
+        hot_dirs_by_score.erase(last);
+      }
     }
   }
-  if (changed.count("mds_bal_hotspot_files_top_n")) {
-    bal_hotspot_files_top_n = g_conf().get_val<int64_t>("mds_bal_hotspot_files_top_n");
-    while ((int64_t)hot_inodes_by_score.size() > bal_hotspot_files_top_n) {
-      auto last = std::prev(hot_inodes_by_score.end());
-      hot_inodes_map.erase(last->second);
-      hot_inodes_by_score.erase(last);
+  if (changed.count("mds_bal_hot_file_num")) {
+    bal_hot_file_num = g_conf().get_val<int64_t>("mds_bal_hot_file_num");
+    if (bal_hot_file_num == 0) {
+      hot_inodes_map.clear();
+      hot_inodes_by_score.clear();
+    } else {
+      while ((int64_t)hot_inodes_by_score.size() > bal_hot_file_num) {
+        auto last = std::prev(hot_inodes_by_score.end());
+        hot_inodes_map.erase(last->second);
+        hot_inodes_by_score.erase(last);
+      }
     }
   }
   if (changed.count("mds_bal_max"))
@@ -489,8 +499,8 @@ void MDBalancer::send_heartbeat()
   mds_load_t load = get_load();
   mds->logger->set(l_mds_load_cent, 100 * load.mds_load(bal_mode));
   mds->logger->set(l_mds_dispatch_queue_len, load.queue_len);
-  mds->logger->set(l_mds_hotspot_dirs, hot_dirs_by_score.size());
-  mds->logger->set(l_mds_hotspot_files, hot_inodes_by_score.size());
+  mds->logger->set(l_mds_hot_dirs, hot_dirs_by_score.size());
+  mds->logger->set(l_mds_hot_files, hot_inodes_by_score.size());
 
   auto em = mds_load.emplace(std::piecewise_construct, std::forward_as_tuple(mds->get_nodeid()), std::forward_as_tuple(load));
   if (!em.second) {
@@ -1303,8 +1313,8 @@ void MDBalancer::hit_inode(CInode *in, int type)
   // hit inode
   in->pop.get(type).hit();
 
-  // Track non-directory inodes as hotspot files.
-  if (!in->is_dir()) {
+  // Track non-directory inodes as hot files.
+  if (!in->is_dir() && bal_hot_file_num > 0) {
     double score = in->pop.get(0).get() + in->pop.get(1).get();
     update_hot_inodes(in, score);
   }
@@ -1359,8 +1369,9 @@ void MDBalancer::hit_dir(CDir *dir, int type, double amount)
 
   maybe_fragment(dir, hot);
 
-  // Update hotspot tracking for this directory using its overall meta_load score.
-  update_hot_dirs(orig_dir, orig_dir->pop_me.meta_load());
+  // Update hot tracking for this directory using its overall meta_load score.
+  if (bal_hot_dir_num > 0)
+    update_hot_dirs(orig_dir, orig_dir->pop_me.meta_load());
 
   // replicate?
   const bool readop = (type == META_POP_IRD || type == META_POP_READDIR);
@@ -1632,7 +1643,7 @@ void MDBalancer::update_hot_dirs(CDir *dir, double score)
   hot_dirs_by_score.emplace(score, dir);
 
   // Evict the lowest-scored entry if we exceed the Top-N limit.
-  while ((int64_t)hot_dirs_by_score.size() > bal_hotspot_dirs_top_n) {
+  while ((int64_t)hot_dirs_by_score.size() > bal_hot_dir_num) {
     auto last = std::prev(hot_dirs_by_score.end());
     hot_dirs_map.erase(last->second);
     hot_dirs_by_score.erase(last);
@@ -1659,14 +1670,14 @@ void MDBalancer::dump_hot_dirs(Formatter *f) const
 {
   f->open_object_section("result");
   f->dump_int("mds_rank", mds->get_nodeid());
-  f->open_array_section("hotspot_dirs");
+  f->open_array_section("dirs");
   for (auto& [score, dir] : hot_dirs_by_score) {
     f->open_object_section("dir");
     f->dump_float("score", score);
     dir->dump_load(f);
     f->close_section();
   }
-  f->close_section();  // hotspot_dirs
+  f->close_section();  // dirs
   f->close_section();  // result
 }
 
@@ -1688,7 +1699,7 @@ void MDBalancer::update_hot_inodes(CInode *in, double score)
   }
   hot_inodes_by_score.emplace(score, in);
 
-  while ((int64_t)hot_inodes_by_score.size() > bal_hotspot_files_top_n) {
+  while ((int64_t)hot_inodes_by_score.size() > bal_hot_file_num) {
     auto last = std::prev(hot_inodes_by_score.end());
     hot_inodes_map.erase(last->second);
     hot_inodes_by_score.erase(last);
@@ -1715,7 +1726,7 @@ void MDBalancer::dump_hot_inodes(Formatter *f) const
 {
   f->open_object_section("result");
   f->dump_int("mds_rank", mds->get_nodeid());
-  f->open_array_section("hotspot_files");
+  f->open_array_section("files");
   for (auto& [score, in] : hot_inodes_by_score) {
     f->open_object_section("file");
     f->dump_float("score", score);
@@ -1729,7 +1740,7 @@ void MDBalancer::dump_hot_inodes(Formatter *f) const
     f->dump_float("pop_wr", in->pop.get(1).get());
     f->close_section();
   }
-  f->close_section();  // hotspot_files
+  f->close_section();  // files
   f->close_section();  // result
 }
 
@@ -1740,7 +1751,7 @@ void MDBalancer::rescore_hot_dirs()
     score = dir->pop_me.meta_load();
     hot_dirs_by_score.emplace(score, dir);
   }
-  while ((int64_t)hot_dirs_by_score.size() > bal_hotspot_dirs_top_n) {
+  while ((int64_t)hot_dirs_by_score.size() > bal_hot_dir_num) {
     auto last = std::prev(hot_dirs_by_score.end());
     hot_dirs_map.erase(last->second);
     hot_dirs_by_score.erase(last);
@@ -1754,7 +1765,7 @@ void MDBalancer::rescore_hot_inodes()
     score = in->pop.get(0).get() + in->pop.get(1).get();
     hot_inodes_by_score.emplace(score, in);
   }
-  while ((int64_t)hot_inodes_by_score.size() > bal_hotspot_files_top_n) {
+  while ((int64_t)hot_inodes_by_score.size() > bal_hot_file_num) {
     auto last = std::prev(hot_inodes_by_score.end());
     hot_inodes_map.erase(last->second);
     hot_inodes_by_score.erase(last);

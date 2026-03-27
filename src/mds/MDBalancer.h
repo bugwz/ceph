@@ -207,9 +207,9 @@ private:
   double my_load = 0;
   double target_load = 0;
 
-  // hotspot tracking: configurable Top-N limits
-  int64_t bal_hotspot_dirs_top_n;
-  int64_t bal_hotspot_files_top_n;
+  // hot tracking: configurable Top-N limits (0 = disabled)
+  int64_t bal_hot_dir_num;
+  int64_t bal_hot_file_num;
 
   // hotspot directory tracking: Top-N most active directories
   void update_hot_dirs(CDir *dir, double score);

@@ -708,31 +708,33 @@ options:
   - mds
   flags:
   - runtime
-- name: mds_bal_hotspot_dirs_top_n
+- name: mds_bal_hot_dir_num
   type: int
   level: advanced
-  desc: maximum number of hotspot directories tracked per MDS
-  fmt_desc: The maximum number of entries in the hotspot directory
-    Top-N tracking set maintained by the MDS balancer.
-  default: 100
+  desc: maximum number of hot directories tracked per MDS, 0 disables tracking
+  fmt_desc: The maximum number of entries in the hot directory
+    Top-N tracking set maintained by the MDS balancer. Set to 0 to disable
+    hot directory tracking entirely.
+  default: 0
   services:
   - mds
   flags:
   - runtime
-  min: 1
+  min: 0
   max: 10000
-- name: mds_bal_hotspot_files_top_n
+- name: mds_bal_hot_file_num
   type: int
   level: advanced
-  desc: maximum number of hotspot files tracked per MDS
-  fmt_desc: The maximum number of entries in the hotspot file
-    Top-N tracking set maintained by the MDS balancer.
-  default: 100
+  desc: maximum number of hot files tracked per MDS, 0 disables tracking
+  fmt_desc: The maximum number of entries in the hot file
+    Top-N tracking set maintained by the MDS balancer. Set to 0 to disable
+    hot file tracking entirely.
+  default: 0
   services:
   - mds
   flags:
   - runtime
-  min: 1
+  min: 0
   max: 10000
 - name: mds_bal_split_size
   type: int
