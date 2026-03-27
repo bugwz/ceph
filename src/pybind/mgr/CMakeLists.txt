@@ -22,6 +22,7 @@ set(mgr_modules
   alerts
   balancer
   cephadm
+  cephfs_profiler
   crash
   # dashboard (optional)
   devicehealth
