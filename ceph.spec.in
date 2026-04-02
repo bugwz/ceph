@@ -1990,6 +1990,7 @@ fi
 %dir %{_datadir}/ceph/mgr
 %{_datadir}/ceph/mgr/alerts
 %{_datadir}/ceph/mgr/balancer
+%{_datadir}/ceph/mgr/cephfs_profiler
 %{_datadir}/ceph/mgr/crash
 %{_datadir}/ceph/mgr/devicehealth
 %{_datadir}/ceph/mgr/influx
