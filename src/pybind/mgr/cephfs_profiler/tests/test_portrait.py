@@ -183,6 +183,7 @@ class TestPortraitSerialization(unittest.TestCase):
         summary = PortraitBuilder.build_summary(portrait)
         self.assertIn("workload", summary)
         self.assertIn("client_id", summary)
+        self.assertIn("metadata_ops", summary)
 
 
 class TestMultipleDeltas(unittest.TestCase):

@@ -190,6 +190,7 @@ class PortraitBuilder:
             "workload": portrait.workload_classification,
             "read_ops": portrait.total_read_ops,
             "write_ops": portrait.total_write_ops,
+            "metadata_ops": portrait.total_metadata_ops,
             "avg_read_tp_MBps": round(portrait.avg_read_throughput_MBps, 2),
             "avg_write_tp_MBps": round(portrait.avg_write_throughput_MBps, 2),
             "rw_ratio": round(portrait.rw_ratio, 3),
